@@ -1,14 +1,16 @@
 // Registro de efectos programados. Cada carta de los JSON apunta a uno por su campo "efecto"
 // y le pasa sus "parametros". Una carta solo puede marcarse "definida" si su efecto está aquí.
 //
-// Para añadir uno: prográmalo en el archivo de su tipo (acciones, cuerdas u objetivos)
+// Para añadir uno: prográmalo en el archivo de su tipo (acciones, cuerdas, objetivos, climas o eventos)
 // con el mismo id que usará el JSON. El registro se arma solo.
 
 import type { Parametros } from "../datos/esquemas";
-import type { Partida } from "../estado/tipos";
+import type { CartaTendida, Partida } from "../estado/tipos";
 import type { JugadaDe } from "../jugadas/tipos";
 import { efectosAccion } from "./acciones";
+import { efectosClima } from "./climas";
 import { efectosCuerda } from "./cuerdas";
+import { efectosEvento } from "./eventos";
 import { efectosObjetivo } from "./objetivos";
 
 /** Lo que una carta de acción hace a sus objetivos; las cuerdas pueden proteger de ciertas etiquetas. */
@@ -43,6 +45,27 @@ export interface EfectoObjetivo {
   contar(p: Partida, jugador: number, params: Parametros): number;
 }
 
-export type Efecto = EfectoAccion | EfectoCuerda | EfectoObjetivo;
+/** Clima persistente: actúa en el secado de cada jugador mientras siga activo. */
+export interface EfectoClima {
+  tipo: "clima";
+  /** Humedad de más (o de menos, si es negativa) que pierden las prendas de esta carta de cuerda. */
+  ajusteSecado?(p: Partida, tendida: CartaTendida, params: Parametros): number;
+  /** Lo que pasa al final del turno del jugador, antes de secar. */
+  antesDelSecado?(p: Partida, jugador: number, params: Parametros): void;
+}
 
-export const efectos: Record<string, Efecto> = { ...efectosAccion, ...efectosCuerda, ...efectosObjetivo };
+/** Evento instantáneo: se resuelve al salir y se descarta. */
+export interface EfectoEvento {
+  tipo: "evento";
+  resolver(p: Partida, params: Parametros): void;
+}
+
+export type Efecto = EfectoAccion | EfectoCuerda | EfectoObjetivo | EfectoClima | EfectoEvento;
+
+export const efectos: Record<string, Efecto> = {
+  ...efectosAccion,
+  ...efectosCuerda,
+  ...efectosObjetivo,
+  ...efectosClima,
+  ...efectosEvento,
+};

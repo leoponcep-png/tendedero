@@ -33,6 +33,9 @@ function motivoBlanco(p: Partida, j: JugadaDe<"jugarAccion">, efecto: EfectoAcci
   if (cuerda?.efecto.protegeDe?.some((e) => efecto.etiquetas.includes(e))) {
     return `${defCarta(p, tendida.carta).nombre} protege de esta carta.`;
   }
+  if (p.rondaProtegeDe.some((e) => efecto.etiquetas.includes(e))) {
+    return "Un evento lo impide durante esta ronda.";
+  }
 
   if (blanco.startsWith("mover")) {
     if (!o.destino) return FALTA_DESTINO;

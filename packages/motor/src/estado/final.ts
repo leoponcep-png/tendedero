@@ -1,6 +1,7 @@
 import { efectos } from "../efectos";
 import type { DefObjetivo } from "../datos/esquemas";
 import type { Partida, PuntosObjetivo, ResultadoJugador } from "./tipos";
+import { inicioDeRonda } from "./ronda";
 import { cestasVacias, rellenarCestas } from "./utilidades";
 
 /** Si el jugador ha llegado al umbral, empieza la última ronda. */
@@ -23,6 +24,11 @@ export function pasarTurno(p: Partida): void {
   if (p.ultimaRonda && siguiente === 0) {
     terminarPartida(p);
     return;
+  }
+
+  if (siguiente === 0) {
+    p.ronda++;
+    inicioDeRonda(p);
   }
 
   // «Proteger cuerda» dura hasta el siguiente turno de su dueño.

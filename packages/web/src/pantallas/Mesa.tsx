@@ -84,7 +84,7 @@ export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshace
                 </span>
               ) : (
                 <span>
-                  <strong>Turno {turno.numero}</strong> · le toca a <strong>{jugadorActivo.nombre}</strong>
+                  <strong>Ronda {partida.ronda}</strong> · turno {turno.numero} · le toca a <strong>{jugadorActivo.nombre}</strong>
                   {partida.ultimaRonda && <span className="etiqueta-ultima">última ronda</span>}
                 </span>
               )}

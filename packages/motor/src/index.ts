@@ -9,5 +9,15 @@ export * from "./jugadas/tipos";
 export { aplicar, esValida, motivoInvalida, type Resultado } from "./jugadas";
 export { cumple, prendasDe } from "./jugadas/draft";
 export { efectoAccion, FALTA_DESTINO } from "./jugadas/jugarAccion";
-export { efectos, type Blanco, type Efecto, type EfectoAccion, type EfectoCuerda, type EfectoObjetivo, type Etiqueta } from "./efectos";
+export {
+  efectos,
+  type Blanco,
+  type Efecto,
+  type EfectoAccion,
+  type EfectoClima,
+  type EfectoCuerda,
+  type EfectoEvento,
+  type EfectoObjetivo,
+  type Etiqueta,
+} from "./efectos";
 export { OCULTA, vistaPara } from "./vistas";

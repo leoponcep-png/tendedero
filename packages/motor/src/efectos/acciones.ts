@@ -1,5 +1,5 @@
 import { secarPrenda } from "../estado/secado";
-import { descolgar, localizar, nombrePrenda, numero, tipoDe } from "../estado/utilidades";
+import { caer, descolgar, localizar, nombrePrenda, numero } from "../estado/utilidades";
 import type { Partida } from "../estado/tipos";
 import type { JugadaDe } from "../jugadas/tipos";
 import type { EfectoAccion } from ".";
@@ -44,13 +44,7 @@ export const efectosAccion: Record<string, EfectoAccion> = {
     tipo: "accion",
     blanco: "prendaRival",
     etiquetas: ["fastidio", "tira"],
-    aplicar(p, j) {
-      const prenda = j.objetivo!.prenda!;
-      descolgar(localizar(p, prenda)!);
-      p.prendas[prenda].humedad = tipoDe(p, prenda).humedad;
-      p.jugadores[j.objetivo!.jugador].pendientes.push(prenda);
-      p.registro.push(`${nombrePrenda(p, prenda)} se cae y vuelve a las prendas por tender de ${p.jugadores[j.objetivo!.jugador].nombre}.`);
-    },
+    aplicar: (p, j) => caer(p, j.objetivo!.prenda!),
   },
 
   // parametros.humedad: cuánta humedad suma a la prenda.

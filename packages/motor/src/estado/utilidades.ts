@@ -80,6 +80,16 @@ export function descolgar(u: Ubicacion): void {
   u.tendida.colgadas = u.tendida.colgadas.filter((c) => c !== u.colgada);
 }
 
+/** La prenda se cae: vuelve a las prendas por tender de su dueño, con su humedad inicial. */
+export function caer(p: Partida, prenda: string): void {
+  const u = localizar(p, prenda);
+  if (!u) return;
+  descolgar(u);
+  p.prendas[prenda].humedad = tipoDe(p, prenda).humedad;
+  p.jugadores[u.jugador].pendientes.push(prenda);
+  p.registro.push(`${nombrePrenda(p, prenda)} se cae y vuelve a las prendas por tender de ${p.jugadores[u.jugador].nombre}.`);
+}
+
 /** Roba hasta `n` cartas; si el mazo se acaba, baraja su descarte. Devuelve cuántas robó. */
 export function robar(p: Partida, jugador: number, pila: "cuerdas" | "acciones", n: number): number {
   let robadas = 0;

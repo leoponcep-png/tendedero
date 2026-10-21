@@ -48,6 +48,9 @@ export function ZonaCentral() {
         <Zona titulo="Clima activo" vacia="Ninguno">
           {partida.clima && <FichaCarta partida={partida} id={partida.clima} />}
         </Zona>
+        <Zona titulo={`Evento de la ronda ${partida.ronda}`} vacia="Ninguno">
+          {partida.ultimoEvento && <FichaCarta partida={partida} id={partida.ultimoEvento} />}
+        </Zona>
         <Mazo nombre="Cuerdas" mazo={partida.mazos.cuerdas.length} descarte={partida.descartes.cuerdas.length} />
         <Mazo nombre="Acciones" mazo={partida.mazos.acciones.length} descarte={partida.descartes.acciones.length} />
         <Mazo nombre="Clima y eventos" mazo={partida.mazos.clima.length} descarte={partida.descartes.clima.length} />

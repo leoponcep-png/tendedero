@@ -1,5 +1,6 @@
 import type { Ajustes } from "../ajustes";
 import type { Color, DefCarta, DefObjetivo, TipoPrenda } from "../datos/esquemas";
+import type { Etiqueta } from "../efectos";
 
 export interface Prenda {
   id: string;
@@ -89,7 +90,13 @@ export interface Partida {
   bolsa: string[];
   cestas: string[][];
   centro: string[];
+  /** Carta de clima activa: dura hasta que sale otro clima. */
   clima: string | null;
+  ronda: number;
+  /** El evento que salió al empezar esta ronda (ya resuelto y en el descarte). */
+  ultimoEvento: string | null;
+  /** Lo que un evento impide durante esta ronda (p. ej. «Ropa se engancha»). */
+  rondaProtegeDe: Etiqueta[];
   /** La última carta de cada lista es la de arriba. */
   mazos: Record<Pila, string[]>;
   descartes: Record<Pila, string[]>;

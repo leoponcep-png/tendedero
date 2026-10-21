@@ -1041,3 +1041,12 @@ legend {
   justify-content: flex-end;
   gap: 8px;
 }
+
+.ficha-carta.mazo-climas {
+  background: #eef5fc;
+}
+
+.ficha-carta.mazo-eventos {
+  background: #fdf3e8;
+  border-top-color: #d98a3a;
+}

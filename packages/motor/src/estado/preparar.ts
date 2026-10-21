@@ -1,6 +1,7 @@
 import { enJuego, type Ajustes } from "../ajustes";
 import { barajar, semillaNueva, sembrar } from "../azar";
 import type { Datos } from "../datos/esquemas";
+import { inicioDeRonda } from "./ronda";
 import type { Partida } from "./tipos";
 import { pilaDe, rellenarCestas, robar } from "./utilidades";
 
@@ -30,6 +31,9 @@ export function crearPartida(datos: Datos, ajustesElegidos: Ajustes): Partida {
     objetivosComunes: [],
     jugadores: [],
     turno: { numero: 1, jugador: 0, fase: "jugar", cuerdasJugadas: 0, cuerdasExtra: 0, accionesJugadas: 0, drafts: 0 },
+    ronda: 1,
+    ultimoEvento: null,
+    rondaProtegeDe: [],
     ultimaRonda: false,
     primeroEnLlegar: null,
     registro: [],
@@ -87,6 +91,7 @@ export function crearPartida(datos: Datos, ajustesElegidos: Ajustes): Partida {
 
   rellenarCestas(p);
   p.registro.push(`Partida creada con la semilla "${semilla}" para ${ajustes.jugadores} jugadores.`);
+  inicioDeRonda(p);
   p.registro.push(`— Turno 1: ${p.jugadores[0].nombre} —`);
   return p;
 }

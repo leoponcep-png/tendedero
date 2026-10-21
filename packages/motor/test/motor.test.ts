@@ -31,7 +31,16 @@ function partida(semilla = "prueba", cambios: (a: Ajustes) => void = () => {}): 
   p.jugadores.forEach((j, i) => {
     if (j.objetivosOfrecidos[0]) p = jugar(p, { tipo: "elegirObjetivo", jugador: i, objetivo: j.objetivosOfrecidos[0] });
   });
+  // Sin clima ni eventos, para que cada test controle el tiempo que hace.
+  p.clima = null;
+  p.mazos.clima = [];
+  p.descartes.clima = [];
   return p;
+}
+
+/** Saca este clima o evento al empezar la siguiente ronda. */
+function proximaCarta(p: Partida, def: string) {
+  p.mazos.clima.push(copia(p, def));
 }
 
 function jugar(p: Partida, j: Jugada): Partida {
@@ -238,6 +247,98 @@ describe("acciones", () => {
     let p = partida();
     for (let i = 0; i < 2; i++) p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "colocar-cuerda-extra") });
     expect(motivo(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "colocar-cuerda-extra") })).toMatch(/2 acciones/);
+  });
+});
+
+describe("clima y eventos", () => {
+  it("al empezar cada ronda sale una carta; el clima se queda y un evento no lo quita", () => {
+    const sinPreparar = crearPartida(datos, { ...ajustesIniciales(datos), semilla: "r" });
+    expect(sinPreparar.mazos.clima).toHaveLength(17);
+
+    let p = partida();
+    proximaCarta(p, "soleado");
+    p = terminar(terminar(p));
+    expect(p.ronda).toBe(2);
+    expect(p.cartas[p.clima!]).toBe("soleado");
+    proximaCarta(p, "ola-de-calor");
+    p = terminar(terminar(p));
+    expect(p.cartas[p.clima!]).toBe("soleado");
+    expect(p.cartas[p.ultimoEvento!]).toBe("ola-de-calor");
+    proximaCarta(p, "lluvia");
+    p = terminar(terminar(p));
+    expect(p.cartas[p.clima!]).toBe("lluvia");
+    expect(p.descartes.clima.map((c) => p.cartas[c])).toEqual(["ola-de-calor", "soleado"]);
+  });
+
+  it("con sol se seca 1 más", () => {
+    let p = partida();
+    p.clima = copia(p, "soleado");
+    tender(p, 0, "basica", [["toalla-azul-1", 0]]);
+    p = terminar(p);
+    expect(p.prendas["toalla-azul-1"].humedad).toBe(1);
+  });
+
+  it("con lluvia no se seca nada salvo bajo un tejadillo", () => {
+    let p = partida();
+    p.clima = copia(p, "lluvia");
+    tender(p, 0, "basica", [["calcetin-azul-1", 0]]);
+    tender(p, 0, "tejadillo", [["calcetin-azul-2", 0]], 1);
+    p = terminar(p);
+    expect(p.prendas["calcetin-azul-1"].humedad).toBe(1);
+    expect(p.jugadores[0].seca).toEqual(["calcetin-azul-2"]);
+  });
+
+  it("con viento se caen los calcetines salvo en cuerdas resistentes, y lo demás seca más", () => {
+    let p = partida();
+    p.clima = copia(p, "viento");
+    tender(p, 0, "basica", [["calcetin-azul-1", 0], ["camiseta-azul-1", 1]]);
+    tender(p, 0, "resistente", [["calcetin-azul-2", 0]], 1);
+    p = terminar(p);
+    expect(p.jugadores[0].pendientes).toContain("calcetin-azul-1");
+    expect(p.jugadores[0].seca).toEqual(expect.arrayContaining(["camiseta-azul-1", "calcetin-azul-2"]));
+  });
+
+  it("Tormenta repentina moja todo lo que no tiene tejadillo, de todos los jugadores", () => {
+    let p = partida();
+    tender(p, 0, "basica", [["toalla-azul-1", 0]]);
+    tender(p, 1, "tejadillo", [["toalla-rojo-1", 0]]);
+    proximaCarta(p, "tormenta-repentina");
+    p = terminar(p);
+    p.prendas["toalla-azul-1"].humedad = 3;
+    p = terminar(p);
+    expect(p.prendas["toalla-azul-1"].humedad).toBe(4);
+    expect(p.prendas["toalla-rojo-1"].humedad).toBe(2);
+  });
+
+  it("Ola de calor seca y puntúa al instante", () => {
+    let p = partida();
+    tender(p, 1, "basica", [["calcetin-rojo-1", 0]]);
+    proximaCarta(p, "ola-de-calor");
+    p = terminar(p);
+    expect(p.jugadores[1].seca).toEqual([]);
+    p = terminar(p);
+    expect(p.jugadores[1].seca).toEqual(["calcetin-rojo-1"]);
+  });
+
+  it("Viento traicionero tira la prenda más grande de cada uno", () => {
+    let p = partida();
+    tender(p, 0, "basica", [["calcetin-azul-1", 0], ["camiseta-azul-1", 1]]);
+    tender(p, 1, "resistente", [["toalla-rojo-1", 0]]);
+    proximaCarta(p, "viento-traicionero");
+    p.prendas["camiseta-azul-1"].humedad = 5;
+    p = terminar(terminar(p));
+    expect(p.jugadores[0].pendientes).toEqual(["camiseta-azul-1"]);
+    expect(p.jugadores[1].pendientes).toEqual([]);
+  });
+
+  it("Ropa se engancha impide tirar y mover durante la ronda", () => {
+    let p = partida();
+    tender(p, 1, "basica", [["toalla-rojo-1", 0]]);
+    p.prendas["toalla-rojo-1"].humedad = 9;
+    proximaCarta(p, "ropa-se-engancha");
+    p = terminar(terminar(p));
+    const rafaga = darAccion(p, 0, "rafaga-de-viento");
+    expect(motivo(p, { tipo: "jugarAccion", jugador: 0, carta: rafaga, objetivo: { jugador: 1, linea: 0, posicion: 0, prenda: "toalla-rojo-1" } })).toMatch(/evento/);
   });
 });
 
