@@ -50,6 +50,7 @@ function Simulador({ datos }: { datos: Datos }) {
       onSalir={() => {
         if (confirm("¿Abandonar la partida y volver a los ajustes?")) setHistorial([]);
       }}
+      onNueva={() => setHistorial([])}
     />
   );
 }

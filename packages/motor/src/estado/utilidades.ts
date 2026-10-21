@@ -1,6 +1,6 @@
 import { barajar } from "../azar";
-import type { DefCarta, Mazo, TipoPrenda } from "../datos/esquemas";
-import type { Partida, Pila } from "./tipos";
+import type { DefCarta, Mazo, Parametros, TipoPrenda } from "../datos/esquemas";
+import type { Colgada, CartaTendida, Partida, Pila } from "./tipos";
 
 export function pilaDe(mazo: Mazo): Pila {
   return mazo === "cuerdas" ? "cuerdas" : mazo === "acciones" ? "acciones" : "clima";
@@ -21,6 +21,63 @@ export function nombrePrenda(p: Partida, prenda: string): string {
 
 export function espacios(n: number): string {
   return n === 1 ? "1 espacio" : `${n} espacios`;
+}
+
+export function numero(params: Parametros, clave: string, porDefecto: number): number {
+  const v = params[clave];
+  return typeof v === "number" ? v : porDefecto;
+}
+
+export function texto(params: Parametros, clave: string): string | undefined {
+  const v = params[clave];
+  return typeof v === "string" ? v : undefined;
+}
+
+export interface Ubicacion {
+  jugador: number;
+  linea: number;
+  posicion: number;
+  tendida: CartaTendida;
+  colgada: Colgada;
+}
+
+/** Dónde está colgada una prenda, si lo está. */
+export function localizar(p: Partida, prenda: string): Ubicacion | null {
+  for (const [jugador, j] of p.jugadores.entries()) {
+    for (const [linea, l] of j.lineas.entries()) {
+      for (const [posicion, tendida] of l.cartas.entries()) {
+        const colgada = tendida.colgadas.find((c) => c.prenda === prenda);
+        if (colgada) return { jugador, linea, posicion, tendida, colgada };
+      }
+    }
+  }
+  return null;
+}
+
+/** null si la prenda cabe en ese sitio; si no, el motivo. `ignorar` es una prenda que se está moviendo. */
+export function motivoNoCabe(
+  p: Partida,
+  sitio: { jugador: number; linea: number; posicion: number; inicio: number },
+  prenda: string,
+  ignorar?: string,
+): string | null {
+  const tendida = p.jugadores[sitio.jugador]?.lineas[sitio.linea]?.cartas[sitio.posicion];
+  if (!tendida) return "Ahí no hay ninguna carta de cuerda.";
+  const huecos = defCarta(p, tendida.carta).espacios;
+  const ocupa = tipoDe(p, prenda).espacios;
+  if (!Number.isInteger(sitio.inicio) || sitio.inicio < 0 || sitio.inicio + ocupa > huecos) {
+    return `No cabe: ocupa ${espacios(ocupa)} y tiene que caber entera en una sola carta.`;
+  }
+  for (const c of tendida.colgadas) {
+    if (c.prenda === ignorar) continue;
+    const fin = c.inicio + tipoDe(p, c.prenda).espacios;
+    if (sitio.inicio < fin && c.inicio < sitio.inicio + ocupa) return "Esos espacios ya están ocupados.";
+  }
+  return null;
+}
+
+export function descolgar(u: Ubicacion): void {
+  u.tendida.colgadas = u.tendida.colgadas.filter((c) => c !== u.colgada);
 }
 
 /** Roba hasta `n` cartas; si el mazo se acaba, baraja su descarte. Devuelve cuántas robó. */

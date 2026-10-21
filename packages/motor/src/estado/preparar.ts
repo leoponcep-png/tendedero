@@ -29,9 +29,12 @@ export function crearPartida(datos: Datos, ajustesElegidos: Ajustes): Partida {
     descartes: { cuerdas: [], acciones: [], clima: [] },
     objetivosComunes: [],
     jugadores: [],
-    turno: { numero: 1, jugador: 0, cuerdasJugadas: 0, accionesJugadas: 0, drafts: 0 },
+    turno: { numero: 1, jugador: 0, fase: "jugar", cuerdasJugadas: 0, cuerdasExtra: 0, accionesJugadas: 0, drafts: 0 },
+    ultimaRonda: false,
+    primeroEnLlegar: null,
     registro: [],
     terminada: false,
+    final: null,
   };
 
   for (const tipo of datos.tipos) {
@@ -73,6 +76,7 @@ export function crearPartida(datos: Datos, ajustesElegidos: Ajustes): Partida {
       mano: [],
       pendientes: [],
       seca: [],
+      secadoEn: {},
       objetivosOfrecidos: secretos.splice(0, ajustes.objetivos.secretosRepartidos),
       objetivoSecreto: null,
       puntos: 0,

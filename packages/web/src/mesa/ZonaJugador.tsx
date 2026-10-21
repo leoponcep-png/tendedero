@@ -1,3 +1,4 @@
+import { puntuarObjetivo } from "@tendedero/motor";
 import type { ReactNode } from "react";
 import { useMesa } from "./contexto";
 import { CartaMano } from "./Carta";
@@ -38,30 +39,48 @@ export function ZonaJugador({ indice }: { indice: number }) {
           ))}
         </Zona>
 
-        <Zona titulo="Objetivo secreto" vacia="Ningún objetivo definido todavía">
-          {jugador.objetivoSecreto ? (
-            <Objetivo id={jugador.objetivoSecreto} />
-          ) : (
-            jugador.objetivosOfrecidos.map((id) => (
-              <div key={id} className="objetivo-ofrecido">
-                <Objetivo id={id} />
-                <button onClick={() => jugar({ tipo: "elegirObjetivo", jugador: indice, objetivo: id })}>Quedármelo</button>
-              </div>
-            ))
-          )}
+        <Zona titulo={jugador.objetivoSecreto ? "Objetivos" : "Elige tu objetivo secreto"} vacia="Ningún objetivo definido todavía">
+          {jugador.objetivoSecreto
+            ? [
+                <Objetivo key="secreto" id={jugador.objetivoSecreto} jugador={indice} secreto />,
+                ...partida.objetivosComunes.map((id) => <Objetivo key={id} id={id} jugador={indice} />),
+              ]
+            : jugador.objetivosOfrecidos.map((id) => (
+                <div key={id} className="objetivo-ofrecido">
+                  <Objetivo id={id} />
+                  <button onClick={() => jugar({ tipo: "elegirObjetivo", jugador: indice, objetivo: id })}>Quedármelo</button>
+                </div>
+              ))}
         </Zona>
       </div>
     </section>
   );
 }
 
-export function Objetivo({ id }: { id: string }) {
+/** Carta de objetivo; con `jugador`, muestra cuánto lleva y cuántos puntos le daría ahora. */
+export function Objetivo({ id, jugador, secreto }: { id: string; jugador?: number; secreto?: boolean }) {
   const { partida } = useMesa();
   const o = partida.catalogo.objetivos[id];
+  const progreso = jugador === undefined ? null : puntuarObjetivo(partida, jugador, o);
   return (
-    <div className="objetivo" title={o.texto}>
+    <div className={`objetivo ${secreto ? "secreto" : ""}`} title={o.texto}>
+      <span className="tipo-carta">{secreto ? "Secreto" : jugador === undefined ? o.uso : "Común"}</span>
       <strong>{o.nombre}</strong>
-      {o.niveles.length > 0 && <small>{o.niveles.map((n) => `${n.requisito} → ${n.puntos} pts`).join(" · ")}</small>}
+      <small>{o.texto}</small>
+      {o.niveles.length > 0 && (
+        <small className="niveles">
+          {o.niveles.map((n, i) => (
+            <span key={i} className={progreso && progreso.cantidad >= n.requisito ? "alcanzado" : ""}>
+              {n.requisito} → {n.puntos} pts
+            </span>
+          ))}
+        </small>
+      )}
+      {progreso && (
+        <small className="progreso">
+          llevas {progreso.cantidad} · ahora darían {progreso.puntos} pts
+        </small>
+      )}
     </div>
   );
 }

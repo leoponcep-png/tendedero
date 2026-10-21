@@ -7,7 +7,7 @@ export const colocarCuerda: Manejador<JugadaDe<"colocarCuerda">> = {
     const jugador = p.jugadores[j.jugador];
     if (!jugador.mano.includes(j.carta)) return "Esa carta no está en tu mano.";
     if (defCarta(p, j.carta).mazo !== "cuerdas") return "Esa carta no es de cuerda.";
-    const maximo = p.ajustes.jugablesPorTurno.cuerdas;
+    const maximo = p.ajustes.jugablesPorTurno.cuerdas + p.turno.cuerdasExtra;
     if (p.turno.cuerdasJugadas >= maximo) {
       return maximo === 1 ? "Ya has jugado una cuerda este turno." : `Ya has jugado ${maximo} cuerdas este turno.`;
     }

@@ -1,5 +1,5 @@
 import { useDroppable } from "@dnd-kit/core";
-import { defCarta, tipoDe, type CartaTendida } from "@tendedero/motor";
+import { defCarta, esValida, tipoDe, type CartaTendida } from "@tendedero/motor";
 import { useAdmite, useMesa, type Destino } from "./contexto";
 import { FichaPrenda } from "./Prenda";
 
@@ -46,11 +46,14 @@ function Hueco({ jugador, linea }: { jugador: number; linea: number }) {
 }
 
 function CartaEnLinea({ jugador, linea, posicion, tendida }: { jugador: number; linea: number; posicion: number; tendida: CartaTendida }) {
-  const { partida } = useMesa();
+  const { partida, movimiento } = useMesa();
   const def = defCarta(partida, tendida.carta);
   return (
-    <div className={`carta-cuerda mazo-${def.mazo}`} title={def.texto}>
-      <div className="nombre-cuerda">{def.nombre}</div>
+    <div className={`carta-cuerda mazo-${def.mazo} ${tendida.protegida ? "protegida" : ""}`} title={def.texto}>
+      <div className="nombre-cuerda">
+        {def.nombre}
+        {tendida.protegida && <span title="Protegida hasta el próximo turno de su dueño"> · protegida</span>}
+      </div>
       <div className="espacios" style={{ gridTemplateColumns: `repeat(${def.espacios}, var(--celda))` }}>
         {Array.from({ length: def.espacios }, (_, i) => (
           <Espacio key={i} destino={{ tipo: "espacio", jugador, linea, posicion, inicio: i }} />
@@ -58,7 +61,7 @@ function CartaEnLinea({ jugador, linea, posicion, tendida }: { jugador: number; 
         {tendida.colgadas.map((c) => (
           <div
             key={c.prenda}
-            className="colgada"
+            className={`colgada ${movimiento?.objetivo?.prenda === c.prenda ? "moviendo" : ""}`}
             style={{ gridColumn: `${c.inicio + 1} / span ${tipoDe(partida, c.prenda).espacios}` }}
           >
             <FichaPrenda partida={partida} id={c.prenda} />
@@ -70,13 +73,28 @@ function CartaEnLinea({ jugador, linea, posicion, tendida }: { jugador: number; 
 }
 
 function Espacio({ destino }: { destino: Destino & { tipo: "espacio" } }) {
+  const { partida, movimiento, jugar } = useMesa();
   const { setNodeRef, isOver } = useDroppable({
     id: `espacio:${destino.jugador}:${destino.linea}:${destino.posicion}:${destino.inicio}`,
     data: destino,
   });
   const admite = useAdmite(destino);
+
+  // Segundo paso de una acción de mover: se pulsa el espacio de destino.
+  const { linea, posicion, inicio } = destino;
+  const movida =
+    movimiento && movimiento.objetivo?.jugador === destino.jugador
+      ? { ...movimiento, objetivo: { ...movimiento.objetivo, destino: { linea, posicion, inicio } } }
+      : null;
+  const destinoValido = movida !== null && esValida(partida, movida);
+
   return (
-    <div ref={setNodeRef} className={`espacio ${admite ? "admite" : ""} ${isOver ? "encima" : ""}`} style={{ gridColumn: destino.inicio + 1 }}>
+    <div
+      ref={setNodeRef}
+      className={`espacio ${admite || destinoValido ? "admite" : ""} ${isOver ? "encima" : ""} ${destinoValido ? "pulsable" : ""}`}
+      style={{ gridColumn: destino.inicio + 1 }}
+      onClick={destinoValido ? () => jugar(movida) : undefined}
+    >
       <span className="pinza" />
     </div>
   );

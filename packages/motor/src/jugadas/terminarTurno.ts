@@ -1,24 +1,43 @@
-import { cestasVacias, rellenarCestas, robar } from "../estado/utilidades";
+import { comprobarUmbral, pasarTurno } from "../estado/final";
+import { faseDeSecado } from "../estado/secado";
+import { defCarta, pilaDe, robar } from "../estado/utilidades";
 import type { JugadaDe, Manejador } from "./tipos";
 
-// Paso 1: roba y pasa al siguiente. El secado, el límite de mano y el final de partida llegan en el paso 2.
+// Orden: secado de sus prendas → robo → comprobar umbral → descartar si se pasa del límite → siguiente.
 export const terminarTurno: Manejador<JugadaDe<"terminarTurno">> = {
   soloEnSuTurno: true,
   validar() {
     return null;
   },
   aplicar(p, j) {
-    const { cuerdas, acciones } = p.ajustes.roboPorTurno;
-    robar(p, j.jugador, "cuerdas", cuerdas);
-    robar(p, j.jugador, "acciones", acciones);
+    faseDeSecado(p, j.jugador);
+    robar(p, j.jugador, "cuerdas", p.ajustes.roboPorTurno.cuerdas);
+    robar(p, j.jugador, "acciones", p.ajustes.roboPorTurno.acciones);
+    comprobarUmbral(p, j.jugador);
 
-    if (cestasVacias(p) && p.bolsa.length > 0) {
-      rellenarCestas(p);
-      p.registro.push("Las cestas y el centro se han vaciado: se rellenan las cestas desde la bolsa.");
+    const jugador = p.jugadores[j.jugador];
+    if (jugador.mano.length > p.ajustes.limiteMano) {
+      p.turno.fase = "descartar";
+      p.registro.push(`${jugador.nombre} tiene ${jugador.mano.length} cartas y debe descartar hasta quedarse con ${p.ajustes.limiteMano}.`);
+      return;
     }
+    pasarTurno(p);
+  },
+};
 
-    const siguiente = (j.jugador + 1) % p.jugadores.length;
-    p.turno = { numero: p.turno.numero + 1, jugador: siguiente, cuerdasJugadas: 0, accionesJugadas: 0, drafts: 0 };
-    p.registro.push(`— Turno ${p.turno.numero}: ${p.jugadores[siguiente].nombre} —`);
+export const descartar: Manejador<JugadaDe<"descartar">> = {
+  soloEnSuTurno: true,
+  validar(p, j) {
+    if (p.turno.fase !== "descartar") return "Solo se descarta al pasarte del límite de mano.";
+    if (!p.jugadores[j.jugador].mano.includes(j.carta)) return "Esa carta no está en tu mano.";
+    return null;
+  },
+  aplicar(p, j) {
+    const jugador = p.jugadores[j.jugador];
+    jugador.mano = jugador.mano.filter((c) => c !== j.carta);
+    const def = defCarta(p, j.carta);
+    p.descartes[pilaDe(def.mazo)].push(j.carta);
+    p.registro.push(`${jugador.nombre} descarta ${def.nombre}.`);
+    if (jugador.mano.length <= p.ajustes.limiteMano) pasarTurno(p);
   },
 };

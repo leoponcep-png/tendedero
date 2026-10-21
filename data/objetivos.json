@@ -1,16 +1,20 @@
 {
   "objetivos": [
-    {
-      "id": "ejemplo-coleccion-color",
-      "nombre": "Ejemplo: colección de color",
-      "uso": "ambos",
-      "estado": "pendiente",
-      "efecto": "coleccion-color",
-      "texto": "Formato de ejemplo, no es un objetivo real. Tener N prendas secas del mismo color; solo puntúa el nivel más alto.",
-      "niveles": [
-        { "requisito": 4, "puntos": 2 },
-        { "requisito": 6, "puntos": 4 }
-      ]
-    }
+    { "id": "calcetinero", "nombre": "Calcetinero", "uso": "comun", "estado": "definida", "efecto": "prendas-secas", "parametros": { "tipo": "calcetin" }, "texto": "Calcetines secos.", "niveles": [{ "requisito": 3, "puntos": 2 }, { "requisito": 6, "puntos": 4 }] },
+    { "id": "toallero", "nombre": "Toallero", "uso": "comun", "estado": "definida", "efecto": "prendas-secas", "parametros": { "tipo": "toalla" }, "texto": "Toallas secas.", "niveles": [{ "requisito": 3, "puntos": 3 }, { "requisito": 5, "puntos": 5 }, { "requisito": 6, "puntos": 7 }] },
+    { "id": "camisetero", "nombre": "Camisetero", "uso": "comun", "estado": "definida", "efecto": "prendas-secas", "parametros": { "tipo": "camiseta" }, "texto": "Camisetas secas.", "niveles": [{ "requisito": 3, "puntos": 2 }, { "requisito": 5, "puntos": 4 }, { "requisito": 7, "puntos": 6 }] },
+    { "id": "coleccion-color", "nombre": "Colección de color", "uso": "comun", "estado": "definida", "efecto": "mismo-color", "texto": "Prendas secas del color del que más tengas.", "niveles": [{ "requisito": 5, "puntos": 2 }, { "requisito": 8, "puntos": 4 }, { "requisito": 11, "puntos": 6 }] },
+    { "id": "arcoiris", "nombre": "Arcoíris", "uso": "comun", "estado": "definida", "efecto": "juegos-de-colores", "texto": "Juegos de 4 prendas secas, una de cada color.", "niveles": [{ "requisito": 1, "puntos": 2 }, { "requisito": 2, "puntos": 4 }, { "requisito": 3, "puntos": 7 }] },
+    { "id": "monton-de-ropa", "nombre": "Montón de ropa", "uso": "comun", "estado": "definida", "efecto": "prendas-secas", "texto": "Prendas secas de cualquier tipo.", "niveles": [{ "requisito": 10, "puntos": 2 }, { "requisito": 15, "puntos": 4 }, { "requisito": 20, "puntos": 6 }] },
+    { "id": "tendedero-completo", "nombre": "Tendedero completo", "uso": "comun", "estado": "definida", "efecto": "lineas-completas", "texto": "Líneas con todas sus cartas de cuerda.", "niveles": [{ "requisito": 1, "puntos": 2 }, { "requisito": 2, "puntos": 5 }] },
+    { "id": "variedad-de-cuerdas", "nombre": "Variedad de cuerdas", "uso": "comun", "estado": "definida", "efecto": "clases-de-cuerda", "texto": "Clases distintas de cuerda en tu tendedero (las básicas cuentan como una).", "niveles": [{ "requisito": 3, "puntos": 2 }, { "requisito": 4, "puntos": 4 }, { "requisito": 5, "puntos": 6 }] },
+
+    { "id": "todo-blanco", "nombre": "Todo blanco", "uso": "secreto", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "blanco" }, "texto": "Prendas blancas secas.", "niveles": [{ "requisito": 4, "puntos": 2 }, { "requisito": 6, "puntos": 4 }, { "requisito": 8, "puntos": 6 }] },
+    { "id": "todo-azul", "nombre": "Todo azul", "uso": "secreto", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "azul" }, "texto": "Prendas azules secas.", "niveles": [{ "requisito": 4, "puntos": 2 }, { "requisito": 6, "puntos": 4 }, { "requisito": 8, "puntos": 6 }] },
+    { "id": "todo-rojo", "nombre": "Todo rojo", "uso": "secreto", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "rojo" }, "texto": "Prendas rojas secas.", "niveles": [{ "requisito": 4, "puntos": 2 }, { "requisito": 6, "puntos": 4 }, { "requisito": 8, "puntos": 6 }] },
+    { "id": "todo-amarillo", "nombre": "Todo amarillo", "uso": "secreto", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "amarillo" }, "texto": "Prendas amarillas secas.", "niveles": [{ "requisito": 4, "puntos": 2 }, { "requisito": 6, "puntos": 4 }, { "requisito": 8, "puntos": 6 }] },
+    { "id": "parejas", "nombre": "Cada oveja con su pareja", "uso": "secreto", "estado": "definida", "efecto": "parejas", "parametros": { "tipo": "calcetin" }, "texto": "Parejas de calcetines secos del mismo color.", "niveles": [{ "requisito": 2, "puntos": 2 }, { "requisito": 4, "puntos": 5 }] },
+    { "id": "bajo-techo", "nombre": "Bajo techo", "uso": "secreto", "estado": "definida", "efecto": "secadas-en", "parametros": { "efecto": "tejadillo" }, "texto": "Prendas secadas en un tejadillo.", "niveles": [{ "requisito": 2, "puntos": 2 }, { "requisito": 4, "puntos": 5 }] },
+    { "id": "a-toda-prisa", "nombre": "A toda prisa", "uso": "secreto", "estado": "definida", "efecto": "secadas-en", "parametros": { "efecto": "secado-rapido" }, "texto": "Prendas secadas en una cuerda de secado rápido.", "niveles": [{ "requisito": 3, "puntos": 2 }, { "requisito": 5, "puntos": 5 }] }
   ]
 }

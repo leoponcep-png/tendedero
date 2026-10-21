@@ -738,6 +738,13 @@ legend {
   gap: 10px;
 }
 
+/* La mano necesita más sitio para que las cartas no se apilen en una columna. */
+@media (min-width: 1100px) {
+  .filas-jugador {
+    grid-template-columns: minmax(140px, 1fr) minmax(260px, 2fr) minmax(140px, 1fr) minmax(200px, 1.3fr);
+  }
+}
+
 .filas-jugador .zona {
   background: white;
 }
@@ -889,4 +896,148 @@ legend {
     position: static;
     max-height: 300px;
   }
+}
+
+/* ---------- Acciones, descarte y final ---------- */
+
+.carta-mano {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.boton-carta {
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
+.franja-aviso {
+  position: sticky;
+  top: 62px;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: #fff1cc;
+  border-bottom: 1px solid #ecd9a9;
+  font-weight: 600;
+}
+
+.etiqueta-ultima {
+  margin-left: 8px;
+  font-size: 11px;
+  background: var(--peligro);
+  color: white;
+  border-radius: 10px;
+  padding: 1px 8px;
+}
+
+.carta-cuerda.protegida {
+  border-color: #3d8fd6;
+  box-shadow: 0 0 0 2px #cfe3f6;
+}
+
+.colgada.moviendo {
+  outline: 2px dashed var(--acento);
+  outline-offset: -2px;
+  border-radius: 6px;
+}
+
+.espacio.pulsable {
+  cursor: pointer;
+}
+
+.objetivo .niveles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+}
+
+.objetivo .alcanzado {
+  color: var(--acento);
+  font-weight: 700;
+}
+
+.objetivo .progreso {
+  color: var(--tinta);
+}
+
+.objetivo.secreto {
+  background: #efe6f7;
+  border-color: #d3bfe6;
+}
+
+.ficha-carta.mazo-acciones {
+  cursor: inherit;
+}
+
+.fondo-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: #2b27228c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal {
+  background: var(--papel);
+  border-radius: 12px;
+  padding: 20px 24px;
+  max-width: 760px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 10px 40px #0005;
+}
+
+.tabla-final {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.tabla-final th,
+.tabla-final td {
+  text-align: left;
+  vertical-align: top;
+  padding: 8px;
+  border-bottom: 1px solid var(--borde);
+}
+
+.tabla-final th {
+  color: var(--tinta-suave);
+  font-weight: 500;
+}
+
+.tabla-final .ganador {
+  background: var(--acento-claro);
+}
+
+.tabla-final .total {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.linea-objetivo {
+  font-size: 12.5px;
+}
+
+.etiqueta-primero {
+  margin-left: 6px;
+  font-size: 11px;
+  background: #ece5d9;
+  border-radius: 10px;
+  padding: 1px 7px;
+}
+
+.acciones-modal {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }

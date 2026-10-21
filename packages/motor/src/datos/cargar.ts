@@ -80,6 +80,11 @@ export function cargarDatos(crudos: DatosCrudos): Datos {
       errores.push(
         `${archivo} → [${c.id}]: está "definida" pero su efecto "${c.efecto}" todavía no está programado; déjala "pendiente"`,
       );
+    } else {
+      const esperado = !("mazo" in c) ? "objetivo" : c.mazo === "cuerdas" ? "cuerda" : c.mazo === "acciones" ? "accion" : null;
+      if (esperado && efectos[c.efecto].tipo !== esperado) {
+        errores.push(`${archivo} → [${c.id}]: el efecto "${c.efecto}" no es de ${esperado}`);
+      }
     }
   }
 

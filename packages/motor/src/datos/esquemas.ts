@@ -25,6 +25,9 @@ export const esquemaPrendas = z.object({
   tipos: z.array(esquemaTipoPrenda).min(1),
 });
 
+/** Números (o ids) que usa el efecto, para poder ajustarlos sin tocar código. */
+const parametros = z.record(z.string(), z.union([z.number(), z.string()])).default({});
+
 const camposCarta = {
   id,
   nombre: z.string(),
@@ -32,6 +35,7 @@ const camposCarta = {
   estado: esquemaEstado,
   grupo: z.string(),
   efecto: z.string().nullable().default(null),
+  parametros,
   texto: z.string().default(""),
 };
 
@@ -47,6 +51,7 @@ export const esquemaObjetivo = z.object({
   uso: z.enum(["comun", "secreto", "ambos"], { error: 'debe ser "comun", "secreto" o "ambos"' }),
   estado: esquemaEstado,
   efecto: z.string().nullable().default(null),
+  parametros,
   texto: z.string().default(""),
   niveles: z.array(z.object({ requisito: entero(), puntos: z.number().int() })).default([]),
 });
@@ -77,7 +82,9 @@ export type TipoPrenda = z.infer<typeof esquemaTipoPrenda>;
 export type DefObjetivo = z.infer<typeof esquemaObjetivo>;
 export type AjustesPorDefecto = z.infer<typeof esquemaAjustesPorDefecto>;
 
-export type Mazo = "cuerdas" | "acciones" | "climas" | "eventos";
+export type Parametros = Record<string, number | string>;
+
+export type Mazo ="cuerdas" | "acciones" | "climas" | "eventos";
 
 export interface DefCarta {
   id: string;
@@ -86,6 +93,7 @@ export interface DefCarta {
   estado: EstadoCarta;
   grupo: string;
   efecto: string | null;
+  parametros: Parametros;
   texto: string;
   mazo: Mazo;
   /** Solo cuenta en las cartas de cuerda. */

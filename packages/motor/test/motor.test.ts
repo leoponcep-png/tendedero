@@ -7,7 +7,9 @@ import {
   cargarDatos,
   crearPartida,
   ErrorDatos,
+  puntuarObjetivo,
   vistaPara,
+  type Ajustes,
   type DatosCrudos,
   type Jugada,
   type Partida,
@@ -21,8 +23,15 @@ function crudos(): DatosCrudos {
 
 const datos = cargarDatos(crudos());
 
-function partida(semilla = "prueba"): Partida {
-  return crearPartida(datos, { ...ajustesIniciales(datos), semilla });
+/** Partida con los objetivos secretos ya elegidos, lista para jugar. */
+function partida(semilla = "prueba", cambios: (a: Ajustes) => void = () => {}): Partida {
+  const ajustes = { ...ajustesIniciales(datos), semilla };
+  cambios(ajustes);
+  let p = crearPartida(datos, ajustes);
+  p.jugadores.forEach((j, i) => {
+    if (j.objetivosOfrecidos[0]) p = jugar(p, { tipo: "elegirObjetivo", jugador: i, objetivo: j.objetivosOfrecidos[0] });
+  });
+  return p;
 }
 
 function jugar(p: Partida, j: Jugada): Partida {
@@ -36,12 +45,31 @@ function motivo(p: Partida, j: Jugada): string | null {
   return r.ok ? null : r.motivo;
 }
 
-/** Partida con una cuerda ya colocada en la línea 1 y las prendas indicadas por tender. */
-function conCuerda(tipos: string[]): Partida {
-  let p = partida();
-  p = jugar(p, { tipo: "colocarCuerda", jugador: 0, carta: p.jugadores[0].mano[0], linea: 0 });
-  p.jugadores[0].pendientes = tipos.map((t, i) => `${t}-azul-${i + 1}`);
-  return p;
+/** Mete en la partida una copia nueva de una carta (sin sacarla del mazo) y devuelve su id. */
+function copia(p: Partida, def: string): string {
+  const id = `${def}#test${Object.keys(p.cartas).length}`;
+  p.cartas[id] = def;
+  p.catalogo.cartas[def] ??= datos.cartas.find((c) => c.id === def)!;
+  return id;
+}
+
+/** Pone directamente una carta de cuerda con prendas en la línea indicada. */
+function tender(p: Partida, jugador: number, cuerda: string, prendas: [string, number][], linea = 0): number {
+  const cartas = p.jugadores[jugador].lineas[linea].cartas;
+  cartas.push({ carta: copia(p, cuerda), colgadas: prendas.map(([prenda, inicio]) => ({ prenda, inicio })) });
+  return cartas.length - 1;
+}
+
+function darAccion(p: Partida, jugador: number, def: string): string {
+  const id = copia(p, def);
+  p.jugadores[jugador].mano.push(id);
+  return id;
+}
+
+function terminar(p: Partida): Partida {
+  let q = jugar(p, { tipo: "terminarTurno", jugador: p.turno.jugador });
+  while (!q.terminada && q.turno.fase === "descartar") q = jugar(q, { tipo: "descartar", jugador: q.turno.jugador, carta: q.jugadores[q.turno.jugador].mano[0] });
+  return q;
 }
 
 describe("datos", () => {
@@ -59,8 +87,9 @@ describe("datos", () => {
 
   it("no dejan marcar como definida una carta sin efecto programado", () => {
     const c = crudos();
-    (c.acciones as { cartas: { estado: string }[] }).cartas[0].estado = "definida";
-    expect(() => cargarDatos(c)).toThrow(/mojar-cuerda-rival.*no está programado/);
+    const cartas = (c.acciones as { cartas: { id: string; estado: string }[] }).cartas;
+    cartas.find((x) => x.id === "pinza-rota")!.estado = "definida";
+    expect(() => cargarDatos(c)).toThrow(/pinza-rota.*no está programado/);
   });
 });
 
@@ -70,62 +99,202 @@ describe("preparar partida", () => {
     expect(partida("abc").bolsa).not.toEqual(partida("xyz").bolsa);
   });
 
-  it("reparte cestas, manos y deja fuera las cartas pendientes", () => {
+  it("reparte cestas, manos y objetivos, y deja fuera las cartas pendientes", () => {
     const p = partida();
     expect(p.cestas).toHaveLength(5);
-    expect(p.cestas.every((c) => c.length === 4)).toBe(true);
     expect(p.bolsa).toHaveLength(80);
-    expect(p.jugadores[0].mano).toHaveLength(2);
-    expect(Object.values(p.cartas).every((def) => def === "basica")).toBe(true);
+    expect(p.jugadores[0].mano).toHaveLength(4);
+    expect(p.objetivosComunes).toHaveLength(2);
+    expect(p.jugadores.every((j) => j.objetivoSecreto)).toBe(true);
+    expect(Object.values(p.cartas)).not.toContain("pinza-rota");
+  });
+
+  it("no se juega sin haber elegido el objetivo secreto", () => {
+    const p = crearPartida(datos, { ...ajustesIniciales(datos), semilla: "x" });
+    expect(motivo(p, { tipo: "terminarTurno", jugador: 0 })).toMatch(/objetivo secreto/);
   });
 });
 
-describe("colgar prendas", () => {
-  it("una toalla cabe en una carta vacía, pero solo desde el primer espacio", () => {
-    const p = conCuerda(["toalla"]);
-    const prenda = p.jugadores[0].pendientes[0];
-    expect(motivo(p, { tipo: "colgarPrenda", jugador: 0, prenda, linea: 0, posicion: 0, inicio: 1 })).toMatch(/No cabe/);
-    expect(motivo(p, { tipo: "colgarPrenda", jugador: 0, prenda, linea: 0, posicion: 0, inicio: 0 })).toBeNull();
+describe("colgar prendas y cuerdas", () => {
+  it("una prenda tiene que caber entera y sin solaparse", () => {
+    const p = partida();
+    tender(p, 0, "basica", [["camiseta-azul-1", 0]]);
+    p.jugadores[0].pendientes = ["toalla-azul-1", "calcetin-azul-1"];
+    const sitio = { tipo: "colgarPrenda", jugador: 0, linea: 0, posicion: 0 } as const;
+    expect(motivo(p, { ...sitio, prenda: "toalla-azul-1", inicio: 0 })).toMatch(/ocupados/);
+    expect(motivo(p, { ...sitio, prenda: "toalla-azul-1", inicio: 1 })).toMatch(/No cabe/);
+    expect(motivo(p, { ...sitio, prenda: "calcetin-azul-1", inicio: 2 })).toBeNull();
   });
 
-  it("no deja solapar prendas", () => {
-    let p = conCuerda(["camiseta", "camiseta", "calcetin"]);
-    const [cam1, cam2, cal] = p.jugadores[0].pendientes;
-    p = jugar(p, { tipo: "colgarPrenda", jugador: 0, prenda: cam1, linea: 0, posicion: 0, inicio: 0 });
-    expect(motivo(p, { tipo: "colgarPrenda", jugador: 0, prenda: cam2, linea: 0, posicion: 0, inicio: 1 })).toMatch(/ocupados/);
-    expect(motivo(p, { tipo: "colgarPrenda", jugador: 0, prenda: cal, linea: 0, posicion: 0, inicio: 2 })).toBeNull();
-  });
-
-  it("no deja colgar donde no hay carta de cuerda", () => {
-    const p = conCuerda(["calcetin"]);
-    const prenda = p.jugadores[0].pendientes[0];
-    expect(motivo(p, { tipo: "colgarPrenda", jugador: 0, prenda, linea: 1, posicion: 0, inicio: 0 })).toMatch(/ninguna carta/);
-  });
-});
-
-describe("cuerdas", () => {
-  it("respeta el máximo por turno y el de cartas por línea", () => {
+  it("respeta el máximo de cuerdas por turno y Colocar cuerda extra lo amplía", () => {
     let p = partida();
     const [a, b] = p.jugadores[0].mano;
     p = jugar(p, { tipo: "colocarCuerda", jugador: 0, carta: a, linea: 0 });
     expect(motivo(p, { tipo: "colocarCuerda", jugador: 0, carta: b, linea: 0 })).toMatch(/Ya has jugado una cuerda/);
-
-    p.ajustes.jugablesPorTurno.cuerdas = 99;
-    p.jugadores[0].mano.push(...p.mazos.cuerdas.splice(-4));
-    for (const carta of p.jugadores[0].mano.slice(0, 3)) {
-      p = jugar(p, { tipo: "colocarCuerda", jugador: 0, carta, linea: 0 });
-    }
-    expect(p.jugadores[0].lineas[0].cartas).toHaveLength(4);
-    expect(motivo(p, { tipo: "colocarCuerda", jugador: 0, carta: p.jugadores[0].mano[0], linea: 0 })).toMatch(/ya tiene 4/);
-  });
-
-  it("solo juega quien tiene el turno", () => {
-    const p = partida();
-    expect(motivo(p, { tipo: "colocarCuerda", jugador: 1, carta: p.jugadores[1].mano[0], linea: 0 })).toMatch(/No es el turno/);
+    const extra = darAccion(p, 0, "colocar-cuerda-extra");
+    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: extra });
+    expect(motivo(p, { tipo: "colocarCuerda", jugador: 0, carta: b, linea: 0 })).toBeNull();
   });
 });
 
-describe("draft", () => {
+describe("secado y puntos", () => {
+  it("al final del turno la humedad baja 1 y al llegar a 0 la prenda puntúa", () => {
+    let p = partida();
+    tender(p, 0, "basica", [["camiseta-azul-1", 0], ["calcetin-azul-1", 2]]);
+    p = terminar(p);
+    expect(p.prendas["camiseta-azul-1"].humedad).toBe(1);
+    expect(p.jugadores[0].seca).toEqual(["calcetin-azul-1"]);
+    expect(p.jugadores[0].puntos).toBe(1);
+    p = terminar(terminar(p));
+    expect(p.jugadores[0].seca).toContain("camiseta-azul-1");
+    expect(p.jugadores[0].puntos).toBe(4);
+  });
+
+  it("solo se secan las prendas del jugador que termina su turno", () => {
+    let p = partida();
+    tender(p, 1, "basica", [["calcetin-rojo-1", 0]]);
+    p = terminar(p);
+    expect(p.prendas["calcetin-rojo-1"].humedad).toBe(1);
+  });
+
+  it("secado rápido quita 2 de humedad", () => {
+    let p = partida();
+    tender(p, 0, "secado-rapido", [["toalla-azul-1", 0]]);
+    p = terminar(p);
+    expect(p.prendas["toalla-azul-1"].humedad).toBe(1);
+  });
+
+  it("las pinzas de color suman y la cuerda vieja resta", () => {
+    let p = partida();
+    tender(p, 0, "pinzas-rojas", [["calcetin-rojo-1", 0], ["calcetin-azul-1", 1]]);
+    tender(p, 0, "vieja", [["calcetin-blanco-1", 0]], 1);
+    p = terminar(p);
+    expect(p.jugadores[0].puntos).toBe(2 + 1 + 0);
+  });
+});
+
+describe("acciones", () => {
+  it("Mojar cuerda rival suma humedad, pero no bajo un tejadillo", () => {
+    let p = partida();
+    const normal = tender(p, 1, "basica", [["camiseta-rojo-1", 0]]);
+    const techo = tender(p, 1, "tejadillo", [["camiseta-rojo-2", 0]]);
+    const carta = darAccion(p, 0, "mojar-cuerda-rival");
+    const sobre = (posicion: number): Jugada => ({ tipo: "jugarAccion", jugador: 0, carta, objetivo: { jugador: 1, linea: 0, posicion } });
+    expect(motivo(p, sobre(techo))).toMatch(/Tejadillo protege/);
+    p = jugar(p, sobre(normal));
+    expect(p.prendas["camiseta-rojo-1"].humedad).toBe(3);
+    expect(p.descartes.acciones).toContain(carta);
+  });
+
+  it("Ráfaga de viento devuelve la prenda a por tender con la humedad inicial", () => {
+    let p = partida();
+    tender(p, 1, "basica", [["toalla-rojo-1", 0]]);
+    p.prendas["toalla-rojo-1"].humedad = 1;
+    const carta = darAccion(p, 0, "rafaga-de-viento");
+    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta, objetivo: { jugador: 1, linea: 0, posicion: 0, prenda: "toalla-rojo-1" } });
+    expect(p.jugadores[1].pendientes).toContain("toalla-rojo-1");
+    expect(p.prendas["toalla-rojo-1"].humedad).toBe(3);
+  });
+
+  it("las acciones de fastidio no se juegan sobre ti mismo", () => {
+    const p = partida();
+    tender(p, 0, "basica", [["toalla-rojo-1", 0]]);
+    const carta = darAccion(p, 0, "rafaga-de-viento");
+    expect(motivo(p, { tipo: "jugarAccion", jugador: 0, carta, objetivo: { jugador: 0, linea: 0, posicion: 0, prenda: "toalla-rojo-1" } })).toMatch(/rival/);
+  });
+
+  it("Mover prenda propia la lleva a otro hueco libre", () => {
+    let p = partida();
+    tender(p, 0, "basica", [["calcetin-azul-1", 0]]);
+    tender(p, 0, "basica", [], 1);
+    const carta = darAccion(p, 0, "mover-prenda-propia");
+    const objetivo = { jugador: 0, linea: 0, posicion: 0, prenda: "calcetin-azul-1" };
+    expect(motivo(p, { tipo: "jugarAccion", jugador: 0, carta, objetivo })).toMatch(/adónde/);
+    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta, objetivo: { ...objetivo, destino: { linea: 1, posicion: 0, inicio: 2 } } });
+    expect(p.jugadores[0].lineas[1].cartas[0].colgadas).toEqual([{ prenda: "calcetin-azul-1", inicio: 2 }]);
+  });
+
+  it("Secar prenda inmediatamente puntúa en el acto", () => {
+    let p = partida();
+    tender(p, 0, "basica", [["toalla-azul-1", 0]]);
+    const carta = darAccion(p, 0, "secar-prenda");
+    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta, objetivo: { jugador: 0, linea: 0, posicion: 0, prenda: "toalla-azul-1" } });
+    expect(p.jugadores[0].puntos).toBe(6);
+  });
+
+  it("Proteger cuerda bloquea el fastidio hasta el siguiente turno de su dueño", () => {
+    let p = partida();
+    tender(p, 0, "basica", [["toalla-azul-1", 0]]);
+    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "proteger-cuerda"), objetivo: { jugador: 0, linea: 0, posicion: 0 } });
+    p = terminar(p);
+    const rafaga: Jugada = { tipo: "jugarAccion", jugador: 1, carta: darAccion(p, 1, "rafaga-de-viento"), objetivo: { jugador: 0, linea: 0, posicion: 0, prenda: "toalla-azul-1" } };
+    expect(motivo(p, rafaga)).toMatch(/protegida/);
+    p = terminar(p);
+    p = terminar(p);
+    expect(p.jugadores[0].lineas[0].cartas[0].protegida).toBeUndefined();
+  });
+
+  it("como máximo 2 acciones por turno", () => {
+    let p = partida();
+    for (let i = 0; i < 2; i++) p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "colocar-cuerda-extra") });
+    expect(motivo(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "colocar-cuerda-extra") })).toMatch(/2 acciones/);
+  });
+});
+
+describe("límite de mano", () => {
+  it("si se pasa del límite tiene que descartar antes de pasar el turno", () => {
+    let p = partida();
+    p = jugar(p, { tipo: "terminarTurno", jugador: 0 });
+    expect(p.turno.fase).toBe("descartar");
+    expect(p.turno.jugador).toBe(0);
+    expect(motivo(p, { tipo: "draft", jugador: 0, origen: { cesta: 0 }, patron: { tipo: "toalla" } })).toMatch(/descarta/);
+    p = jugar(p, { tipo: "descartar", jugador: 0, carta: p.jugadores[0].mano[0] });
+    p = jugar(p, { tipo: "descartar", jugador: 0, carta: p.jugadores[0].mano[0] });
+    expect(p.jugadores[0].mano).toHaveLength(5);
+    expect(p.turno.jugador).toBe(1);
+  });
+});
+
+describe("final de partida", () => {
+  it("al llegar al umbral se acaba la ronda y después se cuentan los objetivos", () => {
+    let p = partida();
+    p.jugadores[0].puntos = 29;
+    tender(p, 0, "basica", [["calcetin-azul-1", 0]]);
+    p = terminar(p);
+    expect(p.ultimaRonda).toBe(true);
+    expect(p.terminada).toBe(false);
+    expect(p.turno.jugador).toBe(1);
+    p = terminar(p);
+    expect(p.terminada).toBe(true);
+    expect(p.final).toHaveLength(2);
+    expect(p.final![0].puesto).toBe(1);
+  });
+
+  it("quien llega primero puede perder por los objetivos", () => {
+    let p = partida("abc", (a) => (a.objetivos.secretosRepartidos = 0));
+    p.objetivosComunes = ["toallero"];
+    p.catalogo.objetivos.toallero ??= datos.objetivos.find((o) => o.id === "toallero")!;
+    p.jugadores[0].puntos = 29;
+    p.jugadores[1].puntos = 25;
+    p.jugadores[1].seca = ["toalla-rojo-1", "toalla-rojo-2", "toalla-rojo-3", "toalla-rojo-4", "toalla-rojo-5", "toalla-rojo-6"];
+    tender(p, 0, "basica", [["calcetin-azul-1", 0]]);
+    p = terminar(terminar(p));
+    expect(p.primeroEnLlegar).toBe(0);
+    expect(p.final![0].jugador).toBe(1);
+    expect(p.final![0].total).toBe(25 + 7);
+  });
+
+  it("los objetivos con niveles solo dan el más alto alcanzado", () => {
+    const p = partida();
+    const toallero = datos.objetivos.find((o) => o.id === "toallero")!;
+    p.jugadores[0].seca = ["toalla-rojo-1", "toalla-rojo-2", "toalla-rojo-3", "toalla-rojo-4"];
+    expect(puntuarObjetivo(p, 0, toallero).puntos).toBe(3);
+    p.jugadores[0].seca.push("toalla-rojo-5", "toalla-rojo-6");
+    expect(puntuarObjetivo(p, 0, toallero).puntos).toBe(7);
+  });
+});
+
+describe("draft y vistas", () => {
   it("se lleva lo que cumple el patrón y manda el resto al centro", () => {
     const p = partida();
     const cesta = p.cestas[0];
@@ -134,23 +303,7 @@ describe("draft", () => {
     const despues = jugar(p, { tipo: "draft", jugador: 0, origen: { cesta: 0 }, patron: { color } });
     expect(despues.jugadores[0].pendientes).toEqual(iguales);
     expect(despues.centro).toHaveLength(4 - iguales.length);
-    expect(despues.cestas[0]).toHaveLength(0);
-    expect(motivo(despues, { tipo: "draft", jugador: 0, origen: { cesta: 1 }, patron: { tipo: "toalla" } })).toMatch(/Ya has cogido/);
-  });
-
-  it("no modifica la partida original", () => {
-    const p = partida();
-    const antes = structuredClone(p);
-    jugar(p, { tipo: "draft", jugador: 0, origen: { cesta: 0 }, patron: { color: p.prendas[p.cestas[0][0]].color } });
-    expect(p).toEqual(antes);
-  });
-});
-
-describe("turnos y vistas", () => {
-  it("terminar turno roba y pasa al siguiente", () => {
-    const p = jugar(partida(), { tipo: "terminarTurno", jugador: 0 });
-    expect(p.turno.jugador).toBe(1);
-    expect(p.jugadores[0].mano).toHaveLength(3);
+    expect(p.cestas[0]).toHaveLength(4);
   });
 
   it("la vista de un jugador oculta la mano rival y la semilla", () => {

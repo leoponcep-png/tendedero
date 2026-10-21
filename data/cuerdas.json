@@ -1,10 +1,13 @@
 {
   "cartas": [
-    { "id": "basica", "nombre": "Cuerda básica", "copias": 24, "estado": "definida", "grupo": "básicas", "espacios": 3, "efecto": null, "texto": "Sin habilidad." },
-    { "id": "tejadillo", "nombre": "Tejadillo", "copias": 4, "estado": "pendiente", "grupo": "con habilidad", "espacios": 3, "efecto": "tejadillo", "texto": "Protege de la lluvia." },
-    { "id": "resistente", "nombre": "Cuerda resistente", "copias": 4, "estado": "pendiente", "grupo": "con habilidad", "espacios": 3, "efecto": "resistente", "texto": "Protege del viento y de las caídas." },
-    { "id": "secado-rapido", "nombre": "Secado rápido", "copias": 4, "estado": "pendiente", "grupo": "con habilidad", "espacios": 3, "efecto": "secado-rapido", "texto": "Las prendas de esta carta secan más rápido." },
-    { "id": "modificador-puntuacion", "nombre": "Modificador de puntuación", "copias": 4, "estado": "pendiente", "grupo": "con habilidad", "espacios": 3, "efecto": "modificador-puntuacion", "texto": "Modifica los puntos de las prendas de esta carta." },
-    { "id": "vieja", "nombre": "Cuerda vieja", "copias": 4, "estado": "pendiente", "grupo": "negativas", "espacios": 3, "efecto": "vieja", "texto": "Negativa." }
+    { "id": "basica", "nombre": "Cuerda básica", "copias": 12, "estado": "definida", "grupo": "básicas", "espacios": 3, "efecto": null, "texto": "Sin habilidad." },
+    { "id": "tejadillo", "nombre": "Tejadillo", "copias": 6, "estado": "definida", "grupo": "con habilidad", "espacios": 3, "efecto": "tejadillo", "texto": "Sus prendas no se mojan: inmunes a Mojar cuerda rival y Retrasar secado." },
+    { "id": "resistente", "nombre": "Cuerda resistente", "copias": 6, "estado": "definida", "grupo": "con habilidad", "espacios": 3, "efecto": "resistente", "texto": "Sus prendas no se caen ni las mueve un rival: inmunes a Ráfaga de viento y Mover una prenda rival." },
+    { "id": "secado-rapido", "nombre": "Secado rápido", "copias": 6, "estado": "definida", "grupo": "con habilidad", "espacios": 3, "efecto": "secado-rapido", "parametros": { "humedad": 2 }, "texto": "Sus prendas pierden 2 de humedad en cada secado." },
+    { "id": "pinzas-blancas", "nombre": "Pinzas blancas", "copias": 1, "estado": "definida", "grupo": "modificadores", "espacios": 3, "efecto": "modificador-puntuacion", "parametros": { "color": "blanco", "bonus": 1 }, "texto": "+1 punto por cada prenda blanca que se seque aquí." },
+    { "id": "pinzas-azules", "nombre": "Pinzas azules", "copias": 1, "estado": "definida", "grupo": "modificadores", "espacios": 3, "efecto": "modificador-puntuacion", "parametros": { "color": "azul", "bonus": 1 }, "texto": "+1 punto por cada prenda azul que se seque aquí." },
+    { "id": "pinzas-rojas", "nombre": "Pinzas rojas", "copias": 1, "estado": "definida", "grupo": "modificadores", "espacios": 3, "efecto": "modificador-puntuacion", "parametros": { "color": "rojo", "bonus": 1 }, "texto": "+1 punto por cada prenda roja que se seque aquí." },
+    { "id": "pinzas-amarillas", "nombre": "Pinzas amarillas", "copias": 1, "estado": "definida", "grupo": "modificadores", "espacios": 3, "efecto": "modificador-puntuacion", "parametros": { "color": "amarillo", "bonus": 1 }, "texto": "+1 punto por cada prenda amarilla que se seque aquí." },
+    { "id": "vieja", "nombre": "Cuerda vieja", "copias": 4, "estado": "definida", "grupo": "negativas", "espacios": 3, "efecto": "modificador-puntuacion", "parametros": { "bonus": -1 }, "texto": "−1 punto por cada prenda que se seque aquí (mínimo 0)." }
   ]
 }
