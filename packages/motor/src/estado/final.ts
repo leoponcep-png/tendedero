@@ -2,33 +2,52 @@ import { efectos } from "../efectos";
 import type { DefObjetivo } from "../datos/esquemas";
 import type { Partida, PuntosObjetivo, ResultadoJugador } from "./tipos";
 import { inicioDeRonda } from "./ronda";
+import { faseDeSecado } from "./secado";
 import { cestasVacias, rellenarCestas } from "./utilidades";
 
-/** Si el jugador ha llegado al umbral, empieza la última ronda. */
-export function comprobarUmbral(p: Partida, jugador: number): void {
-  const j = p.jugadores[jugador];
-  if (p.ultimaRonda || j.puntos < p.ajustes.umbralFinal) return;
-  p.ultimaRonda = true;
-  p.primeroEnLlegar = jugador;
-  p.registro.push(`${j.nombre} llega a ${j.puntos} puntos: se acaba esta ronda y después se cuentan los objetivos.`);
+/** Quien abre la ronda: el primer jugador va rotando, una ronda cada uno. */
+export function jugadorInicial(p: Partida, ronda = p.ronda): number {
+  return (ronda - 1) % p.jugadores.length;
 }
 
-/** Pasa al siguiente jugador o, si se acaba la última ronda, termina la partida. */
+/** Orden de juego de la ronda actual, empezando por quien la abre. */
+export function ordenDeRonda(p: Partida): number[] {
+  const n = p.jugadores.length;
+  return Array.from({ length: n }, (_, i) => (jugadorInicial(p) + i) % n);
+}
+
+/** ¿Es este jugador el último en jugar la ronda? */
+export function cierraLaRonda(p: Partida, jugador: number): boolean {
+  return (jugador + 1) % p.jugadores.length === jugadorInicial(p);
+}
+
+/**
+ * Si alguien ha llegado al umbral, la partida acaba al terminar la ronda.
+ * Si llegan varios a la vez (en el secado de la ronda), cuenta como primero el que más puntos tiene.
+ */
+export function comprobarUmbral(p: Partida): void {
+  if (p.ultimaRonda) return;
+  const llegan = ordenDeRonda(p).filter((i) => p.jugadores[i].puntos >= p.ajustes.umbralFinal);
+  if (llegan.length === 0) return;
+  const primero = llegan.reduce((a, b) => (p.jugadores[b].puntos > p.jugadores[a].puntos ? b : a));
+  p.ultimaRonda = true;
+  p.primeroEnLlegar = primero;
+  const j = p.jugadores[primero];
+  p.registro.push(`${j.nombre} llega a ${j.puntos} puntos: la partida acaba al terminar esta ronda y después se cuentan los objetivos.`);
+}
+
+/** Pasa al siguiente jugador; si ya han jugado todos, se acaba la ronda. */
 export function pasarTurno(p: Partida): void {
   if (cestasVacias(p) && p.bolsa.length > 0) {
     rellenarCestas(p);
     p.registro.push("Las cestas y el centro se han vaciado: se rellenan las cestas desde la bolsa.");
   }
 
-  const siguiente = (p.turno.jugador + 1) % p.jugadores.length;
-  if (p.ultimaRonda && siguiente === 0) {
-    terminarPartida(p);
-    return;
-  }
-
-  if (siguiente === 0) {
-    p.ronda++;
-    inicioDeRonda(p);
+  let siguiente = (p.turno.jugador + 1) % p.jugadores.length;
+  if (siguiente === jugadorInicial(p)) {
+    finDeRonda(p);
+    if (p.terminada) return;
+    siguiente = jugadorInicial(p);
   }
 
   // «Proteger cuerda» dura hasta el siguiente turno de su dueño.
@@ -36,6 +55,20 @@ export function pasarTurno(p: Partida): void {
 
   p.turno = { numero: p.turno.numero + 1, jugador: siguiente, fase: "jugar", cuerdasJugadas: 0, cuerdasExtra: 0, accionesJugadas: 0, drafts: 0 };
   p.registro.push(`— Turno ${p.turno.numero}: ${p.jugadores[siguiente].nombre} —`);
+}
+
+/** Cuando todos han jugado: se seca y se puntúa a la vez, y empieza la ronda siguiente con otro jugador. */
+function finDeRonda(p: Partida): void {
+  p.registro.push(`— Fin de la ronda ${p.ronda}: secado y puntos de todos —`);
+  for (const jugador of ordenDeRonda(p)) faseDeSecado(p, jugador);
+  comprobarUmbral(p);
+  if (p.ultimaRonda) {
+    terminarPartida(p);
+    return;
+  }
+  p.ronda++;
+  p.registro.push(`Empieza la ronda ${p.ronda}; abre ${p.jugadores[jugadorInicial(p)].nombre}.`);
+  inicioDeRonda(p);
 }
 
 /** Puntos que da un objetivo: solo el nivel más alto alcanzado, sin acumular. */

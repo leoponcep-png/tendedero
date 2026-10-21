@@ -50,7 +50,7 @@ export interface EfectoClima {
   tipo: "clima";
   /** Humedad de más (o de menos, si es negativa) que pierden las prendas de esta carta de cuerda. */
   ajusteSecado?(p: Partida, tendida: CartaTendida, params: Parametros): number;
-  /** Lo que pasa al final del turno del jugador, antes de secar. */
+  /** Lo que le pasa a cada jugador al acabar la ronda, justo antes de secar. */
   antesDelSecado?(p: Partida, jugador: number, params: Parametros): void;
 }
 

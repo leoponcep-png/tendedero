@@ -1,3 +1,4 @@
+import { comprobarUmbral } from "../estado/final";
 import type { Partida } from "../estado/tipos";
 import { colgarPrenda } from "./colgarPrenda";
 import { colocarCuerda } from "./colocarCuerda";
@@ -48,5 +49,7 @@ export function aplicar(p: Partida, j: Jugada): Resultado {
   if (motivo) return { ok: false, motivo };
   const nueva = structuredClone(p);
   manejadorDe(j).aplicar(nueva, j);
+  // Una acción o un evento también pueden dar puntos a mitad de ronda.
+  if (!nueva.terminada) comprobarUmbral(nueva);
   return { ok: true, partida: nueva };
 }

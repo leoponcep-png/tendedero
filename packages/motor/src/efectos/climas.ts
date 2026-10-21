@@ -12,7 +12,7 @@ export const efectosClima: Record<string, EfectoClima> = {
     ajusteSecado: (p, tendida, params) => (protegidaDe(p, tendida, "moja") ? 0 : -numero(params, "humedad", 1)),
   },
 
-  // Al final de tu turno, antes de secar, las prendas ligeras (parametros.cae, calcetines por defecto)
+  // Al acabar la ronda, antes de secar, las prendas ligeras (parametros.cae, calcetines por defecto)
   // de cuerdas no resistentes se caen. El resto seca parametros.humedad más.
   viento: {
     tipo: "clima",

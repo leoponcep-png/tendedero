@@ -1,5 +1,5 @@
 import { DndContext, DragOverlay, PointerSensor, pointerWithin, useSensor, useSensors, type DragEndEvent, type DragStartEvent } from "@dnd-kit/core";
-import { motivoInvalida, nombrePrenda, type Jugada, type JugadaDe, type Partida } from "@tendedero/motor";
+import { cierraLaRonda, jugadorInicial, motivoInvalida, nombrePrenda, type Jugada, type JugadaDe, type Partida } from "@tendedero/motor";
 import { useEffect, useState } from "react";
 import { FichaCarta } from "../mesa/Carta";
 import { admisible, ContextoMesa, jugadaDe, necesitaDestino, type Arrastre, type Destino } from "../mesa/contexto";
@@ -84,7 +84,7 @@ export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshace
                 </span>
               ) : (
                 <span>
-                  <strong>Ronda {partida.ronda}</strong> · turno {turno.numero} · le toca a <strong>{jugadorActivo.nombre}</strong>
+                  <strong>Ronda {partida.ronda}</strong> (abre {partida.jugadores[jugadorInicial(partida)].nombre}) · turno {turno.numero} · le toca a <strong>{jugadorActivo.nombre}</strong>
                   {partida.ultimaRonda && <span className="etiqueta-ultima">última ronda</span>}
                 </span>
               )}
@@ -100,7 +100,7 @@ export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshace
                 </button>
               ) : (
                 <button className="principal" disabled={turno.fase === "descartar"} onClick={() => jugar({ tipo: "terminarTurno", jugador: turno.jugador })}>
-                  Terminar turno
+                  {cierraLaRonda(partida, turno.jugador) ? "Terminar turno y acabar la ronda" : "Terminar turno"}
                 </button>
               )}
               <button disabled={!puedeDeshacer} onClick={onDeshacer}>

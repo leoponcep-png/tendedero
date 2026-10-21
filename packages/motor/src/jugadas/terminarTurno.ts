@@ -1,19 +1,17 @@
-import { comprobarUmbral, pasarTurno } from "../estado/final";
-import { faseDeSecado } from "../estado/secado";
+import { pasarTurno } from "../estado/final";
 import { defCarta, pilaDe, robar } from "../estado/utilidades";
 import type { JugadaDe, Manejador } from "./tipos";
 
-// Orden: secado de sus prendas → robo → comprobar umbral → descartar si se pasa del límite → siguiente.
+// Orden: robo → descartar si se pasa del límite → siguiente jugador.
+// El secado y los puntos no van aquí: se hacen para todos a la vez al acabar la ronda (ver pasarTurno).
 export const terminarTurno: Manejador<JugadaDe<"terminarTurno">> = {
   soloEnSuTurno: true,
   validar() {
     return null;
   },
   aplicar(p, j) {
-    faseDeSecado(p, j.jugador);
     robar(p, j.jugador, "cuerdas", p.ajustes.roboPorTurno.cuerdas);
     robar(p, j.jugador, "acciones", p.ajustes.roboPorTurno.acciones);
-    comprobarUmbral(p, j.jugador);
 
     const jugador = p.jugadores[j.jugador];
     if (jugador.mano.length > p.ajustes.limiteMano) {

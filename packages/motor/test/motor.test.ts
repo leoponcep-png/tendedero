@@ -81,6 +81,14 @@ function terminar(p: Partida): Partida {
   return q;
 }
 
+/** Terminan su turno todos los que quedan en la ronda, y con eso se seca y se puntúa. */
+function ronda(p: Partida): Partida {
+  const r = p.ronda;
+  let q = p;
+  while (!q.terminada && q.ronda === r) q = terminar(q);
+  return q;
+}
+
 describe("datos", () => {
   it("cargan los JSON de /data", () => {
     const total = datos.tipos.reduce((s, t) => s + t.porColor * datos.colores.length, 0);
@@ -146,30 +154,50 @@ describe("colgar prendas y cuerdas", () => {
   });
 });
 
-describe("secado y puntos", () => {
-  it("al final del turno la humedad baja 1 y al llegar a 0 la prenda puntúa", () => {
+describe("rondas, secado y puntos", () => {
+  it("al acabar la ronda la humedad baja 1 y al llegar a 0 la prenda puntúa", () => {
     let p = partida();
     tender(p, 0, "basica", [["camiseta-azul-1", 0], ["calcetin-azul-1", 2]]);
-    p = terminar(p);
+    p = ronda(p);
     expect(p.prendas["camiseta-azul-1"].humedad).toBe(1);
     expect(p.jugadores[0].seca).toEqual(["calcetin-azul-1"]);
     expect(p.jugadores[0].puntos).toBe(1);
-    p = terminar(terminar(p));
+    p = ronda(p);
     expect(p.jugadores[0].seca).toContain("camiseta-azul-1");
     expect(p.jugadores[0].puntos).toBe(4);
   });
 
-  it("solo se secan las prendas del jugador que termina su turno", () => {
+  it("terminar el turno no seca nada: se seca y se puntúa a la vez cuando han jugado todos", () => {
     let p = partida();
+    tender(p, 0, "basica", [["calcetin-azul-1", 0]]);
     tender(p, 1, "basica", [["calcetin-rojo-1", 0]]);
     p = terminar(p);
-    expect(p.prendas["calcetin-rojo-1"].humedad).toBe(1);
+    expect(p.turno.jugador).toBe(1);
+    expect(p.prendas["calcetin-azul-1"].humedad).toBe(1);
+    expect(p.jugadores[0].puntos).toBe(0);
+    p = terminar(p);
+    expect(p.jugadores[0].seca).toEqual(["calcetin-azul-1"]);
+    expect(p.jugadores[1].seca).toEqual(["calcetin-rojo-1"]);
+  });
+
+  it("el jugador que abre la ronda va rotando", () => {
+    let p = partida();
+    expect(p.turno.jugador).toBe(0);
+    p = ronda(p);
+    expect(p.ronda).toBe(2);
+    expect(p.turno.jugador).toBe(1);
+    p = terminar(p);
+    expect(p.turno.jugador).toBe(0);
+    expect(p.ronda).toBe(2);
+    p = terminar(p);
+    expect(p.ronda).toBe(3);
+    expect(p.turno.jugador).toBe(0);
   });
 
   it("secado rápido quita 2 de humedad", () => {
     let p = partida();
     tender(p, 0, "secado-rapido", [["toalla-azul-1", 0]]);
-    p = terminar(p);
+    p = ronda(p);
     expect(p.prendas["toalla-azul-1"].humedad).toBe(1);
   });
 
@@ -177,7 +205,7 @@ describe("secado y puntos", () => {
     let p = partida();
     tender(p, 0, "pinzas-rojas", [["calcetin-rojo-1", 0], ["calcetin-azul-1", 1]]);
     tender(p, 0, "vieja", [["calcetin-blanco-1", 0]], 1);
-    p = terminar(p);
+    p = ronda(p);
     expect(p.jugadores[0].puntos).toBe(2 + 1 + 0);
   });
 });
@@ -238,8 +266,12 @@ describe("acciones", () => {
     p = terminar(p);
     const rafaga: Jugada = { tipo: "jugarAccion", jugador: 1, carta: darAccion(p, 1, "rafaga-de-viento"), objetivo: { jugador: 0, linea: 0, posicion: 0, prenda: "toalla-azul-1" } };
     expect(motivo(p, rafaga)).toMatch(/protegida/);
+    // Acaba la ronda y la siguiente la abre el jugador 2: sigue protegida hasta que vuelve a tocarle al 1.
     p = terminar(p);
+    expect(p.turno.jugador).toBe(1);
+    expect(p.jugadores[0].lineas[0].cartas[0].protegida).toBe(true);
     p = terminar(p);
+    expect(p.turno.jugador).toBe(0);
     expect(p.jugadores[0].lineas[0].cartas[0].protegida).toBeUndefined();
   });
 
@@ -274,7 +306,7 @@ describe("clima y eventos", () => {
     let p = partida();
     p.clima = copia(p, "soleado");
     tender(p, 0, "basica", [["toalla-azul-1", 0]]);
-    p = terminar(p);
+    p = ronda(p);
     expect(p.prendas["toalla-azul-1"].humedad).toBe(1);
   });
 
@@ -283,7 +315,7 @@ describe("clima y eventos", () => {
     p.clima = copia(p, "lluvia");
     tender(p, 0, "basica", [["calcetin-azul-1", 0]]);
     tender(p, 0, "tejadillo", [["calcetin-azul-2", 0]], 1);
-    p = terminar(p);
+    p = ronda(p);
     expect(p.prendas["calcetin-azul-1"].humedad).toBe(1);
     expect(p.jugadores[0].seca).toEqual(["calcetin-azul-2"]);
   });
@@ -293,7 +325,7 @@ describe("clima y eventos", () => {
     p.clima = copia(p, "viento");
     tender(p, 0, "basica", [["calcetin-azul-1", 0], ["camiseta-azul-1", 1]]);
     tender(p, 0, "resistente", [["calcetin-azul-2", 0]], 1);
-    p = terminar(p);
+    p = ronda(p);
     expect(p.jugadores[0].pendientes).toContain("calcetin-azul-1");
     expect(p.jugadores[0].seca).toEqual(expect.arrayContaining(["camiseta-azul-1", "calcetin-azul-2"]));
   });
@@ -303,21 +335,20 @@ describe("clima y eventos", () => {
     tender(p, 0, "basica", [["toalla-azul-1", 0]]);
     tender(p, 1, "tejadillo", [["toalla-rojo-1", 0]]);
     proximaCarta(p, "tormenta-repentina");
-    p = terminar(p);
-    p.prendas["toalla-azul-1"].humedad = 3;
-    p = terminar(p);
-    expect(p.prendas["toalla-azul-1"].humedad).toBe(4);
+    // Primero se seca la ronda que acaba (3 → 2) y luego sale la tormenta.
+    p = ronda(p);
+    expect(p.prendas["toalla-azul-1"].humedad).toBe(3);
     expect(p.prendas["toalla-rojo-1"].humedad).toBe(2);
   });
 
   it("Ola de calor seca y puntúa al instante", () => {
     let p = partida();
-    tender(p, 1, "basica", [["calcetin-rojo-1", 0]]);
+    tender(p, 1, "basica", [["toalla-rojo-1", 0]]);
+    p.prendas["toalla-rojo-1"].humedad = 2;
     proximaCarta(p, "ola-de-calor");
-    p = terminar(p);
-    expect(p.jugadores[1].seca).toEqual([]);
-    p = terminar(p);
-    expect(p.jugadores[1].seca).toEqual(["calcetin-rojo-1"]);
+    p = ronda(p);
+    expect(p.jugadores[1].seca).toEqual(["toalla-rojo-1"]);
+    expect(p.jugadores[1].puntos).toBe(6);
   });
 
   it("Viento traicionero tira la prenda más grande de cada uno", () => {
@@ -333,12 +364,12 @@ describe("clima y eventos", () => {
 
   it("Ropa se engancha impide tirar y mover durante la ronda", () => {
     let p = partida();
-    tender(p, 1, "basica", [["toalla-rojo-1", 0]]);
+    tender(p, 0, "basica", [["toalla-rojo-1", 0]]);
     p.prendas["toalla-rojo-1"].humedad = 9;
     proximaCarta(p, "ropa-se-engancha");
     p = terminar(terminar(p));
-    const rafaga = darAccion(p, 0, "rafaga-de-viento");
-    expect(motivo(p, { tipo: "jugarAccion", jugador: 0, carta: rafaga, objetivo: { jugador: 1, linea: 0, posicion: 0, prenda: "toalla-rojo-1" } })).toMatch(/evento/);
+    const rafaga = darAccion(p, 1, "rafaga-de-viento");
+    expect(motivo(p, { tipo: "jugarAccion", jugador: 1, carta: rafaga, objetivo: { jugador: 0, linea: 0, posicion: 0, prenda: "toalla-rojo-1" } })).toMatch(/evento/);
   });
 });
 
@@ -357,18 +388,29 @@ describe("límite de mano", () => {
 });
 
 describe("final de partida", () => {
-  it("al llegar al umbral se acaba la ronda y después se cuentan los objetivos", () => {
+  it("si alguien llega al umbral en el secado de la ronda, se cuentan los objetivos", () => {
     let p = partida();
     p.jugadores[0].puntos = 29;
     tender(p, 0, "basica", [["calcetin-azul-1", 0]]);
     p = terminar(p);
-    expect(p.ultimaRonda).toBe(true);
     expect(p.terminada).toBe(false);
-    expect(p.turno.jugador).toBe(1);
     p = terminar(p);
     expect(p.terminada).toBe(true);
     expect(p.final).toHaveLength(2);
     expect(p.final![0].puesto).toBe(1);
+  });
+
+  it("si llega a mitad de ronda, se termina la ronda antes de contar", () => {
+    let p = partida();
+    p.jugadores[0].puntos = 25;
+    tender(p, 0, "basica", [["toalla-azul-1", 0]]);
+    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "secar-prenda"), objetivo: { jugador: 0, linea: 0, posicion: 0, prenda: "toalla-azul-1" } });
+    expect(p.ultimaRonda).toBe(true);
+    p = terminar(p);
+    expect(p.terminada).toBe(false);
+    expect(p.turno.jugador).toBe(1);
+    p = terminar(p);
+    expect(p.terminada).toBe(true);
   });
 
   it("quien llega primero puede perder por los objetivos", () => {
