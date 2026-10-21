@@ -1,0 +1,14 @@
+{
+  "cartas": [
+    { "id": "mojar-cuerda-rival", "nombre": "Mojar cuerda rival", "copias": 4, "estado": "pendiente", "grupo": "fastidio", "efecto": "mojar-cuerda-rival", "texto": "" },
+    { "id": "rafaga-de-viento", "nombre": "Ráfaga de viento", "copias": 3, "estado": "pendiente", "grupo": "fastidio", "efecto": "rafaga-de-viento", "texto": "" },
+    { "id": "pinza-rota", "nombre": "Pinza rota", "copias": 3, "estado": "pendiente", "grupo": "fastidio", "efecto": "pinza-rota", "texto": "Anula la habilidad de una cuerda." },
+    { "id": "retrasar-secado", "nombre": "Retrasar secado", "copias": 3, "estado": "pendiente", "grupo": "fastidio", "efecto": "retrasar-secado", "texto": "" },
+    { "id": "mover-prenda-rival", "nombre": "Mover una prenda rival", "copias": 3, "estado": "pendiente", "grupo": "fastidio", "efecto": "mover-prenda-rival", "texto": "" },
+    { "id": "colocar-cuerda-extra", "nombre": "Colocar cuerda extra", "copias": 2, "estado": "pendiente", "grupo": "tácticas", "efecto": "colocar-cuerda-extra", "texto": "" },
+    { "id": "secar-prenda", "nombre": "Secar prenda inmediatamente", "copias": 2, "estado": "pendiente", "grupo": "tácticas", "efecto": "secar-prenda", "texto": "" },
+    { "id": "reducir-humedad", "nombre": "Reducir humedad", "copias": 2, "estado": "pendiente", "grupo": "tácticas", "efecto": "reducir-humedad", "texto": "" },
+    { "id": "mover-prenda-propia", "nombre": "Mover prenda propia", "copias": 2, "estado": "pendiente", "grupo": "tácticas", "efecto": "mover-prenda-propia", "texto": "" },
+    { "id": "proteger-cuerda", "nombre": "Proteger cuerda", "copias": 2, "estado": "pendiente", "grupo": "tácticas", "efecto": "proteger-cuerda", "texto": "" }
+  ]
+}

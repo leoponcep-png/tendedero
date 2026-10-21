@@ -1,0 +1,12 @@
+{
+  "name": "tendedero",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @tendedero/web",
+    "test": "npm test -w @tendedero/motor",
+    "typecheck": "npm run typecheck -w @tendedero/motor && npm run typecheck -w @tendedero/web"
+  }
+}

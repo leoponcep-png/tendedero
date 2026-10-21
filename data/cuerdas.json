@@ -1,0 +1,10 @@
+{
+  "cartas": [
+    { "id": "basica", "nombre": "Cuerda básica", "copias": 24, "estado": "definida", "grupo": "básicas", "espacios": 3, "efecto": null, "texto": "Sin habilidad." },
+    { "id": "tejadillo", "nombre": "Tejadillo", "copias": 4, "estado": "pendiente", "grupo": "con habilidad", "espacios": 3, "efecto": "tejadillo", "texto": "Protege de la lluvia." },
+    { "id": "resistente", "nombre": "Cuerda resistente", "copias": 4, "estado": "pendiente", "grupo": "con habilidad", "espacios": 3, "efecto": "resistente", "texto": "Protege del viento y de las caídas." },
+    { "id": "secado-rapido", "nombre": "Secado rápido", "copias": 4, "estado": "pendiente", "grupo": "con habilidad", "espacios": 3, "efecto": "secado-rapido", "texto": "Las prendas de esta carta secan más rápido." },
+    { "id": "modificador-puntuacion", "nombre": "Modificador de puntuación", "copias": 4, "estado": "pendiente", "grupo": "con habilidad", "espacios": 3, "efecto": "modificador-puntuacion", "texto": "Modifica los puntos de las prendas de esta carta." },
+    { "id": "vieja", "nombre": "Cuerda vieja", "copias": 4, "estado": "pendiente", "grupo": "negativas", "espacios": 3, "efecto": "vieja", "texto": "Negativa." }
+  ]
+}

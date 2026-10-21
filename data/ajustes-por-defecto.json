@@ -1,0 +1,15 @@
+{
+  "jugadores": 2,
+  "manoInicial": { "cuerdas": 2, "acciones": 2 },
+  "roboPorTurno": { "cuerdas": 1, "acciones": 2 },
+  "jugablesPorTurno": { "cuerdas": 1, "acciones": 2 },
+  "draftsPorTurno": 1,
+  "limiteMano": 5,
+  "umbralFinal": 30,
+  "cestas": {
+    "porJugadores": { "2": 5, "3": 7, "4": 9 },
+    "prendasPorCesta": 4
+  },
+  "tendedero": { "lineas": 2, "cartasPorLinea": 4 },
+  "objetivos": { "comunes": 2, "secretosRepartidos": 2 }
+}

@@ -1,0 +1,10 @@
+{
+  "cartas": [
+    { "id": "tormenta-repentina", "nombre": "Tormenta repentina", "copias": 2, "estado": "pendiente", "grupo": "eventos", "efecto": "tormenta-repentina", "texto": "" },
+    { "id": "ola-de-calor", "nombre": "Ola de calor", "copias": 2, "estado": "pendiente", "grupo": "eventos", "efecto": "ola-de-calor", "texto": "" },
+    { "id": "vecina-sacude-alfombra", "nombre": "Vecina sacude alfombra", "copias": 2, "estado": "pendiente", "grupo": "eventos", "efecto": "vecina-sacude-alfombra", "texto": "" },
+    { "id": "pinzas-viejas", "nombre": "Pinzas viejas", "copias": 2, "estado": "pendiente", "grupo": "eventos", "efecto": "pinzas-viejas", "texto": "" },
+    { "id": "ropa-se-engancha", "nombre": "Ropa se engancha", "copias": 2, "estado": "pendiente", "grupo": "eventos", "efecto": "ropa-se-engancha", "texto": "" },
+    { "id": "viento-traicionero", "nombre": "Viento traicionero", "copias": 2, "estado": "pendiente", "grupo": "eventos", "efecto": "viento-traicionero", "texto": "" }
+  ]
+}

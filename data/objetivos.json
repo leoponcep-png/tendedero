@@ -1,0 +1,16 @@
+{
+  "objetivos": [
+    {
+      "id": "ejemplo-coleccion-color",
+      "nombre": "Ejemplo: colección de color",
+      "uso": "ambos",
+      "estado": "pendiente",
+      "efecto": "coleccion-color",
+      "texto": "Formato de ejemplo, no es un objetivo real. Tener N prendas secas del mismo color; solo puntúa el nivel más alto.",
+      "niveles": [
+        { "requisito": 4, "puntos": 2 },
+        { "requisito": 6, "puntos": 4 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "cartas": [
+    { "id": "soleado", "nombre": "Soleado", "copias": 2, "estado": "pendiente", "grupo": "climas", "efecto": "soleado", "texto": "" },
+    { "id": "lluvia", "nombre": "Lluvia", "copias": 2, "estado": "pendiente", "grupo": "climas", "efecto": "lluvia", "texto": "" },
+    { "id": "viento", "nombre": "Viento", "copias": 2, "estado": "pendiente", "grupo": "climas", "efecto": "viento", "texto": "" }
+  ]
+}

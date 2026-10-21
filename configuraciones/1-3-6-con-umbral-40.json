@@ -1,0 +1,79 @@
+{
+  "nombre": "1-3-6 con umbral 40",
+  "ajustes": {
+    "jugadores": 2,
+    "manoInicial": {
+      "cuerdas": 2,
+      "acciones": 2
+    },
+    "roboPorTurno": {
+      "cuerdas": 1,
+      "acciones": 2
+    },
+    "jugablesPorTurno": {
+      "cuerdas": 1,
+      "acciones": 2
+    },
+    "draftsPorTurno": 1,
+    "limiteMano": 5,
+    "umbralFinal": 40,
+    "cestas": {
+      "numero": 5,
+      "prendasPorCesta": 4
+    },
+    "tendedero": {
+      "lineas": 2,
+      "cartasPorLinea": 4
+    },
+    "objetivos": {
+      "comunes": 2,
+      "secretosRepartidos": 2
+    },
+    "prendas": {
+      "calcetin": {
+        "espacios": 1,
+        "humedad": 1,
+        "puntos": 1
+      },
+      "camiseta": {
+        "espacios": 2,
+        "humedad": 2,
+        "puntos": 3
+      },
+      "toalla": {
+        "espacios": 3,
+        "humedad": 3,
+        "puntos": 6
+      }
+    },
+    "incluidas": {
+      "basica": true,
+      "tejadillo": true,
+      "resistente": true,
+      "secado-rapido": true,
+      "modificador-puntuacion": true,
+      "vieja": true,
+      "mojar-cuerda-rival": true,
+      "rafaga-de-viento": true,
+      "pinza-rota": true,
+      "retrasar-secado": true,
+      "mover-prenda-rival": true,
+      "colocar-cuerda-extra": true,
+      "secar-prenda": true,
+      "reducir-humedad": true,
+      "mover-prenda-propia": true,
+      "proteger-cuerda": true,
+      "soleado": true,
+      "lluvia": true,
+      "viento": true,
+      "tormenta-repentina": true,
+      "ola-de-calor": true,
+      "vecina-sacude-alfombra": true,
+      "pinzas-viejas": true,
+      "ropa-se-engancha": true,
+      "viento-traicionero": true,
+      "ejemplo-coleccion-color": true
+    },
+    "semilla": ""
+  }
+}

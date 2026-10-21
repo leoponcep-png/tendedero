@@ -1,0 +1,6 @@
+{
+  "name": "@tendedero/servidor",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Servidor del modo online (paso 5). Usará @tendedero/motor como árbitro y vistaPara() para enviar a cada jugador solo lo que puede ver."
+}
