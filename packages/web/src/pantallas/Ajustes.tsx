@@ -17,9 +17,22 @@ interface Props {
   nombreConfig: string;
   onNombreConfig: (nombre: string) => void;
   onEmpezar: () => void;
+  titulo?: string;
+  textoEmpezar?: string;
+  onVolver?: () => void;
 }
 
-export function PantallaAjustes({ datos, ajustes, onCambio, nombreConfig, onNombreConfig, onEmpezar }: Props) {
+export function PantallaAjustes({
+  datos,
+  ajustes,
+  onCambio,
+  nombreConfig,
+  onNombreConfig,
+  onEmpezar,
+  titulo = "Tendedero · ajustes de la partida",
+  textoEmpezar = "Empezar partida",
+  onVolver,
+}: Props) {
   const revision = useMemo(() => revisarAjustes(ajustes, datos), [ajustes, datos]);
 
   // Copia, cambia y entrega: así cada campo solo dice qué toca.
@@ -33,14 +46,17 @@ export function PantallaAjustes({ datos, ajustes, onCambio, nombreConfig, onNomb
     <main className="pagina ajustes">
       <header className="cabecera-ajustes">
         <div>
-          <h1>Tendedero · ajustes de la partida</h1>
+          <h1>{titulo}</h1>
           <p className="nota">
             Los valores por defecto salen de <code>data/</code>. Al empezar, quedan bloqueados hasta que termine la partida.
           </p>
         </div>
-        <button className="principal" disabled={revision.errores.length > 0} onClick={onEmpezar}>
-          Empezar partida
-        </button>
+        <div className="acciones-barra">
+          {onVolver && <button onClick={onVolver}>Volver</button>}
+          <button className="principal" disabled={revision.errores.length > 0} onClick={onEmpezar}>
+            {textoEmpezar}
+          </button>
+        </div>
       </header>
 
       {(revision.errores.length > 0 || revision.avisos.length > 0) && (
@@ -54,7 +70,8 @@ export function PantallaAjustes({ datos, ajustes, onCambio, nombreConfig, onNomb
         </section>
       )}
 
-      <Configuraciones datos={datos} ajustes={ajustes} onCambio={onCambio} nombre={nombreConfig} onNombre={onNombreConfig} />
+      {/* Las configuraciones con nombre se guardan en /configuraciones: solo existe al ejecutarlo en local. */}
+      {import.meta.env.DEV && <Configuraciones datos={datos} ajustes={ajustes} onCambio={onCambio} nombre={nombreConfig} onNombre={onNombreConfig} />}
 
       <div className="rejilla-ajustes">
         <fieldset>

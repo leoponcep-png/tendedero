@@ -48,6 +48,13 @@ interface ContextoMesa {
   /** Acción de dos pasos (mover, intercambiar) a la que solo le falta el destino. */
   movimiento: JugadaDe<"jugarAccion"> | null;
   jugar: (j: Jugada) => void;
+  /** En el modo online, el asiento de quien mira; en el modo local (un ordenador para todos), undefined. */
+  miAsiento?: number;
+}
+
+/** Si quien mira puede jugar por este jugador: en local, por todos; online, solo por su asiento. */
+export function puedeJugarPor(c: Pick<ContextoMesa, "miAsiento">, jugador: number): boolean {
+  return c.miAsiento === undefined || c.miAsiento === jugador;
 }
 
 export const ContextoMesa = createContext<ContextoMesa | null>(null);

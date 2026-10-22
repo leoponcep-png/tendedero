@@ -1,0 +1,675 @@
+/*
+ * Tema ilustrado (beta): patio de vecinos, madera, papel y ropa tendida.
+ * Va después de estilos.css y solo cambia el aspecto; la maquetación sigue allí.
+ */
+
+:root {
+  --fondo: #e9dcc6;
+  --papel: #fffaf0;
+  --tinta: #3a2f25;
+  --tinta-suave: #7a6a58;
+  --borde: #dcc9ab;
+  --acento: #2f7a63;
+  --acento-claro: #d6eee4;
+  --madera: #9b6b3d;
+  --madera-oscura: #5c3d1f;
+  --teja: #c4643d;
+  --cielo: #cfe6f2;
+  --celda: 60px;
+  --letra-titulos: "Fredoka", "Nunito", system-ui, sans-serif;
+  font-family: "Nunito", system-ui, "Segoe UI", sans-serif;
+}
+
+body {
+  /* Baldosas del patio */
+  background-color: #e3d2b6;
+  background-image:
+    linear-gradient(45deg, #0000000a 25%, transparent 25%, transparent 75%, #0000000a 75%),
+    linear-gradient(45deg, #0000000a 25%, transparent 25%, transparent 75%, #0000000a 75%);
+  background-size: 48px 48px;
+  background-position: 0 0, 24px 24px;
+}
+
+h1,
+h2,
+h3,
+.zona-jugador h2,
+.contador-grande,
+.estado-turno strong {
+  font-family: var(--letra-titulos);
+  font-weight: 600;
+}
+
+button {
+  border-radius: 999px;
+  padding: 6px 14px;
+  border-color: #cdb48f;
+  background: #fffaf0;
+  box-shadow: 0 1px 0 #0000001f;
+}
+
+button.principal {
+  background: var(--acento);
+  border-color: #1f5a48;
+  color: #fff;
+  box-shadow: 0 2px 0 #1f5a48;
+}
+
+/* ---------- Barra de arriba: un listón de madera ---------- */
+
+.barra {
+  background: linear-gradient(180deg, #a87545, #8a5b31);
+  border-bottom: 3px solid var(--madera-oscura);
+  color: #fff6e6;
+  box-shadow: 0 3px 10px #0003;
+}
+
+.barra .contadores,
+.barra .info-partida,
+.barra .elegir-robo {
+  color: #f3dfc2;
+}
+
+.barra code {
+  background: #0000002e;
+  color: #fff6e6;
+}
+
+.franja-aviso {
+  top: 66px;
+  background: #fff3cf;
+  border-bottom: 2px solid #e8cf8c;
+}
+
+/* ---------- Zonas: hojas de papel sobre la mesa ---------- */
+
+.zona-central {
+  background: linear-gradient(180deg, var(--cielo), #e7f1f4 60%, #efe3cf);
+  border: 3px solid #fff8;
+  box-shadow: inset 0 0 0 1px #0000000f, 0 6px 18px #0000001f;
+  border-radius: 16px;
+}
+
+.zona {
+  background: var(--papel);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  box-shadow: 0 2px 0 #0000000d, 0 4px 10px #00000010;
+}
+
+.zona h3 {
+  font-family: var(--letra-titulos);
+  font-weight: 500;
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+  color: #8a6d4c;
+}
+
+.registro {
+  background: var(--papel);
+  border-radius: 14px;
+  box-shadow: 0 4px 14px #0000001a;
+}
+
+/* ---------- Cestas de mimbre ---------- */
+
+.cesta,
+.centro {
+  border: none;
+  background: transparent;
+  border-radius: 0;
+}
+
+.cesta {
+  position: relative;
+  width: 150px;
+  height: 128px;
+  justify-content: flex-end;
+  padding-bottom: 8px;
+}
+
+.cesta .arte-cesta {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 74%;
+}
+
+.cesta .prendas-cesta {
+  position: relative;
+  max-width: 130px;
+  margin-bottom: 30px;
+  gap: 0;
+}
+
+.cesta .titulo-cesta {
+  position: absolute;
+  bottom: 10px;
+  z-index: 1;
+  background: #5c3d1fcc;
+  color: #fff6e6;
+  border-radius: 999px;
+  padding: 0 8px;
+  font-weight: 700;
+}
+
+.centro {
+  border: 2px dashed #b9a07c;
+  border-radius: 16px;
+  background: #fffaf099;
+  min-height: 128px;
+}
+
+.cesta.elegida .arte-cesta,
+.centro.elegida {
+  filter: drop-shadow(0 0 6px var(--acento));
+}
+
+/* ---------- Prendas ---------- */
+
+.ficha-prenda {
+  background: none;
+  border: none;
+  border-radius: 0;
+  height: auto;
+  display: block;
+}
+
+.ficha-prenda .arte-prenda {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 2px 1px #0000002e);
+}
+
+.ficha-prenda.mini {
+  height: auto;
+}
+
+.humedad-mini {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  min-width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  background: #3d8fd6;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #fff;
+}
+
+.boton-prenda {
+  border-radius: 6px;
+  transition: transform 0.1s;
+}
+
+.boton-prenda:hover {
+  transform: translateY(-2px);
+}
+
+/* ---------- Tendedero ---------- */
+
+.tendedero {
+  background: linear-gradient(180deg, #d9eef7, #eef6f2 70%, #e6d7bd);
+  border-radius: 12px;
+  padding: 10px 8px 6px;
+  box-shadow: inset 0 0 0 1px #0000000f;
+}
+
+.linea {
+  min-height: 112px;
+}
+
+.poste {
+  flex-shrink: 0;
+  width: 30px;
+  background: none;
+  padding: 0;
+  margin-right: 2px;
+  display: block;
+}
+
+.poste .arte-poste {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.carta-cuerda {
+  background: #fffaf0ee;
+  border: 1px solid #d8c3a0;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px #0000001a;
+  overflow: hidden;
+}
+
+.carta-cuerda .arte-cuerda {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.carta-cuerda > :not(.arte-cuerda) {
+  position: relative;
+}
+
+.carta-cuerda {
+  flex-shrink: 0;
+}
+
+.nombre-cuerda {
+  display: inline-block;
+  font-family: var(--letra-titulos);
+  font-size: 10.5px;
+  color: #6d5338;
+  background: #fffaf0d9;
+  border-radius: 6px;
+  padding: 0 5px;
+}
+
+.espacios {
+  grid-template-rows: 84px;
+}
+
+/* La cuerda la dibuja ya ArteCuerda */
+.espacios::before {
+  display: none;
+}
+
+.espacio {
+  border: 1px dashed #c9b38f88;
+  border-radius: 8px;
+}
+
+.espacio .pinza {
+  top: 0;
+  width: 5px;
+  height: 12px;
+  margin-left: -2.5px;
+  background: #c99a62;
+  border: 1px solid #7a5530;
+  border-radius: 2px;
+}
+
+.colgada {
+  padding: 0;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.hueco,
+.hueco.vacio {
+  flex-shrink: 0;
+}
+
+.hueco {
+  width: calc(3 * var(--celda) + 14px);
+  border: 2px dashed #b9a07c;
+  background: #fffaf055;
+  color: #8a6d4c;
+  border-radius: 10px;
+}
+
+.carta-cuerda.fragil {
+  background: #f3ece0ee;
+  border-style: dashed;
+  border-color: #a38665;
+}
+
+/* ---------- Cartas ---------- */
+
+.ficha-carta {
+  width: 128px;
+  min-height: 150px;
+  padding: 0 8px 8px;
+  border-radius: 12px;
+  border: 2px solid #e2d2b6;
+  background: #fffaf0;
+  box-shadow: 0 3px 0 #0000001a, 0 4px 12px #00000014;
+  gap: 3px;
+  overflow: hidden;
+}
+
+.ficha-carta .tipo-carta {
+  margin: 0 -8px 2px;
+  padding: 3px 8px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 9.5px;
+}
+
+.ficha-carta.mazo-cuerdas .tipo-carta { background: #8a6a45; }
+.ficha-carta.mazo-acciones .tipo-carta { background: #7b4f9a; }
+.ficha-carta.mazo-dia .tipo-carta { background: #3d86c4; }
+
+.ficha-carta.mazo-cuerdas,
+.ficha-carta.mazo-acciones,
+.ficha-carta.mazo-dia {
+  border-top: 2px solid #e2d2b6;
+}
+
+.ficha-carta.mazo-dia {
+  background: linear-gradient(180deg, #eef6fc, #fffaf0 60%);
+}
+
+.ficha-carta strong {
+  font-family: var(--letra-titulos);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.15;
+}
+
+.ficha-carta small {
+  font-size: 10.5px;
+  line-height: 1.3;
+}
+
+.icono-carta {
+  width: 52px;
+  height: 52px;
+  align-self: center;
+  margin: 2px 0;
+  overflow: visible;
+}
+
+.ficha-carta.dorso {
+  align-items: center;
+  justify-content: center;
+  background:
+    repeating-linear-gradient(45deg, #ffffff22 0 6px, transparent 6px 12px),
+    linear-gradient(160deg, #3d86c4, #2f6f9e);
+  border-color: #2b5f86;
+}
+
+.ficha-carta.dorso span {
+  font-family: var(--letra-titulos);
+  color: #fff;
+  font-size: 15px;
+  transform: rotate(-12deg);
+  text-shadow: 0 2px 0 #0003;
+}
+
+.objetivo {
+  background: #fff6dc;
+  border: 2px solid #ecd59a;
+  border-radius: 12px;
+  box-shadow: 0 2px 0 #0000000f;
+}
+
+.objetivo .icono-carta {
+  width: 40px;
+  height: 40px;
+}
+
+.objetivo.secreto {
+  background: #f3eafb;
+  border-color: #cdb4e6;
+}
+
+/* ---------- Jugadores ---------- */
+
+.zona-jugador {
+  background: #fffaf0f2;
+  border: 2px solid #d8c3a0;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px #0000001a;
+}
+
+.zona-jugador.activa {
+  border-color: var(--acento);
+  box-shadow: 0 0 0 4px #2f7a6333, 0 6px 18px #0000002a;
+}
+
+.etiqueta-turno {
+  background: var(--acento);
+  font-weight: 700;
+}
+
+.casilla {
+  background: #fffaf0;
+  border-color: #e0cba8;
+}
+
+.ficha-jugador {
+  width: 14px;
+  height: 14px;
+  box-shadow: 0 1px 0 #0004;
+}
+
+.modal {
+  border-radius: 18px;
+  border: 3px solid #e2d2b6;
+}
+
+/* ---------- Inicio y salas online ---------- */
+
+.inicio,
+.sala {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sala {
+  max-width: 640px;
+  background: #fffaf0f2;
+  margin-top: 24px;
+  border-radius: 18px;
+  border: 2px solid #e2d2b6;
+  box-shadow: 0 6px 24px #0000001f;
+  padding: 20px 24px 28px;
+}
+
+.portada {
+  position: relative;
+  height: 110px;
+  overflow: hidden;
+}
+
+.portada-cuerda {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 8px;
+  width: 100%;
+  height: 30px;
+}
+
+.portada-ropa {
+  position: absolute;
+  inset: 12px 0 0;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.portada-prenda {
+  height: 96px;
+  width: auto;
+  filter: drop-shadow(0 3px 2px #0003);
+}
+
+.portada-ropa > :nth-child(odd) {
+  transform: translateY(6px) rotate(-2deg);
+}
+
+.titulo-juego {
+  font-family: var(--letra-titulos);
+  font-size: clamp(40px, 8vw, 72px);
+  text-align: center;
+  color: #8a4b23;
+  text-shadow: 0 3px 0 #fff8, 0 6px 14px #0002;
+  margin: 0;
+}
+
+.lema {
+  text-align: center;
+  font-size: 17px;
+  color: var(--tinta-suave);
+  margin: 0 0 10px;
+}
+
+.opciones-inicio {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.opcion {
+  background: #fffaf0;
+  border: 2px solid #e2d2b6;
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 4px 14px #0000001a;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.opcion p {
+  margin: 0;
+  color: var(--tinta-suave);
+  flex: 1;
+}
+
+.unirse {
+  display: flex;
+  gap: 8px;
+}
+
+.unirse input,
+.enlace-sala input,
+.sala .campo input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid #cdb48f;
+  background: #fff;
+}
+
+.enlace-sala {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  background: #eef6f2;
+  border: 1px dashed var(--acento);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+
+.codigo {
+  font-family: ui-monospace, monospace;
+  font-size: 18px;
+  letter-spacing: 0.12em;
+  color: var(--acento);
+}
+
+.asientos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.asientos li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #e2d2b6;
+}
+
+.asientos li.libre {
+  background: transparent;
+  border-style: dashed;
+}
+
+.asientos li.ausente {
+  opacity: 0.7;
+}
+
+.asientos .ficha-jugador {
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+}
+
+.asientos .boton-carta {
+  margin-left: auto;
+}
+
+.desconectado {
+  font-size: 11px;
+  color: var(--peligro);
+}
+
+.etiqueta-tu {
+  font-size: 11px;
+  background: #3d86c4;
+  color: #fff;
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-weight: 700;
+}
+
+.estado-conexion {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  margin-right: 8px;
+}
+
+.estado-conexion::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #c9a227;
+}
+
+.estado-conexion.bien::before {
+  background: #3fae6a;
+}
+
+.estado-conexion.mal::before {
+  background: #d2513f;
+}
+
+.esperando {
+  font-style: italic;
+  color: #f3dfc2;
+}
+
+.zona-jugador.mia {
+  border-color: #3d86c4;
+}
+
+html {
+  background-color: #e3d2b6;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+}

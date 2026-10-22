@@ -1,5 +1,6 @@
 import { useDroppable } from "@dnd-kit/core";
 import { defCarta, efectoDeCuerda, rondasHastaRomperse, tipoDe, type CartaTendida, type Partida } from "@tendedero/motor";
+import { ArteCuerda, ArtePoste } from "../arte/Escena";
 import { movidaHacia, useAdmite, useMesa, type Destino } from "./contexto";
 import { FichaPrenda } from "./Prenda";
 
@@ -21,7 +22,7 @@ function Linea({ jugador, indice }: { jugador: number; indice: number }) {
   return (
     <div className="linea">
       <div className="poste" title="Tablero de inicio">
-        <span>{indice + 1}</span>
+        <ArtePoste numero={indice + 1} />
       </div>
       {linea.cartas.map((t, pos) => (
         <CartaEnLinea key={t.carta} jugador={jugador} linea={indice} posicion={pos} tendida={t} />
@@ -70,8 +71,11 @@ function CartaEnLinea({ jugador, linea, posicion, tendida }: { jugador: number; 
   const elegida = o && !o.prenda && o.jugador === jugador && o.linea === linea && o.posicion === posicion;
   const notas = avisos(partida, jugador, linea, posicion, tendida);
   const rompe = rondasHastaRomperse(partida, tendida) !== null;
+  // Las cuerdas de pinzas de color pintan sus pinzas de ese color.
+  const colorPinzas = def.efecto === "modificador-puntuacion" ? partida.catalogo.colores[String(def.parametros.color)]?.hex : undefined;
   return (
     <div className={`carta-cuerda mazo-${def.mazo} ${tendida.protegida ? "protegida" : ""} ${elegida ? "moviendo" : ""} ${rompe ? "fragil" : ""}`} title={def.texto}>
+      <ArteCuerda efecto={def.efecto} espacios={def.espacios} colorPinzas={colorPinzas} />
       <div className="nombre-cuerda">
         {def.nombre}
         {notas.length > 0 && <span className="notas-cuerda"> · {notas.join(" · ")}</span>}
@@ -90,7 +94,7 @@ function CartaEnLinea({ jugador, linea, posicion, tendida }: { jugador: number; 
               style={{ gridColumn: `${c.inicio + 1} / span ${tipoDe(partida, c.prenda).espacios}` }}
               onClick={movida ? () => jugar(movida) : undefined}
             >
-              <FichaPrenda partida={partida} id={c.prenda} />
+              <FichaPrenda partida={partida} id={c.prenda} pinzaColor={colorPinzas} />
             </div>
           );
         })}

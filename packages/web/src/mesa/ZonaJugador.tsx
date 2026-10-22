@@ -1,21 +1,27 @@
-import { puntuarObjetivo } from "@tendedero/motor";
+import { OCULTA, puntuarObjetivo } from "@tendedero/motor";
 import type { ReactNode } from "react";
-import { useMesa } from "./contexto";
-import { CartaMano, FichaCarta } from "./Carta";
+import { puedeJugarPor, useMesa } from "./contexto";
+import { IconoCarta } from "../arte/Iconos";
+import { CartaMano, DorsoCarta, FichaCarta } from "./Carta";
 import { FichaPrenda, PrendaArrastrable } from "./Prenda";
 import { Tendedero } from "./Tendedero";
 
 export function ZonaJugador({ indice }: { indice: number }) {
-  const { partida, jugar } = useMesa();
+  const mesa = useMesa();
+  const { partida, jugar } = mesa;
   const jugador = partida.jugadores[indice];
-  const activa = partida.turno.jugador === indice;
+  const suTurno = partida.turno.jugador === indice;
+  // Online solo se mueven tus propias cosas; en local, las de quien tenga el turno.
+  const mia = puedeJugarPor(mesa, indice);
+  const activa = suTurno && mia;
 
   return (
-    <section className={`zona-jugador ${activa ? "activa" : ""}`}>
+    <section className={`zona-jugador ${suTurno ? "activa" : ""} ${mesa.miAsiento === indice ? "mia" : ""}`}>
       <header>
         <h2>{jugador.nombre}</h2>
         <span className="puntos">{jugador.puntos} pts</span>
-        {activa && <span className="etiqueta-turno">su turno</span>}
+        {suTurno && <span className="etiqueta-turno">{mesa.miAsiento === indice ? "tu turno" : "su turno"}</span>}
+        {mesa.miAsiento === indice && <span className="etiqueta-tu">tú</span>}
       </header>
 
       <Tendedero jugador={indice} />
@@ -28,8 +34,8 @@ export function ZonaJugador({ indice }: { indice: number }) {
         </Zona>
 
         <Zona titulo="Mano" vacia="Sin cartas" cantidad={jugador.mano.length}>
-          {jugador.mano.map((id) => (
-            <CartaMano key={id} id={id} jugador={indice} activa={activa} />
+          {jugador.mano.map((id, i) => (
+            <CartaMano key={id === OCULTA ? `oculta-${i}` : id} id={id} jugador={indice} activa={activa} />
           ))}
         </Zona>
 
@@ -53,10 +59,12 @@ export function ZonaJugador({ indice }: { indice: number }) {
                 <Objetivo key="secreto" id={jugador.objetivoSecreto} jugador={indice} secreto />,
                 ...partida.objetivosComunes.map((id) => <Objetivo key={id} id={id} jugador={indice} />),
               ]
-            : jugador.objetivosOfrecidos.map((id) => (
-                <div key={id} className="objetivo-ofrecido">
+            : jugador.objetivosOfrecidos.map((id, i) => (
+                <div key={id === OCULTA ? `oculto-${i}` : id} className="objetivo-ofrecido">
                   <Objetivo id={id} />
-                  <button onClick={() => jugar({ tipo: "elegirObjetivo", jugador: indice, objetivo: id })}>Quedármelo</button>
+                  {mia && id !== OCULTA && (
+                    <button onClick={() => jugar({ tipo: "elegirObjetivo", jugador: indice, objetivo: id })}>Quedármelo</button>
+                  )}
                 </div>
               ))}
         </Zona>
@@ -68,11 +76,14 @@ export function ZonaJugador({ indice }: { indice: number }) {
 /** Carta de objetivo; con `jugador`, muestra cuánto lleva y cuántos puntos le daría ahora. */
 export function Objetivo({ id, jugador, secreto }: { id: string; jugador?: number; secreto?: boolean }) {
   const { partida } = useMesa();
+  // En el modo online, el objetivo secreto de un rival llega tapado.
+  if (id === OCULTA) return <DorsoCarta />;
   const o = partida.catalogo.objetivos[id];
   const progreso = jugador === undefined ? null : puntuarObjetivo(partida, jugador, o);
   return (
     <div className={`objetivo ${secreto ? "secreto" : ""}`} title={o.texto}>
       <span className="tipo-carta">{secreto ? "Secreto" : jugador === undefined ? "Objetivo" : "Común"}</span>
+      <IconoCarta id={o.id} efecto={o.efecto} objetivo />
       <strong>{o.nombre}</strong>
       <small>{o.texto}</small>
       <small className="niveles">

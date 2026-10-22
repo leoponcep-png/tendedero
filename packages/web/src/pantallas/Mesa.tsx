@@ -14,7 +14,7 @@ import {
 } from "@tendedero/motor";
 import { useEffect, useState } from "react";
 import { FichaCarta } from "../mesa/Carta";
-import { admisible, ContextoMesa, jugadaDe, necesitaDestino, type Arrastre, type Destino } from "../mesa/contexto";
+import { admisible, ContextoMesa, jugadaDe, necesitaDestino, puedeJugarPor, type Arrastre, type Destino } from "../mesa/contexto";
 import { Final } from "../mesa/Final";
 import { FichaPrenda } from "../mesa/Prenda";
 import { ZonaCentral } from "../mesa/ZonaCentral";
@@ -23,11 +23,18 @@ import { ZonaJugador } from "../mesa/ZonaJugador";
 interface Props {
   partida: Partida;
   nombreConfig: string;
+  /** Devuelve el motivo si la jugada no vale (online, el motivo llega después por `aviso`). */
   onJugada: (j: Jugada) => string | null;
   puedeDeshacer: boolean;
   onDeshacer: () => void;
   onSalir: () => void;
   onNueva: () => void;
+  /** Online: el asiento de quien mira. Sin él, un mismo ordenador juega por todos (modo local). */
+  miAsiento?: number;
+  /** Online: estado de la conexión, que se muestra en la barra. */
+  conexion?: React.ReactNode;
+  /** Online: un aviso que llega del anfitrión (p. ej. una jugada rechazada). */
+  avisoExterno?: string | null;
 }
 
 /** Qué pulsar para completar una acción de dos pasos. */
@@ -47,10 +54,17 @@ function textoSegundoPaso(p: Partida, j: JugadaDe<"jugarAccion">): string {
 }
 
 /** El jugador atacado decide si anula el fastidio con su carta de reacción. */
-function Reaccion({ partida, jugar }: { partida: Partida; jugar: (j: Jugada) => void }) {
+function Reaccion({ partida, jugar, puede }: { partida: Partida; jugar: (j: Jugada) => void; puede: boolean }) {
   const { jugada, defensor } = partida.reaccion!;
   const atacante = partida.jugadores[jugada.jugador].nombre;
   const nombre = partida.jugadores[defensor].nombre;
+  if (!puede) {
+    return (
+      <div className="franja-aviso reaccion">
+        {atacante} le juega <strong>{defCarta(partida, jugada.carta).nombre}</strong> a {nombre}. Esperando a que {nombre} decida si lo anula…
+      </div>
+    );
+  }
   const carta = cartaDeReaccion(partida, defensor);
   return (
     <div className="franja-aviso reaccion">
@@ -77,7 +91,7 @@ function textoRobo(cuerdas: number, acciones: number): string {
   return `${parte(cuerdas, "cuerda", "cuerdas")} + ${parte(acciones, "acción", "acciones")}`;
 }
 
-export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshacer, onSalir, onNueva }: Props) {
+export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshacer, onSalir, onNueva, miAsiento, conexion, avisoExterno }: Props) {
   const [arrastre, setArrastre] = useState<Arrastre | null>(null);
   const [movimiento, setMovimiento] = useState<JugadaDe<"jugarAccion"> | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -86,6 +100,10 @@ export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshace
   const [robarCuerdas, setRobarCuerdas] = useState(1);
   // Sin un pequeño margen de movimiento, cualquier clic sobre una prenda empezaría un arrastre.
   const sensores = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  useEffect(() => {
+    if (avisoExterno) setAviso(avisoExterno);
+  }, [avisoExterno]);
 
   useEffect(() => {
     if (!aviso) return;
@@ -129,9 +147,13 @@ export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshace
   const enReparto = turno.fase === "cesta" || turno.fase === "centro";
   const maxCuerdas = maxCuerdasRobadas(partida);
   const cuerdasElegidas = Math.min(robarCuerdas, maxCuerdas);
+  const online = miAsiento !== undefined;
+  const miTurno = puedeJugarPor({ miAsiento }, turno.jugador);
+  // Online, tu tendedero va el primero.
+  const orden = partida.jugadores.map((_, i) => i).sort((a, b) => Number(b === miAsiento) - Number(a === miAsiento));
 
   return (
-    <ContextoMesa.Provider value={{ partida, arrastre, movimiento, jugar }}>
+    <ContextoMesa.Provider value={{ partida, arrastre, movimiento, jugar, miAsiento }}>
       <DndContext sensors={sensores} collisionDetection={pointerWithin} onDragStart={alEmpezar} onDragEnd={alSoltar} onDragCancel={() => setArrastre(null)}>
         <div className="mesa">
           <header className="barra">
@@ -160,6 +182,8 @@ export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshace
                 <button className="principal" onClick={() => setVerFinal(true)}>
                   Ver clasificación
                 </button>
+              ) : !miTurno ? (
+                <span className="esperando">Esperando a {jugadorActivo.nombre}…</span>
               ) : (
                 <>
                   <label className="elegir-robo">
@@ -181,14 +205,21 @@ export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshace
                   </button>
                 </>
               )}
-              <button disabled={!puedeDeshacer} onClick={onDeshacer}>
-                Deshacer
-              </button>
+              {!online && (
+                <button disabled={!puedeDeshacer} onClick={onDeshacer}>
+                  Deshacer
+                </button>
+              )}
               <button onClick={partida.terminada ? onNueva : onSalir}>Salir</button>
             </div>
             <div className="info-partida">
+              {conexion}
               {nombreConfig && <span>«{nombreConfig}» · </span>}
-              semilla <code>{partida.semilla}</code>
+              {partida.semilla && (
+                <>
+                  semilla <code>{partida.semilla}</code>
+                </>
+              )}
             </div>
           </header>
 
@@ -208,14 +239,14 @@ export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshace
               <button onClick={() => setMovimiento(null)}>Cancelar</button>
             </div>
           )}
-          {partida.reaccion && <Reaccion partida={partida} jugar={jugar} />}
+          {partida.reaccion && <Reaccion partida={partida} jugar={jugar} puede={puedeJugarPor({ miAsiento }, partida.reaccion.defensor)} />}
           {aviso && <div className="aviso-jugada">{aviso}</div>}
 
           <div className="cuerpo-mesa">
             <div className="tablero">
               <ZonaCentral />
               <div className="jugadores">
-                {partida.jugadores.map((_, i) => (
+                {orden.map((i) => (
                   <ZonaJugador key={i} indice={i} />
                 ))}
               </div>

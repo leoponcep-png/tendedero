@@ -73,4 +73,6 @@ function enviar(res: ServerResponse, estado: number, datos: unknown) {
 export default defineConfig({
   plugins: [react(), configuraciones()],
   server: { port: 5180 },
+  // Rutas relativas: la web publicada funciona en cualquier carpeta (p. ej. usuario.github.io/tendedero/).
+  base: "./",
 });

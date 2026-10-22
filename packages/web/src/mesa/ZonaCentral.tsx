@@ -1,6 +1,7 @@
 import { cumple, motivoInvalida, prendasDe, diasRestantes, type Jugada, type Origen, type Patron } from "@tendedero/motor";
 import { useState } from "react";
-import { useMesa } from "./contexto";
+import { ArteCesta } from "../arte/Escena";
+import { puedeJugarPor, useMesa } from "./contexto";
 import { FichaCarta } from "./Carta";
 import { FichaPrenda } from "./Prenda";
 import { Objetivo, Zona } from "./ZonaJugador";
@@ -17,6 +18,7 @@ export function ZonaCentral() {
 
   const grupo = (origen: Origen, titulo: string, prendas: string[], clase: string) => (
     <div key={titulo} className={`${clase} ${seleccion && mismo(seleccion.origen, origen) ? "elegida" : ""}`}>
+      {clase === "cesta" && <ArteCesta />}
       <span className="titulo-cesta">{titulo}</span>
       <div className="prendas-cesta">
         {prendas.map((id) => (
@@ -70,7 +72,8 @@ export function ZonaCentral() {
 
 /** Al pulsar una prenda de una cesta o del centro: coger todas las de su color o todas las de su tipo. */
 function Coger({ seleccion, onCerrar }: { seleccion: Seleccion; onCerrar: () => void }) {
-  const { partida, jugar } = useMesa();
+  const mesa = useMesa();
+  const { partida, jugar } = mesa;
   const prenda = partida.prendas[seleccion.prenda];
   const jugador = partida.turno.jugador;
   const prendas = prendasDe(partida, seleccion.origen) ?? [];
@@ -79,7 +82,9 @@ function Coger({ seleccion, onCerrar }: { seleccion: Seleccion; onCerrar: () => 
 
   const jugada = (patron: Patron): Jugada => ({ tipo: "draft", jugador, origen: seleccion.origen, patron });
   // El motivo no depende del patrón elegido: los dos valen o ninguno.
-  const motivo = motivoInvalida(partida, jugada({ tipo: prenda.tipo }));
+  const motivo = puedeJugarPor(mesa, jugador)
+    ? motivoInvalida(partida, jugada({ tipo: prenda.tipo }))
+    : `Le toca coger a ${partida.jugadores[jugador].nombre}.`;
 
   const opcion = (patron: Patron, texto: string) => (
     <button
