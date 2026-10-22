@@ -320,6 +320,34 @@ describe("clima y eventos", () => {
     expect(p.jugadores[0].seca).toEqual(["calcetin-azul-2"]);
   });
 
+  it("un clima dura 2 rondas y después vuelve el tiempo normal", () => {
+    let p = partida();
+    proximaCarta(p, "soleado");
+    p = ronda(p);
+    expect(p.cartas[p.clima!]).toBe("soleado");
+    p = ronda(p);
+    expect(p.cartas[p.clima!]).toBe("soleado");
+    proximaCarta(p, "ropa-se-engancha");
+    p = ronda(p);
+    expect(p.clima).toBeNull();
+    expect(p.registro).toContain("Se acaba Soleado: vuelve el tiempo normal.");
+    expect(p.descartes.clima.map((c) => p.cartas[c])).toEqual(["soleado", "ropa-se-engancha"]);
+  });
+
+  it("con lluvia, en la segunda ronda de lluvia se seca normal", () => {
+    let p = partida();
+    p.clima = copia(p, "lluvia");
+    p.climaDesde = p.ronda;
+    tender(p, 0, "basica", [["calcetin-azul-1", 0]]);
+    tender(p, 0, "basica", [["camiseta-azul-1", 0]], 1);
+    p = ronda(p);
+    expect(p.prendas["calcetin-azul-1"].humedad).toBe(1);
+    expect(p.prendas["camiseta-azul-1"].humedad).toBe(2);
+    p = ronda(p);
+    expect(p.jugadores[0].seca).toEqual(["calcetin-azul-1"]);
+    expect(p.prendas["camiseta-azul-1"].humedad).toBe(1);
+  });
+
   it("con viento se caen los calcetines salvo en cuerdas resistentes, y lo demás seca más", () => {
     let p = partida();
     p.clima = copia(p, "viento");

@@ -42,7 +42,7 @@ export function secarPrenda(p: Partida, prenda: string): void {
 }
 
 /**
- * Final del turno: el clima actúa (p. ej. el viento tira prendas), y después todas las prendas
+ * Al acabar la ronda, para cada jugador: el clima actúa (p. ej. el viento tira prendas), y después todas las prendas
  * colgadas del jugador pierden humedad según su cuerda y el clima; las que llegan a 0 se secan.
  */
 export function faseDeSecado(p: Partida, jugador: number): void {

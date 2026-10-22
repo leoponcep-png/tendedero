@@ -90,8 +90,10 @@ export interface Partida {
   bolsa: string[];
   cestas: string[][];
   centro: string[];
-  /** Carta de clima activa: dura hasta que sale otro clima. */
+  /** Carta de clima activa: dura hasta que sale otro clima o se cumplen sus parametros.rondas. */
   clima: string | null;
+  /** Ronda en la que salió el clima activo. */
+  climaDesde: number | null;
   ronda: number;
   /** El evento que salió al empezar esta ronda (ya resuelto y en el descarte). */
   ultimoEvento: string | null;

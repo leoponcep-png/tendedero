@@ -1,4 +1,4 @@
-import { cumple, esValida, prendasDe, type Jugada, type Origen, type Patron } from "@tendedero/motor";
+import { cumple, esValida, prendasDe, rondasDeClimaRestantes, type Jugada, type Origen, type Patron } from "@tendedero/motor";
 import { useState } from "react";
 import { useMesa } from "./contexto";
 import { FichaCarta } from "./Carta";
@@ -45,7 +45,7 @@ export function ZonaCentral() {
       </div>
 
       <div className="fila-central">
-        <Zona titulo="Clima activo" vacia="Ninguno">
+        <Zona titulo={tituloClima(rondasDeClimaRestantes(partida))} vacia="Tiempo normal">
           {partida.clima && <FichaCarta partida={partida} id={partida.clima} />}
         </Zona>
         <Zona titulo={`Evento de la ronda ${partida.ronda}`} vacia="Ninguno">
@@ -136,4 +136,9 @@ function PistaPuntos() {
       </div>
     </div>
   );
+}
+
+function tituloClima(restantes: number | null): string {
+  if (restantes === null) return "Clima activo";
+  return restantes <= 1 ? "Clima activo · última ronda" : `Clima activo · ${restantes} rondas`;
 }

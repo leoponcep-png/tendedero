@@ -26,6 +26,7 @@ export function crearPartida(datos: Datos, ajustesElegidos: Ajustes): Partida {
     cestas: [],
     centro: [],
     clima: null,
+    climaDesde: null,
     mazos: { cuerdas: [], acciones: [], clima: [] },
     descartes: { cuerdas: [], acciones: [], clima: [] },
     objetivosComunes: [],

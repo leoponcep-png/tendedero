@@ -1,7 +1,7 @@
 {
   "cartas": [
-    { "id": "soleado", "nombre": "Soleado", "copias": 2, "estado": "definida", "grupo": "climas", "efecto": "soleado", "parametros": { "humedad": 1 }, "texto": "Mientras dure: todas las prendas pierden 1 de humedad más en cada secado." },
-    { "id": "lluvia", "nombre": "Lluvia", "copias": 2, "estado": "definida", "grupo": "climas", "efecto": "lluvia", "parametros": { "humedad": 1 }, "texto": "Mientras dure: las prendas sin tejadillo pierden 1 de humedad menos en cada secado (en una cuerda básica, no se secan)." },
-    { "id": "viento", "nombre": "Viento", "copias": 2, "estado": "definida", "grupo": "climas", "efecto": "viento", "parametros": { "cae": "calcetin", "humedad": 1 }, "texto": "Mientras dure: al final de tu turno, antes de secar, tus calcetines en cuerdas no resistentes se caen. El resto pierde 1 de humedad más." }
+    { "id": "soleado", "nombre": "Soleado", "copias": 2, "estado": "definida", "grupo": "climas", "efecto": "soleado", "parametros": { "humedad": 1, "rondas": 2 }, "texto": "Durante 2 rondas: todas las prendas pierden 1 de humedad más en cada secado." },
+    { "id": "lluvia", "nombre": "Lluvia", "copias": 2, "estado": "definida", "grupo": "climas", "efecto": "lluvia", "parametros": { "humedad": 1, "cadaRondas": 2, "rondas": 2 }, "texto": "Durante 2 rondas: las prendas sin tejadillo pierden 1 de humedad menos en cada secado, salvo en la segunda ronda de lluvia, que secan normal." },
+    { "id": "viento", "nombre": "Viento", "copias": 2, "estado": "definida", "grupo": "climas", "efecto": "viento", "parametros": { "cae": "calcetin", "humedad": 1, "rondas": 2 }, "texto": "Durante 2 rondas: al acabar la ronda, antes de secar, los calcetines en cuerdas no resistentes se caen. El resto pierde 1 de humedad más." }
   ]
 }
