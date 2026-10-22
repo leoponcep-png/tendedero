@@ -6,7 +6,7 @@
   "limiteMano": 6,
   "umbralFinal": 30,
   "cestas": {
-    "porJugadores": { "2": 5, "3": 7, "4": 9 },
+    "porJugadores": { "2": 4, "3": 4, "4": 4 },
     "prendasPorCesta": 4
   },
   "tendedero": { "lineas": 2, "cartasPorLinea": 4 },

@@ -17,7 +17,7 @@
     "limiteMano": 6,
     "umbralFinal": 40,
     "cestas": {
-      "numero": 5,
+      "numero": 4,
       "prendasPorCesta": 4
     },
     "tendedero": {

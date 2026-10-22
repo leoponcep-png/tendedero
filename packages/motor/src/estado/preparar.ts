@@ -24,7 +24,7 @@ export function crearPartida(datos: Datos, ajustesElegidos: Ajustes): Partida {
     prendas: {},
     cartas: {},
     bolsa: [],
-    cestas: [],
+    cestas: Array.from({ length: ajustes.cestas.numero }, () => []),
     centro: [],
     perdidas: [],
     clima: null,

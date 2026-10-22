@@ -1,16 +1,20 @@
 import { barajar } from "../azar";
 import { ordenDeRonda } from "./ronda";
 import type { Partida } from "./tipos";
-import { rellenarCestas } from "./utilidades";
 
 type FaseReparto = "cesta" | "centro";
 
-/** Lo que sobra en las cestas y en el centro vuelve a la bolsa, se baraja y se reparten cestas nuevas. */
+/**
+ * Lo que sobra en el centro vuelve a la bolsa y solo se rellenan las cestas que se cogieron (las vacías;
+ * si la bolsa no da para todas, salen incompletas):
+ * las que nadie tocó se quedan como están para la ronda siguiente.
+ */
 export function renovarCestas(p: Partida): void {
-  p.bolsa.push(...p.cestas.flat(), ...p.centro);
+  p.bolsa.push(...p.centro);
   p.centro = [];
   barajar(p, p.bolsa);
-  rellenarCestas(p);
+  const { prendasPorCesta } = p.ajustes.cestas;
+  p.cestas = p.cestas.map((c) => (c.length > 0 ? c : p.bolsa.splice(-prendasPorCesta)));
 }
 
 /**

@@ -153,8 +153,8 @@ describe("preparar partida", () => {
 
   it("reparte cestas, manos y objetivos, y deja fuera las cartas pendientes", () => {
     const p = partida();
-    expect(p.cestas).toHaveLength(5);
-    expect(p.bolsa).toHaveLength(80);
+    expect(p.cestas).toHaveLength(4);
+    expect(p.bolsa).toHaveLength(84);
     expect(p.jugadores[0].mano).toHaveLength(4);
     expect(p.objetivosComunes).toHaveLength(2);
     expect(p.jugadores.every((j) => j.objetivoSecreto)).toBe(true);
@@ -696,15 +696,22 @@ describe("reparto de prendas y vistas", () => {
     expect(p.centro).toHaveLength(4 - iguales.length);
   });
 
-  it("al acabar la ronda lo que sobra vuelve a la bolsa y se llenan cestas nuevas", () => {
+  it("al acabar la ronda el centro vuelve a la bolsa y solo se rellenan las cestas que se cogieron", () => {
     let p = partida("prueba", (a) => (a.limiteMano = 99));
+    expect(p.cestas).toHaveLength(4);
     const sueltas = p.bolsa.length + p.cestas.flat().length + p.centro.length;
+    const vacias = p.cestas.map((c, i) => (c.length === 0 ? i : -1)).filter((i) => i >= 0);
+    expect(vacias).toHaveLength(2);
+    const intactas = p.cestas.map((c) => [...c]);
     p = jugar(p, { tipo: "terminarTurno", jugador: 0 });
     p = jugar(p, { tipo: "terminarTurno", jugador: 1 });
     expect(p.ronda).toBe(2);
     expect(p.turno).toMatchObject({ fase: "cesta", jugador: 1 });
     expect(p.centro).toEqual([]);
     expect(p.cestas.every((c) => c.length === 4)).toBe(true);
+    p.cestas.forEach((c, i) => {
+      if (!vacias.includes(i)) expect(c).toEqual(intactas[i]);
+    });
     expect(p.bolsa.length + p.cestas.flat().length).toBe(sueltas);
   });
 
