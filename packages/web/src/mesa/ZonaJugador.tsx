@@ -1,7 +1,7 @@
 import { puntuarObjetivo } from "@tendedero/motor";
 import type { ReactNode } from "react";
 import { useMesa } from "./contexto";
-import { CartaMano } from "./Carta";
+import { CartaMano, FichaCarta } from "./Carta";
 import { FichaPrenda, PrendaArrastrable } from "./Prenda";
 import { Tendedero } from "./Tendedero";
 
@@ -39,6 +39,14 @@ export function ZonaJugador({ indice }: { indice: number }) {
           ))}
         </Zona>
 
+        {jugador.trofeos.length > 0 && (
+          <Zona titulo="Trofeos" cantidad={jugador.trofeos.length}>
+            {jugador.trofeos.map((id) => (
+              <FichaCarta key={id} partida={partida} id={id} />
+            ))}
+          </Zona>
+        )}
+
         <Zona titulo={jugador.objetivoSecreto ? "Objetivos" : "Elige tu objetivo secreto"} vacia="Ningún objetivo definido todavía">
           {jugador.objetivoSecreto
             ? [
@@ -64,7 +72,7 @@ export function Objetivo({ id, jugador, secreto }: { id: string; jugador?: numbe
   const progreso = jugador === undefined ? null : puntuarObjetivo(partida, jugador, o);
   return (
     <div className={`objetivo ${secreto ? "secreto" : ""}`} title={o.texto}>
-      <span className="tipo-carta">{secreto ? "Secreto" : jugador === undefined ? o.uso : "Común"}</span>
+      <span className="tipo-carta">{secreto ? "Secreto" : jugador === undefined ? "Objetivo" : "Común"}</span>
       <strong>{o.nombre}</strong>
       <small>{o.texto}</small>
       <small className="niveles">

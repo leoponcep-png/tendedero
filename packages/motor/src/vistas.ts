@@ -15,7 +15,7 @@ export function vistaPara(p: Partida, jugador: number): Partida {
     if (j.objetivoSecreto) j.objetivoSecreto = OCULTA;
   });
   v.bolsa = v.bolsa.map(() => OCULTA);
-  v.mazos = { cuerdas: v.mazos.cuerdas.map(() => OCULTA), acciones: v.mazos.acciones.map(() => OCULTA), clima: v.mazos.clima.map(() => OCULTA) };
+  v.mazos = { cuerdas: v.mazos.cuerdas.map(() => OCULTA), acciones: v.mazos.acciones.map(() => OCULTA), dia: v.mazos.dia.map(() => OCULTA) };
   v.semilla = "";
   v.ajustes.semilla = "";
   v.azar = 0;

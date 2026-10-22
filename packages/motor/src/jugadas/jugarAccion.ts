@@ -52,7 +52,7 @@ function motivoBlanco(p: Partida, j: JugadaDe<"jugarAccion">, efecto: EfectoAcci
     if (protege) return `${defCarta(p, protege.carta).nombre} protege de esta carta.`;
   }
   if (p.rondaProtegeDe.some((e) => efecto.etiquetas.includes(e))) {
-    return "Un evento lo impide durante esta ronda.";
+    return `${defCarta(p, p.dia!).nombre} lo impide hoy.`;
   }
 
   if (!pideDestino(blanco)) return null;

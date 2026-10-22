@@ -48,7 +48,6 @@ export const esquemaMazo = z.object({ cartas: z.array(z.object(camposCarta)) });
 export const esquemaObjetivo = z.object({
   id,
   nombre: z.string(),
-  uso: z.enum(["comun", "secreto", "ambos"], { error: 'debe ser "comun", "secreto" o "ambos"' }),
   estado: esquemaEstado,
   efecto: z.string().nullable().default(null),
   parametros,
@@ -86,7 +85,7 @@ export type AjustesPorDefecto = z.infer<typeof esquemaAjustesPorDefecto>;
 
 export type Parametros = Record<string, number | string>;
 
-export type Mazo ="cuerdas" | "acciones" | "climas" | "eventos";
+export type Mazo = "cuerdas" | "acciones" | "dia";
 
 export interface DefCarta {
   id: string;

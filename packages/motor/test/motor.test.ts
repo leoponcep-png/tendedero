@@ -60,15 +60,15 @@ function partida(semilla = "prueba", cambios: (a: Ajustes) => void = () => {}): 
   p.jugadores.forEach((j) => (j.mano = j.mano.filter((c) => !reaccion(c))));
   p.mazos.acciones = p.mazos.acciones.filter((c) => !reaccion(c));
   // Sin clima ni eventos, para que cada test controle el tiempo que hace.
-  p.clima = null;
-  p.mazos.clima = [];
-  p.descartes.clima = [];
+  p.dia = null;
+  p.mazos.dia = [];
+  p.descartes.dia = [];
   return p;
 }
 
 /** Saca este clima o evento al empezar la siguiente ronda. */
 function proximaCarta(p: Partida, def: string) {
-  p.mazos.clima.push(copia(p, def));
+  p.mazos.dia.push(copia(p, def));
 }
 
 function jugar(p: Partida, j: Jugada): Partida {
@@ -245,8 +245,8 @@ describe("rondas, secado y puntos", () => {
 
   it("un tejadillo protege también la cuerda justo debajo", () => {
     let p = partida();
-    p.clima = copia(p, "lluvia");
-    p.climaDesde = p.ronda;
+    p.dia = copia(p, "lluvia");
+    p.diaDesde = p.ronda;
     p.catalogo.objetivos["bajo-techo"] ??= datos.objetivos.find((o) => o.id === "bajo-techo")!;
     tender(p, 0, "tejadillo", [], 0);
     tender(p, 0, "basica", [["calcetin-azul-1", 0]], 1);
@@ -457,29 +457,35 @@ describe("acciones", () => {
   });
 });
 
-describe("clima y eventos", () => {
-  it("al empezar cada ronda sale una carta; el clima se queda y un evento no lo quita", () => {
+describe("mazo del día", () => {
+  it("solo se roba carta del día cuando no hay ninguna en juego, y cada una dura sus días", () => {
     const sinPreparar = crearPartida(datos, { ...ajustesIniciales(datos), semilla: "r" });
-    expect(sinPreparar.mazos.clima).toHaveLength(17);
+    // Al empezar sale la primera; el resto se queda en el mazo.
+    expect(sinPreparar.dia).not.toBeNull();
+    expect(sinPreparar.mazos.dia).toHaveLength(21);
 
     let p = partida();
-    proximaCarta(p, "soleado");
-    p = terminar(terminar(p));
-    expect(p.ronda).toBe(2);
-    expect(p.cartas[p.clima!]).toBe("soleado");
     proximaCarta(p, "ola-de-calor");
-    p = terminar(terminar(p));
-    expect(p.cartas[p.clima!]).toBe("soleado");
-    expect(p.cartas[p.ultimoEvento!]).toBe("ola-de-calor");
-    proximaCarta(p, "lluvia");
-    p = terminar(terminar(p));
-    expect(p.cartas[p.clima!]).toBe("lluvia");
-    expect(p.descartes.clima.map((c) => p.cartas[c])).toEqual(["ola-de-calor", "soleado"]);
+    proximaCarta(p, "racha-de-sol");
+    p = ronda(p);
+    expect(p.cartas[p.dia!]).toBe("racha-de-sol");
+    p = ronda(p);
+    // Segundo día de sol: no se roba.
+    expect(p.cartas[p.dia!]).toBe("racha-de-sol");
+    expect(p.mazos.dia.map((c) => p.cartas[c])).toEqual(["ola-de-calor"]);
+    p = ronda(p);
+    expect(p.cartas[p.dia!]).toBe("ola-de-calor");
+    expect(p.registro).toContain("Se acaba Racha de sol.");
+    p = ronda(p);
+    // Un suceso dura 1 día; con el mazo vacío se baraja el descarte para robar la siguiente.
+    expect(p.registro).toContain("Se acaba Ola de calor.");
+    expect(p.registro).toContain("Se baraja el descarte del mazo del día para formar un mazo nuevo.");
+    expect(p.dia).not.toBeNull();
   });
 
   it("con sol se seca 1 más", () => {
     let p = partida();
-    p.clima = copia(p, "soleado");
+    p.dia = copia(p, "soleado");
     tender(p, 0, "basica", [["toalla-azul-1", 0]]);
     p = ronda(p);
     expect(p.prendas["toalla-azul-1"].humedad).toBe(1);
@@ -487,7 +493,7 @@ describe("clima y eventos", () => {
 
   it("con lluvia no se seca nada salvo bajo un tejadillo", () => {
     let p = partida();
-    p.clima = copia(p, "lluvia");
+    p.dia = copia(p, "lluvia");
     tender(p, 0, "basica", [["calcetin-azul-1", 0]]);
     tender(p, 0, "tejadillo", [["calcetin-azul-2", 0]], 1);
     p = ronda(p);
@@ -495,24 +501,20 @@ describe("clima y eventos", () => {
     expect(p.jugadores[0].seca).toEqual(["calcetin-azul-2"]);
   });
 
-  it("un clima dura 2 rondas y después vuelve el tiempo normal", () => {
+  it("un chaparrón dura 1 día y no deja secar nada sin tejadillo", () => {
     let p = partida();
-    proximaCarta(p, "soleado");
+    proximaCarta(p, "chaparron");
     p = ronda(p);
-    expect(p.cartas[p.clima!]).toBe("soleado");
+    tender(p, 0, "basica", [["calcetin-azul-1", 0]]);
     p = ronda(p);
-    expect(p.cartas[p.clima!]).toBe("soleado");
-    proximaCarta(p, "ropa-se-engancha");
-    p = ronda(p);
-    expect(p.clima).toBeNull();
-    expect(p.registro).toContain("Se acaba Soleado: vuelve el tiempo normal.");
-    expect(p.descartes.clima.map((c) => p.cartas[c])).toEqual(["soleado", "ropa-se-engancha"]);
+    expect(p.prendas["calcetin-azul-1"].humedad).toBe(1);
+    expect(p.registro).toContain("Se acaba Chaparrón.");
   });
 
   it("con lluvia, en la segunda ronda de lluvia se seca normal", () => {
     let p = partida();
-    p.clima = copia(p, "lluvia");
-    p.climaDesde = p.ronda;
+    p.dia = copia(p, "lluvia");
+    p.diaDesde = p.ronda;
     tender(p, 0, "basica", [["calcetin-azul-1", 0]]);
     tender(p, 0, "basica", [["camiseta-azul-1", 0]], 1);
     p = ronda(p);
@@ -525,7 +527,7 @@ describe("clima y eventos", () => {
 
   it("con viento se caen los calcetines salvo en cuerdas resistentes, y lo demás seca más", () => {
     let p = partida();
-    p.clima = copia(p, "viento");
+    p.dia = copia(p, "viento");
     tender(p, 0, "basica", [["calcetin-azul-1", 0], ["camiseta-azul-1", 1]]);
     tender(p, 0, "resistente", [["calcetin-azul-2", 0]], 1);
     p = ronda(p);
@@ -572,7 +574,87 @@ describe("clima y eventos", () => {
     proximaCarta(p, "ropa-se-engancha");
     p = terminar(terminar(p));
     const rafaga = darAccion(p, 1, "rafaga-de-viento");
-    expect(motivo(p, { tipo: "jugarAccion", jugador: 1, carta: rafaga, objetivo: { jugador: 0, linea: 0, posicion: 0, prenda: "toalla-rojo-1" } })).toMatch(/evento/);
+    expect(motivo(p, { tipo: "jugarAccion", jugador: 1, carta: rafaga, objetivo: { jugador: 0, linea: 0, posicion: 0, prenda: "toalla-rojo-1" } })).toMatch(/Ropa se engancha lo impide hoy/);
+  });
+});
+
+describe("objetivos", () => {
+  const objetivo = (id: string) => datos.objetivos.find((o) => o.id === id)!;
+
+  it("salen de un solo montón: primero los comunes y luego 2 por jugador, sin repetir", () => {
+    const p = crearPartida(datos, { ...ajustesIniciales(datos), semilla: "montón" });
+    const ofrecidos = p.jugadores.flatMap((j) => j.objetivosOfrecidos);
+    expect(p.objetivosComunes).toHaveLength(2);
+    expect(ofrecidos).toHaveLength(4);
+    expect(new Set([...p.objetivosComunes, ...ofrecidos]).size).toBe(6);
+  });
+
+  it("Cuerdas llenas cuenta las cartas con todos sus huecos ocupados", () => {
+    const p = partida();
+    tender(p, 0, "basica", [["calcetin-azul-1", 0], ["camiseta-azul-1", 1]]);
+    tender(p, 0, "basica", [["calcetin-azul-2", 0]]);
+    tender(p, 0, "tejadillo", [["toalla-azul-1", 0]], 1);
+    expect(puntuarObjetivo(p, 0, objetivo("cuerdas-llenas"))).toMatchObject({ cantidad: 2, puntos: 4 });
+  });
+
+  it("Regalo envenenado: la vieja que pusiste a un rival y se le rompe es tu trofeo", () => {
+    let p = partida();
+    const i = tenderVieja(p, 1, [["calcetin-azul-1", 0]]);
+    p.jugadores[1].lineas[0].cartas[i].colocadaPor = 0;
+    p = ronda(ronda(p));
+    expect(p.jugadores[1].lineas[0].cartas).toHaveLength(0);
+    expect(p.jugadores[0].trofeos.map((c) => p.cartas[c])).toEqual(["vieja"]);
+    expect(p.registro).toContain("Jugador 1 se queda Cuerda vieja como trofeo.");
+    expect(puntuarObjetivo(p, 0, objetivo("regalo-envenenado")).puntos).toBe(4);
+  });
+
+  it("la vieja colocada con la jugada normal se rompe al acabar su 2.ª ronda y es trofeo de quien la puso", () => {
+    let p = partida();
+    const vieja = copia(p, "vieja");
+    p.jugadores[0].mano.push(vieja);
+    p = jugar(p, { tipo: "colocarCuerda", jugador: 0, carta: vieja, linea: 0, en: 1 });
+    expect(p.jugadores[1].lineas[0].cartas[0].colocadaPor).toBe(0);
+    p = ronda(p);
+    expect(p.jugadores[1].lineas[0].cartas).toHaveLength(1);
+    p = ronda(p);
+    expect(p.jugadores[1].lineas[0].cartas).toHaveLength(0);
+    expect(p.jugadores[0].trofeos).toEqual([vieja]);
+  });
+
+  it("con viejaAlRivalGratis, poner una vieja al rival no gasta la cuerda del turno", () => {
+    let p = partida("prueba", (a) => (a.viejaAlRivalGratis = true));
+    const vieja = copia(p, "vieja");
+    const basica = copia(p, "basica");
+    p.jugadores[0].mano.push(vieja, basica);
+    p = jugar(p, { tipo: "colocarCuerda", jugador: 0, carta: vieja, linea: 0, en: 1 });
+    expect(p.turno.cuerdasJugadas).toBe(0);
+    p = jugar(p, { tipo: "colocarCuerda", jugador: 0, carta: basica, linea: 0 });
+    expect(p.turno.cuerdasJugadas).toBe(1);
+  });
+
+  it("el efecto viejas-colocadas cuenta las viejas que siguen en tendederos rivales y los trofeos", () => {
+    const p = partida();
+    const i = tenderVieja(p, 1, []);
+    p.jugadores[1].lineas[0].cartas[i].colocadaPor = 0;
+    p.jugadores[0].trofeos.push(copia(p, "vieja"));
+    const def = { ...objetivo("regalo-envenenado"), efecto: "viejas-colocadas" };
+    expect(puntuarObjetivo(p, 0, def).cantidad).toBe(2);
+  });
+
+  it("si el rival mejora la vieja antes de que se rompa, ya no es tu regalo", () => {
+    let p = partida();
+    const i = tenderVieja(p, 0, [["calcetin-azul-1", 0]]);
+    p.jugadores[0].lineas[0].cartas[i].colocadaPor = 1;
+    const tejadillo = copia(p, "tejadillo");
+    p.jugadores[0].mano.push(tejadillo);
+    p = jugar(p, { tipo: "mejorarCuerda", jugador: 0, carta: tejadillo, linea: 0, posicion: i });
+    expect(p.jugadores[0].lineas[0].cartas[i].colocadaPor).toBeUndefined();
+  });
+
+  it("Conjunto completo: un calcetín, una camiseta y una toalla secos del mismo color", () => {
+    const p = partida();
+    p.jugadores[0].seca = ["calcetin-rojo-1", "camiseta-rojo-1", "toalla-rojo-1", "calcetin-azul-1", "camiseta-azul-1", "toalla-rojo-2"];
+    expect(puntuarObjetivo(p, 0, objetivo("conjunto-completo"))).toMatchObject({ cantidad: 1, puntos: 5 });
   });
 });
 
@@ -684,6 +766,13 @@ describe("reparto de prendas y vistas", () => {
     p = jugar(p, { tipo: "draft", jugador: 0, origen: "centro", patron: { tipo: p.prendas[p.centro[0]].tipo } });
     if (p.centro.length > 0) p = jugar(p, { tipo: "draft", jugador: 1, origen: "centro", patron: { tipo: p.prendas[p.centro[0]].tipo } });
     expect(p.turno).toMatchObject({ fase: "jugar", jugador: 0, numero: 1 });
+  });
+
+  it("con reparto inverso coge primero quien juega el último, y el turno lo sigue abriendo el primero", () => {
+    let p = sinRepartir("prueba", (a) => (a.repartoInverso = true));
+    expect(p.turno).toMatchObject({ fase: "cesta", jugador: 1 });
+    p = repartir(p);
+    expect(p.turno).toMatchObject({ fase: "jugar", jugador: 0 });
   });
 
   it("también se puede coger por color", () => {

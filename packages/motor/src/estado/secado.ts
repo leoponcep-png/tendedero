@@ -17,8 +17,8 @@ export function efectoCuerda(p: Partida, tendida: CartaTendida): { efecto: Efect
 
 /** Efecto del clima activo, si hay. */
 export function efectoClima(p: Partida): { efecto: EfectoClima; params: Parametros } | null {
-  if (!p.clima) return null;
-  const def = defCarta(p, p.clima);
+  if (!p.dia) return null;
+  const def = defCarta(p, p.dia);
   const efecto = def.efecto ? efectos[def.efecto] : undefined;
   return efecto?.tipo === "clima" ? { efecto, params: def.parametros } : null;
 }

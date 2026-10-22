@@ -238,15 +238,14 @@ function Configuraciones({
 const NOMBRES_MAZO: Record<string, string> = {
   cuerdas: "Cuerdas",
   acciones: "Acciones",
-  climas: "Climas",
-  eventos: "Eventos",
+  dia: "Mazo del día",
   objetivos: "Objetivos",
 };
 
 function SeleccionCartas({ datos, ajustes, onCambio }: { datos: Datos; ajustes: Ajustes; onCambio: (a: Ajustes) => void }) {
   const todas: (DefCarta | DefObjetivo)[] = [...datos.cartas, ...datos.objetivos];
   const mazoDe = (c: DefCarta | DefObjetivo) => ("mazo" in c ? c.mazo : "objetivos");
-  const grupoDe = (c: DefCarta | DefObjetivo) => ("grupo" in c ? c.grupo : c.uso);
+  const grupoDe = (c: DefCarta | DefObjetivo) => ("grupo" in c ? c.grupo : "objetivos");
 
   const poner = (ids: string[], valor: boolean) =>
     onCambio({ ...ajustes, incluidas: { ...ajustes.incluidas, ...Object.fromEntries(ids.map((id) => [id, valor])) } });

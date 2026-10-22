@@ -4,10 +4,14 @@ import { defCarta, tipoDe } from "../estado/utilidades";
 import { esperaReaccion } from "./jugarAccion";
 import type { JugadaDe, Manejador } from "./tipos";
 
-/** Comprobaciones comunes a jugar una carta de cuerda, ya sea colocándola o mejorando otra. */
-function motivoCartaDeCuerda(p: Partida, jugador: number, carta: string): string | null {
+/**
+ * Comprobaciones comunes a jugar una carta de cuerda, ya sea colocándola o mejorando otra.
+ * `gratis`: no cuenta como la cuerda del turno (con el ajuste viejaAlRivalGratis).
+ */
+function motivoCartaDeCuerda(p: Partida, jugador: number, carta: string, gratis = false): string | null {
   if (!p.jugadores[jugador].mano.includes(carta)) return "Esa carta no está en tu mano.";
   if (defCarta(p, carta).mazo !== "cuerdas") return "Esa carta no es de cuerda.";
+  if (gratis) return null;
   const maximo = p.ajustes.jugablesPorTurno.cuerdas + p.turno.cuerdasExtra;
   if (p.turno.cuerdasJugadas >= maximo) {
     return maximo === 1 ? "Ya has jugado una cuerda este turno." : `Ya has jugado ${maximo} cuerdas este turno.`;
@@ -15,21 +19,32 @@ function motivoCartaDeCuerda(p: Partida, jugador: number, carta: string): string
   return null;
 }
 
-/** Quita la carta de la mano y la cuenta como la cuerda del turno. */
-function pagarCuerda(p: Partida, jugador: number, carta: string): void {
+/** Quita la carta de la mano y, salvo que sea gratis, la cuenta como la cuerda del turno. */
+function pagarCuerda(p: Partida, jugador: number, carta: string, gratis = false): void {
   p.jugadores[jugador].mano = p.jugadores[jugador].mano.filter((c) => c !== carta);
-  p.turno.cuerdasJugadas++;
+  if (!gratis) p.turno.cuerdasJugadas++;
+}
+
+/** Con el ajuste viejaAlRivalGratis, colocar una cuerda en el tendedero de un rival no gasta la del turno. */
+function esGratis(p: Partida, j: JugadaDe<"colocarCuerda">): boolean {
+  return Boolean(p.ajustes.viejaAlRivalGratis) && (j.en ?? j.jugador) !== j.jugador;
 }
 
 /** Pone la carta de cuerda en el hueco siguiente de la línea (ya pagada). */
 export function tenderCuerda(p: Partida, j: JugadaDe<"colocarCuerda">): void {
-  p.jugadores[j.en ?? j.jugador].lineas[j.linea].cartas.push({ carta: j.carta, colgadas: [], colocadaEn: p.ronda });
+  const en = j.en ?? j.jugador;
+  p.jugadores[en].lineas[j.linea].cartas.push({
+    carta: j.carta,
+    colgadas: [],
+    colocadaEn: p.ronda,
+    ...(en !== j.jugador && { colocadaPor: j.jugador }),
+  });
 }
 
 export const colocarCuerda: Manejador<JugadaDe<"colocarCuerda">> = {
   soloEnSuTurno: true,
   validar(p, j) {
-    const motivo = motivoCartaDeCuerda(p, j.jugador, j.carta);
+    const motivo = motivoCartaDeCuerda(p, j.jugador, j.carta, esGratis(p, j));
     if (motivo) return motivo;
     const en = j.en ?? j.jugador;
     if (!p.jugadores[en]) return "Ese jugador no existe.";
@@ -45,7 +60,7 @@ export const colocarCuerda: Manejador<JugadaDe<"colocarCuerda">> = {
   },
   aplicar(p, j) {
     const en = j.en ?? j.jugador;
-    pagarCuerda(p, j.jugador, j.carta);
+    pagarCuerda(p, j.jugador, j.carta, esGratis(p, j));
     const donde = en === j.jugador ? "" : ` de ${p.jugadores[en].nombre}`;
     p.registro.push(`${p.jugadores[j.jugador].nombre} coloca ${defCarta(p, j.carta).nombre} en la línea ${j.linea + 1}${donde}.`);
     // Colocarle una cuerda a un rival es un fastidio: puede anularlo con una carta de reacción.
@@ -83,6 +98,8 @@ export const mejorarCuerda: Manejador<JugadaDe<"mejorarCuerda">> = {
     p.descartes.cuerdas.push(tendida.carta);
     tendida.carta = j.carta;
     tendida.colocadaEn = p.ronda;
+    // Mejorada, ya no es el regalo de nadie.
+    delete tendida.colocadaPor;
     p.registro.push(
       `${p.jugadores[j.jugador].nombre} mejora ${antes} a ${defCarta(p, j.carta).nombre} (línea ${j.linea + 1}, carta ${j.posicion + 1}).`,
     );

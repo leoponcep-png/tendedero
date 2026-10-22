@@ -27,15 +27,14 @@ export function crearPartida(datos: Datos, ajustesElegidos: Ajustes): Partida {
     cestas: Array.from({ length: ajustes.cestas.numero }, () => []),
     centro: [],
     perdidas: [],
-    clima: null,
-    climaDesde: null,
-    mazos: { cuerdas: [], acciones: [], clima: [] },
-    descartes: { cuerdas: [], acciones: [], clima: [] },
+    dia: null,
+    diaDesde: null,
+    mazos: { cuerdas: [], acciones: [], dia: [] },
+    descartes: { cuerdas: [], acciones: [], dia: [] },
     objetivosComunes: [],
     jugadores: [],
     turno: { numero: 0, jugador: 0, fase: "cesta", cuerdasJugadas: 0, cuerdasExtra: 0, accionesJugadas: 0 },
     ronda: 1,
-    ultimoEvento: null,
     rondaProtegeDe: [],
     reaccion: null,
     ultimaRonda: false,
@@ -67,15 +66,14 @@ export function crearPartida(datos: Datos, ajustesElegidos: Ajustes): Partida {
   }
   barajar(p, p.mazos.cuerdas);
   barajar(p, p.mazos.acciones);
-  barajar(p, p.mazos.clima);
+  barajar(p, p.mazos.dia);
 
   const objetivos = datos.objetivos.filter((o) => enJuego(o, ajustes));
   for (const o of objetivos) p.catalogo.objetivos[o.id] = o;
-  const comunes = objetivos.filter((o) => o.uso !== "secreto").map((o) => o.id);
-  barajar(p, comunes);
-  p.objetivosComunes = comunes.slice(0, ajustes.objetivos.comunes);
-  const secretos = objetivos.filter((o) => o.uso !== "comun" && !p.objetivosComunes.includes(o.id)).map((o) => o.id);
+  // Un solo montón: los primeros son los comunes y del resto se reparten los secretos.
+  const secretos = objetivos.map((o) => o.id);
   barajar(p, secretos);
+  p.objetivosComunes = secretos.splice(0, ajustes.objetivos.comunes);
 
   for (let i = 0; i < ajustes.jugadores; i++) {
     p.jugadores.push({
@@ -85,6 +83,7 @@ export function crearPartida(datos: Datos, ajustesElegidos: Ajustes): Partida {
       pendientes: [],
       seca: [],
       secadoEn: {},
+      trofeos: [],
       objetivosOfrecidos: secretos.splice(0, ajustes.objetivos.secretosRepartidos),
       objetivoSecreto: null,
       puntos: 0,

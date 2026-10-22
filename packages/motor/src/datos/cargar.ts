@@ -15,8 +15,7 @@ export const ARCHIVOS_DATOS = [
   "prendas",
   "cuerdas",
   "acciones",
-  "climas",
-  "eventos",
+  "dia",
   "objetivos",
   "ajustes-por-defecto",
 ] as const;
@@ -46,11 +45,10 @@ export function cargarDatos(crudos: DatosCrudos): Datos {
   const prendas = leer(esquemaPrendas, "prendas");
   const cuerdas = leer(esquemaCuerdas, "cuerdas");
   const acciones = leer(esquemaMazo, "acciones");
-  const climas = leer(esquemaMazo, "climas");
-  const eventos = leer(esquemaMazo, "eventos");
+  const dia = leer(esquemaMazo, "dia");
   const objetivos = leer(esquemaObjetivos, "objetivos");
   const porDefecto = leer(esquemaAjustesPorDefecto, "ajustes-por-defecto");
-  if (!prendas || !cuerdas || !acciones || !climas || !eventos || !objetivos || !porDefecto) {
+  if (!prendas || !cuerdas || !acciones || !dia || !objetivos || !porDefecto) {
     throw new ErrorDatos(errores);
   }
 
@@ -59,13 +57,12 @@ export function cargarDatos(crudos: DatosCrudos): Datos {
   const cartas = [
     ...conMazo("cuerdas", cuerdas.cartas),
     ...conMazo("acciones", acciones.cartas),
-    ...conMazo("climas", climas.cartas),
-    ...conMazo("eventos", eventos.cartas),
+    ...conMazo("dia", dia.cartas),
   ];
 
   repetidos("prendas.json → colores", prendas.colores, errores);
   repetidos("prendas.json → tipos", prendas.tipos, errores);
-  repetidos("cartas (entre cuerdas, acciones, climas y eventos)", cartas, errores);
+  repetidos("cartas (entre cuerdas, acciones y el mazo del día)", cartas, errores);
   repetidos("objetivos.json", objetivos.objetivos, errores);
 
   for (const c of [...cartas, ...objetivos.objetivos]) {
@@ -81,11 +78,12 @@ export function cargarDatos(crudos: DatosCrudos): Datos {
         `${archivo} → [${c.id}]: está "definida" pero su efecto "${c.efecto}" todavía no está programado; déjala "pendiente"`,
       );
     } else {
-      const esperado = !("mazo" in c)
-        ? "objetivo"
-        : ({ cuerdas: "cuerda", acciones: "accion", climas: "clima", eventos: "evento" } as const)[c.mazo];
-      if (efectos[c.efecto].tipo !== esperado) {
-        errores.push(`${archivo} → [${c.id}]: el efecto "${c.efecto}" no es de ${esperado}`);
+      // Las cartas del día pueden ser de tiempo (clima) o sucesos (evento).
+      const esperados: string[] = !("mazo" in c)
+        ? ["objetivo"]
+        : ({ cuerdas: ["cuerda"], acciones: ["accion"], dia: ["clima", "evento"] } as const)[c.mazo].slice();
+      if (!esperados.includes(efectos[c.efecto].tipo)) {
+        errores.push(`${archivo} → [${c.id}]: el efecto "${c.efecto}" no es de ${esperados.join(" ni de ")}`);
       }
     }
   }

@@ -12,7 +12,8 @@ export function rondasHastaRomperse(p: Partida, tendida: CartaTendida): number |
 
 /**
  * Al acabar la ronda, tras el secado: cada cuerda que ha cumplido sus rondas se rompe, y con ella todas
- * las cartas a su derecha en la misma línea. Las cartas van al descarte y sus prendas salen de la partida.
+ * las cartas a su derecha en la misma línea. Las cartas van al descarte (o a los trofeos de quien la puso,
+ * si fue un rival) y sus prendas salen de la partida.
  */
 export function romperCuerdas(p: Partida): void {
   for (const jugador of p.jugadores) {
@@ -26,11 +27,20 @@ export function romperCuerdas(p: Partida): void {
       const rotas = linea.cartas.splice(i);
       const prendas = rotas.flatMap((t) => t.colgadas.map((c) => c.prenda));
       p.perdidas.push(...prendas);
-      p.descartes.cuerdas.push(...rotas.map((t) => t.carta));
 
       const conElla = rotas.length > 1 ? ` y con ella ${rotas.length - 1} carta(s) a su derecha` : "";
       const perdidas = prendas.length ? `; se pierden ${prendas.map((id) => nombrePrenda(p, id)).join(", ")}` : "";
       p.registro.push(`Se rompe ${defCarta(p, rotas[0].carta).nombre} de ${jugador.nombre} en la línea ${l + 1}${conElla}${perdidas}.`);
+
+      // La que puso un rival se la queda él como trofeo; el resto va al descarte.
+      for (const t of rotas) {
+        if (t.colocadaPor === undefined) {
+          p.descartes.cuerdas.push(t.carta);
+          continue;
+        }
+        p.jugadores[t.colocadaPor].trofeos.push(t.carta);
+        p.registro.push(`${p.jugadores[t.colocadaPor].nombre} se queda ${defCarta(p, t.carta).nombre} como trofeo.`);
+      }
     }
   }
 }

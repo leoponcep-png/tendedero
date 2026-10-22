@@ -1,4 +1,4 @@
-import { cumple, motivoInvalida, prendasDe, rondasDeClimaRestantes, type Jugada, type Origen, type Patron } from "@tendedero/motor";
+import { cumple, motivoInvalida, prendasDe, diasRestantes, type Jugada, type Origen, type Patron } from "@tendedero/motor";
 import { useState } from "react";
 import { useMesa } from "./contexto";
 import { FichaCarta } from "./Carta";
@@ -50,15 +50,12 @@ export function ZonaCentral() {
       </div>
 
       <div className="fila-central">
-        <Zona titulo={tituloClima(rondasDeClimaRestantes(partida))} vacia="Tiempo normal">
-          {partida.clima && <FichaCarta partida={partida} id={partida.clima} />}
-        </Zona>
-        <Zona titulo={`Evento de la ronda ${partida.ronda}`} vacia="Ninguno">
-          {partida.ultimoEvento && <FichaCarta partida={partida} id={partida.ultimoEvento} />}
+        <Zona titulo={tituloDia(diasRestantes(partida))} vacia="Día tranquilo">
+          {partida.dia && <FichaCarta partida={partida} id={partida.dia} />}
         </Zona>
         <Mazo nombre="Cuerdas" mazo={partida.mazos.cuerdas.length} descarte={partida.descartes.cuerdas.length} />
         <Mazo nombre="Acciones" mazo={partida.mazos.acciones.length} descarte={partida.descartes.acciones.length} />
-        <Mazo nombre="Clima y eventos" mazo={partida.mazos.clima.length} descarte={partida.descartes.clima.length} />
+        <Mazo nombre="Mazo del día" mazo={partida.mazos.dia.length} descarte={partida.descartes.dia.length} />
         <Zona titulo="Objetivos comunes" vacia="Ninguno definido todavía">
           {partida.objetivosComunes.map((id) => (
             <Objetivo key={id} id={id} />
@@ -148,7 +145,7 @@ function PistaPuntos() {
   );
 }
 
-function tituloClima(restantes: number | null): string {
-  if (restantes === null) return "Clima activo";
-  return restantes <= 1 ? "Clima activo · última ronda" : `Clima activo · ${restantes} rondas`;
+function tituloDia(restantes: number | null): string {
+  if (restantes === null) return "Carta del día";
+  return restantes <= 1 ? "Carta del día · último día" : `Carta del día · ${restantes} días`;
 }

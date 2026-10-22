@@ -9,7 +9,12 @@ export interface Ajustes {
   jugablesPorTurno: { cuerdas: number; acciones: number };
   limiteMano: number;
   umbralFinal: number;
-  cestas: { numero: number; prendasPorCesta: number };
+  /** `renovarTodas`: al acabar la ronda se vacían y rellenan todas, no solo las que se cogieron (sistema anterior). */
+  cestas: { numero: number; prendasPorCesta: number; renovarTodas?: boolean };
+  /** Si en el reparto coge primero quien juega el último (para compensar el orden de turno). */
+  repartoInverso?: boolean;
+  /** Si colocar una cuerda en el tendedero de un rival (la vieja) no cuenta como tu cuerda del turno. */
+  viejaAlRivalGratis?: boolean;
   tendedero: { lineas: number; cartasPorLinea: number };
   objetivos: { comunes: number; secretosRepartidos: number };
   /** Por id de tipo de prenda. */
@@ -103,14 +108,10 @@ export function revisarAjustes(a: Ajustes, datos: Datos): Revision {
     avisos.push(`La mano inicial pide ${a.manoInicial.cuerdas * a.jugadores} cuerdas y el mazo solo tiene ${copiasCuerdas}.`);
   }
 
-  const objetivos = datos.objetivos.filter((o) => enJuego(o, a));
-  const comunes = objetivos.filter((o) => o.uso !== "secreto").length;
-  const secretos = objetivos.filter((o) => o.uso !== "comun").length;
-  if (comunes < a.objetivos.comunes) {
-    avisos.push(`Se piden ${a.objetivos.comunes} objetivos comunes y solo hay ${comunes} definidos.`);
-  }
-  if (secretos < a.objetivos.secretosRepartidos * a.jugadores) {
-    avisos.push(`Se reparten ${a.objetivos.secretosRepartidos} objetivos secretos por jugador y solo hay ${secretos} definidos.`);
+  const objetivos = datos.objetivos.filter((o) => enJuego(o, a)).length;
+  const pedidos = a.objetivos.comunes + a.objetivos.secretosRepartidos * a.jugadores;
+  if (objetivos < pedidos) {
+    avisos.push(`Se sacan ${a.objetivos.comunes} comunes y ${a.objetivos.secretosRepartidos} secretos por jugador (${pedidos}) y solo hay ${objetivos} objetivos.`);
   }
 
   const pendientes = [...datos.cartas, ...datos.objetivos].filter((c) => c.estado === "pendiente").length;

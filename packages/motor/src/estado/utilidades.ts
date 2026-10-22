@@ -3,7 +3,7 @@ import type { DefCarta, Mazo, Parametros, TipoPrenda } from "../datos/esquemas";
 import type { Colgada, CartaTendida, Partida, Pila } from "./tipos";
 
 export function pilaDe(mazo: Mazo): Pila {
-  return mazo === "cuerdas" ? "cuerdas" : mazo === "acciones" ? "acciones" : "clima";
+  return mazo === "cuerdas" ? "cuerdas" : mazo === "acciones" ? "acciones" : "dia";
 }
 
 export function defCarta(p: Partida, carta: string): DefCarta {

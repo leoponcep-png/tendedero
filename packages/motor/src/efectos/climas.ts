@@ -12,7 +12,7 @@ export const efectosClima: Record<string, EfectoClima> = {
     tipo: "clima",
     ajusteSecado(p, tendida, params) {
       if (protegidaDe(p, tendida, "moja")) return 0;
-      const rondaDeLluvia = p.ronda - (p.climaDesde ?? p.ronda) + 1;
+      const rondaDeLluvia = p.ronda - (p.diaDesde ?? p.ronda) + 1;
       const cada = numero(params, "cadaRondas", 0);
       if (cada > 0 && rondaDeLluvia % cada === 0) return 0;
       return -numero(params, "humedad", 1);

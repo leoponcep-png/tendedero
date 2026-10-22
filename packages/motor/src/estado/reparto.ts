@@ -8,10 +8,15 @@ type FaseReparto = "cesta" | "centro";
  * Lo que sobra en el centro vuelve a la bolsa y solo se rellenan las cestas que se cogieron (las vacías;
  * si la bolsa no da para todas, salen incompletas):
  * las que nadie tocó se quedan como están para la ronda siguiente.
+ * Con `renovarTodas` (el sistema anterior), todo lo que sobra vuelve a la bolsa y se llenan todas.
  */
 export function renovarCestas(p: Partida): void {
   p.bolsa.push(...p.centro);
   p.centro = [];
+  if (p.ajustes.cestas.renovarTodas) {
+    p.bolsa.push(...p.cestas.flat());
+    p.cestas = p.cestas.map(() => []);
+  }
   barajar(p, p.bolsa);
   const { prendasPorCesta } = p.ajustes.cestas;
   p.cestas = p.cestas.map((c) => (c.length > 0 ? c : p.bolsa.splice(-prendasPorCesta)));
@@ -29,21 +34,27 @@ export function empezarReparto(p: Partida): void {
 
 /** Tras coger un jugador: el siguiente de su fase, la fase del centro o los turnos de juego. */
 export function avanzarReparto(p: Partida): void {
-  ponerEnReparto(p, p.turno.fase as FaseReparto, ordenDeRonda(p).indexOf(p.turno.jugador) + 1);
+  ponerEnReparto(p, p.turno.fase as FaseReparto, ordenDeReparto(p).indexOf(p.turno.jugador) + 1);
 }
 
 function puedeCoger(p: Partida, fase: FaseReparto): boolean {
   return fase === "cesta" ? p.cestas.some((c) => c.length > 0) : p.centro.length > 0;
 }
 
-function ponerEnReparto(p: Partida, fase: FaseReparto, indice: number): void {
+/** Quién coge antes en el reparto: el orden de la ronda o, con `repartoInverso`, al revés (el último en jugar coge primero). */
+function ordenDeReparto(p: Partida): number[] {
   const orden = ordenDeRonda(p);
+  return p.ajustes.repartoInverso ? [...orden].reverse() : orden;
+}
+
+function ponerEnReparto(p: Partida, fase: FaseReparto, indice: number): void {
+  const orden = ordenDeReparto(p);
   if (indice < orden.length && puedeCoger(p, fase)) {
     p.turno = { ...p.turno, jugador: orden[indice], fase };
     return;
   }
   if (fase === "cesta") ponerEnReparto(p, "centro", 0);
-  else empezarTurnoDeJuego(p, orden[0]);
+  else empezarTurnoDeJuego(p, ordenDeRonda(p)[0]);
 }
 
 export function empezarTurnoDeJuego(p: Partida, jugador: number): void {

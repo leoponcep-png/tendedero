@@ -3,7 +3,7 @@ export { ARCHIVOS_DATOS, cargarDatos, ErrorDatos, type DatosCrudos, type NombreA
 export * from "./ajustes";
 export * from "./estado/tipos";
 export { crearPartida } from "./estado/preparar";
-export { cierraLaRonda, jugadorInicial, ordenDeRonda, rondasDeClimaRestantes } from "./estado/ronda";
+export { cierraLaRonda, jugadorInicial, ordenDeRonda, diasRestantes } from "./estado/ronda";
 export { maxCuerdasRobadas } from "./jugadas/terminarTurno";
 export { puntuarObjetivo } from "./estado/final";
 export { defCarta, localizar, nombrePrenda, prendaEn, tipoDe } from "./estado/utilidades";

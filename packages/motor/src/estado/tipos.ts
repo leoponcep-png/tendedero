@@ -23,6 +23,8 @@ export interface CartaTendida {
   protegida?: boolean;
   /** Ronda en la que se colocó (o se mejoró); las cuerdas que se rompen cuentan desde aquí. */
   colocadaEn?: number;
+  /** Quién la puso, si fue un rival (la cuerda vieja); si se rompe aquí, se la lleva como trofeo. */
+  colocadaPor?: number;
 }
 
 /** Las cartas van de izquierda a derecha; cada nueva tapa el poste de la anterior. */
@@ -38,12 +40,14 @@ export interface Jugador {
   seca: string[];
   /** Por prenda seca: las cartas de cuerda en las que se secó (la suya y, si la cubría, el tejadillo de arriba). */
   secadoEn: Record<string, string[]>;
+  /** Cuerdas viejas que puso a un rival y se le rompieron allí: se las queda boca abajo. */
+  trofeos: string[];
   objetivosOfrecidos: string[];
   objetivoSecreto: string | null;
   puntos: number;
 }
 
-export type Pila = "cuerdas" | "acciones" | "clima";
+export type Pila = "cuerdas" | "acciones" | "dia";
 
 export interface Turno {
   numero: number;
@@ -102,14 +106,15 @@ export interface Partida {
   centro: string[];
   /** Prendas que han salido de la partida (estaban en una cuerda que se rompió). */
   perdidas: string[];
-  /** Carta de clima activa: dura hasta que sale otro clima o se cumplen sus parametros.rondas. */
-  clima: string | null;
-  /** Ronda en la que salió el clima activo. */
-  climaDesde: number | null;
+  /**
+   * Carta del día en juego (tiempo o suceso): dura sus parametros.dias rondas y, mientras haya una,
+   * no se roba otra.
+   */
+  dia: string | null;
+  /** Ronda en la que salió la carta del día en juego. */
+  diaDesde: number | null;
   ronda: number;
-  /** El evento que salió al empezar esta ronda (ya resuelto y en el descarte). */
-  ultimoEvento: string | null;
-  /** Lo que un evento impide durante esta ronda (p. ej. «Ropa se engancha»). */
+  /** Lo que un suceso impide durante esta ronda (p. ej. «Ropa se engancha»). */
   rondaProtegeDe: Etiqueta[];
   /** La última carta de cada lista es la de arriba. */
   mazos: Record<Pila, string[]>;

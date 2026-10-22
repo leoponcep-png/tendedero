@@ -1,9 +1,8 @@
 import { cargarDatos, ErrorDatos, type Datos } from "@tendedero/motor";
 import acciones from "../../../data/acciones.json";
 import ajustesPorDefecto from "../../../data/ajustes-por-defecto.json";
-import climas from "../../../data/climas.json";
+import dia from "../../../data/dia.json";
 import cuerdas from "../../../data/cuerdas.json";
-import eventos from "../../../data/eventos.json";
 import objetivos from "../../../data/objetivos.json";
 import prendas from "../../../data/prendas.json";
 
@@ -19,8 +18,7 @@ function cargar(): ResultadoDatos {
         prendas,
         cuerdas,
         acciones,
-        climas,
-        eventos,
+        dia,
         objetivos,
         "ajustes-por-defecto": ajustesPorDefecto,
       }),

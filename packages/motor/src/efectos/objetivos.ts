@@ -1,5 +1,5 @@
-import type { Partida } from "../estado/tipos";
-import { texto } from "../estado/utilidades";
+import type { CartaTendida, Partida } from "../estado/tipos";
+import { texto, tipoDe } from "../estado/utilidades";
 import type { EfectoObjetivo } from ".";
 
 function porColor(p: Partida, prendas: string[]): number[] {
@@ -57,6 +57,42 @@ export const efectosObjetivo: Record<string, EfectoObjetivo> = {
         for (const t of l.cartas) clases.add(p.catalogo.cartas[p.cartas[t.carta]].efecto ?? "basica");
       }
       return clases.size;
+    },
+  },
+
+  // Cartas de cuerda con todos sus huecos ocupados (se cuenta al final, con lo que quede colgado).
+  "cuerdas-llenas": {
+    tipo: "objetivo",
+    contar(p, jugador) {
+      const llena = (t: CartaTendida) =>
+        t.colgadas.reduce((s, c) => s + tipoDe(p, c.prenda).espacios, 0) >= p.catalogo.cartas[p.cartas[t.carta]].espacios;
+      return p.jugadores[jugador].lineas.flatMap((l) => l.cartas).filter(llena).length;
+    },
+  },
+
+  // Cuerdas viejas que pusiste a un rival y se le rompieron allí (las guardas como trofeo).
+  trofeos: {
+    tipo: "objetivo",
+    contar: (p, jugador) => p.jugadores[jugador].trofeos.length,
+  },
+
+  // Cuerdas que pusiste en el tendedero de un rival: las que siguen allí y las que ya se rompieron (trofeos).
+  "viejas-colocadas": {
+    tipo: "objetivo",
+    contar: (p, jugador) =>
+      p.jugadores[jugador].trofeos.length +
+      p.jugadores.flatMap((j) => j.lineas.flatMap((l) => l.cartas)).filter((t) => t.colocadaPor === jugador).length,
+  },
+
+  // Conjuntos de una prenda seca de cada tipo, todas del mismo color.
+  conjuntos: {
+    tipo: "objetivo",
+    contar(p, jugador) {
+      const seca = p.jugadores[jugador].seca;
+      return Object.keys(p.catalogo.colores).reduce((total, color) => {
+        const delColor = seca.filter((id) => p.prendas[id].color === color);
+        return total + Math.min(...Object.keys(p.catalogo.tipos).map((tipo) => delColor.filter((id) => p.prendas[id].tipo === tipo).length));
+      }, 0);
     },
   },
 

@@ -1,0 +1,15 @@
+{
+  "cartas": [
+    { "id": "soleado", "nombre": "Soleado", "copias": 2, "estado": "definida", "grupo": "tiempo", "efecto": "soleado", "parametros": { "humedad": 1, "dias": 1 }, "texto": "1 día: todas las prendas pierden 1 de humedad más al secarse." },
+    { "id": "racha-de-sol", "nombre": "Racha de sol", "copias": 2, "estado": "definida", "grupo": "tiempo", "efecto": "soleado", "parametros": { "humedad": 1, "dias": 2 }, "texto": "2 días: todas las prendas pierden 1 de humedad más al secarse." },
+    { "id": "chaparron", "nombre": "Chaparrón", "copias": 2, "estado": "definida", "grupo": "tiempo", "efecto": "lluvia", "parametros": { "humedad": 1, "dias": 1 }, "texto": "1 día: las prendas sin tejadillo pierden 1 de humedad menos al secarse." },
+    { "id": "lluvia", "nombre": "Días de lluvia", "copias": 2, "estado": "definida", "grupo": "tiempo", "efecto": "lluvia", "parametros": { "humedad": 1, "cadaRondas": 2, "dias": 2 }, "texto": "2 días: las prendas sin tejadillo pierden 1 de humedad menos al secarse, salvo el segundo día, que secan normal." },
+    { "id": "viento", "nombre": "Viento", "copias": 2, "estado": "definida", "grupo": "tiempo", "efecto": "viento", "parametros": { "cae": "calcetin", "humedad": 1, "dias": 2 }, "texto": "2 días: al acabar el día, antes de secar, los calcetines en cuerdas no resistentes se caen. El resto pierde 1 de humedad más." },
+    { "id": "tormenta-repentina", "nombre": "Tormenta repentina", "copias": 2, "estado": "definida", "grupo": "sucesos", "efecto": "tormenta-repentina", "parametros": { "humedad": 1, "dias": 1 }, "texto": "1 día: al empezar, todas las prendas colgadas sin tejadillo ganan 1 de humedad." },
+    { "id": "ola-de-calor", "nombre": "Ola de calor", "copias": 2, "estado": "definida", "grupo": "sucesos", "efecto": "ola-de-calor", "parametros": { "humedad": 1, "dias": 1 }, "texto": "1 día: al empezar, todas las prendas colgadas pierden 1 de humedad; las que llegan a 0 se secan y puntúan." },
+    { "id": "vecina-sacude-alfombra", "nombre": "Vecina sacude alfombra", "copias": 2, "estado": "definida", "grupo": "sucesos", "efecto": "vecina-sacude-alfombra", "parametros": { "color": "blanco", "humedad": 1, "dias": 1 }, "texto": "1 día: el polvo cae sobre la ropa blanca y las prendas blancas colgadas ganan 1 de humedad." },
+    { "id": "pinzas-viejas", "nombre": "Pinzas viejas", "copias": 2, "estado": "definida", "grupo": "sucesos", "efecto": "pinzas-viejas", "parametros": { "dias": 1 }, "texto": "1 día: al empezar, a cada jugador se le cae su prenda con más humedad (salvo en cuerdas resistentes)." },
+    { "id": "ropa-se-engancha", "nombre": "Ropa se engancha", "copias": 2, "estado": "definida", "grupo": "sucesos", "efecto": "ropa-se-engancha", "parametros": { "dias": 1 }, "texto": "1 día: ninguna prenda se puede tirar ni mover." },
+    { "id": "viento-traicionero", "nombre": "Viento traicionero", "copias": 2, "estado": "definida", "grupo": "sucesos", "efecto": "viento-traicionero", "parametros": { "dias": 1 }, "texto": "1 día: al empezar, a cada jugador se le cae su prenda más grande (salvo en cuerdas resistentes)." }
+  ]
+}

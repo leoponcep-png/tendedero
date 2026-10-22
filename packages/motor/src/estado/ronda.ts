@@ -19,53 +19,48 @@ export function cierraLaRonda(p: Partida, jugador: number): boolean {
   return (jugador + 1) % p.jugadores.length === jugadorInicial(p);
 }
 
-/** Rondas que dura un clima si su carta no dice otra cosa (parametros.rondas). */
-const RONDAS_DE_CLIMA = 2;
+/** Días que dura una carta del día si no dice otra cosa (parametros.dias). Cada día es una ronda. */
+const DIAS_POR_DEFECTO = 1;
 
-/** Rondas que le quedan al clima activo contando la actual, o null si no hay clima. */
-export function rondasDeClimaRestantes(p: Partida): number | null {
-  if (!p.clima) return null;
-  const duracion = numero(defCarta(p, p.clima).parametros, "rondas", RONDAS_DE_CLIMA);
-  return duracion - (p.ronda - (p.climaDesde ?? p.ronda));
+/** Días (rondas) que le quedan a la carta del día en juego contando el actual, o null si no hay ninguna. */
+export function diasRestantes(p: Partida): number | null {
+  if (!p.dia) return null;
+  const duracion = numero(defCarta(p, p.dia).parametros, "dias", DIAS_POR_DEFECTO);
+  return duracion - (p.ronda - (p.diaDesde ?? p.ronda));
 }
 
 /**
- * Al empezar cada ronda se roba una carta de clima o evento.
- * Un clima sustituye al activo; un evento se resuelve en el acto, va al descarte y no quita el clima.
- * Antes de robar, el clima que ya ha cumplido sus rondas se retira.
+ * Al empezar cada ronda: si la carta del día ya ha cumplido sus días, se descarta; si no queda ninguna
+ * en juego, se roba una (así nunca hay dos a la vez). Un suceso se resuelve al empezar cada uno de sus días;
+ * el tiempo actúa al secar (ver secado.ts).
  */
 export function inicioDeRonda(p: Partida): void {
   p.rondaProtegeDe = [];
-  p.ultimoEvento = null;
 
-  const restantes = rondasDeClimaRestantes(p);
-  if (p.clima && restantes !== null && restantes <= 0) {
-    p.registro.push(`Se acaba ${defCarta(p, p.clima).nombre}: vuelve el tiempo normal.`);
-    p.descartes.clima.push(p.clima);
-    p.clima = null;
-    p.climaDesde = null;
+  const restantes = diasRestantes(p);
+  if (p.dia && restantes !== null && restantes <= 0) {
+    p.registro.push(`Se acaba ${defCarta(p, p.dia).nombre}.`);
+    p.descartes.dia.push(p.dia);
+    p.dia = null;
+    p.diaDesde = null;
   }
 
-  if (p.mazos.clima.length === 0 && p.descartes.clima.length > 0) {
-    p.mazos.clima = p.descartes.clima;
-    p.descartes.clima = [];
-    barajar(p, p.mazos.clima);
-    p.registro.push("Se baraja el descarte de clima y eventos para formar un mazo nuevo.");
+  if (!p.dia) {
+    if (p.mazos.dia.length === 0 && p.descartes.dia.length > 0) {
+      p.mazos.dia = p.descartes.dia;
+      p.descartes.dia = [];
+      barajar(p, p.mazos.dia);
+      p.registro.push("Se baraja el descarte del mazo del día para formar un mazo nuevo.");
+    }
+    const carta = p.mazos.dia.pop();
+    if (!carta) return;
+    p.dia = carta;
+    p.diaDesde = p.ronda;
+    const dias = diasRestantes(p)!;
+    p.registro.push(`Ronda ${p.ronda}: sale ${defCarta(p, carta).nombre} (${dias === 1 ? "1 día" : `${dias} días`}).`);
   }
-  const carta = p.mazos.clima.pop();
-  if (!carta) return;
 
-  const def = defCarta(p, carta);
+  const def = defCarta(p, p.dia);
   const efecto = def.efecto ? efectos[def.efecto] : undefined;
-  if (def.mazo === "climas") {
-    if (p.clima) p.descartes.clima.push(p.clima);
-    p.clima = carta;
-    p.climaDesde = p.ronda;
-    p.registro.push(`Ronda ${p.ronda}: cambia el tiempo a ${def.nombre}.`);
-  } else {
-    p.ultimoEvento = carta;
-    p.descartes.clima.push(carta);
-    p.registro.push(`Ronda ${p.ronda}: evento ${def.nombre}.`);
-    if (efecto?.tipo === "evento") efecto.resolver(p, def.parametros);
-  }
+  if (efecto?.tipo === "evento") efecto.resolver(p, def.parametros);
 }
