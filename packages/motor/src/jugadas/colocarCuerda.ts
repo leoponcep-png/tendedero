@@ -6,7 +6,7 @@ import type { JugadaDe, Manejador } from "./tipos";
 
 /**
  * Comprobaciones comunes a jugar una carta de cuerda, ya sea colocándola o mejorando otra.
- * `gratis`: no cuenta como la cuerda del turno (con el ajuste viejaAlRivalGratis).
+ * `gratis`: no cuenta como la cuerda del turno (la cuerda vieja).
  */
 function motivoCartaDeCuerda(p: Partida, jugador: number, carta: string, gratis = false): string | null {
   if (!p.jugadores[jugador].mano.includes(carta)) return "Esa carta no está en tu mano.";
@@ -25,9 +25,9 @@ function pagarCuerda(p: Partida, jugador: number, carta: string, gratis = false)
   if (!gratis) p.turno.cuerdasJugadas++;
 }
 
-/** Con el ajuste viejaAlRivalGratis, colocar una cuerda en el tendedero de un rival no gasta la del turno. */
+/** Algunas cuerdas (la vieja) se colocan sin gastar la cuerda del turno. */
 function esGratis(p: Partida, j: JugadaDe<"colocarCuerda">): boolean {
-  return Boolean(p.ajustes.viejaAlRivalGratis) && (j.en ?? j.jugador) !== j.jugador;
+  return Boolean(efectoDeCuerda(p, j.carta)?.efecto.noGastaTurno);
 }
 
 /** Pone la carta de cuerda en el hueco siguiente de la línea (ya pagada). */
@@ -73,7 +73,8 @@ export const colocarCuerda: Manejador<JugadaDe<"colocarCuerda">> = {
   },
 };
 
-// Se mejora poniendo la carta encima de una básica o de una que se rompe (la vieja); las prendas se quedan.
+// Se mejora poniendo la carta encima de otra tuya; las prendas se quedan. Las cuerdas con habilidad van sobre
+// una básica, y una que se rompe (la vieja) solo se arregla poniéndole encima una básica.
 export const mejorarCuerda: Manejador<JugadaDe<"mejorarCuerda">> = {
   soloEnSuTurno: true,
   validar(p, j) {
@@ -87,6 +88,7 @@ export const mejorarCuerda: Manejador<JugadaDe<"mejorarCuerda">> = {
     if (debajo.efecto !== null && !seRompe(tendida.carta)) return "Solo se mejoran las cuerdas básicas y las viejas.";
     if (encima.id === debajo.id) return `Ya es una ${debajo.nombre.toLowerCase()}.`;
     if (seRompe(j.carta)) return `${encima.nombre} no sirve para mejorar una cuerda.`;
+    if (seRompe(tendida.carta) && encima.efecto !== null) return `${debajo.nombre} solo se arregla poniéndole encima una cuerda básica.`;
     const cabe = tendida.colgadas.every((c) => c.inicio + tipoDe(p, c.prenda).espacios <= encima.espacios);
     if (!cabe) return "Las prendas colgadas no caben en esa carta.";
     return null;

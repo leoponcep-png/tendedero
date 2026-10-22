@@ -309,6 +309,34 @@ if (recomendada.length) {
   tablaObjetivos(recomendada.flat());
 }
 
+// ---------- Orden del reparto según cómo atacan los bots ----------
+if (Object.keys(porConfig).some((id) => id.includes("-X-"))) {
+  L("## Orden del reparto según a quién atacan los bots");
+  L();
+  L("Con las reglas actuales del juego (vieja gratis, objetivos compensados, robo de 3). «Atacan al que va mejor»: cada bot se compara con el rival que va mejor y le lanza a él los fastidios. «Reparten los ataques»: se compara con la media de los rivales, así que le da igual a quién atacar.");
+  L();
+  L("| Jugadores | Reparto | Bots | Partidas | Victorias por asiento | Minutos | Viejas al rival | Regalo: puntos | Cuerdas llenas: puntos |");
+  L("|---|---|---|---|---|---|---|---|---|");
+  for (const n of [2, 3, 4]) {
+    for (const rep of ["normal", "inverso", "final"]) {
+      for (const riv of ["mejor", "media"]) {
+        const g = porConfig[`n${n}-X-${rep}-${riv}`];
+        if (!g) continue;
+        const r = resumen(g);
+        const pts = (id) => f1(media(g.flatMap((s) => s.puntosPorObjetivo[id] ?? [])));
+        L(`| ${n} | ${{ normal: "Orden de los turnos", inverso: "Al revés", final: "Reglas finales (orden de los turnos)" }[rep]} | ${riv === "mejor" ? "Atacan al que va mejor" : "Reparten los ataques"} | ${r.partidas} | ${r.asientos.map((x) => (100 * x).toFixed(0)).join(" / ")} | ${Math.round(r.minutos)} | ${f1(media(g.map((s) => s.viejasAlRival)))} | ${pts("regalo-envenenado")} | ${pts("cuerdas-llenas")} |`);
+      }
+    }
+  }
+  L();
+  const actuales = Object.entries(porConfig).filter(([id]) => id.includes("-X-final-mejor")).flatMap(([, g]) => g);
+  if (actuales.length) {
+    L("### Objetivos con las reglas finales");
+    L();
+    tablaObjetivos(actuales);
+  }
+}
+
 // ---------- Opciones para la cuerda vieja ----------
 const VIEJA = {
   "R-afinada": "Reglas afinadas (sin cambios en la vieja)",

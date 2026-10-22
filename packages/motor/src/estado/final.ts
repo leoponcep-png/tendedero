@@ -30,13 +30,17 @@ export function pasarTurno(p: Partida): void {
 
 /**
  * Cuando todos han jugado: se seca y se puntúa a la vez, y empieza la ronda siguiente con otro jugador:
- * carta de clima o evento, cestas nuevas y reparto de prendas.
+ * carta del día, cestas nuevas y reparto de prendas. Si ya no queda ropa que repartir, la partida acaba.
  */
 function finDeRonda(p: Partida): void {
   p.registro.push(`— Fin de la ronda ${p.ronda}: secado y puntos de todos —`);
   for (const jugador of ordenDeRonda(p)) faseDeSecado(p, jugador);
   romperCuerdas(p);
   comprobarUmbral(p);
+  if (!p.ultimaRonda && p.bolsa.length + p.centro.length + p.cestas.flat().length === 0) {
+    p.ultimaRonda = true;
+    p.registro.push("Se ha acabado la ropa (no queda en la bolsa, ni en las cestas, ni en el centro): la partida termina.");
+  }
   if (p.ultimaRonda) {
     terminarPartida(p);
     return;

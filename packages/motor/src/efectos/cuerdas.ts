@@ -11,7 +11,7 @@ export const efectosCuerda: Record<string, EfectoCuerda> = {
   // Cuerda vieja: se puede colocar a un rival y se rompe al acabar su ronda número parametros.rondas
   // (contando aquella en la que se colocó), junto con todas las cartas a su derecha; sus prendas se pierden.
   // Se salva mejorándola antes (ver jugadas/colocarCuerda.ts).
-  fragil: { tipo: "cuerda", paraRival: true, seRompeTras: (params) => numero(params, "rondas", 2) },
+  fragil: { tipo: "cuerda", paraRival: true, noGastaTurno: true, seRompeTras: (params) => numero(params, "rondas", 2) },
 
   // parametros.humedad: cuánto pierden sus prendas en cada secado.
   "secado-rapido": { tipo: "cuerda", secado: (params) => numero(params, "humedad", 2) },

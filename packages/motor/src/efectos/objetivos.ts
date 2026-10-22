@@ -1,5 +1,5 @@
 import type { CartaTendida, Partida } from "../estado/tipos";
-import { texto, tipoDe } from "../estado/utilidades";
+import { numero, texto, tipoDe } from "../estado/utilidades";
 import type { EfectoObjetivo } from ".";
 
 function porColor(p: Partida, prendas: string[]): number[] {
@@ -61,11 +61,14 @@ export const efectosObjetivo: Record<string, EfectoObjetivo> = {
   },
 
   // Cartas de cuerda con todos sus huecos ocupados (se cuenta al final, con lo que quede colgado).
+  // Con parametros.mismoColor, solo cuentan si todas sus prendas son del mismo color.
   "cuerdas-llenas": {
     tipo: "objetivo",
-    contar(p, jugador) {
+    contar(p, jugador, params) {
+      const mismoColor = numero(params, "mismoColor", 0) > 0;
       const llena = (t: CartaTendida) =>
-        t.colgadas.reduce((s, c) => s + tipoDe(p, c.prenda).espacios, 0) >= p.catalogo.cartas[p.cartas[t.carta]].espacios;
+        t.colgadas.reduce((s, c) => s + tipoDe(p, c.prenda).espacios, 0) >= p.catalogo.cartas[p.cartas[t.carta]].espacios &&
+        (!mismoColor || new Set(t.colgadas.map((c) => p.prendas[c.prenda].color)).size === 1);
       return p.jugadores[jugador].lineas.flatMap((l) => l.cartas).filter(llena).length;
     },
   },

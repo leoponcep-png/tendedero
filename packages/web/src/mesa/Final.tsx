@@ -8,11 +8,11 @@ export function Final({ partida, onCerrar, onNueva }: { partida: Partida; onCerr
     <div className="fondo-modal">
       <div className="modal">
         <h2>Fin de la partida</h2>
-        {primero !== null && (
-          <p className="nota">
-            {partida.jugadores[primero].nombre} llegó primero a {partida.ajustes.umbralFinal} puntos; se terminó la ronda y se contaron los objetivos.
-          </p>
-        )}
+        <p className="nota">
+          {primero !== null
+            ? `${partida.jugadores[primero].nombre} llegó primero a ${partida.ajustes.umbralFinal} puntos; se terminó la ronda y se contaron los objetivos.`
+            : "Se acabó la ropa antes de que nadie llegara al final; se terminó la ronda y se contaron los objetivos."}
+        </p>
         <table className="tabla-final">
           <thead>
             <tr>

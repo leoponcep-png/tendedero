@@ -1,6 +1,24 @@
 # Informe de partidas con bots
 
-> Pruebas terminadas. Recoge **36 471 partidas** jugadas por bots con 2, 3 y 4 jugadores (más 6600 de una primera versión de los bots, que no se mezclan aquí). La última tanda, la de la cuerda vieja, se paró a medias.
+> Pruebas terminadas. Recoge **unas 43 000 partidas** jugadas por bots con 2, 3 y 4 jugadores (más 6600 de una primera versión de los bots, que no se mezclan aquí).
+
+## Lo que se ha decidido y aplicado al juego
+
+| Tema | Decisión | Resultado con bots (reglas finales, 900 partidas) |
+|---|---|---|
+| Ritmos de objetivos | Compensados (tabla del apartado 3, con Cuerdas llenas de un color a cada 1 → 2) | Casi todos dan entre 3 y 5 puntos de media |
+| Cuerda vieja | No cuenta como tu cuerda del turno; solo se arregla poniéndole encima una básica | Se colocan 2–4 por partida (antes 0,2–0,4) |
+| Regalo envenenado | Cuenta las viejas tuyas en tendederos rivales al final, más los trofeos | 1 punto de media; de secreto gana el 28 % (justo: 34 %). Sigue algo flojo |
+| Cuerdas llenas | Solo cartas llenas de un mismo color, cada 1 → 2 | 3,2 puntos; de secreto gana el 40 % |
+| Cartas de habilidad | Solo mejoran cuerdas básicas | — |
+| Se acaba la ropa | La partida acaba al terminar la ronda | Ya no hay partidas que no terminan |
+| Robo | Se queda en 3 a elegir (más acciones) | — |
+| Reparto | Se queda en el orden de los turnos (ver abajo) | 47 / 53 · 32 / 29 / 39 · 23 / 23 / 24 / 31 |
+| Duración | Final a 30, prendas 1 / 3 / 6 | 32 min a 2, 40 a 3, 49 a 4 |
+
+**Por qué el reparto se queda como estaba:** la desventaja de abrir la ronda venía de que los bots atacaban siempre al que iba mejor. Con bots que reparten los ataques, el orden normal ya sale justo (24 / 27 / 24 / 26 a 4 jugadores) y el reparto al revés se pasa. Ver «Orden del reparto según a quién atacan los bots».
+
+Lo que sigue es el análisis completo, escrito antes de esas decisiones.
 
 ## En pocas palabras
 
@@ -136,10 +154,10 @@ Los bots no planifican a varios turnos, así que una persona quizá la use más.
 
 # Informe de partidas con bots
 
-Partidas jugadas: **36471** (6 abortadas por pasar de 60 rondas).
-- 2 jugadores: 12330
-- 3 jugadores: 12081
-- 4 jugadores: 12060
+Partidas jugadas: **42171** (6 abortadas por pasar de 60 rondas).
+- 2 jugadores: 14230
+- 3 jugadores: 13981
+- 4 jugadores: 13960
 
 Los bots juegan con una valoración sencilla: en cada paso prueban todas las jugadas válidas y se quedan con la que mejor deja la mesa para ellos frente al mejor rival. No planifican a varios turnos ni ven la mano del rival. Juegan razonablemente, pero peor que una persona con experiencia: las conclusiones sobre equilibrio valen más que las cifras exactas.
 
@@ -551,6 +569,51 @@ Todas llevan los objetivos equilibrados y el reparto inverso, salvo la primera f
 | a-toda-prisa | 1512 | 3,3 | 523 | 35 % (esperado 34 %) |
 | parejas | 1530 | 3,2 | 498 | 28 % (esperado 34 %) |
 | regalo-envenenado | 1437 | 0,0 | 530 | 24 % (esperado 34 %) |
+
+## Orden del reparto según a quién atacan los bots
+
+Con las reglas actuales del juego (vieja gratis, objetivos compensados, robo de 3). «Atacan al que va mejor»: cada bot se compara con el rival que va mejor y le lanza a él los fastidios. «Reparten los ataques»: se compara con la media de los rivales, así que le da igual a quién atacar.
+
+| Jugadores | Reparto | Bots | Partidas | Victorias por asiento | Minutos | Viejas al rival | Regalo: puntos | Cuerdas llenas: puntos |
+|---|---|---|---|---|---|---|---|---|
+| 2 | Orden de los turnos | Atacan al que va mejor | 400 | 51 / 49 | 31 | 2,1 | 0,6 | 5,2 |
+| 2 | Orden de los turnos | Reparten los ataques | 400 | 48 / 52 | 31 | 2,0 | 0,4 | 4,2 |
+| 2 | Al revés | Atacan al que va mejor | 400 | 47 / 53 | 32 | 2,1 | 0,5 | 4,2 |
+| 2 | Al revés | Reparten los ataques | 400 | 48 / 52 | 32 | 2,1 | 0,5 | 4,6 |
+| 2 | Reglas finales (orden de los turnos) | Atacan al que va mejor | 300 | 47 / 53 | 32 | 2,1 | 1,0 | 3,4 |
+| 3 | Orden de los turnos | Atacan al que va mejor | 400 | 31 / 33 / 36 | 39 | 3,0 | 0,5 | 4,5 |
+| 3 | Orden de los turnos | Reparten los ataques | 400 | 34 / 30 / 36 | 40 | 3,3 | 0,6 | 5,0 |
+| 3 | Al revés | Atacan al que va mejor | 400 | 33 / 39 / 28 | 40 | 3,1 | 0,6 | 4,7 |
+| 3 | Al revés | Reparten los ataques | 400 | 34 / 40 / 26 | 39 | 3,2 | 0,7 | 4,8 |
+| 3 | Reglas finales (orden de los turnos) | Atacan al que va mejor | 300 | 32 / 29 / 39 | 40 | 3,0 | 0,9 | 2,8 |
+| 4 | Orden de los turnos | Atacan al que va mejor | 400 | 18 / 25 / 28 / 30 | 48 | 4,1 | 0,8 | 4,8 |
+| 4 | Orden de los turnos | Reparten los ataques | 400 | 24 / 27 / 24 / 26 | 47 | 4,3 | 0,3 | 5,0 |
+| 4 | Al revés | Atacan al que va mejor | 400 | 26 / 29 / 24 / 20 | 48 | 4,1 | 0,6 | 5,0 |
+| 4 | Al revés | Reparten los ataques | 400 | 28 / 28 / 22 / 22 | 48 | 4,2 | 0,3 | 4,2 |
+| 4 | Reglas finales (orden de los turnos) | Atacan al que va mejor | 300 | 23 / 23 / 24 / 31 | 49 | 4,2 | 1,1 | 3,3 |
+
+### Objetivos con las reglas finales
+
+| Objetivo | Veces en juego | Puntos medios | Veces de secreto | Gana con él de secreto |
+|---|---|---|---|---|
+| monton-de-ropa | 369 | 5,3 | 147 | 37 % (esperado 32 %) |
+| coleccion-color | 464 | 5,1 | 144 | 38 % (esperado 32 %) |
+| tendedero-completo | 526 | 4,9 | 146 | 30 % (esperado 34 %) |
+| variedad-de-cuerdas | 491 | 4,8 | 152 | 38 % (esperado 33 %) |
+| todo-rojo | 399 | 4,8 | 125 | 36 % (esperado 34 %) |
+| calcetinero | 418 | 4,7 | 137 | 31 % (esperado 33 %) |
+| camisetero | 474 | 4,6 | 165 | 28 % (esperado 33 %) |
+| todo-amarillo | 405 | 4,6 | 155 | 30 % (esperado 32 %) |
+| conjunto-completo | 494 | 4,6 | 168 | 36 % (esperado 34 %) |
+| todo-blanco | 439 | 4,6 | 138 | 39 % (esperado 34 %) |
+| bajo-techo | 492 | 4,4 | 166 | 32 % (esperado 34 %) |
+| todo-azul | 453 | 4,1 | 153 | 37 % (esperado 33 %) |
+| arcoiris | 455 | 4,1 | 149 | 30 % (esperado 32 %) |
+| toallero | 410 | 4,1 | 138 | 23 % (esperado 33 %) |
+| parejas | 508 | 3,5 | 161 | 37 % (esperado 34 %) |
+| cuerdas-llenas | 459 | 3,2 | 154 | 40 % (esperado 34 %) |
+| a-toda-prisa | 420 | 2,9 | 142 | 31 % (esperado 33 %) |
+| regalo-envenenado | 424 | 1,0 | 160 | 28 % (esperado 34 %) |
 
 ## Opciones para la cuerda vieja
 

@@ -13,8 +13,6 @@ export interface Ajustes {
   cestas: { numero: number; prendasPorCesta: number; renovarTodas?: boolean };
   /** Si en el reparto coge primero quien juega el último (para compensar el orden de turno). */
   repartoInverso?: boolean;
-  /** Si colocar una cuerda en el tendedero de un rival (la vieja) no cuenta como tu cuerda del turno. */
-  viejaAlRivalGratis?: boolean;
   tendedero: { lineas: number; cartasPorLinea: number };
   objetivos: { comunes: number; secretosRepartidos: number };
   /** Por id de tipo de prenda. */

@@ -113,9 +113,14 @@ function valoracion(p: Partida, i: number): number {
     const mejorRival = Math.max(...p.final.filter((r) => r.jugador !== i).map((r) => r.total));
     return (mio.total - mejorRival) * 10;
   }
-  const rivales = p.jugadores.map((_, k) => k).filter((k) => k !== i);
-  return valor(p, i) - 0.8 * Math.max(...rivales.map((k) => valor(p, k)));
+  const valores = p.jugadores.map((_, k) => k).filter((k) => k !== i).map((k) => valor(p, k));
+  // «mejor»: se compara con el rival que va mejor (y se le ataca a él); «media»: con la media de los rivales,
+  // así que da igual a quién se ataque y los fastidios se reparten.
+  const rival = modoRivales === "media" ? valores.reduce((a, b) => a + b, 0) / valores.length : Math.max(...valores);
+  return valor(p, i) - 0.8 * rival;
 }
+
+let modoRivales: "mejor" | "media" = "mejor";
 
 // ---------- Jugadas candidatas ----------
 
@@ -245,9 +250,10 @@ export interface Config {
   ritmos?: Record<string, [number, number]>;
   /** Parámetros distintos para algunas cartas: id → parámetros (p. ej. las rondas de la cuerda vieja). */
   parametros?: Record<string, Record<string, number>>;
-  viejaAlRivalGratis?: boolean;
   /** Efecto distinto para algunos objetivos: id → efecto (p. ej. Regalo envenenado contando viejas colocadas). */
   efectos?: Record<string, string>;
+  /** Con quién se comparan los bots: el rival que va mejor (por defecto) o la media de los rivales. */
+  rivales?: "mejor" | "media";
 }
 
 interface Stats {
@@ -300,6 +306,7 @@ function contarColgadas(p: Partida): number {
 
 function jugarPartida(c: Config, semilla: string): Stats {
   const datosConfig = datosDe(c);
+  modoRivales = c.rivales ?? "mejor";
   const base = ajustesIniciales(datosConfig);
   const ajustes = {
     ...base,
@@ -311,7 +318,6 @@ function jugarPartida(c: Config, semilla: string): Stats {
     limiteMano: c.limiteMano ?? base.limiteMano,
     cestas: { ...base.cestas, ...c.cestas },
     repartoInverso: c.repartoInverso,
-    viejaAlRivalGratis: c.viejaAlRivalGratis,
   };
   TIPOS.forEach((t, k) => (ajustes.prendas[t].puntos = c.prendas[k]));
   let p = crearPartida(datosConfig, ajustes);

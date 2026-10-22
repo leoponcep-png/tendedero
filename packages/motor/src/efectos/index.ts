@@ -64,6 +64,8 @@ export interface EfectoCuerda {
   seRompeTras?(params: Parametros): number;
   /** Se puede colocar en el tendedero de un rival. */
   paraRival?: boolean;
+  /** Colocarla no cuenta como la cuerda del turno. */
+  noGastaTurno?: boolean;
 }
 
 /** Cuenta lo que mide un objetivo; «cada» y «puntos» del JSON convierten la cantidad en puntos. */
