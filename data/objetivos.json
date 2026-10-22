@@ -9,12 +9,12 @@
     { "id": "tendedero-completo", "nombre": "Tendedero completo", "uso": "comun", "estado": "definida", "efecto": "lineas-completas", "texto": "Líneas con todas sus cartas de cuerda.", "cada": 1, "puntos": 4 },
     { "id": "variedad-de-cuerdas", "nombre": "Variedad de cuerdas", "uso": "comun", "estado": "definida", "efecto": "clases-de-cuerda", "texto": "Clases distintas de cuerda en tu tendedero (las básicas cuentan como una).", "cada": 1, "puntos": 2 },
 
-    { "id": "todo-blanco", "nombre": "Todo blanco", "uso": "secreto", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "blanco" }, "texto": "Prendas blancas secas.", "cada": 1, "puntos": 2 },
-    { "id": "todo-azul", "nombre": "Todo azul", "uso": "secreto", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "azul" }, "texto": "Prendas azules secas.", "cada": 1, "puntos": 2 },
-    { "id": "todo-rojo", "nombre": "Todo rojo", "uso": "secreto", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "rojo" }, "texto": "Prendas rojas secas.", "cada": 1, "puntos": 2 },
-    { "id": "todo-amarillo", "nombre": "Todo amarillo", "uso": "secreto", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "amarillo" }, "texto": "Prendas amarillas secas.", "cada": 1, "puntos": 2 },
+    { "id": "todo-blanco", "nombre": "Todo blanco", "uso": "secreto", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "blanco" }, "texto": "Prendas blancas secas.", "cada": 2, "puntos": 3 },
+    { "id": "todo-azul", "nombre": "Todo azul", "uso": "secreto", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "azul" }, "texto": "Prendas azules secas.", "cada": 2, "puntos": 3 },
+    { "id": "todo-rojo", "nombre": "Todo rojo", "uso": "secreto", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "rojo" }, "texto": "Prendas rojas secas.", "cada": 2, "puntos": 3 },
+    { "id": "todo-amarillo", "nombre": "Todo amarillo", "uso": "secreto", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "amarillo" }, "texto": "Prendas amarillas secas.", "cada": 2, "puntos": 3 },
     { "id": "parejas", "nombre": "Cada oveja con su pareja", "uso": "secreto", "estado": "definida", "efecto": "parejas", "parametros": { "tipo": "calcetin" }, "texto": "Parejas de calcetines secos del mismo color.", "cada": 1, "puntos": 4 },
-    { "id": "bajo-techo", "nombre": "Bajo techo", "uso": "secreto", "estado": "definida", "efecto": "secadas-en", "parametros": { "efecto": "tejadillo" }, "texto": "Prendas secadas en un tejadillo o en la cuerda que cubre.", "cada": 1, "puntos": 2 },
-    { "id": "a-toda-prisa", "nombre": "A toda prisa", "uso": "secreto", "estado": "definida", "efecto": "secadas-en", "parametros": { "efecto": "secado-rapido" }, "texto": "Prendas secadas en una cuerda de secado rápido.", "cada": 1, "puntos": 2 }
+    { "id": "bajo-techo", "nombre": "Bajo techo", "uso": "secreto", "estado": "definida", "efecto": "secadas-en", "parametros": { "efecto": "tejadillo" }, "texto": "Prendas secadas en un tejadillo o en la cuerda que cubre.", "cada": 1, "puntos": 3 },
+    { "id": "a-toda-prisa", "nombre": "A toda prisa", "uso": "secreto", "estado": "definida", "efecto": "secadas-en", "parametros": { "efecto": "secado-rapido" }, "texto": "Prendas secadas en una cuerda de secado rápido.", "cada": 1, "puntos": 3 }
   ]
 }
