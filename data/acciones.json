@@ -9,6 +9,11 @@
     { "id": "secar-prenda", "nombre": "Secar prenda inmediatamente", "copias": 2, "estado": "definida", "grupo": "tácticas", "efecto": "secar-prenda", "texto": "Una prenda tuya se seca ya y puntúa." },
     { "id": "reducir-humedad", "nombre": "Reducir humedad", "copias": 2, "estado": "definida", "grupo": "tácticas", "efecto": "reducir-humedad", "parametros": { "humedad": 1 }, "texto": "−1 de humedad a una prenda tuya; si llega a 0, se seca." },
     { "id": "mover-prenda-propia", "nombre": "Mover prenda propia", "copias": 2, "estado": "definida", "grupo": "tácticas", "efecto": "mover-prenda-propia", "texto": "Mueve una prenda tuya a otro hueco libre." },
-    { "id": "proteger-cuerda", "nombre": "Proteger cuerda", "copias": 2, "estado": "definida", "grupo": "tácticas", "efecto": "proteger-cuerda", "texto": "Las cartas de fastidio no afectan a esta carta de cuerda hasta tu próximo turno." }
+    { "id": "proteger-cuerda", "nombre": "Proteger cuerda", "copias": 2, "estado": "definida", "grupo": "tácticas", "efecto": "proteger-cuerda", "texto": "Las cartas de fastidio no afectan a esta carta de cuerda hasta tu próximo turno." },
+    { "id": "buscar-cuerda", "nombre": "Buscar cuerda", "copias": 3, "estado": "definida", "grupo": "tácticas", "efecto": "buscar-cuerda", "parametros": { "cartas": 1 }, "texto": "Roba 1 carta de cuerda." },
+    { "id": "cambiar-prendas", "nombre": "Cambiar prendas de sitio", "copias": 2, "estado": "definida", "grupo": "tácticas", "efecto": "cambiar-prendas", "texto": "Dos prendas tuyas se intercambian el sitio." },
+    { "id": "cambiar-cuerdas", "nombre": "Cambiar la ropa de cuerda", "copias": 2, "estado": "definida", "grupo": "tácticas", "efecto": "cambiar-cuerdas", "texto": "Todo lo colgado en una carta de cuerda tuya pasa a otra tuya, y al revés." },
+    { "id": "mover-cuerda", "nombre": "Mover cuerda", "copias": 2, "estado": "definida", "grupo": "tácticas", "efecto": "mover-cuerda", "texto": "Una carta de cuerda tuya, con sus prendas, cambia de sitio con otra o pasa al final de una línea." },
+    { "id": "ni-hablar", "nombre": "¡Ni hablar!", "copias": 3, "estado": "definida", "grupo": "tácticas", "efecto": "anular-fastidio", "texto": "Reacción: cuando un rival te juega una carta de fastidio o te coloca una cuerda vieja, juégala para que no tenga efecto." }
   ]
 }

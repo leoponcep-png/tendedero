@@ -67,15 +67,11 @@ export function Objetivo({ id, jugador, secreto }: { id: string; jugador?: numbe
       <span className="tipo-carta">{secreto ? "Secreto" : jugador === undefined ? o.uso : "Común"}</span>
       <strong>{o.nombre}</strong>
       <small>{o.texto}</small>
-      {o.niveles.length > 0 && (
-        <small className="niveles">
-          {o.niveles.map((n, i) => (
-            <span key={i} className={progreso && progreso.cantidad >= n.requisito ? "alcanzado" : ""}>
-              {n.requisito} → {n.puntos} pts
-            </span>
-          ))}
-        </small>
-      )}
+      <small className="niveles">
+        <span className="alcanzado">
+          cada {o.cada} → {o.puntos} pts, sin límite
+        </span>
+      </small>
       {progreso && (
         <small className="progreso">
           llevas {progreso.cantidad} · ahora darían {progreso.puntos} pts

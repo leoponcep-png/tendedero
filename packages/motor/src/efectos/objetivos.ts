@@ -60,12 +60,12 @@ export const efectosObjetivo: Record<string, EfectoObjetivo> = {
     },
   },
 
-  // Prendas que se secaron en cuerdas con un efecto concreto (parametros.efecto).
+  // Prendas que se secaron en cuerdas con un efecto concreto (parametros.efecto), o bajo un tejadillo que las cubría.
   "secadas-en": {
     tipo: "objetivo",
     contar(p, jugador, params) {
       const efecto = texto(params, "efecto");
-      return Object.values(p.jugadores[jugador].secadoEn).filter((def) => p.catalogo.cartas[def]?.efecto === efecto).length;
+      return Object.values(p.jugadores[jugador].secadoEn).filter((defs) => defs.some((def) => p.catalogo.cartas[def]?.efecto === efecto)).length;
     },
   },
 };

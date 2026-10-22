@@ -1050,3 +1050,37 @@ legend {
   background: #fdf3e8;
   border-top-color: #d98a3a;
 }
+
+/* Cartas que se rompen, avisos de las cartas tendidas y destinos que se pulsan */
+.notas-cuerda {
+  font-weight: 400;
+  font-size: 0.85em;
+  opacity: 0.8;
+}
+
+.carta-cuerda.fragil {
+  border-style: dashed;
+}
+
+.carta-cuerda.moviendo {
+  outline: 2px dashed var(--acento);
+  outline-offset: 2px;
+}
+
+.colgada.pulsable,
+.hueco.pulsable {
+  cursor: pointer;
+}
+
+.colgada.pulsable {
+  outline: 2px solid var(--acento);
+  outline-offset: -2px;
+  border-radius: 6px;
+}
+
+.franja-aviso.reaccion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}

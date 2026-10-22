@@ -16,8 +16,29 @@ import { efectosObjetivo } from "./objetivos";
 /** Lo que una carta de acción hace a sus objetivos; las cuerdas pueden proteger de ciertas etiquetas. */
 export type Etiqueta = "fastidio" | "moja" | "tira" | "mueve";
 
-/** Sobre qué se suelta la carta de acción. */
-export type Blanco = "ninguno" | "prendaPropia" | "prendaRival" | "cartaPropia" | "cartaRival" | "moverPropia" | "moverRival";
+/**
+ * Sobre qué se suelta la carta de acción. Los que acaban en «Rival» van al tendedero de otro; el resto, al tuyo.
+ * Los de dos pasos (ver BLANCOS_CON_DESTINO) piden además un destino:
+ * - moverPropia / moverRival: un espacio libre adonde llevar la prenda.
+ * - cambiarPrendas: un espacio de otra prenda tuya; se intercambian sus sitios.
+ * - cambiarCuerdas: otra carta de cuerda tuya; se intercambia todo lo colgado en ellas.
+ * - moverCuerda: otra carta de cuerda tuya (se intercambian de sitio) o el hueco siguiente de una línea.
+ * «reaccion» no se juega en tu turno: se responde con ella al fastidio de un rival.
+ */
+export type Blanco =
+  | "ninguno"
+  | "prendaPropia"
+  | "prendaRival"
+  | "cartaPropia"
+  | "cartaRival"
+  | "moverPropia"
+  | "moverRival"
+  | "cambiarPrendas"
+  | "cambiarCuerdas"
+  | "moverCuerda"
+  | "reaccion";
+
+export const BLANCOS_CON_DESTINO: Blanco[] = ["moverPropia", "moverRival", "cambiarPrendas", "cambiarCuerdas", "moverCuerda"];
 
 export interface EfectoAccion {
   tipo: "accion";
@@ -37,9 +58,15 @@ export interface EfectoCuerda {
   puntosAlSecar?(p: Partida, prenda: string, params: Parametros, base: number): number;
   /** Etiquetas de acción que no afectan a esta carta. */
   protegeDe?: Etiqueta[];
+  /** Etiquetas de las que protege también a la carta de cuerda justo debajo (misma posición, línea siguiente). */
+  cubreAbajo?: Etiqueta[];
+  /** Rondas tras las que se rompe, ella y todas las cartas a su derecha (contando la ronda en que se coloca). */
+  seRompeTras?(params: Parametros): number;
+  /** Se puede colocar en el tendedero de un rival. */
+  paraRival?: boolean;
 }
 
-/** Cuenta lo que mide un objetivo; los niveles del JSON convierten la cantidad en puntos. */
+/** Cuenta lo que mide un objetivo; «cada» y «puntos» del JSON convierten la cantidad en puntos. */
 export interface EfectoObjetivo {
   tipo: "objetivo";
   contar(p: Partida, jugador: number, params: Parametros): number;

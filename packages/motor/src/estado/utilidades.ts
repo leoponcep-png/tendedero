@@ -54,13 +54,20 @@ export function localizar(p: Partida, prenda: string): Ubicacion | null {
   return null;
 }
 
-/** null si la prenda cabe en ese sitio; si no, el motivo. `ignorar` es una prenda que se está moviendo. */
+/** La prenda que ocupa ese espacio de una carta de cuerda, si hay alguna. */
+export function prendaEn(p: Partida, sitio: { jugador: number; linea: number; posicion: number; inicio: number }): string | undefined {
+  const tendida = p.jugadores[sitio.jugador]?.lineas[sitio.linea]?.cartas[sitio.posicion];
+  return tendida?.colgadas.find((c) => sitio.inicio >= c.inicio && sitio.inicio < c.inicio + tipoDe(p, c.prenda).espacios)?.prenda;
+}
+
+/** null si la prenda cabe en ese sitio; si no, el motivo. `ignorar`: prendas que se están moviendo. */
 export function motivoNoCabe(
   p: Partida,
   sitio: { jugador: number; linea: number; posicion: number; inicio: number },
   prenda: string,
-  ignorar?: string,
+  ignorar: string | string[] = [],
 ): string | null {
+  const ignoradas = typeof ignorar === "string" ? [ignorar] : ignorar;
   const tendida = p.jugadores[sitio.jugador]?.lineas[sitio.linea]?.cartas[sitio.posicion];
   if (!tendida) return "Ahí no hay ninguna carta de cuerda.";
   const huecos = defCarta(p, tendida.carta).espacios;
@@ -69,7 +76,7 @@ export function motivoNoCabe(
     return `No cabe: ocupa ${espacios(ocupa)} y tiene que caber entera en una sola carta.`;
   }
   for (const c of tendida.colgadas) {
-    if (c.prenda === ignorar) continue;
+    if (ignoradas.includes(c.prenda)) continue;
     const fin = c.inicio + tipoDe(p, c.prenda).espacios;
     if (sitio.inicio < fin && c.inicio < sitio.inicio + ocupa) return "Esos espacios ya están ocupados.";
   }

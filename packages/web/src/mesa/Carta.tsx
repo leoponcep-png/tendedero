@@ -21,8 +21,10 @@ export function CartaMano({ id, jugador, activa }: { id: string; jugador: number
   const { partida, jugar } = useMesa();
   const def = defCarta(partida, id);
   const descartando = activa && partida.turno.fase === "descartar";
-  const sinObjetivo = def.mazo === "acciones" && efectoAccion(partida, id)?.blanco === "ninguno";
-  const arrastrable = activa && !descartando && !sinObjetivo && partida.turno.fase === "jugar";
+  const blanco = def.mazo === "acciones" ? efectoAccion(partida, id)?.blanco : undefined;
+  const sinObjetivo = blanco === "ninguno";
+  // Las de reacción no se juegan en tu turno: se ofrecen cuando un rival te lanza un fastidio.
+  const arrastrable = activa && !descartando && !sinObjetivo && blanco !== "reaccion" && partida.turno.fase === "jugar";
   const { setNodeRef, listeners, attributes, isDragging } = useDraggable({
     id: `carta:${id}`,
     data: { tipo: def.mazo === "cuerdas" ? "cuerda" : "accion", jugador, carta: id },

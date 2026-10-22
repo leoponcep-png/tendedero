@@ -1,6 +1,7 @@
 import type { Ajustes } from "../ajustes";
 import type { Color, DefCarta, DefObjetivo, TipoPrenda } from "../datos/esquemas";
 import type { Etiqueta } from "../efectos";
+import type { JugadaDe } from "../jugadas/tipos";
 
 export interface Prenda {
   id: string;
@@ -20,6 +21,8 @@ export interface CartaTendida {
   colgadas: Colgada[];
   /** Por «Proteger cuerda»: inmune al fastidio hasta el siguiente turno de su dueño. */
   protegida?: boolean;
+  /** Ronda en la que se colocó (o se mejoró); las cuerdas que se rompen cuentan desde aquí. */
+  colocadaEn?: number;
 }
 
 /** Las cartas van de izquierda a derecha; cada nueva tapa el poste de la anterior. */
@@ -33,8 +36,8 @@ export interface Jugador {
   mano: string[];
   pendientes: string[];
   seca: string[];
-  /** Prenda seca → id de la cuerda en la que se secó (para objetivos que dependen de ello). */
-  secadoEn: Record<string, string>;
+  /** Por prenda seca: las cartas de cuerda en las que se secó (la suya y, si la cubría, el tejadillo de arriba). */
+  secadoEn: Record<string, string[]>;
   objetivosOfrecidos: string[];
   objetivoSecreto: string | null;
   puntos: number;
@@ -53,6 +56,11 @@ export interface Turno {
   cuerdasJugadas: number;
   cuerdasExtra: number;
   accionesJugadas: number;
+}
+
+export interface Reaccion {
+  jugada: JugadaDe<"jugarAccion"> | JugadaDe<"colocarCuerda">;
+  defensor: number;
 }
 
 export interface PuntosObjetivo {
@@ -92,6 +100,8 @@ export interface Partida {
   bolsa: string[];
   cestas: string[][];
   centro: string[];
+  /** Prendas que han salido de la partida (estaban en una cuerda que se rompió). */
+  perdidas: string[];
   /** Carta de clima activa: dura hasta que sale otro clima o se cumplen sus parametros.rondas. */
   clima: string | null;
   /** Ronda en la que salió el clima activo. */
@@ -107,6 +117,11 @@ export interface Partida {
   objetivosComunes: string[];
   jugadores: Jugador[];
   turno: Turno;
+  /**
+   * Fastidio a la espera de que el jugador atacado decida si lo anula con una carta de reacción.
+   * La carta del atacante ya ha salido de su mano y cuenta como jugada; el efecto aún no se ha aplicado.
+   */
+  reaccion: Reaccion | null;
   /** Alguien ha llegado al umbral: se juega hasta acabar la ronda. */
   ultimaRonda: boolean;
   primeroEnLlegar: number | null;

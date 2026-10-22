@@ -1,5 +1,16 @@
 import { DndContext, DragOverlay, PointerSensor, pointerWithin, useSensor, useSensors, type DragEndEvent, type DragStartEvent } from "@dnd-kit/core";
-import { cierraLaRonda, jugadorInicial, motivoInvalida, nombrePrenda, type Jugada, type JugadaDe, type Partida } from "@tendedero/motor";
+import {
+  cartaDeReaccion,
+  cierraLaRonda,
+  defCarta,
+  efectoAccion,
+  jugadorInicial,
+  motivoInvalida,
+  nombrePrenda,
+  type Jugada,
+  type JugadaDe,
+  type Partida,
+} from "@tendedero/motor";
 import { useEffect, useState } from "react";
 import { FichaCarta } from "../mesa/Carta";
 import { admisible, ContextoMesa, jugadaDe, necesitaDestino, type Arrastre, type Destino } from "../mesa/contexto";
@@ -18,9 +29,45 @@ interface Props {
   onNueva: () => void;
 }
 
+/** Qué pulsar para completar una acción de dos pasos. */
+function textoSegundoPaso(p: Partida, j: JugadaDe<"jugarAccion">): string {
+  const o = j.objetivo!;
+  const cuerda = defCarta(p, p.jugadores[o.jugador].lineas[o.linea].cartas[o.posicion].carta).nombre;
+  switch (efectoAccion(p, j.carta)?.blanco) {
+    case "cambiarPrendas":
+      return `Pulsa la prenda tuya con la que intercambiar ${nombrePrenda(p, o.prenda!)}.`;
+    case "cambiarCuerdas":
+      return `Pulsa otra carta de cuerda tuya para intercambiar lo colgado con ${cuerda}.`;
+    case "moverCuerda":
+      return `Pulsa otra carta de cuerda tuya para cambiarlas de sitio, o un hueco libre para llevar ${cuerda} al final de esa línea.`;
+    default:
+      return `Pulsa el espacio al que mover ${nombrePrenda(p, o.prenda!)}.`;
+  }
+}
+
+/** El jugador atacado decide si anula el fastidio con su carta de reacción. */
+function Reaccion({ partida, jugar }: { partida: Partida; jugar: (j: Jugada) => void }) {
+  const { jugada, defensor } = partida.reaccion!;
+  const atacante = partida.jugadores[jugada.jugador].nombre;
+  const nombre = partida.jugadores[defensor].nombre;
+  const carta = cartaDeReaccion(partida, defensor);
+  return (
+    <div className="franja-aviso reaccion">
+      <span>
+        {atacante} le juega <strong>{defCarta(partida, jugada.carta).nombre}</strong> a {nombre}. {nombre}, ¿lo anulas con{" "}
+        {carta ? defCarta(partida, carta).nombre : "tu carta de reacción"}?
+      </span>
+      <button className="principal" onClick={() => jugar({ tipo: "responder", jugador: defensor, anular: true })}>
+        Sí, anularlo
+      </button>
+      <button onClick={() => jugar({ tipo: "responder", jugador: defensor, anular: false })}>No, dejarlo pasar</button>
+    </div>
+  );
+}
+
 const AYUDA_SOLTAR: Record<Arrastre["tipo"], string> = {
   prenda: "Las prendas se cuelgan en los espacios de tus cartas de cuerda.",
-  cuerda: "Las cuerdas van en el siguiente hueco de una de tus líneas.",
+  cuerda: "Las cuerdas van en el siguiente hueco de una de tus líneas, o encima de una básica o vieja tuya para mejorarla.",
   accion: "Suelta la carta de acción sobre una carta de cuerda o una prenda colgada.",
 };
 
@@ -45,7 +92,7 @@ export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshace
   }, [partida]);
 
   function jugar(j: Jugada) {
-    // Las acciones de mover piden el destino en un segundo paso.
+    // Las acciones de mover e intercambiar piden el destino en un segundo paso.
     if (necesitaDestino(partida, j)) {
       if (admisible(partida, j)) setMovimiento(j);
       else setAviso(motivoInvalida(partida, j));
@@ -104,7 +151,7 @@ export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshace
                   Ver clasificación
                 </button>
               ) : (
-                <button className="principal" disabled={turno.fase !== "jugar"} onClick={() => jugar({ tipo: "terminarTurno", jugador: turno.jugador })}>
+                <button className="principal" disabled={turno.fase !== "jugar" || partida.reaccion !== null} onClick={() => jugar({ tipo: "terminarTurno", jugador: turno.jugador })}>
                   {cierraLaRonda(partida, turno.jugador) ? "Terminar turno y acabar la ronda" : "Terminar turno"}
                 </button>
               )}
@@ -131,10 +178,11 @@ export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshace
           )}
           {movimiento && (
             <div className="franja-aviso">
-              Pulsa el espacio al que mover {nombrePrenda(partida, movimiento.objetivo!.prenda!)}.
+              {textoSegundoPaso(partida, movimiento)}
               <button onClick={() => setMovimiento(null)}>Cancelar</button>
             </div>
           )}
+          {partida.reaccion && <Reaccion partida={partida} jugar={jugar} />}
           {aviso && <div className="aviso-jugada">{aviso}</div>}
 
           <div className="cuerpo-mesa">

@@ -53,7 +53,9 @@ export const esquemaObjetivo = z.object({
   efecto: z.string().nullable().default(null),
   parametros,
   texto: z.string().default(""),
-  niveles: z.array(z.object({ requisito: entero(), puntos: z.number().int() })).default([]),
+  /** Sin límite: cada `cada` de lo que cuenta el objetivo dan `puntos`. */
+  cada: entero(1),
+  puntos: entero(),
 });
 
 export const esquemaObjetivos = z.object({ objetivos: z.array(esquemaObjetivo) });

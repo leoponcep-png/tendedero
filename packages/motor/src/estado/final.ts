@@ -3,6 +3,7 @@ import type { DefObjetivo } from "../datos/esquemas";
 import type { Partida, PuntosObjetivo, ResultadoJugador } from "./tipos";
 import { empezarReparto, empezarTurnoDeJuego, renovarCestas } from "./reparto";
 import { inicioDeRonda, jugadorInicial, ordenDeRonda } from "./ronda";
+import { romperCuerdas } from "./rotura";
 import { faseDeSecado } from "./secado";
 
 /**
@@ -34,6 +35,7 @@ export function pasarTurno(p: Partida): void {
 function finDeRonda(p: Partida): void {
   p.registro.push(`— Fin de la ronda ${p.ronda}: secado y puntos de todos —`);
   for (const jugador of ordenDeRonda(p)) faseDeSecado(p, jugador);
+  romperCuerdas(p);
   comprobarUmbral(p);
   if (p.ultimaRonda) {
     terminarPartida(p);
@@ -47,11 +49,11 @@ function finDeRonda(p: Partida): void {
   empezarReparto(p);
 }
 
-/** Puntos que da un objetivo: solo el nivel más alto alcanzado, sin acumular. */
+/** Puntos que da un objetivo: sin límite, `puntos` por cada `cada` de lo que cuenta. */
 export function puntuarObjetivo(p: Partida, jugador: number, def: DefObjetivo): PuntosObjetivo {
   const efecto = def.efecto ? efectos[def.efecto] : undefined;
   const cantidad = efecto?.tipo === "objetivo" ? efecto.contar(p, jugador, def.parametros) : 0;
-  const puntos = def.niveles.filter((n) => cantidad >= n.requisito).reduce((max, n) => Math.max(max, n.puntos), 0);
+  const puntos = Math.floor(cantidad / def.cada) * def.puntos;
   return { objetivo: def.id, nombre: def.nombre, cantidad, puntos };
 }
 

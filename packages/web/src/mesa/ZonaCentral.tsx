@@ -34,6 +34,11 @@ export function ZonaCentral() {
         <Zona titulo="Bolsa">
           <span className="contador-grande">{partida.bolsa.length}</span>
         </Zona>
+        <Zona titulo="Perdidas">
+          <span className="contador-grande" title="Prendas de cuerdas que se rompieron: salen de la partida">
+            {partida.perdidas.length}
+          </span>
+        </Zona>
         <div className="zona cestas">
           <h3>Cestas</h3>
           <div className="contenido-zona">

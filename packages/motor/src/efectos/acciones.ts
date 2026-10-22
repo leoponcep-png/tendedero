@@ -1,5 +1,5 @@
 import { secarPrenda } from "../estado/secado";
-import { caer, descolgar, localizar, nombrePrenda, numero } from "../estado/utilidades";
+import { caer, defCarta, descolgar, localizar, nombrePrenda, numero, prendaEn, robar } from "../estado/utilidades";
 import type { Partida } from "../estado/tipos";
 import type { JugadaDe } from "../jugadas/tipos";
 import type { EfectoAccion } from ".";
@@ -23,6 +23,11 @@ function mover(p: Partida, j: JugadaDe<"jugarAccion">) {
   descolgar(u);
   p.jugadores[jugador].lineas[destino!.linea].cartas[destino!.posicion].colgadas.push({ prenda: prenda!, inicio: destino!.inicio });
   p.registro.push(`Se mueve ${nombrePrenda(p, prenda!)} a la línea ${destino!.linea + 1}, carta ${destino!.posicion + 1}.`);
+}
+
+function sitio(p: Partida, j: JugadaDe<"jugarAccion">): string {
+  const o = j.objetivo!;
+  return `${defCarta(p, cartaObjetivo(p, j).carta).nombre} (línea ${o.linea + 1}, carta ${o.posicion + 1})`;
 }
 
 export const efectosAccion: Record<string, EfectoAccion> = {
@@ -92,6 +97,75 @@ export const efectosAccion: Record<string, EfectoAccion> = {
       cambiarHumedad(p, j.objetivo!.prenda!, -h);
     },
   },
+
+  // Dos prendas tuyas se cambian el sitio: cada una pasa a la carta y al espacio de la otra.
+  "cambiar-prendas": {
+    tipo: "accion",
+    blanco: "cambiarPrendas",
+    etiquetas: [],
+    aplicar(p, j) {
+      const a = j.objetivo!.prenda!;
+      const b = prendaEn(p, { jugador: j.jugador, ...j.objetivo!.destino! })!;
+      const ua = localizar(p, a)!;
+      const ub = localizar(p, b)!;
+      descolgar(ua);
+      descolgar(ub);
+      ub.tendida.colgadas.push({ prenda: a, inicio: ub.colgada.inicio });
+      ua.tendida.colgadas.push({ prenda: b, inicio: ua.colgada.inicio });
+      p.registro.push(`Se intercambian ${nombrePrenda(p, a)} y ${nombrePrenda(p, b)}.`);
+    },
+  },
+
+  // Todo lo colgado en una carta de cuerda tuya pasa a otra, y al revés; las cartas no se mueven.
+  "cambiar-cuerdas": {
+    tipo: "accion",
+    blanco: "cambiarCuerdas",
+    etiquetas: [],
+    aplicar(p, j) {
+      const { destino } = j.objetivo!;
+      const a = cartaObjetivo(p, j);
+      const b = p.jugadores[j.jugador].lineas[destino!.linea].cartas[destino!.posicion];
+      [a.colgadas, b.colgadas] = [b.colgadas, a.colgadas];
+      p.registro.push(`Se intercambia lo colgado en ${sitio(p, j)} con lo de la línea ${destino!.linea + 1}, carta ${destino!.posicion + 1}.`);
+    },
+  },
+
+  // Una carta de cuerda tuya, con sus prendas, cambia de sitio con otra o pasa al hueco siguiente de una línea.
+  "mover-cuerda": {
+    tipo: "accion",
+    blanco: "moverCuerda",
+    etiquetas: [],
+    aplicar(p, j) {
+      const o = j.objetivo!;
+      const d = o.destino!;
+      const lineas = p.jugadores[j.jugador].lineas;
+      const nombre = sitio(p, j);
+      if (d.posicion < lineas[d.linea].cartas.length) {
+        const otra = lineas[d.linea].cartas[d.posicion];
+        lineas[d.linea].cartas[d.posicion] = lineas[o.linea].cartas[o.posicion];
+        lineas[o.linea].cartas[o.posicion] = otra;
+        p.registro.push(`${nombre} cambia de sitio con ${defCarta(p, otra.carta).nombre}.`);
+      } else {
+        const [movida] = lineas[o.linea].cartas.splice(o.posicion, 1);
+        lineas[d.linea].cartas.push(movida);
+        p.registro.push(`${nombre} pasa al final de la línea ${d.linea + 1}.`);
+      }
+    },
+  },
+
+  // parametros.cartas: cuántas cartas de cuerda roba.
+  "buscar-cuerda": {
+    tipo: "accion",
+    blanco: "ninguno",
+    etiquetas: [],
+    aplicar(p, j, params) {
+      const n = robar(p, j.jugador, "cuerdas", numero(params, "cartas", 1));
+      p.registro.push(`${p.jugadores[j.jugador].nombre} roba ${n} carta(s) de cuerda.`);
+    },
+  },
+
+  // Carta de reacción: no se juega en tu turno; anula un fastidio de un rival (ver jugadas/responder.ts).
+  "anular-fastidio": { tipo: "accion", blanco: "reaccion", etiquetas: [], aplicar() {} },
 
   "proteger-cuerda": {
     tipo: "accion",

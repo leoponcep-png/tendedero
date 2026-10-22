@@ -1,21 +1,24 @@
 import { comprobarUmbral } from "../estado/final";
 import type { Partida } from "../estado/tipos";
 import { colgarPrenda } from "./colgarPrenda";
-import { colocarCuerda } from "./colocarCuerda";
+import { colocarCuerda, mejorarCuerda } from "./colocarCuerda";
 import { draft } from "./draft";
 import { elegirObjetivo } from "./elegirObjetivo";
 import { jugarAccion } from "./jugarAccion";
+import { responder } from "./responder";
 import { descartar, terminarTurno } from "./terminarTurno";
 import type { Jugada, JugadaDe, Manejador } from "./tipos";
 
 const manejadores: { [T in Jugada["tipo"]]: Manejador<JugadaDe<T>> } = {
   draft,
   colocarCuerda,
+  mejorarCuerda,
   colgarPrenda,
   jugarAccion,
   elegirObjetivo,
   terminarTurno,
   descartar,
+  responder,
 };
 
 export type Resultado = { ok: true; partida: Partida } | { ok: false; motivo: string };
@@ -31,6 +34,7 @@ export function motivoInvalida(p: Partida, j: Jugada): string | null {
   if (p.terminada) return "La partida ha terminado.";
   const jugador = p.jugadores[j.jugador];
   if (!jugador) return "Ese jugador no existe.";
+  if (p.reaccion && j.tipo !== "responder") return `Esperando a que ${p.jugadores[p.reaccion.defensor].nombre} decida si responde.`;
   if (m.soloEnSuTurno && j.jugador !== p.turno.jugador) return `No es el turno de ${jugador.nombre}.`;
   if (j.tipo !== "elegirObjetivo" && jugador.objetivosOfrecidos.length > 0) return "Primero elige tu objetivo secreto.";
   if (p.turno.fase === "descartar" && j.tipo !== "descartar" && j.tipo !== "elegirObjetivo") {

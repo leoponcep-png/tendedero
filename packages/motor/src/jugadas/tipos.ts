@@ -4,7 +4,11 @@ import type { Partida } from "../estado/tipos";
 export type Patron = { color: string } | { tipo: string };
 export type Origen = { cesta: number } | "centro";
 
-/** Sobre qué se juega una carta de acción: una carta de cuerda y, si hace falta, una prenda y adónde moverla. */
+/**
+ * Sobre qué se juega una carta de acción: una carta de cuerda y, si hace falta, una prenda.
+ * Las de dos pasos (mover, intercambiar) llevan además un destino: un espacio de una carta de cuerda,
+ * o el hueco siguiente de una línea (posicion = número de cartas de esa línea).
+ */
 export interface ObjetivoAccion {
   jugador: number;
   linea: number;
@@ -15,7 +19,12 @@ export interface ObjetivoAccion {
 
 export type Jugada =
   | { tipo: "draft"; jugador: number; origen: Origen; patron: Patron }
-  | { tipo: "colocarCuerda"; jugador: number; carta: string; linea: number }
+  /** `en`: a quién se le coloca (por defecto, a uno mismo); solo algunas cuerdas van al tendedero de un rival. */
+  | { tipo: "colocarCuerda"; jugador: number; carta: string; linea: number; en?: number }
+  /** Pone la carta de cuerda encima de una básica o vieja propia; las prendas se quedan. */
+  | { tipo: "mejorarCuerda"; jugador: number; carta: string; linea: number; posicion: number }
+  /** El jugador atacado decide si anula el fastidio con una carta de reacción. */
+  | { tipo: "responder"; jugador: number; anular: boolean }
   | { tipo: "colgarPrenda"; jugador: number; prenda: string; linea: number; posicion: number; inicio: number }
   | { tipo: "jugarAccion"; jugador: number; carta: string; objetivo?: ObjetivoAccion }
   | { tipo: "elegirObjetivo"; jugador: number; objetivo: string }
