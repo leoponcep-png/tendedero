@@ -7,14 +7,14 @@
       "acciones": 2
     },
     "roboPorTurno": {
-      "cuerdas": 1,
-      "acciones": 2
+      "cartas": 3,
+      "maxCuerdas": 2
     },
     "jugablesPorTurno": {
       "cuerdas": 1,
       "acciones": 2
     },
-    "limiteMano": 5,
+    "limiteMano": 6,
     "umbralFinal": 40,
     "cestas": {
       "numero": 5,

@@ -4,7 +4,8 @@ import type { Datos, DefCarta, DefObjetivo } from "./datos/esquemas";
 export interface Ajustes {
   jugadores: number;
   manoInicial: { cuerdas: number; acciones: number };
-  roboPorTurno: { cuerdas: number; acciones: number };
+  /** Cuántas se roban al terminar el turno; el jugador elige cuántas son de cuerda, hasta `maxCuerdas`. */
+  roboPorTurno: { cartas: number; maxCuerdas: number };
   jugablesPorTurno: { cuerdas: number; acciones: number };
   limiteMano: number;
   umbralFinal: number;

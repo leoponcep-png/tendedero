@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
+  defCarta,
   ajustesIniciales,
   aplicar,
   ARCHIVOS_DATOS,
@@ -582,10 +583,32 @@ describe("límite de mano", () => {
     expect(p.turno.fase).toBe("descartar");
     expect(p.turno.jugador).toBe(0);
     expect(motivo(p, { tipo: "draft", jugador: 0, origen: { cesta: 0 }, patron: { tipo: "toalla" } })).toMatch(/descarta/);
-    p = jugar(p, { tipo: "descartar", jugador: 0, carta: p.jugadores[0].mano[0] });
-    p = jugar(p, { tipo: "descartar", jugador: 0, carta: p.jugadores[0].mano[0] });
-    expect(p.jugadores[0].mano).toHaveLength(5);
+    while (p.turno.fase === "descartar") p = jugar(p, { tipo: "descartar", jugador: 0, carta: p.jugadores[0].mano[0] });
+    expect(p.jugadores[0].mano).toHaveLength(p.ajustes.limiteMano);
     expect(p.turno.jugador).toBe(1);
+  });
+});
+
+describe("robo al terminar el turno", () => {
+  const deMazo = (p: Partida, mazo: string) => p.jugadores[0].mano.filter((c) => defCarta(p, c).mazo === mazo).length;
+
+  it("se eligen cuántas de las 3 son de cuerda, hasta 2", () => {
+    const p = partida();
+    p.jugadores[0].mano = [];
+    expect(motivo(p, { tipo: "terminarTurno", jugador: 0, cuerdas: 3 })).toMatch(/Como mucho puedes robar 2 de cuerda/);
+    const q = jugar(p, { tipo: "terminarTurno", jugador: 0, cuerdas: 2 });
+    expect(deMazo(q, "cuerdas")).toBe(2);
+    expect(deMazo(q, "acciones")).toBe(1);
+  });
+
+  it("se puede robar todo de acción, y sin elegir se roba 1 de cuerda y 2 de acción", () => {
+    const p = partida();
+    p.jugadores[0].mano = [];
+    const todoAccion = jugar(p, { tipo: "terminarTurno", jugador: 0, cuerdas: 0 });
+    expect(deMazo(todoAccion, "acciones")).toBe(3);
+    const porDefecto = jugar(p, { tipo: "terminarTurno", jugador: 0 });
+    expect(deMazo(porDefecto, "cuerdas")).toBe(1);
+    expect(deMazo(porDefecto, "acciones")).toBe(2);
   });
 });
 

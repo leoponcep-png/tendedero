@@ -28,7 +28,8 @@ export type Jugada =
   | { tipo: "colgarPrenda"; jugador: number; prenda: string; linea: number; posicion: number; inicio: number }
   | { tipo: "jugarAccion"; jugador: number; carta: string; objetivo?: ObjetivoAccion }
   | { tipo: "elegirObjetivo"; jugador: number; objetivo: string }
-  | { tipo: "terminarTurno"; jugador: number }
+  /** `cuerdas`: cuántas de las cartas que roba son de cuerda (el resto, de acción). */
+  | { tipo: "terminarTurno"; jugador: number; cuerdas?: number }
   | { tipo: "descartar"; jugador: number; carta: string };
 
 export type JugadaDe<T extends Jugada["tipo"]> = Extract<Jugada, { tipo: T }>;

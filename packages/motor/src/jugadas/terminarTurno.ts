@@ -1,19 +1,31 @@
 import { pasarTurno } from "../estado/final";
 import { defCarta, pilaDe, robar } from "../estado/utilidades";
+import type { Partida } from "../estado/tipos";
 import type { JugadaDe, Manejador } from "./tipos";
+
+/** Cuántas de las cartas robadas pueden ser de cuerda; el resto son de acción. */
+export function maxCuerdasRobadas(p: Partida): number {
+  return Math.min(p.ajustes.roboPorTurno.maxCuerdas, p.ajustes.roboPorTurno.cartas);
+}
 
 // Orden: robo → descartar si se pasa del límite → siguiente jugador.
 // El secado y los puntos no van aquí: se hacen para todos a la vez al acabar la ronda (ver pasarTurno).
 export const terminarTurno: Manejador<JugadaDe<"terminarTurno">> = {
   soloEnSuTurno: true,
-  validar() {
+  validar(p, j) {
+    const maximo = maxCuerdasRobadas(p);
+    const cuerdas = j.cuerdas ?? Math.min(1, maximo);
+    if (!Number.isInteger(cuerdas) || cuerdas < 0) return "Elige cuántas cartas de cuerda robas.";
+    if (cuerdas > maximo) return `Como mucho puedes robar ${maximo} de cuerda.`;
     return null;
   },
   aplicar(p, j) {
-    robar(p, j.jugador, "cuerdas", p.ajustes.roboPorTurno.cuerdas);
-    robar(p, j.jugador, "acciones", p.ajustes.roboPorTurno.acciones);
+    const cuerdas = j.cuerdas ?? Math.min(1, maxCuerdasRobadas(p));
+    const deCuerda = robar(p, j.jugador, "cuerdas", cuerdas);
+    const deAccion = robar(p, j.jugador, "acciones", p.ajustes.roboPorTurno.cartas - cuerdas);
 
     const jugador = p.jugadores[j.jugador];
+    p.registro.push(`${jugador.nombre} roba ${deCuerda} de cuerda y ${deAccion} de acción.`);
     if (jugador.mano.length > p.ajustes.limiteMano) {
       p.turno.fase = "descartar";
       p.registro.push(`${jugador.nombre} tiene ${jugador.mano.length} cartas y debe descartar hasta quedarse con ${p.ajustes.limiteMano}.`);

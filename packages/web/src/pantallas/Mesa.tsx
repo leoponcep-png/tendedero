@@ -5,6 +5,7 @@ import {
   defCarta,
   efectoAccion,
   jugadorInicial,
+  maxCuerdasRobadas,
   motivoInvalida,
   nombrePrenda,
   type Jugada,
@@ -71,11 +72,18 @@ const AYUDA_SOLTAR: Record<Arrastre["tipo"], string> = {
   accion: "Suelta la carta de acción sobre una carta de cuerda o una prenda colgada.",
 };
 
+function textoRobo(cuerdas: number, acciones: number): string {
+  const parte = (n: number, una: string, varias: string) => `${n} ${n === 1 ? una : varias}`;
+  return `${parte(cuerdas, "cuerda", "cuerdas")} + ${parte(acciones, "acción", "acciones")}`;
+}
+
 export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshacer, onSalir, onNueva }: Props) {
   const [arrastre, setArrastre] = useState<Arrastre | null>(null);
   const [movimiento, setMovimiento] = useState<JugadaDe<"jugarAccion"> | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [verFinal, setVerFinal] = useState(true);
+  // Cuántas de las cartas que se roban al terminar el turno son de cuerda.
+  const [robarCuerdas, setRobarCuerdas] = useState(1);
   // Sin un pequeño margen de movimiento, cualquier clic sobre una prenda empezaría un arrastre.
   const sensores = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -119,6 +127,8 @@ export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshace
   const { turno, ajustes } = partida;
   const jugadorActivo = partida.jugadores[turno.jugador];
   const enReparto = turno.fase === "cesta" || turno.fase === "centro";
+  const maxCuerdas = maxCuerdasRobadas(partida);
+  const cuerdasElegidas = Math.min(robarCuerdas, maxCuerdas);
 
   return (
     <ContextoMesa.Provider value={{ partida, arrastre, movimiento, jugar }}>
@@ -151,9 +161,25 @@ export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshace
                   Ver clasificación
                 </button>
               ) : (
-                <button className="principal" disabled={turno.fase !== "jugar" || partida.reaccion !== null} onClick={() => jugar({ tipo: "terminarTurno", jugador: turno.jugador })}>
-                  {cierraLaRonda(partida, turno.jugador) ? "Terminar turno y acabar la ronda" : "Terminar turno"}
-                </button>
+                <>
+                  <label className="elegir-robo">
+                    Robar
+                    <select value={cuerdasElegidas} onChange={(e) => setRobarCuerdas(Number(e.target.value))}>
+                      {Array.from({ length: maxCuerdas + 1 }, (_, c) => maxCuerdas - c).map((c) => (
+                        <option key={c} value={c}>
+                          {textoRobo(c, ajustes.roboPorTurno.cartas - c)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <button
+                    className="principal"
+                    disabled={turno.fase !== "jugar" || partida.reaccion !== null}
+                    onClick={() => jugar({ tipo: "terminarTurno", jugador: turno.jugador, cuerdas: cuerdasElegidas })}
+                  >
+                    {cierraLaRonda(partida, turno.jugador) ? "Terminar turno y acabar la ronda" : "Terminar turno"}
+                  </button>
+                </>
               )}
               <button disabled={!puedeDeshacer} onClick={onDeshacer}>
                 Deshacer

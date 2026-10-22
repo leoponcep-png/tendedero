@@ -86,7 +86,8 @@ export function PantallaAjustes({ datos, ajustes, onCambio, nombreConfig, onNomb
 
         <fieldset>
           <legend>Cartas por turno</legend>
-          <Par etiqueta="Robo por turno" valor={ajustes.roboPorTurno} onCambio={(v) => cambiar((a) => void (a.roboPorTurno = v))} />
+          <Numero etiqueta="Cartas robadas por turno" valor={ajustes.roboPorTurno.cartas} min={0} onCambio={(n) => cambiar((a) => void (a.roboPorTurno.cartas = n))} />
+          <Numero etiqueta="De ellas, máximo de cuerda" valor={ajustes.roboPorTurno.maxCuerdas} min={0} onCambio={(n) => cambiar((a) => void (a.roboPorTurno.maxCuerdas = n))} />
           <Par etiqueta="Se pueden jugar" valor={ajustes.jugablesPorTurno} onCambio={(v) => cambiar((a) => void (a.jugablesPorTurno = v))} />
           <Par etiqueta="Mano inicial" valor={ajustes.manoInicial} onCambio={(v) => cambiar((a) => void (a.manoInicial = v))} />
         </fieldset>

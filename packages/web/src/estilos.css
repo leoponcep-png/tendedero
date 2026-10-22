@@ -304,6 +304,14 @@ legend {
 .acciones-barra {
   display: flex;
   gap: 8px;
+  align-items: center;
+}
+
+.elegir-robo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tinta-suave);
 }
 
 .info-partida {

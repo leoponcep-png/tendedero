@@ -65,7 +65,8 @@ const parCartas = z.object({ cuerdas: entero(), acciones: entero() });
 export const esquemaAjustesPorDefecto = z.object({
   jugadores: entero(2).max(4, "como máximo 4"),
   manoInicial: parCartas,
-  roboPorTurno: parCartas,
+  /** Se roban `cartas` repartidas como quiera el jugador, con como mucho `maxCuerdas` de cuerda. */
+  roboPorTurno: z.object({ cartas: entero(), maxCuerdas: entero() }),
   jugablesPorTurno: parCartas,
   limiteMano: entero(1),
   umbralFinal: entero(1),
