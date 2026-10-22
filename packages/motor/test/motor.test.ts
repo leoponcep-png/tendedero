@@ -512,6 +512,16 @@ describe("reparto de prendas y vistas", () => {
     expect(p.turno).toMatchObject({ fase: "jugar", jugador: 0, numero: 1 });
   });
 
+  it("también se puede coger por color", () => {
+    let p = sinRepartir();
+    const cesta = p.cestas[0];
+    const color = p.prendas[cesta[0]].color;
+    const iguales = cesta.filter((id) => p.prendas[id].color === color);
+    p = jugar(p, { tipo: "draft", jugador: 0, origen: { cesta: 0 }, patron: { color } });
+    expect(p.jugadores[0].pendientes).toEqual(iguales);
+    expect(p.centro).toHaveLength(4 - iguales.length);
+  });
+
   it("al acabar la ronda lo que sobra vuelve a la bolsa y se llenan cestas nuevas", () => {
     let p = partida("prueba", (a) => (a.limiteMano = 99));
     const sueltas = p.bolsa.length + p.cestas.flat().length + p.centro.length;

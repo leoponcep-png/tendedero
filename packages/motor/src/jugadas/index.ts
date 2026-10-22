@@ -37,7 +37,7 @@ export function motivoInvalida(p: Partida, j: Jugada): string | null {
     return `Primero descarta hasta quedarte con ${p.ajustes.limiteMano} cartas.`;
   }
   if ((p.turno.fase === "cesta" || p.turno.fase === "centro") && j.tipo !== "draft" && j.tipo !== "elegirObjetivo") {
-    return `Primero se reparten las prendas: ${p.jugadores[p.turno.jugador].nombre} coge un tipo ${p.turno.fase === "cesta" ? "de una cesta" : "del centro"}.`;
+    return `Primero se reparten las prendas: ${p.jugadores[p.turno.jugador].nombre} coge un color o un tipo ${p.turno.fase === "cesta" ? "de una cesta" : "del centro"}.`;
   }
   return m.validar(p, j);
 }

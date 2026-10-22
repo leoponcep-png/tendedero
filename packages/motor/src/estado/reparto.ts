@@ -14,8 +14,8 @@ export function renovarCestas(p: Partida): void {
 }
 
 /**
- * Reparto por fases al empezar la ronda, en el orden de la ronda: primero cada jugador coge un tipo
- * de una cesta (el resto va al centro); después cada uno coge un tipo del centro.
+ * Reparto por fases al empezar la ronda, en el orden de la ronda: primero cada jugador coge un color o un tipo
+ * de una cesta (el resto va al centro); después cada uno coge un color o un tipo del centro.
  * A quien ya no le queda nada que coger se lo salta.
  */
 export function empezarReparto(p: Partida): void {

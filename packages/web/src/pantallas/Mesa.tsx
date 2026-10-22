@@ -126,7 +126,7 @@ export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshace
           )}
           {!partida.terminada && enReparto && (
             <div className="franja-aviso">
-              Reparto: {jugadorActivo.nombre} coge un tipo {turno.fase === "cesta" ? "de una cesta (el resto va al centro)" : "del centro"}. Pulsa una prenda.
+              Reparto: {jugadorActivo.nombre} coge un color o un tipo {turno.fase === "cesta" ? "de una cesta (el resto va al centro)" : "del centro"}. Pulsa una prenda.
             </div>
           )}
           {movimiento && (

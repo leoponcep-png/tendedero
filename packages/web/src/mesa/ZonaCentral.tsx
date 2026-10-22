@@ -66,7 +66,7 @@ export function ZonaCentral() {
   );
 }
 
-/** Al pulsar una prenda de una cesta o del centro: coger todas las de su tipo. */
+/** Al pulsar una prenda de una cesta o del centro: coger todas las de su color o todas las de su tipo. */
 function Coger({ seleccion, onCerrar }: { seleccion: Seleccion; onCerrar: () => void }) {
   const { partida, jugar } = useMesa();
   const prenda = partida.prendas[seleccion.prenda];
@@ -75,11 +75,21 @@ function Coger({ seleccion, onCerrar }: { seleccion: Seleccion; onCerrar: () => 
   // Tras deshacer o cambiar de turno, la prenda elegida puede ya no estar ahí.
   if (!prendas.includes(seleccion.prenda)) return null;
 
-  const patron: Patron = { tipo: prenda.tipo };
-  const n = prendas.filter((id) => cumple(partida.prendas[id], patron)).length;
-  const j: Jugada = { tipo: "draft", jugador, origen: seleccion.origen, patron };
-  const motivo = motivoInvalida(partida, j);
-  const tipo = partida.catalogo.tipos[prenda.tipo].nombre.toLowerCase();
+  const jugada = (patron: Patron): Jugada => ({ tipo: "draft", jugador, origen: seleccion.origen, patron });
+  // El motivo no depende del patrón elegido: los dos valen o ninguno.
+  const motivo = motivoInvalida(partida, jugada({ tipo: prenda.tipo }));
+
+  const opcion = (patron: Patron, texto: string) => (
+    <button
+      className="principal"
+      onClick={() => {
+        jugar(jugada(patron));
+        onCerrar();
+      }}
+    >
+      {texto} ({prendas.filter((id) => cumple(partida.prendas[id], patron)).length})
+    </button>
+  );
 
   return (
     <div className="coger">
@@ -88,15 +98,8 @@ function Coger({ seleccion, onCerrar }: { seleccion: Seleccion; onCerrar: () => 
       ) : (
         <>
           <span>{partida.jugadores[jugador].nombre} coge:</span>
-          <button
-            className="principal"
-            onClick={() => {
-              jugar(j);
-              onCerrar();
-            }}
-          >
-            todas las prendas de tipo {tipo} ({n})
-          </button>
+          {opcion({ color: prenda.color }, `por color: ${partida.catalogo.colores[prenda.color].nombre.toLowerCase()}`)}
+          {opcion({ tipo: prenda.tipo }, `por tipo: ${partida.catalogo.tipos[prenda.tipo].nombre.toLowerCase()}`)}
         </>
       )}
       <button onClick={onCerrar}>{motivo ? "Cerrar" : "Cancelar"}</button>
