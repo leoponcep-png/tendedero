@@ -1,25 +1,9 @@
 import { efectos } from "../efectos";
 import type { DefObjetivo } from "../datos/esquemas";
 import type { Partida, PuntosObjetivo, ResultadoJugador } from "./tipos";
-import { inicioDeRonda } from "./ronda";
+import { empezarReparto, empezarTurnoDeJuego, renovarCestas } from "./reparto";
+import { inicioDeRonda, jugadorInicial, ordenDeRonda } from "./ronda";
 import { faseDeSecado } from "./secado";
-import { cestasVacias, rellenarCestas } from "./utilidades";
-
-/** Quien abre la ronda: el primer jugador va rotando, una ronda cada uno. */
-export function jugadorInicial(p: Partida, ronda = p.ronda): number {
-  return (ronda - 1) % p.jugadores.length;
-}
-
-/** Orden de juego de la ronda actual, empezando por quien la abre. */
-export function ordenDeRonda(p: Partida): number[] {
-  const n = p.jugadores.length;
-  return Array.from({ length: n }, (_, i) => (jugadorInicial(p) + i) % n);
-}
-
-/** ¿Es este jugador el último en jugar la ronda? */
-export function cierraLaRonda(p: Partida, jugador: number): boolean {
-  return (jugador + 1) % p.jugadores.length === jugadorInicial(p);
-}
 
 /**
  * Si alguien ha llegado al umbral, la partida acaba al terminar la ronda.
@@ -38,26 +22,15 @@ export function comprobarUmbral(p: Partida): void {
 
 /** Pasa al siguiente jugador; si ya han jugado todos, se acaba la ronda. */
 export function pasarTurno(p: Partida): void {
-  if (cestasVacias(p) && p.bolsa.length > 0) {
-    rellenarCestas(p);
-    p.registro.push("Las cestas y el centro se han vaciado: se rellenan las cestas desde la bolsa.");
-  }
-
-  let siguiente = (p.turno.jugador + 1) % p.jugadores.length;
-  if (siguiente === jugadorInicial(p)) {
-    finDeRonda(p);
-    if (p.terminada) return;
-    siguiente = jugadorInicial(p);
-  }
-
-  // «Proteger cuerda» dura hasta el siguiente turno de su dueño.
-  for (const l of p.jugadores[siguiente].lineas) for (const t of l.cartas) delete t.protegida;
-
-  p.turno = { numero: p.turno.numero + 1, jugador: siguiente, fase: "jugar", cuerdasJugadas: 0, cuerdasExtra: 0, accionesJugadas: 0, drafts: 0 };
-  p.registro.push(`— Turno ${p.turno.numero}: ${p.jugadores[siguiente].nombre} —`);
+  const siguiente = (p.turno.jugador + 1) % p.jugadores.length;
+  if (siguiente === jugadorInicial(p)) finDeRonda(p);
+  else empezarTurnoDeJuego(p, siguiente);
 }
 
-/** Cuando todos han jugado: se seca y se puntúa a la vez, y empieza la ronda siguiente con otro jugador. */
+/**
+ * Cuando todos han jugado: se seca y se puntúa a la vez, y empieza la ronda siguiente con otro jugador:
+ * carta de clima o evento, cestas nuevas y reparto de prendas.
+ */
 function finDeRonda(p: Partida): void {
   p.registro.push(`— Fin de la ronda ${p.ronda}: secado y puntos de todos —`);
   for (const jugador of ordenDeRonda(p)) faseDeSecado(p, jugador);
@@ -69,6 +42,9 @@ function finDeRonda(p: Partida): void {
   p.ronda++;
   p.registro.push(`Empieza la ronda ${p.ronda}; abre ${p.jugadores[jugadorInicial(p)].nombre}.`);
   inicioDeRonda(p);
+  renovarCestas(p);
+  p.registro.push("Lo que sobraba en las cestas y el centro vuelve a la bolsa y se llenan cestas nuevas.");
+  empezarReparto(p);
 }
 
 /** Puntos que da un objetivo: solo el nivel más alto alcanzado, sin acumular. */

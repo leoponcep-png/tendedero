@@ -3,8 +3,8 @@ export { ARCHIVOS_DATOS, cargarDatos, ErrorDatos, type DatosCrudos, type NombreA
 export * from "./ajustes";
 export * from "./estado/tipos";
 export { crearPartida } from "./estado/preparar";
-export { rondasDeClimaRestantes } from "./estado/ronda";
-export { cierraLaRonda, jugadorInicial, ordenDeRonda, puntuarObjetivo } from "./estado/final";
+export { cierraLaRonda, jugadorInicial, ordenDeRonda, rondasDeClimaRestantes } from "./estado/ronda";
+export { puntuarObjetivo } from "./estado/final";
 export { defCarta, localizar, nombrePrenda, tipoDe } from "./estado/utilidades";
 export * from "./jugadas/tipos";
 export { aplicar, esValida, motivoInvalida, type Resultado } from "./jugadas";

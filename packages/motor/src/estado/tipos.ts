@@ -45,12 +45,14 @@ export type Pila = "cuerdas" | "acciones" | "clima";
 export interface Turno {
   numero: number;
   jugador: number;
-  /** "descartar": se ha pasado del límite de mano y tiene que soltar cartas antes de pasar. */
-  fase: "jugar" | "descartar";
+  /**
+   * "cesta" y "centro": reparto de prendas al empezar la ronda; `jugador` es a quien le toca coger.
+   * "descartar": se ha pasado del límite de mano y tiene que soltar cartas antes de pasar.
+   */
+  fase: "cesta" | "centro" | "jugar" | "descartar";
   cuerdasJugadas: number;
   cuerdasExtra: number;
   accionesJugadas: number;
-  drafts: number;
 }
 
 export interface PuntosObjetivo {

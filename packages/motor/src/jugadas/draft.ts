@@ -1,23 +1,28 @@
+import { avanzarReparto } from "../estado/reparto";
 import type { Partida, Prenda } from "../estado/tipos";
 import { nombrePrenda } from "../estado/utilidades";
 import type { JugadaDe, Manejador, Origen, Patron } from "./tipos";
 
 export function cumple(prenda: Prenda, patron: Patron): boolean {
-  return "color" in patron ? prenda.color === patron.color : prenda.tipo === patron.tipo;
+  return prenda.tipo === patron.tipo;
 }
 
 export function prendasDe(p: Partida, origen: Origen): string[] | undefined {
   return origen === "centro" ? p.centro : p.cestas[origen.cesta];
 }
 
-// Al estilo Azul: de una cesta te llevas todo lo que cumple el patrón y el resto va al centro.
+// Reparto por fases (ver estado/reparto.ts): en la fase de cestas te llevas un tipo de una cesta y el resto
+// va al centro; en la fase del centro te llevas un tipo del centro.
 export const draft: Manejador<JugadaDe<"draft">> = {
   soloEnSuTurno: true,
   validar(p, j) {
-    if (p.turno.drafts >= p.ajustes.draftsPorTurno) return "Ya has cogido prendas este turno.";
+    const fase = p.turno.fase;
+    if (fase !== "cesta" && fase !== "centro") return "Las prendas se cogen en el reparto, al empezar la ronda.";
+    if (fase === "cesta" && j.origen === "centro") return "Ahora se coge de una cesta; del centro se coge después.";
+    if (fase === "centro" && j.origen !== "centro") return "Ahora toca coger del centro.";
     const prendas = prendasDe(p, j.origen);
     if (!prendas) return "Esa cesta no existe.";
-    if (!prendas.some((id) => cumple(p.prendas[id], j.patron))) return "Ahí no hay ninguna prenda que cumpla ese patrón.";
+    if (!prendas.some((id) => cumple(p.prendas[id], j.patron))) return "Ahí no hay prendas de ese tipo.";
     return null;
   },
   aplicar(p, j) {
@@ -31,8 +36,8 @@ export const draft: Manejador<JugadaDe<"draft">> = {
       p.centro.push(...resto);
     }
     p.jugadores[j.jugador].pendientes.push(...cogidas);
-    p.turno.drafts++;
     const desde = j.origen === "centro" ? "del centro" : `de la cesta ${j.origen.cesta + 1}`;
     p.registro.push(`${p.jugadores[j.jugador].nombre} coge ${desde}: ${cogidas.map((id) => nombrePrenda(p, id)).join(", ")}.`);
+    avanzarReparto(p);
   },
 };

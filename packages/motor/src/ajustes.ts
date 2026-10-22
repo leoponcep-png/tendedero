@@ -6,7 +6,6 @@ export interface Ajustes {
   manoInicial: { cuerdas: number; acciones: number };
   roboPorTurno: { cuerdas: number; acciones: number };
   jugablesPorTurno: { cuerdas: number; acciones: number };
-  draftsPorTurno: number;
   limiteMano: number;
   umbralFinal: number;
   cestas: { numero: number; prendasPorCesta: number };
@@ -32,7 +31,6 @@ export function ajustesIniciales(datos: Datos): Ajustes {
     manoInicial: d.manoInicial,
     roboPorTurno: d.roboPorTurno,
     jugablesPorTurno: d.jugablesPorTurno,
-    draftsPorTurno: d.draftsPorTurno,
     limiteMano: d.limiteMano,
     umbralFinal: d.umbralFinal,
     cestas: { numero: cestasPorDefecto(datos, d.jugadores), prendasPorCesta: d.cestas.prendasPorCesta },

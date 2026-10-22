@@ -92,10 +92,9 @@ export function PantallaAjustes({ datos, ajustes, onCambio, nombreConfig, onNomb
         </fieldset>
 
         <fieldset>
-          <legend>Cestas y draft</legend>
+          <legend>Cestas</legend>
           <Numero etiqueta="Número de cestas" valor={ajustes.cestas.numero} min={1} onCambio={(n) => cambiar((a) => void (a.cestas.numero = n))} />
           <Numero etiqueta="Prendas por cesta" valor={ajustes.cestas.prendasPorCesta} min={1} onCambio={(n) => cambiar((a) => void (a.cestas.prendasPorCesta = n))} />
-          <Numero etiqueta="Drafts por turno" valor={ajustes.draftsPorTurno} min={0} onCambio={(n) => cambiar((a) => void (a.draftsPorTurno = n))} />
         </fieldset>
 
         <fieldset>

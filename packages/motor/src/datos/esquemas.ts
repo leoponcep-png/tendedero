@@ -65,7 +65,6 @@ export const esquemaAjustesPorDefecto = z.object({
   manoInicial: parCartas,
   roboPorTurno: parCartas,
   jugablesPorTurno: parCartas,
-  draftsPorTurno: entero(),
   limiteMano: entero(1),
   umbralFinal: entero(1),
   cestas: z.object({

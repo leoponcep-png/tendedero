@@ -1,6 +1,7 @@
 import type { Partida } from "../estado/tipos";
 
-export type Patron = { color: string } | { tipo: string };
+/** Las prendas se cogen por tipo. */
+export type Patron = { tipo: string };
 export type Origen = { cesta: number } | "centro";
 
 /** Sobre qué se juega una carta de acción: una carta de cuerda y, si hace falta, una prenda y adónde moverla. */

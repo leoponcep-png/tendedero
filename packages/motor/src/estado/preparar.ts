@@ -1,9 +1,10 @@
 import { enJuego, type Ajustes } from "../ajustes";
 import { barajar, semillaNueva, sembrar } from "../azar";
 import type { Datos } from "../datos/esquemas";
+import { empezarReparto, renovarCestas } from "./reparto";
 import { inicioDeRonda } from "./ronda";
 import type { Partida } from "./tipos";
-import { pilaDe, rellenarCestas, robar } from "./utilidades";
+import { pilaDe, robar } from "./utilidades";
 
 export function crearPartida(datos: Datos, ajustesElegidos: Ajustes): Partida {
   const semilla = ajustesElegidos.semilla.trim() || semillaNueva();
@@ -31,7 +32,7 @@ export function crearPartida(datos: Datos, ajustesElegidos: Ajustes): Partida {
     descartes: { cuerdas: [], acciones: [], clima: [] },
     objetivosComunes: [],
     jugadores: [],
-    turno: { numero: 1, jugador: 0, fase: "jugar", cuerdasJugadas: 0, cuerdasExtra: 0, accionesJugadas: 0, drafts: 0 },
+    turno: { numero: 0, jugador: 0, fase: "cesta", cuerdasJugadas: 0, cuerdasExtra: 0, accionesJugadas: 0 },
     ronda: 1,
     ultimoEvento: null,
     rondaProtegeDe: [],
@@ -90,9 +91,9 @@ export function crearPartida(datos: Datos, ajustesElegidos: Ajustes): Partida {
     robar(p, i, "acciones", ajustes.manoInicial.acciones);
   }
 
-  rellenarCestas(p);
   p.registro.push(`Partida creada con la semilla "${semilla}" para ${ajustes.jugadores} jugadores.`);
   inicioDeRonda(p);
-  p.registro.push(`— Turno 1: ${p.jugadores[0].nombre} —`);
+  renovarCestas(p);
+  empezarReparto(p);
   return p;
 }

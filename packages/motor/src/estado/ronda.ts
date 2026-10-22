@@ -3,6 +3,22 @@ import { efectos } from "../efectos";
 import type { Partida } from "./tipos";
 import { defCarta, numero } from "./utilidades";
 
+/** Quien abre la ronda: el primer jugador va rotando, una ronda cada uno. */
+export function jugadorInicial(p: Partida, ronda = p.ronda): number {
+  return (ronda - 1) % p.jugadores.length;
+}
+
+/** Orden de juego de la ronda actual, empezando por quien la abre. */
+export function ordenDeRonda(p: Partida): number[] {
+  const n = p.jugadores.length;
+  return Array.from({ length: n }, (_, i) => (jugadorInicial(p) + i) % n);
+}
+
+/** ¿Es este jugador el último en jugar la ronda? */
+export function cierraLaRonda(p: Partida, jugador: number): boolean {
+  return (jugador + 1) % p.jugadores.length === jugadorInicial(p);
+}
+
 /** Rondas que dura un clima si su carta no dice otra cosa (parametros.rondas). */
 const RONDAS_DE_CLIMA = 2;
 

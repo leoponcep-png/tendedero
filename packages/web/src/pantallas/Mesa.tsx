@@ -71,6 +71,7 @@ export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshace
 
   const { turno, ajustes } = partida;
   const jugadorActivo = partida.jugadores[turno.jugador];
+  const enReparto = turno.fase === "cesta" || turno.fase === "centro";
 
   return (
     <ContextoMesa.Provider value={{ partida, arrastre, movimiento, jugar }}>
@@ -84,14 +85,18 @@ export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshace
                 </span>
               ) : (
                 <span>
-                  <strong>Ronda {partida.ronda}</strong> (abre {partida.jugadores[jugadorInicial(partida)].nombre}) · turno {turno.numero} · le toca a <strong>{jugadorActivo.nombre}</strong>
+                  <strong>Ronda {partida.ronda}</strong> (abre {partida.jugadores[jugadorInicial(partida)].nombre}) ·{" "}
+                  {enReparto ? `reparto de prendas, ${turno.fase === "cesta" ? "cestas" : "centro"}` : `turno ${turno.numero}`} · le toca a{" "}
+                  <strong>{jugadorActivo.nombre}</strong>
                   {partida.ultimaRonda && <span className="etiqueta-ultima">última ronda</span>}
                 </span>
               )}
-              <span className="contadores">
-                prendas cogidas {turno.drafts}/{ajustes.draftsPorTurno} · cuerdas {turno.cuerdasJugadas}/
-                {ajustes.jugablesPorTurno.cuerdas + turno.cuerdasExtra} · acciones {turno.accionesJugadas}/{ajustes.jugablesPorTurno.acciones}
-              </span>
+              {!enReparto && (
+                <span className="contadores">
+                  cuerdas {turno.cuerdasJugadas}/
+                  {ajustes.jugablesPorTurno.cuerdas + turno.cuerdasExtra} · acciones {turno.accionesJugadas}/{ajustes.jugablesPorTurno.acciones}
+                </span>
+              )}
             </div>
             <div className="acciones-barra">
               {partida.terminada ? (
@@ -99,7 +104,7 @@ export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshace
                   Ver clasificación
                 </button>
               ) : (
-                <button className="principal" disabled={turno.fase === "descartar"} onClick={() => jugar({ tipo: "terminarTurno", jugador: turno.jugador })}>
+                <button className="principal" disabled={turno.fase !== "jugar"} onClick={() => jugar({ tipo: "terminarTurno", jugador: turno.jugador })}>
                   {cierraLaRonda(partida, turno.jugador) ? "Terminar turno y acabar la ronda" : "Terminar turno"}
                 </button>
               )}
@@ -117,6 +122,11 @@ export function Mesa({ partida, nombreConfig, onJugada, puedeDeshacer, onDeshace
           {!partida.terminada && turno.fase === "descartar" && (
             <div className="franja-aviso">
               {jugadorActivo.nombre} tiene {jugadorActivo.mano.length} cartas: descarta hasta quedarte con {ajustes.limiteMano}.
+            </div>
+          )}
+          {!partida.terminada && enReparto && (
+            <div className="franja-aviso">
+              Reparto: {jugadorActivo.nombre} coge un tipo {turno.fase === "cesta" ? "de una cesta (el resto va al centro)" : "del centro"}. Pulsa una prenda.
             </div>
           )}
           {movimiento && (

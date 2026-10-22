@@ -108,12 +108,8 @@ export function robar(p: Partida, jugador: number, pila: "cuerdas" | "acciones",
   return robadas;
 }
 
-// Provisional: el reparto de cestas, el relleno y las sobrantes siguen pendientes en el diseño.
+// Si la bolsa no da para todas, las últimas cestas salen incompletas o vacías.
 export function rellenarCestas(p: Partida): void {
   const { numero, prendasPorCesta } = p.ajustes.cestas;
   p.cestas = Array.from({ length: numero }, () => p.bolsa.splice(-prendasPorCesta));
-}
-
-export function cestasVacias(p: Partida): boolean {
-  return p.centro.length === 0 && p.cestas.every((c) => c.length === 0);
 }

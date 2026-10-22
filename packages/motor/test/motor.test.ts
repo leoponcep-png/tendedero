@@ -23,14 +23,37 @@ function crudos(): DatosCrudos {
 
 const datos = cargarDatos(crudos());
 
-/** Partida con los objetivos secretos ya elegidos, lista para jugar. */
-function partida(semilla = "prueba", cambios: (a: Ajustes) => void = () => {}): Partida {
+/** Partida con los objetivos secretos ya elegidos, a punto de empezar el reparto de prendas. */
+function sinRepartir(semilla = "prueba", cambios: (a: Ajustes) => void = () => {}): Partida {
   const ajustes = { ...ajustesIniciales(datos), semilla };
   cambios(ajustes);
   let p = crearPartida(datos, ajustes);
   p.jugadores.forEach((j, i) => {
     if (j.objetivosOfrecidos[0]) p = jugar(p, { tipo: "elegirObjetivo", jugador: i, objetivo: j.objetivosOfrecidos[0] });
   });
+  return p;
+}
+
+/**
+ * Hace el reparto de la ronda cogiendo siempre lo primero que haya. Lo cogido se quita de «por tender»
+ * para que no estorbe a los tests, que cuelgan sus propias prendas.
+ */
+function repartir(p: Partida): Partida {
+  let q = p;
+  while (!q.terminada && (q.turno.fase === "cesta" || q.turno.fase === "centro")) {
+    const origen = q.turno.fase === "centro" ? "centro" : { cesta: q.cestas.findIndex((c) => c.length > 0) };
+    const prendas = origen === "centro" ? q.centro : q.cestas[origen.cesta];
+    const jugador = q.turno.jugador;
+    const antes = q.jugadores[jugador].pendientes.length;
+    q = jugar(q, { tipo: "draft", jugador, origen, patron: { tipo: q.prendas[prendas[0]].tipo } });
+    q.jugadores[jugador].pendientes.splice(antes);
+  }
+  return q;
+}
+
+/** Partida con los objetivos elegidos y el reparto de la primera ronda hecho, lista para jugar. */
+function partida(semilla = "prueba", cambios: (a: Ajustes) => void = () => {}): Partida {
+  const p = repartir(sinRepartir(semilla, cambios));
   // Sin clima ni eventos, para que cada test controle el tiempo que hace.
   p.clima = null;
   p.mazos.clima = [];
@@ -78,7 +101,7 @@ function darAccion(p: Partida, jugador: number, def: string): string {
 function terminar(p: Partida): Partida {
   let q = jugar(p, { tipo: "terminarTurno", jugador: p.turno.jugador });
   while (!q.terminada && q.turno.fase === "descartar") q = jugar(q, { tipo: "descartar", jugador: q.turno.jugador, carta: q.jugadores[q.turno.jugador].mano[0] });
-  return q;
+  return repartir(q);
 }
 
 /** Terminan su turno todos los que quedan en la ronda, y con eso se seca y se puntúa. */
@@ -465,16 +488,40 @@ describe("final de partida", () => {
   });
 });
 
-describe("draft y vistas", () => {
-  it("se lleva lo que cumple el patrón y manda el resto al centro", () => {
-    const p = partida();
+describe("reparto de prendas y vistas", () => {
+  it("primero cada uno coge un tipo de una cesta, luego cada uno un tipo del centro, y después se juega", () => {
+    let p = sinRepartir();
+    expect(p.turno).toMatchObject({ fase: "cesta", jugador: 0 });
+    expect(motivo(p, { tipo: "terminarTurno", jugador: 0 })).toMatch(/reparten las prendas/);
+    expect(motivo(p, { tipo: "draft", jugador: 0, origen: "centro", patron: { tipo: "toalla" } })).toMatch(/de una cesta/);
+
     const cesta = p.cestas[0];
-    const color = p.prendas[cesta[0]].color;
-    const iguales = cesta.filter((id) => p.prendas[id].color === color);
-    const despues = jugar(p, { tipo: "draft", jugador: 0, origen: { cesta: 0 }, patron: { color } });
-    expect(despues.jugadores[0].pendientes).toEqual(iguales);
-    expect(despues.centro).toHaveLength(4 - iguales.length);
-    expect(p.cestas[0]).toHaveLength(4);
+    const tipo = p.prendas[cesta[0]].tipo;
+    const iguales = cesta.filter((id) => p.prendas[id].tipo === tipo);
+    p = jugar(p, { tipo: "draft", jugador: 0, origen: { cesta: 0 }, patron: { tipo } });
+    expect(p.jugadores[0].pendientes).toEqual(iguales);
+    expect(p.centro).toEqual(cesta.filter((id) => !iguales.includes(id)));
+    expect(p.turno).toMatchObject({ fase: "cesta", jugador: 1 });
+
+    p = jugar(p, { tipo: "draft", jugador: 1, origen: { cesta: 1 }, patron: { tipo: p.prendas[p.cestas[1][0]].tipo } });
+    expect(p.turno).toMatchObject({ fase: "centro", jugador: 0 });
+    expect(motivo(p, { tipo: "draft", jugador: 0, origen: { cesta: 2 }, patron: { tipo: p.prendas[p.cestas[2][0]].tipo } })).toMatch(/del centro/);
+
+    p = jugar(p, { tipo: "draft", jugador: 0, origen: "centro", patron: { tipo: p.prendas[p.centro[0]].tipo } });
+    if (p.centro.length > 0) p = jugar(p, { tipo: "draft", jugador: 1, origen: "centro", patron: { tipo: p.prendas[p.centro[0]].tipo } });
+    expect(p.turno).toMatchObject({ fase: "jugar", jugador: 0, numero: 1 });
+  });
+
+  it("al acabar la ronda lo que sobra vuelve a la bolsa y se llenan cestas nuevas", () => {
+    let p = partida("prueba", (a) => (a.limiteMano = 99));
+    const sueltas = p.bolsa.length + p.cestas.flat().length + p.centro.length;
+    p = jugar(p, { tipo: "terminarTurno", jugador: 0 });
+    p = jugar(p, { tipo: "terminarTurno", jugador: 1 });
+    expect(p.ronda).toBe(2);
+    expect(p.turno).toMatchObject({ fase: "cesta", jugador: 1 });
+    expect(p.centro).toEqual([]);
+    expect(p.cestas.every((c) => c.length === 4)).toBe(true);
+    expect(p.bolsa.length + p.cestas.flat().length).toBe(sueltas);
   });
 
   it("la vista de un jugador oculta la mano rival y la semilla", () => {
