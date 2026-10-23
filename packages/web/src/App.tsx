@@ -8,6 +8,8 @@ import { ErroresDatos } from "./pantallas/ErroresDatos";
 import { PantallaInicio } from "./pantallas/Inicio";
 import { Mesa } from "./pantallas/Mesa";
 import { SalaAnfitrion, SalaInvitado } from "./pantallas/SalaOnline";
+import { MesaCartas } from "./prototipos/MesaCartas";
+import { Prototipos } from "./prototipos/Prototipos";
 
 // Cada pantalla tiene su dirección (#/local, #/crear, #/anfitrion/código, #/sala/código) para que el enlace
 // de una sala lleve directo a ella y recargar no saque a nadie de la partida.
@@ -32,6 +34,8 @@ function Rutas({ datos }: { datos: Datos }) {
   const [, seccion, codigo] = ruta.split("/");
   const inicio = () => ir("/");
 
+  if (seccion === "prototipos" && (codigo ?? "a2") === "a2") return <MesaCartas onVersion={(v) => ir(`/prototipos/${v}`)} onVolver={inicio} />;
+  if (seccion === "prototipos") return <Prototipos version={codigo ?? "a"} onVersion={(v) => ir(`/prototipos/${v}`)} onVolver={inicio} />;
   if (seccion === "local") return <Simulador datos={datos} onVolver={inicio} />;
   if (seccion === "crear") return <CrearSala datos={datos} onVolver={inicio} onCreada={(c) => ir(`/anfitrion/${c}`)} />;
   if (seccion === "anfitrion" && codigo) {

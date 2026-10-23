@@ -69,6 +69,10 @@ export function PantallaInicio({ onLocal, onCrear, onUnirse }: { onLocal: () => 
           </form>
         </section>
       </div>
+
+      <p className="lema">
+        <a href="#/prototipos/a2">Prototipos de mesa animada (beta)</a>
+      </p>
     </main>
   );
 }
