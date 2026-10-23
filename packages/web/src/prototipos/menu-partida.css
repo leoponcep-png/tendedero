@@ -186,7 +186,7 @@
 .me-escenario .mb-mesa {
   /* Su ancho de verdad aunque no quepa: la cámara la escala, el navegador no debe estrecharla */
   width: max-content;
-  will-change: transform;
+  /* Sin will-change: así el navegador la vuelve a dibujar nítida a cada zoom en vez de estirar una imagen. */
 }
 .me-camara {
   position: absolute;

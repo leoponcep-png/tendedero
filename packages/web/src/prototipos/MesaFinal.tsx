@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { Animal } from "./Animales";
-import { CestaBosque, colorEstilo, DefsBosque, PrendaBosque } from "./ArteBosque";
+import { colorEstilo, DefsBosque, PrendaBosque } from "./ArteBosque";
 import { useCamara } from "./camara";
 import { CaraAccionBosque, CartaCuerdaBosque, CartaDiaBosque, DorsoBosque, LosetaBosque } from "./CartasBosque";
 import * as fx from "./efectos";
@@ -987,6 +987,18 @@ function Reparto({
   onCoger: (origen: Origen, patron: Patron) => void;
 }) {
   const [resaltado, setResaltado] = useState<{ origen: Origen; patron: Patron } | null>(null);
+  // Cesta (o centro) abierta con un clic: se queda abierta hasta que se pulsa fuera, se elige otra o se coge.
+  const [abierto, setAbierto] = useState<Origen | null>(null);
+  useEffect(() => {
+    if (abierto === null) return;
+    const fuera = (ev: PointerEvent) => {
+      if (!(ev.target as Element).closest?.(".me-monton.abierta")) setAbierto(null);
+    };
+    document.addEventListener("pointerdown", fuera);
+    return () => document.removeEventListener("pointerdown", fuera);
+  }, [abierto]);
+  useEffect(() => setAbierto(null), [estado.fase, estado.coge]);
+  const abrir = (o: Origen, hay: boolean) => hay && setAbierto(o);
   const repartiendo = estado.fase !== "juego";
   const miTurno = repartiendo && estado.coge === 0 && !ocupado;
   const quien = perfiles[estado.coge];
@@ -1001,7 +1013,7 @@ function Reparto({
   const estado_ = (o: Origen, p: Prenda) => (resaltado && resaltado.origen === o ? (cumple(p, resaltado.patron) ? "destacada" : "apagada") : "");
 
   const botones = (o: Origen, prendas: Prenda[]) =>
-    miTurno && (estado.fase === "centro") === (o === "centro") && prendas.length > 0 ? (
+    abierto === o && miTurno && (estado.fase === "centro") === (o === "centro") && prendas.length > 0 ? (
       <div className="me-opciones">
         {opciones(prendas).map((op) => (
           <button
@@ -1009,8 +1021,11 @@ function Reparto({
             className="me-opcion"
             onMouseEnter={() => setResaltado({ origen: o, patron: op.patron })}
             onMouseLeave={() => setResaltado(null)}
-            onClick={() => {
+            onClick={(ev) => {
+              // Que el clic no llegue al montón (que lo volvería a abrir).
+              ev.stopPropagation();
               setResaltado(null);
+              setAbierto(null);
               onCoger(o, op.patron);
             }}
           >
@@ -1028,28 +1043,38 @@ function Reparto({
         <span className="me-ronda">Ronda {estado.ronda}</span>
         <span>{aviso}</span>
       </div>
-      <div className="me-montones">
+      <div className={`me-montones ${abierto !== null ? "hay-abierta" : ""}`}>
         {estado.cestas.map((c, i) => (
-          <div key={i} className={`me-cesta ${miTurno && estado.fase === "cesta" && c.length ? "elegible" : ""}`} data-cesta={i}>
-            <div className="me-cesta-nombre">Cesta {i + 1}</div>
-            <div className="me-cesta-cartas">
+          <div
+            key={i}
+            className={`me-monton ${miTurno && estado.fase === "cesta" && c.length ? "elegible" : ""} ${abierto === i ? "abierta" : ""}`}
+            onClick={() => abrir(i, c.length > 0)}
+            data-cesta={i}
+            style={{ "--n": Math.max(1, c.length) } as CSSProperties}
+          >
+            <div className="me-monton-nombre">Cesta {i + 1}</div>
+            <div className="me-monton-cartas">
               {c.map((p, k) => (
-                <CartaPrendaHumeda key={p.id} p={p} data-encesta={p.id} className={`me-en-cesta ${estado_(i, p)}`} style={{ "--k": k, "--n": c.length } as CSSProperties} />
+                <CartaPrendaHumeda key={p.id} p={p} data-encesta={p.id} className={`me-en-monton ${estado_(i, p)}`} style={{ "--k": k } as CSSProperties} />
               ))}
             </div>
-            <CestaBosque className="me-cesta-arte" />
             {c.length === 0 && <div className="me-cesta-vacia">vacía</div>}
             {botones(i, c)}
           </div>
         ))}
-        <div className={`me-centro-pila ${miTurno && estado.fase === "centro" ? "elegible" : ""}`} data-centro>
-          <div className="me-cesta-nombre">Centro</div>
-          <div className="me-centro-cartas">
+        <div
+          className={`me-monton me-monton-centro ${miTurno && estado.fase === "centro" ? "elegible" : ""} ${abierto === "centro" ? "abierta" : ""}`}
+          onClick={() => abrir("centro", estado.centro.length > 0)}
+          data-centro
+          style={{ "--n": Math.max(1, estado.centro.length) } as CSSProperties}
+        >
+          <div className="me-monton-nombre">Centro</div>
+          <div className="me-monton-cartas">
             {estado.centro.map((p, k) => (
-              <CartaPrendaHumeda key={p.id} p={p} data-encentro={p.id} className={`me-en-centro ${estado_("centro", p)}`} style={{ "--k": k } as CSSProperties} />
+              <CartaPrendaHumeda key={p.id} p={p} data-encentro={p.id} className={`me-en-monton ${estado_("centro", p)}`} style={{ "--k": k } as CSSProperties} />
             ))}
-            {estado.centro.length === 0 && <div className="me-cesta-vacia">vacío</div>}
           </div>
+          {estado.centro.length === 0 && <div className="me-cesta-vacia">vacío</div>}
           {botones("centro", estado.centro)}
         </div>
         <Bolsa cuantas={estado.bolsa.length} />
