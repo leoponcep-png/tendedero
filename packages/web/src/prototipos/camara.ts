@@ -33,16 +33,22 @@ export function useCamara(escenario: RefObject<HTMLElement | null>, mesa: RefObj
   const caja = useCallback(
     (selector: string) => {
       const m = mesa.current!;
-      if (selector === TODO) return { x: 0, y: 0, w: m.offsetWidth, h: m.offsetHeight };
-      const el = m.querySelector<HTMLElement>(selector);
-      if (!el) return { x: 0, y: 0, w: m.offsetWidth, h: m.offsetHeight };
-      let x = 0;
-      let y = 0;
-      for (let n: HTMLElement | null = el; n && n !== m; n = n.offsetParent as HTMLElement | null) {
-        x += n.offsetLeft;
-        y += n.offsetTop;
-      }
-      return { x, y, w: el.offsetWidth, h: el.offsetHeight };
+      const todo = { x: 0, y: 0, w: m.offsetWidth, h: m.offsetHeight };
+      if (selector === TODO) return todo;
+      // Si el selector abarca varias zonas (p. ej. «las cestas y el tendedero de quien coge»), se encuadran todas.
+      const cajas = [...m.querySelectorAll<HTMLElement>(selector)].map((el) => {
+        let x = 0;
+        let y = 0;
+        for (let n: HTMLElement | null = el; n && n !== m; n = n.offsetParent as HTMLElement | null) {
+          x += n.offsetLeft;
+          y += n.offsetTop;
+        }
+        return { x, y, x2: x + el.offsetWidth, y2: y + el.offsetHeight };
+      });
+      if (!cajas.length) return todo;
+      const x = Math.min(...cajas.map((c) => c.x));
+      const y = Math.min(...cajas.map((c) => c.y));
+      return { x, y, w: Math.max(...cajas.map((c) => c.x2)) - x, h: Math.max(...cajas.map((c) => c.y2)) - y };
     },
     [mesa],
   );

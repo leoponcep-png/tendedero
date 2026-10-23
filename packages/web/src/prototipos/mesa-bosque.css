@@ -796,3 +796,8 @@
     opacity: 0;
   }
 }
+
+/* Las medidas que dependen de la celda se recalculan donde la celda cambia (tapetes rivales, más pequeños). */
+.mb-tapete {
+  --alto-cuerda: calc(var(--celda) * 3 * 128 / 180);
+}

@@ -160,3 +160,210 @@
 .me .mb-centro {
   padding-top: 6px;
 }
+
+.me .mb-tapete,
+.me .me-cesta,
+.me .me-centro-pila {
+  --paso: calc(var(--celda) * 0.24);
+  --ancho-prenda: calc(var(--celda) * 1.45);
+  --colgante: calc(4 * var(--paso) + var(--celda) * 1.35);
+  --alto-linea: calc(var(--alto-cuerda) + var(--colgante));
+}
+
+/* ---------- Reparto: 4 cestas, centro y bolsa ---------- */
+
+.me-reparto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.me-reparto-aviso {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px 6px 8px;
+  border-radius: 999px;
+  background: var(--grano), var(--crema);
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    inset 5px 0 0 var(--jugador),
+    0 6px 12px #0005;
+  font-weight: 800;
+  font-size: 15px;
+}
+.me-reparto-aviso.tu-turno {
+  animation: me-aviso 1.2s ease-in-out infinite alternate;
+}
+@keyframes me-aviso {
+  to {
+    box-shadow:
+      0 0 0 2px var(--tinta),
+      inset 5px 0 0 var(--jugador),
+      0 0 0 6px #f2c25a,
+      0 0 24px #f2c25a;
+  }
+}
+.me-reparto-animal {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 2.5px var(--jugador);
+}
+.me-ronda {
+  padding: 1px 10px;
+  border-radius: 999px;
+  background: var(--tinta);
+  color: var(--crema);
+  font: 800 13px var(--fuente-titulo);
+}
+.me-montones {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.me-cesta,
+.me-centro-pila {
+  --celda: calc(var(--celda-base) * 0.82);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px 8px;
+  border-radius: 14px;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.me-cesta {
+  width: calc(var(--celda) * 3.7);
+}
+.me-cesta.elegible,
+.me-centro-pila.elegible {
+  background: #f2c25a26;
+  box-shadow: 0 0 0 3px #f2c25aaa;
+}
+.me-cesta-nombre {
+  font: 800 13px var(--fuente-titulo);
+  color: #f2e6cce0;
+  text-shadow: 0 1px 0 #0008;
+}
+/* Prendas asomando de la cesta, en abanico */
+.me-cesta-cartas {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: calc(5 * var(--paso) + var(--celda) * 1.3);
+  margin-bottom: calc(var(--celda) * -1.3);
+}
+.me .me-en-cesta {
+  position: absolute;
+  left: calc((100% - var(--ancho-prenda)) * var(--k) / max(var(--n) - 1, 1));
+  top: calc(var(--k) * 3px);
+  width: var(--ancho-prenda);
+  rotate: calc((var(--k) - (var(--n) - 1) / 2) * 5deg);
+  z-index: calc(var(--k) + 1);
+  transition:
+    translate 0.2s,
+    opacity 0.2s,
+    filter 0.2s;
+}
+.me-cesta-arte {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: calc(var(--celda) * 1.6);
+  filter: drop-shadow(0 6px 5px #0007);
+}
+.me-cesta-vacia {
+  position: absolute;
+  top: 45%;
+  font: 800 12px var(--fuente-titulo);
+  color: #f2e6cc99;
+}
+.me-centro-pila {
+  min-width: calc(var(--celda) * 4);
+  background: #0000001f;
+  box-shadow: inset 0 0 0 2px #f2e6cc33;
+}
+.me-centro-cartas {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding-right: calc(var(--ancho-prenda) * 0.5);
+  min-height: calc(5 * var(--paso) + var(--celda) * 1.3);
+}
+.me .me-en-centro {
+  position: relative;
+  left: auto;
+  top: auto;
+  flex: none;
+  width: var(--ancho-prenda);
+  margin-right: calc(var(--ancho-prenda) * -0.5);
+  rotate: calc((var(--k) % 3 - 1) * 4deg);
+  transition:
+    translate 0.2s,
+    opacity 0.2s,
+    filter 0.2s;
+}
+/* Al pasar el ratón por una opción: suben las prendas que te llevarías */
+.me .destacada {
+  translate: 0 -14px;
+  z-index: 20 !important;
+  filter: drop-shadow(0 0 6px #f2c25a) drop-shadow(0 0 2px #f2c25a);
+}
+.me .apagada {
+  opacity: 0.35;
+  filter: grayscale(0.6);
+}
+.me-opciones {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  max-width: calc(var(--celda) * 4.6);
+}
+.me-opcion {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  font-size: 12.5px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.me-opcion:hover {
+  background: #f2c25a;
+  border-color: var(--tinta);
+}
+.me-muestra {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.5px var(--tinta);
+}
+.me-muestra-tipo {
+  width: 22px;
+  height: 16px;
+}
+.me-bolsa {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: center;
+  gap: 2px;
+  font-weight: 800;
+  font-size: 12.5px;
+  color: #f2e6cce0;
+  text-shadow: 0 1px 0 #0008;
+}
+.me-bolsa svg {
+  width: calc(var(--celda-base) * 1.5);
+  height: calc(var(--celda-base) * 1.6);
+  filter: drop-shadow(0 6px 5px #0007);
+}
+.me .mb-centro {
+  align-items: flex-start;
+}

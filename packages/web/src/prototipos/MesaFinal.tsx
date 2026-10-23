@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { Animal } from "./Animales";
-import { CestaBosque, DefsBosque } from "./ArteBosque";
+import { CestaBosque, colorEstilo, DefsBosque, PrendaBosque } from "./ArteBosque";
 import { useCamara } from "./camara";
 import { CaraAccionBosque, CartaCuerdaBosque, CartaDiaBosque, DorsoBosque, LosetaBosque } from "./CartasBosque";
 import * as fx from "./efectos";
@@ -42,19 +42,68 @@ import "./menu-partida.css";
 // jugadores). Una cámara acerca la vista a cada tendedero y sigue las jugadas.
 
 type CartaMesa = { uid: string; clase: "accion" | "cuerda"; id: string; pinzas?: string };
-type Estado = { jugadores: Jugador[]; mano: CartaMesa[]; manos: CartaMano[][]; descarte: string | null; recien: string | null };
+type Fase = "cesta" | "centro" | "juego";
+type Estado = {
+  jugadores: Jugador[];
+  mano: CartaMesa[];
+  manos: CartaMano[][];
+  descarte: string | null;
+  recien: string | null;
+  bolsa: Prenda[];
+  cestas: Prenda[][];
+  centro: Prenda[];
+  /** Reparto al empezar la ronda: primero se coge de una cesta, luego del centro; después se juega. */
+  fase: Fase;
+  /** A quién le toca coger en el reparto (índice de jugador). */
+  coge: number;
+  ronda: number;
+};
 type Seleccion = { tipo: "carta"; carta: CartaMesa } | { tipo: "prenda"; prenda: Prenda };
+/** En el reparto se coge todo un color o todo un tipo. */
+type Patron = { color: string } | { tipo: keyof typeof TIPOS };
+type Origen = number | "centro";
+
+const NUM_CESTAS = 4;
+const PRENDAS_POR_CESTA = 4;
+const NOMBRE_COLOR: Record<string, [string, string]> = {
+  [COLORES.blanco]: ["blanca", "blancas"],
+  [COLORES.azul]: ["azul", "azules"],
+  [COLORES.rojo]: ["roja", "rojas"],
+  [COLORES.amarillo]: ["amarilla", "amarillas"],
+};
+const NOMBRE_TIPO: Record<string, [string, string]> = { calcetin: ["calcetín", "calcetines"], camiseta: ["camiseta", "camisetas"], toalla: ["toalla", "toallas"] };
+
+const cumple = (p: Prenda, patron: Patron) => ("color" in patron ? p.color === patron.color : p.tipo === patron.tipo);
+
+/** Lo que se puede coger de un montón: cada color y cada tipo que haya, con cuántas prendas son. */
+function opciones(prendas: Prenda[]): { patron: Patron; cuantas: number; texto: string }[] {
+  const lista: { patron: Patron; cuantas: number; texto: string }[] = [];
+  for (const color of Object.values(COLORES)) {
+    const n = prendas.filter((p) => p.color === color).length;
+    if (n) lista.push({ patron: { color }, cuantas: n, texto: `${n} ${NOMBRE_COLOR[color][n === 1 ? 0 : 1]}` });
+  }
+  for (const tipo of Object.keys(TIPOS) as (keyof typeof TIPOS)[]) {
+    const n = prendas.filter((p) => p.tipo === tipo).length;
+    if (n) lista.push({ patron: { tipo }, cuantas: n, texto: `${n} ${NOMBRE_TIPO[tipo][n === 1 ? 0 : 1]}` });
+  }
+  return lista;
+}
+
+/** La bolsa entera según los datos del juego (por color: 10 calcetines, 9 camisetas y 6 toallas), barajada. */
+function bolsaLlena(): Prenda[] {
+  const bolsa = (Object.keys(COLORES) as (keyof typeof COLORES)[]).flatMap((color) =>
+    (Object.keys(TIPOS) as (keyof typeof TIPOS)[]).flatMap((tipo) => Array.from({ length: { calcetin: 10, camiseta: 9, toalla: 6 }[tipo] }, () => prenda(tipo, color, TIPOS[tipo].humedad))),
+  );
+  for (let i = bolsa.length - 1; i > 0; i--) {
+    const k = Math.floor(Math.random() * (i + 1));
+    [bolsa[i], bolsa[k]] = [bolsa[k], bolsa[i]];
+  }
+  return bolsa;
+}
 
 const CUERDAS_POR_LINEA = 4;
 const PINZAS_POR_CUERDA = 3;
 const CUERDAS_MAZO: { id: string; pinzas?: string }[] = [{ id: "basica" }, { id: "tejadillo" }, { id: "resistente" }, { id: "secado-rapido" }, { id: "modificador-puntuacion", pinzas: COLORES.rojo }];
-const NUEVAS_PRENDAS: [keyof typeof TIPOS, keyof typeof COLORES][] = [
-  ["calcetin", "rojo"],
-  ["camiseta", "amarillo"],
-  ["toalla", "azul"],
-  ["calcetin", "blanco"],
-  ["camiseta", "rojo"],
-];
 
 const deAccion = (id: string): CartaMesa => ({ uid: nuevoId("k"), clase: "accion", id });
 const deCuerda = (id: string, pinzas?: string): CartaMesa => ({ uid: nuevoId("k"), clase: "cuerda", id, pinzas });
@@ -114,13 +163,42 @@ const RIVALES: (() => Jugador)[] = [
 ];
 
 function inicial(n: number): Estado {
+  const bolsa = bolsaLlena();
+  const jugadores = [tuTendedero(), ...RIVALES.slice(0, n - 1).map((f) => f())];
+  // Las prendas por tender salen del reparto: se empieza con la pila vacía.
+  for (const j of jugadores) j.porTender = [];
   return {
-    jugadores: [tuTendedero(), ...RIVALES.slice(0, n - 1).map((f) => f())],
+    jugadores,
     mano: [deAccion("rafaga-de-viento"), deCuerda("tejadillo"), deAccion("retrasar-secado"), deCuerda("resistente"), deAccion("secar-prenda")],
     manos: Array.from({ length: n - 1 }, () => MAZO_RIVAL.concat("retrasar-secado").map(carta)),
     descarte: null,
     recien: null,
+    cestas: Array.from({ length: NUM_CESTAS }, () => bolsa.splice(-PRENDAS_POR_CESTA)),
+    centro: [],
+    bolsa,
+    fase: "cesta",
+    coge: 0,
+    ronda: 1,
   };
+}
+
+/** Quién coge después en el reparto, o el paso a la fase siguiente (quien no tiene nada que coger se salta). */
+function siguienteReparto(e: Estado) {
+  const n = e.jugadores.length;
+  const hayAlgo = (f: Fase) => (f === "cesta" ? e.cestas.some((c) => c.length > 0) : e.centro.length > 0);
+  let fase = e.fase;
+  let coge = e.coge + 1;
+  if (coge >= n || !hayAlgo(fase)) {
+    if (fase === "cesta") {
+      fase = "centro";
+      coge = 0;
+    } else {
+      fase = "juego";
+    }
+  }
+  if (fase === "centro" && !hayAlgo("centro")) fase = "juego";
+  e.fase = fase;
+  e.coge = fase === "juego" ? 0 : coge;
 }
 
 /** A qué se le puede jugar cada acción, con cualquier número de rivales (las mismas protecciones que el juego). */
@@ -253,11 +331,9 @@ function Partida({
     };
   }
 
-  // Al empezar, la cámara viaja de la mesa entera a tu tendedero.
+  // Al empezar se ve la mesa entera; luego la cámara va al reparto (ver más abajo).
   useEffect(() => {
     camara.enfocar("todo", false);
-    const t = setTimeout(() => enfocar(tapete(0)), 900);
-    return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -398,12 +474,108 @@ function Partida({
       fx.salpicar({ x: r.left + r.width / 2, y: cz.bottom }, "#c99a62", 8);
       await fx.esperar(800);
       cambiar((e) => void (e.recien = null));
-      const [tipo, color] = azar(NUEVAS_PRENDAS);
-      const nueva = prenda(tipo, color, TIPOS[tipo].humedad);
-      const cesta = rect(`[data-cesta="${Math.floor(Math.random() * 3)}"]`);
-      cambiar((e) => void e.jugadores[quien].porTender.push(nueva));
-      await fx.traerDesde(el(`[data-portender="${nueva.id}"]`), cesta);
       await volver();
+    });
+  }
+
+  // ---------- Reparto (draft) ----------
+
+  /** Coge todas las prendas de un color o de un tipo de una cesta (lo demás va al centro) o del centro. */
+  function coger(quien: number, origen: Origen, patron: Patron) {
+    return animar(async () => {
+      const e0 = ultimo.current;
+      const monton = origen === "centro" ? e0.centro : e0.cestas[origen];
+      const cogidas = monton.filter((p) => cumple(p, patron));
+      const resto = monton.filter((p) => !cumple(p, patron));
+      const nombres = "color" in patron ? NOMBRE_COLOR[patron.color] : NOMBRE_TIPO[patron.tipo];
+      fx.anunciar(
+        `${perfiles[quien].nombre} coge ${cogidas.length} ${nombres[cogidas.length === 1 ? 0 : 1]}`,
+        origen === "centro" ? "del centro" : `de la cesta ${origen + 1}${resto.length ? " · el resto va al centro" : ""}`,
+        "tactica",
+      );
+      const pila = rect(`[data-pila="porTender-${quien}"]`);
+      const centro = rect("[data-centro]");
+      const elemento = (p: Prenda) => el(origen === "centro" ? `[data-encentro="${p.id}"]` : `[data-encesta="${p.id}"]`);
+      const vuelos = [...cogidas.map((p) => ({ p, destino: pila })), ...(origen === "centro" ? [] : resto.map((p) => ({ p, destino: centro })))];
+      await Promise.all(
+        vuelos.map(async ({ p, destino }, i) => {
+          await fx.esperar(i * 120);
+          const original = elemento(p);
+          const clon = fx.clonar(original);
+          original.style.visibility = "hidden";
+          await fx.volar(clon, fx.centro(destino), { arco: 120, escala: 0.85, giro: i % 2 ? 7 : -7, duracion: 700 });
+          clon.remove();
+        }),
+      );
+      cambiar((e) => {
+        if (origen === "centro") e.centro = e.centro.filter((p) => !cumple(p, patron));
+        else {
+          e.cestas[origen] = [];
+          e.centro.push(...resto);
+        }
+        e.jugadores[quien].porTender.push(...cogidas);
+        siguienteReparto(e);
+      });
+      fx.salpicar(fx.centro(rect(`[data-pila="porTender-${quien}"]`)), perfiles[quien].color, 10);
+    });
+  }
+
+  // Cuando en el reparto le toca a un rival, coge solo: el color o tipo con más prendas.
+  useEffect(() => {
+    if (estado.fase === "juego" || estado.coge === 0 || ocupado) return;
+    const quien = estado.coge;
+    const t = setTimeout(() => {
+      const origenes: Origen[] = estado.fase === "centro" ? ["centro"] : estado.cestas.flatMap((c, i) => (c.length ? [i] : []));
+      const todas = origenes.flatMap((o) => opciones(o === "centro" ? estado.centro : estado.cestas[o]).map((op) => ({ o, ...op })));
+      const mejor = Math.max(...todas.map((x) => x.cuantas));
+      const elegida = azar(todas.filter((x) => x.cuantas === mejor));
+      if (elegida) void coger(quien, elegida.o, elegida.patron);
+    }, 900);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [estado.fase, estado.coge, ocupado]);
+
+  // La cámara sigue el reparto: las cestas y quien coge; al acabar, vuelve a tu tendedero.
+  const primeraVista = useRef(true);
+  useEffect(() => {
+    if (!camaraAuto) return;
+    const t = setTimeout(() => enfocar(estado.fase === "juego" ? tapete(0) : `.mb-centro, ${tapete(estado.coge)}`), primeraVista.current ? 1000 : 300);
+    primeraVista.current = false;
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [estado.fase, estado.coge]);
+
+  /** Fin de ronda: lo que queda en el centro vuelve a la bolsa y solo se rellenan las cestas vacías. */
+  async function renovarCestas() {
+    const bolsa = rect("[data-bolsa]");
+    const centro = ultimo.current.centro;
+    await Promise.all(
+      centro.map(async (p, i) => {
+        await fx.esperar(i * 80);
+        const original = el(`[data-encentro="${p.id}"]`);
+        const clon = fx.clonar(original);
+        original.style.visibility = "hidden";
+        await fx.volar(clon, fx.centro(bolsa), { arco: 80, escala: 0.4, giro: 20, duracion: 550 });
+        clon.remove();
+      }),
+    );
+    const vacias = ultimo.current.cestas.flatMap((c, i) => (c.length ? [] : [i]));
+    cambiar((e) => {
+      e.bolsa.push(...e.centro);
+      e.centro = [];
+      for (let i = e.bolsa.length - 1; i > 0; i--) {
+        const k = Math.floor(Math.random() * (i + 1));
+        [e.bolsa[i], e.bolsa[k]] = [e.bolsa[k], e.bolsa[i]];
+      }
+      e.cestas = e.cestas.map((c) => (c.length ? c : e.bolsa.splice(-PRENDAS_POR_CESTA)));
+    });
+    const nuevas = vacias.flatMap((i) => ultimo.current.cestas[i]);
+    await Promise.all(nuevas.map((p, i) => fx.esperar(i * 70).then(() => fx.traerDesde(el(`[data-encesta="${p.id}"]`), bolsa))));
+    fx.anunciar(`Ronda ${ultimo.current.ronda + 1}`, "Reparto: cada uno coge de una cesta", "tactica");
+    cambiar((e) => {
+      e.ronda++;
+      e.fase = "cesta";
+      e.coge = 0;
     });
   }
 
@@ -439,6 +611,7 @@ function Partida({
       }
       await fx.esperar(400);
       await volver();
+      await renovarCestas();
     });
   }
 
@@ -491,7 +664,7 @@ function Partida({
         version="e"
         onVersion={onVersion}
         onVolver={onVolver}
-        ocupado={ocupado}
+        ocupado={ocupado || estado.fase !== "juego"}
         onRival={() => void jugarRival()}
         onReiniciar={reiniciar}
         textoRival={`Que juegue ${perfiles[turnoRival].nombre}`}
@@ -518,14 +691,7 @@ function Partida({
           </div>
 
           <section className="mb-centro">
-            <div className="mb-cestas">
-              {(["camiseta", "toalla", "calcetin"] as const).map((t, i) => (
-                <div key={t} className="mb-cesta" data-cesta={i}>
-                  <CartaPrendaHumeda p={{ id: `cesta-${i}`, tipo: t, color: Object.values(COLORES)[(i + 1) % 4], humedad: TIPOS[t].humedad }} className="me-cesta-carta" />
-                  <CestaBosque className="mb-cesta-arte" />
-                </div>
-              ))}
-            </div>
+            <Reparto estado={estado} perfiles={perfiles} ocupado={ocupado} onCoger={(o, patron) => void coger(0, o, patron)} />
             <div className="mb-mazos">
               <div className="mb-pila mb-pila-cuerdas" data-pila="mazo-cuerdas" title="Mazo de cuerdas">
                 {[0, 1, 2].map((i) => (
@@ -560,7 +726,7 @@ function Partida({
             </div>
             <div className="me-dia">
               <CartaDiaBosque />
-              <button className="principal" disabled={ocupado} onClick={() => void acabarDia()}>
+              <button className="principal" disabled={ocupado || estado.fase !== "juego"} onClick={() => void acabarDia()}>
                 Acabar el día
               </button>
             </div>
@@ -577,7 +743,7 @@ function Partida({
             cuerdasValidas={cuerdasValidas}
             prendaElegida={sel?.tipo === "prenda" ? sel.prenda.id : null}
             onHueco={(l) => sel?.tipo === "carta" && void ponerCuerda(0, sel.carta, l)}
-            onPrenda={(p) => !ocupado && setSel(sel?.tipo === "prenda" && sel.prenda.id === p.id ? null : { tipo: "prenda", prenda: p })}
+            onPrenda={(p) => !ocupado && estado.fase === "juego" && setSel(sel?.tipo === "prenda" && sel.prenda.id === p.id ? null : { tipo: "prenda", prenda: p })}
           />
         </div>
 
@@ -610,7 +776,7 @@ function Partida({
 
       <div className="mano">
         {estado.mano.map((c, i) => {
-          const jugable = c.clase === "cuerda" ? lineasConHueco(yo).length > 0 : objetivos(estado, 0, c.id).length > 0;
+          const jugable = estado.fase === "juego" && (c.clase === "cuerda" ? lineasConHueco(yo).length > 0 : objetivos(estado, 0, c.id).length > 0);
           const elegida = sel?.tipo === "carta" && sel.carta.uid === c.uid;
           const centrado = i - (estado.mano.length - 1) / 2;
           const estiloCarta = { "--abanico": `${centrado * 5}deg`, "--alzado": `${Math.abs(centrado) * 7}px` } as CSSProperties;
@@ -786,5 +952,108 @@ function Tapete({
         </div>
       )}
     </section>
+  );
+}
+
+/** Saco de la bolsa de prendas. */
+function Bolsa({ cuantas }: { cuantas: number }) {
+  return (
+    <div className="me-bolsa" data-bolsa title="Bolsa de prendas">
+      <svg viewBox="0 0 64 70" className="ilu" aria-hidden>
+        <g filter="url(#tinta-bosque)">
+          <path d="M18 22 C8 34 6 60 20 64 C30 67 40 67 46 64 C60 58 56 34 46 22 Z" fill="#d6b98c" stroke="#2b2019" strokeWidth="3" strokeLinejoin="round" />
+          <path d="M22 22 C24 14 40 14 42 22" fill="#c9a877" stroke="#2b2019" strokeWidth="3" />
+          <path d="M19 23 Q32 28 45 23" fill="none" stroke="#c2553a" strokeWidth="4" strokeLinecap="round" />
+          <path d="M40 34 C44 44 44 54 40 60" fill="none" stroke="#2b2019" strokeWidth="1.5" opacity=".4" />
+        </g>
+      </svg>
+      <span>
+        Bolsa · <b>{cuantas}</b>
+      </span>
+    </div>
+  );
+}
+
+/** Reparto de la ronda: las 4 cestas, el centro y la bolsa. Cuando te toca, botones para coger un color o un tipo. */
+function Reparto({
+  estado,
+  perfiles,
+  ocupado,
+  onCoger,
+}: {
+  estado: Estado;
+  perfiles: Perfil[];
+  ocupado: boolean;
+  onCoger: (origen: Origen, patron: Patron) => void;
+}) {
+  const [resaltado, setResaltado] = useState<{ origen: Origen; patron: Patron } | null>(null);
+  const repartiendo = estado.fase !== "juego";
+  const miTurno = repartiendo && estado.coge === 0 && !ocupado;
+  const quien = perfiles[estado.coge];
+  const aviso = !repartiendo
+    ? "A jugar: juega cartas, cuelga prendas y, al final, acaba el día"
+    : miTurno
+      ? estado.fase === "cesta"
+        ? "Te toca: elige una cesta y llévate todo un color o todo un tipo. Lo demás va al centro."
+        : "Te toca: llévate del centro todo un color o todo un tipo."
+      : `${quien.nombre} está cogiendo ${estado.fase === "cesta" ? "de una cesta" : "del centro"}…`;
+
+  const estado_ = (o: Origen, p: Prenda) => (resaltado && resaltado.origen === o ? (cumple(p, resaltado.patron) ? "destacada" : "apagada") : "");
+
+  const botones = (o: Origen, prendas: Prenda[]) =>
+    miTurno && (estado.fase === "centro") === (o === "centro") && prendas.length > 0 ? (
+      <div className="me-opciones">
+        {opciones(prendas).map((op) => (
+          <button
+            key={op.texto}
+            className="me-opcion"
+            onMouseEnter={() => setResaltado({ origen: o, patron: op.patron })}
+            onMouseLeave={() => setResaltado(null)}
+            onClick={() => {
+              setResaltado(null);
+              onCoger(o, op.patron);
+            }}
+          >
+            {"color" in op.patron ? <i className="me-muestra" style={{ background: colorEstilo(op.patron.color) }} /> : <PrendaBosque tipo={op.patron.tipo} color={COLORES.blanco} espacios={TIPOS[op.patron.tipo].espacios} className="me-muestra-tipo" />}
+            {op.texto}
+          </button>
+        ))}
+      </div>
+    ) : null;
+
+  return (
+    <div className="me-reparto">
+      <div className={`me-reparto-aviso ${miTurno ? "tu-turno" : ""}`} style={{ "--jugador": repartiendo ? quien.color : "#2b2019" } as CSSProperties}>
+        {repartiendo && <Animal id={quien.animal} className="me-reparto-animal" />}
+        <span className="me-ronda">Ronda {estado.ronda}</span>
+        <span>{aviso}</span>
+      </div>
+      <div className="me-montones">
+        {estado.cestas.map((c, i) => (
+          <div key={i} className={`me-cesta ${miTurno && estado.fase === "cesta" && c.length ? "elegible" : ""}`} data-cesta={i}>
+            <div className="me-cesta-nombre">Cesta {i + 1}</div>
+            <div className="me-cesta-cartas">
+              {c.map((p, k) => (
+                <CartaPrendaHumeda key={p.id} p={p} data-encesta={p.id} className={`me-en-cesta ${estado_(i, p)}`} style={{ "--k": k, "--n": c.length } as CSSProperties} />
+              ))}
+            </div>
+            <CestaBosque className="me-cesta-arte" />
+            {c.length === 0 && <div className="me-cesta-vacia">vacía</div>}
+            {botones(i, c)}
+          </div>
+        ))}
+        <div className={`me-centro-pila ${miTurno && estado.fase === "centro" ? "elegible" : ""}`} data-centro>
+          <div className="me-cesta-nombre">Centro</div>
+          <div className="me-centro-cartas">
+            {estado.centro.map((p, k) => (
+              <CartaPrendaHumeda key={p.id} p={p} data-encentro={p.id} className={`me-en-centro ${estado_("centro", p)}`} style={{ "--k": k } as CSSProperties} />
+            ))}
+            {estado.centro.length === 0 && <div className="me-cesta-vacia">vacío</div>}
+          </div>
+          {botones("centro", estado.centro)}
+        </div>
+        <Bolsa cuantas={estado.bolsa.length} />
+      </div>
+    </div>
   );
 }
