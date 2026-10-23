@@ -1,0 +1,162 @@
+/*
+ * E · Mesa final. Las prendas (todas del mismo tamaño) cuelgan por debajo de la carta de cuerda; lo que asoma
+ * de su columna de gotas es la humedad que les queda. Cada línea deja sitio debajo para la ropa colgada.
+ */
+
+.mb.me {
+  --celda-base: clamp(26px, 3.3vh, 50px);
+  --paso: calc(var(--celda) * 0.24);
+  --ancho-prenda: calc(var(--celda) * 1.45);
+  /* Sitio bajo cada línea: hasta 4 gotas visibles más el dibujo de la prenda */
+  --colgante: calc(4 * var(--paso) + var(--celda) * 1.35);
+  --alto-linea: calc(var(--alto-cuerda) + var(--colgante));
+}
+.me .hp {
+  height: calc(5 * var(--paso) + var(--celda) * 1.3);
+  font-size: calc(var(--celda) * 0.19);
+}
+
+/* ---------- Líneas y cuerdas ---------- */
+
+.me .me-linea {
+  height: var(--alto-linea);
+  align-items: flex-start;
+}
+.me .me-cuerda {
+  height: var(--alto-cuerda);
+}
+.me .me-cuerda-carta {
+  z-index: 10;
+}
+.me .me-hueco {
+  align-self: flex-start;
+  height: var(--alto-cuerda);
+}
+.me .loseta {
+  height: calc(var(--alto-linea) * var(--lineas) + var(--hueco-linea) * (var(--lineas) - 1));
+}
+.me .loseta-gancho {
+  top: calc(var(--i) * (var(--alto-linea) + var(--hueco-linea)) + var(--alto-cuerda) * 108 / 128 - 13px);
+}
+.me-pinzas-libres {
+  position: absolute;
+  z-index: 11;
+  right: 4px;
+  top: calc(var(--alto-cuerda) * 30 / 128);
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #fffaf0e6;
+  box-shadow: 0 0 0 1px #2b201955;
+  font: 800 calc(var(--celda) * 0.19) / 1.4 var(--fuente-texto);
+  color: #3d3026;
+  pointer-events: none;
+}
+.me-pinzas-libres.llena {
+  background: #2b2019cc;
+  color: #fff6e6;
+}
+
+/* Prenda colgada: por debajo de la carta de cuerda, más baja cuanto más mojada. */
+.me .me-colgada {
+  left: calc(var(--celda) * var(--x));
+  width: var(--ancho-prenda);
+  z-index: calc(1 + var(--orden));
+  transform-origin: 50% 0;
+  transition:
+    top 0.8s cubic-bezier(0.4, 1.35, 0.5, 1),
+    left 0.45s ease;
+}
+.me .me-colgada.colgando {
+  animation: me-entra 0.7s cubic-bezier(0.3, 0.6, 0.4, 1);
+}
+@keyframes me-entra {
+  0% {
+    rotate: 8deg;
+  }
+  40% {
+    rotate: -5deg;
+  }
+  70% {
+    rotate: 2deg;
+  }
+}
+
+/* Cuerdas y prendas que se pueden elegir mientras se apunta */
+.mb.apuntando .mb-cuerda.valido {
+  cursor: crosshair;
+}
+.mb.apuntando .mb-cuerda.valido::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  z-index: 20;
+  border-radius: 10px;
+  border: 3px solid #ffd34d;
+  box-shadow:
+    0 0 0 4px #ffd34d55,
+    0 0 18px #ffd34d;
+  animation: latido 0.9s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+/* ---------- Pila por tender, secas y cestas ---------- */
+
+.me .me-pendiente {
+  position: relative;
+  left: auto;
+  top: auto;
+  flex: none;
+  width: var(--ancho-prenda);
+  height: calc(5 * var(--paso) + var(--celda) * 1.3);
+  margin: 0 -6px;
+  transition: transform 0.25s var(--curva);
+}
+.me .me-pendiente:nth-child(odd) {
+  transform: rotate(-4deg);
+}
+.me .me-pendiente:nth-child(even) {
+  transform: rotate(3deg) translateY(3px);
+}
+.me .me-pendiente.jugable {
+  cursor: pointer;
+}
+.me .me-pendiente.jugable:hover {
+  z-index: 2;
+  transform: translateY(-12px) scale(1.08);
+}
+.me .me-pendiente.elegida {
+  z-index: 3;
+  transform: translateY(-18px) scale(1.12);
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    0 0 0 5px #f2c25a,
+    0 0 22px #f2c25a;
+}
+.me .me-seca {
+  --celda: 20px;
+  --paso: 4px;
+  position: absolute;
+  left: calc(var(--i) * 8px);
+  top: 0;
+  width: 30px;
+  height: 46px;
+  rotate: calc(var(--i) * 6deg - 8deg);
+}
+.me .me-cesta-carta {
+  --celda: calc(var(--celda-base) * 0.75);
+  position: absolute;
+  left: 26%;
+  top: -34%;
+  width: calc(var(--celda-base) * 1.05);
+  height: calc(var(--celda-base) * 1.75);
+  rotate: -8deg;
+}
+.me-dia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.me .mb-centro {
+  padding-top: 6px;
+}

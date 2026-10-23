@@ -15,6 +15,8 @@
   inset: 0;
   display: grid;
   grid-template-rows: auto 1fr;
+  /* Una sola columna del ancho de la ventana: las barras largas se deslizan en vez de ensanchar la página */
+  grid-template-columns: minmax(0, 1fr);
   overflow: hidden;
   color: var(--tinta);
   font-family: "Nunito", system-ui, sans-serif;
@@ -62,6 +64,8 @@
   display: flex;
   gap: 6px;
   margin-left: auto;
+  min-width: 0;
+  overflow-x: auto;
 }
 .proto-versiones button.activa {
   background: #2f7a63;

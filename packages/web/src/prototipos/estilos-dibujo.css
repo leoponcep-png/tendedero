@@ -1,0 +1,850 @@
+/*
+ * Estilos de dibujo de la mesa D. Todos usan los mismos dibujos: cada estilo cambia la paleta, el contorno,
+ * el sombreado (.sombra), la textura de la tela (.patron), los reflejos (.brillo), los detalles (.detalle),
+ * el filtro de la ilustración, las letras, la mesa, los tapetes y los marcos de las cartas.
+ */
+
+/* ---------- Base (Bosque, el estilo de partida) ---------- */
+
+.mb {
+  --fuente-titulo: "Alegreya SC", Georgia, serif;
+  --fuente-texto: "Alegreya Sans", "Nunito", sans-serif;
+  --p-blanco: #efe5cf;
+  --p-azul: #4f7fa6;
+  --p-rojo: #c2553a;
+  --p-amarillo: #e1a73a;
+  --ilu-sombra: #1d140e;
+  --pinza: #c99a62;
+  --tinta-ilu: var(--tinta);
+}
+.mb .ilu [stroke="#2b2019"] {
+  stroke: var(--tinta-ilu);
+}
+.mb .ilu [fill="#2b2019"] {
+  fill: var(--tinta-ilu);
+}
+.mb .ilu [fill="#f2e6cc"] {
+  fill: var(--crema);
+}
+.mb .ilu .patron {
+  fill: none;
+  pointer-events: none;
+}
+.mb .ilu .capa-rica,
+.mb .ilu .brillo,
+.mb .ilu .detalle {
+  display: none;
+}
+
+/* Selector de estilo */
+.mb-estilos {
+  position: relative;
+  z-index: 29;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  overflow-x: auto;
+  background: #1d140ecc;
+  backdrop-filter: blur(4px);
+  color: #f2e6cc;
+  font: 700 13px "Nunito", sans-serif;
+}
+.mb-estilos span {
+  white-space: nowrap;
+  opacity: 0.8;
+  margin-right: 4px;
+}
+.mb-estilos button {
+  flex: none;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1.5px solid #f2e6cc55;
+  background: transparent;
+  color: #f2e6cc;
+  font: inherit;
+  cursor: pointer;
+}
+.mb-estilos button.activa {
+  background: #f2e6cc;
+  color: #2b2019;
+}
+.mb.con-estilos {
+  grid-template-rows: auto auto 1fr;
+}
+
+/* ---------- Minimalista ---------- */
+
+.mb.estilo-minimal {
+  --fuente-titulo: "Quicksand", sans-serif;
+  --fuente-texto: "Quicksand", sans-serif;
+  --tinta: #3c3c3c;
+  --crema: #fbfaf7;
+  --fastidio: #e0806b;
+  --tactica: #69ad94;
+  --p-blanco: #f1efea;
+  --p-azul: #8db2d8;
+  --p-rojo: #ee9886;
+  --p-amarillo: #f3d17a;
+  --ilu-sombra: #000;
+  --pinza: #e3c9a6;
+  --grano: linear-gradient(transparent, transparent);
+  background: #ece9e4;
+}
+.estilo-minimal .mb-luz {
+  display: none;
+}
+.estilo-minimal .ilu [stroke="#2b2019"] {
+  stroke: transparent;
+}
+.estilo-minimal .ilu .sombra {
+  display: none;
+}
+.estilo-minimal .ilu g[filter] {
+  filter: none;
+}
+.estilo-minimal .mb-tapete {
+  background: #dfe8e1;
+  box-shadow: 0 10px 30px #0000001a;
+}
+.estilo-minimal .mb-tapete-rival {
+  background: #efe0d8;
+}
+.estilo-minimal .mb-tapete::before {
+  display: none;
+}
+.estilo-minimal .ccb > svg,
+.estilo-minimal .pb-marco,
+.estilo-minimal .cb,
+.estilo-minimal .loseta,
+.estilo-minimal .mb-placa,
+.estilo-minimal .dia-bosque {
+  filter: none;
+  box-shadow: 0 4px 14px #0000001c;
+}
+.estilo-minimal .loseta {
+  background: #fff;
+}
+.estilo-minimal .loseta-poste {
+  background: #d8c3a6;
+  box-shadow: none;
+}
+.estilo-minimal .cb-nombre,
+.estilo-minimal .cb-tipo {
+  background: var(--g);
+  border: none;
+}
+.estilo-minimal .cb-ilustra,
+.estilo-minimal .pb-ilustra {
+  border: none;
+  background: var(--g-claro, var(--c-claro));
+}
+.estilo-minimal .mb-placa-puntos b {
+  box-shadow: none;
+}
+.estilo-minimal .mb-animal {
+  box-shadow: 0 0 0 3px var(--jugador);
+}
+
+/* ---------- Detallado ---------- */
+
+.mb.estilo-detallado {
+  --fuente-titulo: "Cormorant Garamond", Georgia, serif;
+  --p-blanco: #f1ebdd;
+  --p-azul: #3d6f9e;
+  --p-rojo: #b8432f;
+  --p-amarillo: #d99a2b;
+  --ilu-sombra: #2a1608;
+  --fastidio: #9c3b26;
+  --tactica: #3e6b58;
+  background:
+    var(--veta) 0 0 / 600px 200px,
+    var(--veta) 300px 100px / 900px 300px,
+    linear-gradient(180deg, #7a4b2a, #5a341b);
+}
+.estilo-detallado .ilu .capa-rica {
+  display: inline;
+}
+.estilo-detallado .ilu .patron {
+  fill: url(#pat-rayas);
+  opacity: 0.5;
+}
+.estilo-detallado .ilu .detalle {
+  display: inline;
+  fill: none;
+  stroke: #0000005c;
+  stroke-width: 1.2;
+  stroke-dasharray: 2.5 2;
+}
+.estilo-detallado .ilu .brillo {
+  display: inline;
+  fill: none;
+  stroke: #ffffff59;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+.estilo-detallado .mb-tapete {
+  background:
+    var(--fieltro),
+    radial-gradient(ellipse at 50% 30%, #4f7a55, #2c4630);
+  box-shadow:
+    0 14px 26px #0008,
+    0 0 0 3px var(--tinta),
+    0 0 0 6px #b8913f,
+    0 0 0 8px var(--tinta);
+}
+.estilo-detallado .mb-tapete-rival {
+  background:
+    var(--fieltro),
+    radial-gradient(ellipse at 50% 30%, #8c4b3b, #57281e);
+}
+.estilo-detallado .mb-tapete::before {
+  border: 2px solid #d9b45e66;
+  outline: 1px dashed #d9b45e55;
+  outline-offset: 3px;
+}
+.estilo-detallado .cb,
+.estilo-detallado .loseta,
+.estilo-detallado .mb-placa,
+.estilo-detallado .dia-bosque {
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    inset 0 0 0 3px var(--crema),
+    inset 0 0 0 4.5px #b8913f,
+    0 8px 18px #0006;
+}
+.estilo-detallado .cb-nombre {
+  background:
+    linear-gradient(#ffffff26, transparent 55%),
+    var(--grano),
+    var(--g);
+  font-size: 1.2em;
+}
+.estilo-detallado .cb-ilustra,
+.estilo-detallado .pb-ilustra {
+  background:
+    radial-gradient(ellipse at 50% 25%, #fffc, transparent 65%),
+    repeating-linear-gradient(45deg, #0000000a 0 2px, transparent 2px 6px),
+    var(--g-claro, var(--c-claro));
+}
+
+/* ---------- Impresionista ---------- */
+
+.mb.estilo-impresionista {
+  --fuente-titulo: "Playfair Display", Georgia, serif;
+  --tinta: #3b3150;
+  --crema: #f7eedb;
+  --p-blanco: #f7efd9;
+  --p-azul: #6c94c9;
+  --p-rojo: #e2735b;
+  --p-amarillo: #f2c14e;
+  --ilu-sombra: #4b3a6b;
+  --fastidio: #c9624c;
+  --tactica: #5d8f7a;
+  background:
+    radial-gradient(circle at 20% 30%, #c98a5a88, transparent 25%),
+    radial-gradient(circle at 75% 20%, #e8b77088, transparent 22%),
+    radial-gradient(circle at 60% 80%, #9a5d3f88, transparent 30%),
+    radial-gradient(circle at 10% 85%, #6f8f6f66, transparent 25%),
+    var(--grano),
+    linear-gradient(160deg, #b77b4c, #8c5636);
+}
+.estilo-impresionista .ilu g[filter] {
+  filter: url(#pincel);
+}
+.estilo-impresionista .ilu [stroke="#2b2019"] {
+  stroke: #3b315055;
+}
+.estilo-impresionista .ilu .sombra {
+  opacity: 0.6;
+}
+.estilo-impresionista .mb-tapete {
+  background:
+    radial-gradient(circle at 30% 30%, #9fc29a, transparent 40%),
+    radial-gradient(circle at 70% 60%, #6f9a7a, transparent 45%),
+    var(--grano),
+    #5d8467;
+  box-shadow: 0 14px 30px #0006;
+}
+.estilo-impresionista .mb-tapete-rival {
+  background:
+    radial-gradient(circle at 30% 40%, #e3a07d, transparent 40%),
+    radial-gradient(circle at 70% 60%, #b9705a, transparent 45%),
+    var(--grano),
+    #9c5e48;
+}
+.estilo-impresionista .mb-tapete::before {
+  display: none;
+}
+.estilo-impresionista .cb-nombre,
+.estilo-impresionista .mb-placa-nombre {
+  font-style: italic;
+}
+
+/* ---------- Anime ---------- */
+
+.mb.estilo-anime {
+  --fuente-titulo: "M PLUS Rounded 1c", "Nunito", sans-serif;
+  --fuente-texto: "M PLUS Rounded 1c", "Nunito", sans-serif;
+  --tinta: #1d1838;
+  --crema: #ffffff;
+  --p-blanco: #ffffff;
+  --p-azul: #3b8cff;
+  --p-rojo: #ff4d5e;
+  --p-amarillo: #ffcc1f;
+  --ilu-sombra: #3a2a8a;
+  --pinza: #ffb36b;
+  --fastidio: #ff4d6d;
+  --tactica: #12b886;
+  --grano: linear-gradient(transparent, transparent);
+  background:
+    radial-gradient(circle at 15% 20%, #ffffff55 0 2px, transparent 3px) 0 0 / 90px 90px,
+    linear-gradient(180deg, #ffd9a8, #f1b27a);
+}
+.estilo-anime .mb-luz {
+  background: radial-gradient(ellipse 70% 60% at 50% 40%, #fff4, transparent 70%);
+}
+.estilo-anime .ilu g[filter] {
+  filter: none;
+}
+.estilo-anime .ilu .sombra {
+  opacity: 0.55;
+}
+.estilo-anime .ilu .brillo {
+  display: inline;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 3.6;
+  stroke-linecap: round;
+  opacity: 0.9;
+}
+.estilo-anime .mb-tapete {
+  background:
+    radial-gradient(circle, #ffffff22 1.5px, transparent 2px) 0 0 / 14px 14px,
+    linear-gradient(160deg, #2ec4b6, #1a9e93);
+  box-shadow:
+    0 0 0 4px #fff,
+    0 0 0 7px var(--tinta),
+    0 14px 26px #0005;
+}
+.estilo-anime .mb-tapete-rival {
+  background:
+    radial-gradient(circle, #ffffff22 1.5px, transparent 2px) 0 0 / 14px 14px,
+    linear-gradient(160deg, #ff7aa2, #e85a86);
+}
+.estilo-anime .mb-tapete::before {
+  border-color: #fff8;
+}
+.estilo-anime .cb {
+  border-radius: calc(var(--carta-w) / 9);
+}
+.estilo-anime .cb-nombre {
+  background: linear-gradient(90deg, var(--g), color-mix(in srgb, var(--g), #fff 30%));
+  text-shadow: 2px 2px 0 var(--tinta);
+}
+.estilo-anime .cb-ilustra {
+  background:
+    repeating-conic-gradient(from 0deg at 50% 45%, #ffffff55 0 6deg, transparent 6deg 18deg),
+    var(--g-claro);
+}
+.estilo-anime .anuncio-titulo {
+  -webkit-text-stroke: 1.5px var(--tinta);
+  color: #fff;
+  text-shadow: 4px 4px 0 var(--fastidio);
+}
+
+/* ---------- Cozy ---------- */
+
+.mb.estilo-cozy {
+  --fuente-titulo: "Gaegu", "Nunito", sans-serif;
+  --fuente-texto: "Nunito", sans-serif;
+  --tinta: #6b4f3f;
+  --crema: #fdf5e6;
+  --p-blanco: #fbf3e4;
+  --p-azul: #8fb1c9;
+  --p-rojo: #e5937f;
+  --p-amarillo: #f2cf80;
+  --ilu-sombra: #7a4e3a;
+  --pinza: #e9c9a1;
+  --fastidio: #d98a74;
+  --tactica: #8db596;
+  background:
+    var(--veta) 0 0 / 900px 300px,
+    linear-gradient(180deg, #d9a877, #c08b5c);
+}
+.estilo-cozy .mb-luz {
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 40%, #ffe9c255, transparent 70%),
+    radial-gradient(ellipse 85% 80% at 50% 45%, transparent 60%, #6b3f1f66 100%);
+}
+.estilo-cozy .ilu .patron {
+  fill: url(#pat-punto);
+}
+.estilo-cozy .ilu .sombra {
+  opacity: 0.45;
+}
+.estilo-cozy .ilu .detalle {
+  display: inline;
+  fill: none;
+  stroke: #ffffffaa;
+  stroke-width: 1.4;
+  stroke-dasharray: 3 3;
+}
+.estilo-cozy .ilu g[filter] {
+  filter: none;
+}
+.estilo-cozy .mb-tapete {
+  border-radius: 30px;
+  background:
+    repeating-linear-gradient(0deg, #ffffff1f 0 6px, transparent 6px 26px),
+    repeating-linear-gradient(90deg, #ffffff1f 0 6px, transparent 6px 26px),
+    repeating-linear-gradient(0deg, #00000012 0 13px, transparent 13px 26px),
+    #9cbf9f;
+  box-shadow:
+    0 0 0 3px var(--tinta),
+    0 12px 24px #6b3f1f55;
+}
+.estilo-cozy .mb-tapete-rival {
+  background:
+    repeating-linear-gradient(0deg, #ffffff1f 0 6px, transparent 6px 26px),
+    repeating-linear-gradient(90deg, #ffffff1f 0 6px, transparent 6px 26px),
+    repeating-linear-gradient(0deg, #00000012 0 13px, transparent 13px 26px),
+    #dba48f;
+}
+.estilo-cozy .mb-tapete::before {
+  border-radius: 24px;
+  border-color: #fff9;
+}
+.estilo-cozy .cb,
+.estilo-cozy .pb-marco,
+.estilo-cozy .mb-placa,
+.estilo-cozy .loseta,
+.estilo-cozy .dia-bosque {
+  border-radius: 14px;
+}
+.estilo-cozy .cb-nombre {
+  font-size: 1.5em;
+}
+.estilo-cozy .mb-placa-nombre::after {
+  content: " ♥";
+  color: var(--fastidio);
+}
+
+/* ---------- Acuarela ---------- */
+
+.mb.estilo-acuarela {
+  --fuente-titulo: "Caveat", cursive;
+  --tinta: #5d5246;
+  --crema: #fffaf1;
+  --p-blanco: #fbf7ef;
+  --p-azul: #7ea9d6;
+  --p-rojo: #e48a76;
+  --p-amarillo: #f3cd6b;
+  --ilu-sombra: #5b6b8a;
+  --fastidio: #d9826c;
+  --tactica: #7aae9a;
+  background:
+    radial-gradient(ellipse at 20% 30%, #c9dcef88, transparent 35%),
+    radial-gradient(ellipse at 80% 70%, #f2d3b788, transparent 40%),
+    radial-gradient(ellipse at 60% 20%, #d9e8cf88, transparent 30%),
+    var(--grano),
+    #f6efe2;
+}
+.estilo-acuarela .mb-luz {
+  display: none;
+}
+.estilo-acuarela .ilu g[filter] {
+  filter: url(#acuarela);
+}
+.estilo-acuarela .ilu [stroke="#2b2019"] {
+  stroke: #5d524666;
+}
+.estilo-acuarela .ilu .sombra {
+  opacity: 0.4;
+}
+.estilo-acuarela .mb-tapete {
+  background:
+    radial-gradient(ellipse at 30% 40%, #b7d3b0, transparent 55%),
+    radial-gradient(ellipse at 70% 60%, #9fc4a3, transparent 60%),
+    #c4dcc0aa;
+  box-shadow: 0 0 30px 8px #c4dcc0aa;
+}
+.estilo-acuarela .mb-tapete-rival {
+  background:
+    radial-gradient(ellipse at 30% 40%, #f0c2ad, transparent 55%),
+    radial-gradient(ellipse at 70% 60%, #e7ab95, transparent 60%),
+    #f1cbbaaa;
+  box-shadow: 0 0 30px 8px #f1cbbaaa;
+}
+.estilo-acuarela .mb-tapete::before {
+  display: none;
+}
+.estilo-acuarela .mb-portender-titulo,
+.estilo-acuarela .mb-pila-nombre {
+  color: #5d5246;
+}
+.estilo-acuarela .cb-nombre {
+  font-size: 1.5em;
+}
+
+/* ---------- Pixel art ---------- */
+
+.mb.estilo-pixel {
+  --fuente-titulo: "Silkscreen", monospace;
+  --fuente-texto: "Silkscreen", monospace;
+  --tinta: #111;
+  --crema: #f4f0e6;
+  --p-blanco: #f4f4f4;
+  --p-azul: #3e7bd6;
+  --p-rojo: #d8433b;
+  --p-amarillo: #f2c230;
+  --ilu-sombra: #1b1b2f;
+  --fastidio: #d8433b;
+  --tactica: #2f9e5b;
+  --grano: linear-gradient(transparent, transparent);
+  background:
+    linear-gradient(90deg, #ffffff08 1px, transparent 1px) 0 0 / 16px 16px,
+    linear-gradient(#ffffff08 1px, transparent 1px) 0 0 / 16px 16px,
+    #2b2d42;
+}
+.estilo-pixel .mb-luz {
+  display: none;
+}
+/* La letra de píxeles es muy ancha: todo un poco más pequeño para que quepa la mesa */
+.mb.estilo-pixel {
+  --celda-base: clamp(26px, 3.4vh, 46px);
+  letter-spacing: -0.03em;
+}
+.estilo-pixel .loseta-fila span {
+  font-size: calc(var(--celda) * 0.15);
+}
+.estilo-pixel .ilu {
+  shape-rendering: crispEdges;
+}
+.estilo-pixel .ilu g[filter] {
+  filter: url(#pixel);
+}
+.estilo-pixel .mb-tapete,
+.estilo-pixel .cb,
+.estilo-pixel .pb-marco,
+.estilo-pixel .loseta,
+.estilo-pixel .mb-placa,
+.estilo-pixel .dia-bosque,
+.estilo-pixel .db {
+  border-radius: 0;
+}
+.estilo-pixel .mb-tapete {
+  background: #3e8948;
+  box-shadow:
+    0 0 0 4px #111,
+    8px 8px 0 4px #0008;
+}
+.estilo-pixel .mb-tapete-rival {
+  background: #a0462f;
+}
+.estilo-pixel .mb-tapete::before {
+  border-radius: 0;
+  border-style: dotted;
+}
+.estilo-pixel .cb,
+.estilo-pixel .loseta,
+.estilo-pixel .mb-placa,
+.estilo-pixel .dia-bosque {
+  box-shadow:
+    0 0 0 3px #111,
+    5px 5px 0 3px #0007;
+}
+.estilo-pixel .cb {
+  font-size: calc(var(--carta-w) / 14);
+}
+.estilo-pixel .mb-animal,
+.estilo-pixel .mb-placa-puntos b {
+  border-radius: 0;
+}
+
+/* ---------- Grabado (linóleo) ---------- */
+
+.mb.estilo-grabado {
+  --fuente-titulo: "IM Fell English SC", Georgia, serif;
+  --fuente-texto: "IM Fell English", Georgia, serif;
+  --tinta: #1d1b1a;
+  --crema: #f3ead7;
+  --p-blanco: #f3ead7;
+  --p-azul: #2f4858;
+  --p-rojo: #a8322a;
+  --p-amarillo: #c8902e;
+  --ilu-sombra: #1d1b1a;
+  --fastidio: #a8322a;
+  --tactica: #2f4858;
+  background: var(--grano), #e9dfc8;
+}
+.estilo-grabado .mb-luz {
+  display: none;
+}
+.estilo-grabado .ilu g[filter] {
+  filter: url(#rugoso);
+}
+.estilo-grabado .ilu .sombra {
+  fill: url(#pat-rayado) !important;
+  opacity: 0.85;
+}
+.estilo-grabado .mb-tapete {
+  background: var(--grano), #f3ead7;
+  box-shadow:
+    0 0 0 3px var(--tinta),
+    0 0 0 7px #f3ead7,
+    0 0 0 9px var(--tinta);
+}
+.estilo-grabado .mb-tapete-rival {
+  background: var(--grano), #efd9cf;
+}
+.estilo-grabado .mb-tapete::before {
+  border: 1.5px solid #1d1b1a66;
+}
+.estilo-grabado .mb-portender-titulo,
+.estilo-grabado .mb-pila-nombre,
+.estilo-grabado .mb-estilos {
+  color: var(--tinta);
+}
+.estilo-grabado .mb-hueco {
+  border-color: #1d1b1a44;
+  color: #1d1b1a66;
+}
+
+/* ---------- Papel recortado ---------- */
+
+.mb.estilo-recortable {
+  --fuente-titulo: "Baloo 2", "Nunito", sans-serif;
+  --fuente-texto: "Baloo 2", "Nunito", sans-serif;
+  --crema: #fffdf6;
+  --p-blanco: #fffdf6;
+  --p-azul: #5a8fd8;
+  --p-rojo: #f06b5b;
+  --p-amarillo: #ffcf4a;
+  --fastidio: #f06b5b;
+  --tactica: #3fb68b;
+  background:
+    repeating-linear-gradient(80deg, #00000008 0 2px, transparent 2px 9px),
+    var(--grano),
+    #c8a77a;
+}
+.estilo-recortable .ilu [stroke="#2b2019"] {
+  stroke: transparent;
+}
+.estilo-recortable .ilu .sombra {
+  display: none;
+}
+.estilo-recortable .ilu g[filter] {
+  filter: drop-shadow(1.5px 2.5px 0 #00000040);
+}
+.estilo-recortable .mb-tapete {
+  background: #7fb685;
+  box-shadow: 8px 10px 0 #00000033;
+  rotate: -0.6deg;
+}
+.estilo-recortable .mb-tapete-rival {
+  background: #f2a07f;
+  rotate: 0.5deg;
+}
+.estilo-recortable .mb-tapete::before {
+  display: none;
+}
+.estilo-recortable .cb,
+.estilo-recortable .pb-marco,
+.estilo-recortable .loseta,
+.estilo-recortable .mb-placa,
+.estilo-recortable .dia-bosque {
+  box-shadow: 4px 5px 0 #00000038;
+}
+
+/* ---------- Retro (risografía) ---------- */
+
+.mb.estilo-retro {
+  --fuente-titulo: "Rammetto One", "Fredoka", sans-serif;
+  --fuente-texto: "Nunito", sans-serif;
+  --tinta: #1d1b3a;
+  --crema: #fff7ea;
+  --p-blanco: #fff7ea;
+  --p-azul: #2f6fde;
+  --p-rojo: #ff5d7a;
+  --p-amarillo: #ffd23f;
+  --fastidio: #ff5d7a;
+  --tactica: #2f6fde;
+  background:
+    radial-gradient(circle, #1d1b3a1a 1.5px, transparent 2px) 0 0 / 9px 9px,
+    #a8e0d1;
+}
+.estilo-retro .mb-luz {
+  display: none;
+}
+.estilo-retro .ilu [stroke="#2b2019"] {
+  stroke: transparent;
+}
+.estilo-retro .ilu .sombra {
+  fill: url(#pat-semitono) !important;
+}
+.estilo-retro .ilu g[filter] {
+  filter: drop-shadow(2.5px 1.5px 0 #ff5d7a99);
+}
+.estilo-retro .mb-tapete {
+  background:
+    radial-gradient(circle, #ffffff33 1.5px, transparent 2px) 0 0 / 9px 9px,
+    #2f6fde;
+  box-shadow:
+    0 0 0 3px var(--tinta),
+    6px 6px 0 3px #ff5d7a;
+}
+.estilo-retro .mb-tapete-rival {
+  background:
+    radial-gradient(circle, #ffffff33 1.5px, transparent 2px) 0 0 / 9px 9px,
+    #ff5d7a;
+  box-shadow:
+    0 0 0 3px var(--tinta),
+    6px 6px 0 3px #2f6fde;
+}
+.estilo-retro .cb-nombre {
+  font-size: 1em;
+}
+.estilo-retro .mb-portender-titulo,
+.estilo-retro .mb-pila-nombre {
+  color: var(--tinta);
+}
+.estilo-retro .mb-pila-nombre {
+  font: 800 12px var(--fuente-texto);
+}
+
+/* =====================================================================
+ * Fusión: bordes de tinta (bosque) + prendas y acabados del detallado + colores del anime
+ * + tramas y registro movido de la risografía + calidez cozy.
+ * ===================================================================== */
+
+.mb.estilo-fusion {
+  --fuente-titulo: "Baloo 2", "Fredoka", sans-serif;
+  --fuente-texto: "Nunito", sans-serif;
+  --tinta: #2a1d2e;
+  --crema: #fff6e6;
+  --p-blanco: #fffaf0;
+  --p-azul: #2f86e8;
+  --p-rojo: #ff5a4f;
+  --p-amarillo: #ffc531;
+  --ilu-sombra: #4a2a6a;
+  --pinza: #f0b878;
+  --fastidio: #ff5a4f;
+  --tactica: #1fae87;
+  --dorado: #e8b04a;
+  background:
+    var(--veta) 0 0 / 900px 300px,
+    linear-gradient(180deg, #c98a55, #a2643a);
+}
+.estilo-fusion .mb-luz {
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 40%, #ffe7b866, transparent 70%),
+    radial-gradient(ellipse 85% 80% at 50% 45%, transparent 58%, #3a1d1288 100%);
+}
+/* Tinta temblorosa con el color un pelín desplazado, como una risografía */
+.estilo-fusion .ilu g[filter] {
+  filter: url(#tinta-bosque) drop-shadow(1.4px 1px 0 #ff4f8b55);
+}
+.estilo-fusion .ilu .capa-rica {
+  display: inline;
+}
+.estilo-fusion .ilu .sombra {
+  opacity: 0.5;
+}
+.estilo-fusion .ilu .brillo {
+  display: inline;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+.estilo-fusion .ilu .detalle {
+  display: inline;
+  fill: none;
+  stroke: #0000004d;
+  stroke-width: 1.1;
+  stroke-dasharray: 2.4 2;
+}
+/* Tapetes de cuadros cozy, con colores vivos y trama de puntos */
+.estilo-fusion .mb-tapete {
+  border-radius: 26px;
+  background:
+    radial-gradient(circle, #ffffff26 1.2px, transparent 1.7px) 0 0 / 8px 8px,
+    repeating-linear-gradient(0deg, #ffffff22 0 7px, transparent 7px 28px),
+    repeating-linear-gradient(90deg, #ffffff22 0 7px, transparent 7px 28px),
+    repeating-linear-gradient(0deg, #00000014 0 14px, transparent 14px 28px),
+    #22a08a;
+  box-shadow:
+    0 0 0 3px var(--tinta),
+    0 0 0 7px var(--dorado),
+    0 0 0 9.5px var(--tinta),
+    0 16px 28px #3a1d1299;
+}
+.estilo-fusion .mb-tapete-rival {
+  background:
+    radial-gradient(circle, #ffffff26 1.2px, transparent 1.7px) 0 0 / 8px 8px,
+    repeating-linear-gradient(0deg, #ffffff22 0 7px, transparent 7px 28px),
+    repeating-linear-gradient(90deg, #ffffff22 0 7px, transparent 7px 28px),
+    repeating-linear-gradient(0deg, #00000014 0 14px, transparent 14px 28px),
+    #ef6f5c;
+}
+.estilo-fusion .mb-tapete::before {
+  border-radius: 20px;
+  border: 2px dashed #fff9;
+}
+/* Cartas: ribete dorado, esquinas redondas y cabeceras de color con trama */
+.estilo-fusion .cb,
+.estilo-fusion .mb-placa,
+.estilo-fusion .loseta,
+.estilo-fusion .dia-bosque,
+.estilo-fusion .taller-opcion,
+.estilo-fusion .taller-intro {
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 2.5px var(--tinta),
+    inset 0 0 0 3px var(--crema),
+    inset 0 0 0 4.5px var(--dorado),
+    0 10px 20px #3a1d1266;
+}
+.estilo-fusion .cb-nombre,
+.estilo-fusion .cb-tipo,
+.estilo-fusion .dia-bosque-nombre {
+  background:
+    radial-gradient(circle, #ffffff40 1px, transparent 1.5px) 0 0 / 6px 6px,
+    linear-gradient(180deg, color-mix(in srgb, var(--g, #ffc531), #fff 22%), var(--g, #e8a71c));
+  text-shadow: 1.5px 1.5px 0 var(--tinta);
+  color: #fff;
+  letter-spacing: 0.01em;
+}
+.estilo-fusion .cb-ilustra {
+  background:
+    repeating-conic-gradient(from 0deg at 50% 45%, #ffffff40 0 6deg, transparent 6deg 18deg),
+    radial-gradient(ellipse at 50% 40%, #fff, transparent 70%),
+    var(--g-claro);
+}
+.estilo-fusion .pb-marco,
+.estilo-fusion .hp {
+  border-radius: 9px;
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    inset 0 0 0 2px var(--crema),
+    inset 0 0 0 3px var(--dorado),
+    0 6px 8px #3a1d1266;
+}
+.estilo-fusion .pb-ilustra,
+.estilo-fusion .hp-ilustra {
+  background:
+    radial-gradient(circle, #ffffff55 1px, transparent 1.6px) 0 0 / 6px 6px,
+    radial-gradient(circle at 50% 35%, #fff, transparent 70%),
+    color-mix(in srgb, var(--c), #fff 62%);
+}
+.estilo-fusion .mb-placa-nombre::after {
+  content: " ♥";
+  color: var(--fastidio);
+}
+.estilo-fusion .anuncio-titulo {
+  color: #fff;
+  -webkit-text-stroke: 1.2px var(--tinta);
+  text-shadow: 3px 3px 0 var(--fastidio);
+}

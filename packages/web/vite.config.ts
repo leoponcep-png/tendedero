@@ -45,6 +45,33 @@ function configuraciones(): Plugin {
   };
 }
 
+const BOCETOS = fileURLToPath(new URL("../../bocetos/", import.meta.url));
+
+// Guarda en /bocetos los dibujos de la pizarra de los prototipos, para poder enseñárselos a Claude.
+// Solo existe en local, como las configuraciones.
+function bocetos(): Plugin {
+  return {
+    name: "tendedero-bocetos",
+    configureServer(server) {
+      server.middlewares.use("/api/bocetos", async (req, res) => {
+        try {
+          if (req.method !== "POST") return enviar(res, 405, { error: "Operación no admitida." });
+          const { nombre, png } = JSON.parse(await leerCuerpo(req));
+          const datos = String(png ?? "").replace(/^data:image\/png;base64,/, "");
+          if (!datos) return enviar(res, 400, { error: "Falta el dibujo." });
+          await fs.mkdir(BOCETOS, { recursive: true });
+          const fecha = new Date().toISOString().slice(0, 19).replace(/[T:]/g, "-");
+          const destino = `${fecha}-${aArchivo(String(nombre ?? "")) || "boceto"}.png`;
+          await fs.writeFile(path.join(BOCETOS, destino), Buffer.from(datos, "base64"));
+          enviar(res, 200, { archivo: `bocetos/${destino}` });
+        } catch (e) {
+          enviar(res, 500, { error: String(e) });
+        }
+      });
+    },
+  };
+}
+
 function aArchivo(nombre: string): string {
   const base = nombre
     .normalize("NFD")
@@ -71,7 +98,7 @@ function enviar(res: ServerResponse, estado: number, datos: unknown) {
 }
 
 export default defineConfig({
-  plugins: [react(), configuraciones()],
+  plugins: [react(), configuraciones(), bocetos()],
   server: { port: 5180 },
   // Rutas relativas: la web publicada funciona en cualquier carpeta (p. ej. usuario.github.io/tendedero/).
   base: "./",

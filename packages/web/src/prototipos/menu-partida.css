@@ -1,0 +1,288 @@
+/* Menú de partida (perfil, animal, jugadores) y cámara de la mesa E. */
+
+.me-menu-fondo {
+  overflow: auto;
+  padding: 24px;
+  place-items: start center;
+}
+.menu-partida {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 22px;
+  width: min(1100px, 100%);
+}
+.menu-tarjeta {
+  padding: 18px 22px 22px;
+  border-radius: 16px;
+  background: var(--grano), var(--crema);
+  box-shadow:
+    0 0 0 2.5px var(--tinta),
+    inset 0 0 0 3px var(--crema),
+    inset 0 0 0 4.5px var(--dorado, #e8b04a),
+    0 12px 24px #0006;
+}
+.menu-tarjeta h1 {
+  margin: 0 0 10px;
+  font: 800 28px var(--fuente-titulo);
+}
+.menu-tarjeta h2 {
+  margin: 16px 0 8px;
+  font: 800 17px var(--fuente-titulo);
+}
+.menu-perfil-cabeza {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.menu-avatar {
+  flex: none;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #fff8, transparent 60%), color-mix(in srgb, var(--jugador), #fff 55%);
+  box-shadow:
+    0 0 0 4px var(--jugador),
+    0 0 0 6.5px var(--tinta);
+}
+.menu-avatar svg {
+  width: 100%;
+  height: 100%;
+}
+.menu-avatar.pequeno {
+  width: 54px;
+  height: 54px;
+}
+.menu-nombre {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  font-weight: 800;
+  font-size: 14px;
+}
+.menu-nombre input {
+  font: 800 20px var(--fuente-titulo);
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 2px solid var(--tinta);
+}
+.menu-animales {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+.menu-animal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border-radius: 12px;
+  border: 2px solid #2b201933;
+  background: #fff8;
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+}
+.menu-animal svg {
+  width: 100%;
+  max-width: 58px;
+  aspect-ratio: 1;
+}
+.menu-animal.activa {
+  border-color: var(--tinta);
+  background: #f2c25a;
+  box-shadow: 0 3px 0 var(--tinta);
+}
+.menu-animal:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.menu-animales.pequeno {
+  grid-template-columns: repeat(6, 34px);
+  gap: 4px;
+}
+.menu-animales.pequeno .menu-animal {
+  padding: 2px;
+  border-radius: 8px;
+}
+.menu-colores {
+  display: flex;
+  gap: 8px;
+}
+.menu-colores button {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px #2b201955;
+  cursor: pointer;
+}
+.menu-colores button.activa {
+  box-shadow: 0 0 0 3px var(--tinta);
+  scale: 1.12;
+}
+.menu-colores button:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+.menu-cuantos {
+  display: flex;
+  gap: 8px;
+}
+.menu-cuantos button.activa {
+  background: var(--tactica);
+  border-color: var(--tactica);
+  color: #fff;
+}
+.menu-rivales {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.menu-rival {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--jugador), transparent 88%);
+}
+.menu-rival-datos {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.menu-rival-datos input {
+  width: 180px;
+  font: 800 15px var(--fuente-titulo);
+  padding: 3px 10px;
+  border-radius: 8px;
+  border: 2px solid var(--tinta);
+}
+.menu-rival .menu-colores button {
+  width: 22px;
+  height: 22px;
+}
+.menu-empezar {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  font: 800 20px var(--fuente-titulo);
+}
+
+/* ---------- Cámara ---------- */
+
+.me-escenario {
+  display: block;
+  overflow: hidden;
+  cursor: grab;
+}
+.me-escenario.arrastrando {
+  cursor: grabbing;
+}
+.me-escenario .mb-mesa {
+  /* Su ancho de verdad aunque no quepa: la cámara la escala, el navegador no debe estrecharla */
+  width: max-content;
+  will-change: transform;
+}
+.me-camara {
+  position: absolute;
+  z-index: 15;
+  left: 50%;
+  top: 8px;
+  translate: -50% 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  max-width: calc(100% - 24px);
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--grano), var(--crema);
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    0 8px 16px #0005;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: default;
+}
+/* Hueco para la barra de la cámara: la mesa se encuadra por debajo */
+.me .me-escenario {
+  padding-top: 62px;
+}.me-camara-titulo {
+  font: 800 15px var(--fuente-titulo);
+  margin-right: 2px;
+}
+.me-camara button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.me-camara button.activa {
+  background: var(--tinta);
+  color: var(--crema);
+}
+.me-camara-animal {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--jugador);
+  background: #fff;
+}
+.me-camara-zoom {
+  display: flex;
+  gap: 6px;
+}
+.me-camara-zoom button {
+  flex: 1;
+  justify-content: center;
+  font: 800 18px var(--fuente-titulo);
+  padding: 0 6px;
+}
+.me-camara label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.me-camara-ayuda {
+  display: none;
+  margin: 0;
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+/* ---------- Varios rivales ---------- */
+
+.me-rivales {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  justify-content: center;
+}
+.me-n3 .mb-tapete-rival {
+  --celda: calc(var(--celda-base) * 0.68);
+}
+.me-n4 .mb-tapete-rival {
+  --celda: calc(var(--celda-base) * 0.58);
+}
+.me-n3 .mb-tapete-rival .mb-placa,
+.me-n4 .mb-tapete-rival .mb-placa {
+  grid-template-columns: auto;
+  justify-items: center;
+}
+.me-n3 .mb-tapete-rival .mb-animal,
+.me-n4 .mb-tapete-rival .mb-animal {
+  grid-row: auto;
+}
+.me-n3 .mb-tapete-rival .mb-secas,
+.me-n4 .mb-tapete-rival .mb-secas {
+  grid-column: auto;
+}

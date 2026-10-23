@@ -13,6 +13,10 @@ import "./prototipos.css";
 // el estilo. Las tres versiones comparten todo y solo cambian el CSS (proto-a, proto-b, proto-c).
 
 export const VERSIONES = [
+  { id: "e", nombre: "Mesa final", lema: "Prendas iguales bajo la cuerda, 3 pinzas por cuerda y la humedad en gotas que asoman." },
+  { id: "pizarra", nombre: "Pizarra", lema: "Dibuja un boceto y guárdalo para Claude." },
+  { id: "taller", nombre: "Taller: prendas", lema: "Tres formas de colgar las prendas si todas las cartas son del mismo tamaño." },
+  { id: "d", nombre: "Mesa ilustrada", lema: "Los componentes como en la mesa real, con ilustraciones de trazo de tinta." },
   { id: "a2", nombre: "Mesa de cartas", lema: "Todo son cartas: las cuerdas forman el tendedero y las prendas se cuelgan con pinzas." },
   { id: "a", nombre: "Mesa de madera", lema: "Como sentados a la mesa: cada uno con su tendedero delante." },
   { id: "b", nombre: "Patio de vecinos", lema: "Cada jugador es un balcón; el tiempo se ve en el cielo." },
@@ -337,6 +341,7 @@ export function Barra({
   ocupado,
   onRival,
   onReiniciar,
+  textoRival = "Que juegue Lu",
 }: {
   version: string;
   onVersion: (v: string) => void;
@@ -344,6 +349,7 @@ export function Barra({
   ocupado: boolean;
   onRival: () => void;
   onReiniciar: () => void;
+  textoRival?: string;
 }) {
   const v = VERSIONES.find((x) => x.id === version) ?? VERSIONES[0];
   return (
@@ -362,7 +368,7 @@ export function Barra({
       </nav>
       <div className="proto-acciones">
         <button disabled={ocupado} onClick={onRival}>
-          Que juegue Lu
+          {textoRival}
         </button>
         <button disabled={ocupado} onClick={onReiniciar}>
           Reiniciar

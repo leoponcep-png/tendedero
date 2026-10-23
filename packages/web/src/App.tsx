@@ -8,8 +8,12 @@ import { ErroresDatos } from "./pantallas/ErroresDatos";
 import { PantallaInicio } from "./pantallas/Inicio";
 import { Mesa } from "./pantallas/Mesa";
 import { SalaAnfitrion, SalaInvitado } from "./pantallas/SalaOnline";
+import { MesaBosque } from "./prototipos/MesaBosque";
 import { MesaCartas } from "./prototipos/MesaCartas";
+import { MesaFinal } from "./prototipos/MesaFinal";
+import { Pizarra } from "./prototipos/Pizarra";
 import { Prototipos } from "./prototipos/Prototipos";
+import { TallerPrendas } from "./prototipos/TallerPrendas";
 
 // Cada pantalla tiene su dirección (#/local, #/crear, #/anfitrion/código, #/sala/código) para que el enlace
 // de una sala lleve directo a ella y recargar no saque a nadie de la partida.
@@ -34,7 +38,11 @@ function Rutas({ datos }: { datos: Datos }) {
   const [, seccion, codigo] = ruta.split("/");
   const inicio = () => ir("/");
 
-  if (seccion === "prototipos" && (codigo ?? "a2") === "a2") return <MesaCartas onVersion={(v) => ir(`/prototipos/${v}`)} onVolver={inicio} />;
+  if (seccion === "prototipos" && (codigo ?? "e") === "e") return <MesaFinal onVersion={(v) => ir(`/prototipos/${v}`)} onVolver={inicio} />;
+  if (seccion === "prototipos" && codigo === "pizarra") return <Pizarra onVersion={(v) => ir(`/prototipos/${v}`)} onVolver={inicio} />;
+  if (seccion === "prototipos" && codigo === "taller") return <TallerPrendas onVersion={(v) => ir(`/prototipos/${v}`)} onVolver={inicio} />;
+  if (seccion === "prototipos" && (codigo ?? "d") === "d") return <MesaBosque onVersion={(v) => ir(`/prototipos/${v}`)} onVolver={inicio} />;
+  if (seccion === "prototipos" && codigo === "a2") return <MesaCartas onVersion={(v) => ir(`/prototipos/${v}`)} onVolver={inicio} />;
   if (seccion === "prototipos") return <Prototipos version={codigo ?? "a"} onVersion={(v) => ir(`/prototipos/${v}`)} onVolver={inicio} />;
   if (seccion === "local") return <Simulador datos={datos} onVolver={inicio} />;
   if (seccion === "crear") return <CrearSala datos={datos} onVolver={inicio} onCreada={(c) => ir(`/anfitrion/${c}`)} />;
