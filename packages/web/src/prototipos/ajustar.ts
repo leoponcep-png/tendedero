@@ -1,10 +1,10 @@
 import { useLayoutEffect, type RefObject } from "react";
 
 /**
- * Encoge la mesa para que quepa entera en su escenario (nunca la agranda). Se recalcula al cambiar el tamaño
- * de la ventana o de la propia mesa, por ejemplo al tender una cuerda nueva.
+ * Escala la mesa para que quepa entera en su escenario, como mucho hasta `maximo` (1 = nunca la agranda).
+ * Se recalcula al cambiar el tamaño de la ventana o de la propia mesa, por ejemplo al tender una cuerda nueva.
  */
-export function useAjustarMesa(escenario: RefObject<HTMLElement | null>, mesa: RefObject<HTMLElement | null>) {
+export function useAjustarMesa(escenario: RefObject<HTMLElement | null>, mesa: RefObject<HTMLElement | null>, maximo = 1) {
   useLayoutEffect(() => {
     const caja = escenario.current;
     const contenido = mesa.current;
@@ -13,7 +13,7 @@ export function useAjustarMesa(escenario: RefObject<HTMLElement | null>, mesa: R
       const estilo = getComputedStyle(caja);
       const anchoLibre = caja.clientWidth - parseFloat(estilo.paddingLeft) - parseFloat(estilo.paddingRight);
       const altoLibre = caja.clientHeight - parseFloat(estilo.paddingTop) - parseFloat(estilo.paddingBottom);
-      const escala = Math.min(1, anchoLibre / contenido.offsetWidth, altoLibre / contenido.offsetHeight);
+      const escala = Math.min(maximo, anchoLibre / contenido.offsetWidth, altoLibre / contenido.offsetHeight);
       contenido.style.scale = String(Math.max(0.3, escala));
       // Centrada en el hueco libre (la escala parte del centro, así que basta con colocar su caja sin escalar).
       contenido.style.position = "absolute";
@@ -25,5 +25,5 @@ export function useAjustarMesa(escenario: RefObject<HTMLElement | null>, mesa: R
     observador.observe(contenido);
     ajustar();
     return () => observador.disconnect();
-  }, [escenario, mesa]);
+  }, [escenario, mesa, maximo]);
 }

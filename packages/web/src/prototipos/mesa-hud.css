@@ -1,0 +1,447 @@
+/*
+ * Mesa E con interfaz de juego digital (como Catan o Risk): tu tendedero en grande en el centro, los rivales
+ * como paneles a la izquierda (clic para ver su tendedero), la zona común arriba, el registro a la derecha y la
+ * mano abajo con un botón grande para acabar el día.
+ */
+
+.mb.mf {
+  --carta-w: clamp(104px, 13.5vh, 160px);
+}
+
+.mf-juego {
+  position: relative;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 244px minmax(0, 1fr) 256px;
+  grid-template-rows: clamp(150px, 22vh, 240px) minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px 14px calc(var(--carta-w) * 0.72);
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 40%, #ffe3ad33, transparent 70%),
+    radial-gradient(ellipse 100% 90% at 50% 50%, transparent 55%, #1d0f06aa 100%),
+    repeating-linear-gradient(0deg, transparent 0 158px, #2b1a0e66 158px 160px),
+    var(--veta) 0 0 / 900px 300px,
+    linear-gradient(180deg, #b77a45, #9a6234);
+}
+
+/* ---------- Paneles de jugador ---------- */
+
+.mf-jugadores {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px 4px 4px 2px;
+}
+.mf-panel {
+  position: relative;
+  flex: none;
+  padding: 10px 12px 10px 16px;
+  border-radius: 14px;
+  background: var(--grano), var(--lino), var(--crema);
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    inset 7px 0 0 var(--jugador),
+    0 2px 0 2px #b8a782,
+    0 8px 14px #0006;
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+.mf-panel:hover {
+  transform: translateX(4px);
+}
+.mf-panel.viendo {
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    inset 7px 0 0 var(--jugador),
+    0 0 0 5px var(--jugador),
+    0 8px 18px #0007;
+}
+.mf-panel.turno {
+  animation: mf-turno 1.1s ease-in-out infinite alternate;
+}
+@keyframes mf-turno {
+  to {
+    box-shadow:
+      0 0 0 2px var(--tinta),
+      inset 7px 0 0 var(--jugador),
+      0 0 0 5px #f2c25a,
+      0 0 26px #f2c25a;
+  }
+}
+.mf-panel.apuntado {
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    inset 7px 0 0 var(--jugador),
+    0 0 0 5px #ff5a4f,
+    0 0 22px #ff5a4f99;
+}
+.mf-panel-cabeza {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mf-panel-animal {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #fff8, transparent 60%), color-mix(in srgb, var(--jugador), #fff 55%);
+  box-shadow:
+    0 0 0 3px var(--jugador),
+    0 0 0 5px var(--tinta);
+}
+.mf-panel-nombre {
+  flex: 1;
+  min-width: 0;
+  font: 800 19px var(--fuente-titulo);
+  color: var(--tinta);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mf-panel-nombre small {
+  font-size: 13px;
+  opacity: 0.7;
+}
+.mf-panel-puntos {
+  flex: none;
+  min-width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffe39a, #f0b52c);
+  box-shadow:
+    0 0 0 2.5px var(--tinta),
+    inset 0 -3px 0 #c98f22;
+  font: 800 20px var(--fuente-titulo);
+  color: var(--tinta);
+}
+.mf-panel-datos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px 8px;
+  margin-top: 8px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #4d4036;
+}
+.mf-dato {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.mf-icono {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1.5px var(--tinta);
+}
+.mf-icono-seca {
+  background: #f2c25a;
+  border-radius: 50%;
+}
+.mf-icono-tender {
+  background: #6fb2dc;
+}
+.mf-icono-colgada {
+  background: #ff8a7a;
+}
+.mf-icono-cuerda {
+  background: #c9a877;
+  height: 6px;
+}
+.mf-panel-mano {
+  --carta-w: 26px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  margin-top: 6px;
+  padding-left: 4px;
+}
+.mf-panel-mano .carta-p {
+  margin-right: -13px;
+  rotate: calc((var(--i) - 2) * 5deg);
+  pointer-events: none;
+}
+.mf-panel-mano span {
+  margin-left: 22px;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #4d4036;
+}
+.mf-turno {
+  position: absolute;
+  top: -9px;
+  right: 10px;
+  padding: 1px 10px;
+  border-radius: 999px;
+  background: #f2c25a;
+  box-shadow: 0 0 0 2px var(--tinta);
+  font: 800 12px var(--fuente-titulo);
+  color: var(--tinta);
+}
+.mf-turno-objetivo {
+  background: #ff5a4f;
+  color: #fff;
+}
+.mf-menu {
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+/* ---------- Zona común: cestas, centro, bolsa, mazos y día ---------- */
+
+.mf-comun {
+  grid-column: 2;
+  grid-row: 1;
+  position: relative;
+  z-index: 20;
+  min-width: 0;
+  border-radius: 18px;
+  background: #0000001c;
+  box-shadow: inset 0 0 0 2px #f2e6cc22;
+}
+.mf-comun-contenido {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  padding: 6px 10px;
+}
+.mf .mb-mazos {
+  align-self: center;
+}
+.mf .dia-bosque {
+  flex: none;
+}
+
+/* ---------- Tendedero en grande con pestañas ---------- */
+
+.mf-vista {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.mf-pestanas {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  padding-left: 14px;
+  overflow-x: auto;
+}
+.mf-pestana {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px 7px 8px;
+  border-radius: 14px 14px 0 0;
+  border: none;
+  background: #f2e6ccb3;
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    inset 0 4px 0 var(--jugador);
+  font: 800 14px var(--fuente-titulo);
+  color: var(--tinta);
+  white-space: nowrap;
+  cursor: pointer;
+  translate: 0 4px;
+}
+.mf-pestana.activa {
+  background: var(--crema);
+  translate: 0 0;
+  z-index: 1;
+  padding-bottom: 11px;
+}
+.mf-pestana.apuntada {
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    inset 0 4px 0 #ff5a4f,
+    0 0 16px #ff5a4f;
+}
+.mf-pestana-animal {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 2px var(--jugador);
+}
+.mf-objetivo {
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #ff5a4f;
+  color: #fff;
+  font-size: 11px;
+}
+.mf-seguir {
+  margin-left: auto;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #1d140ebb;
+  color: #f2e6cc;
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.mf-lienzo {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  padding: 16px;
+  border-radius: 16px;
+  background: #00000014;
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    inset 0 0 0 2px #f2e6cc33;
+  overflow: hidden;
+}
+/* El tendedero visto siempre a tamaño completo, sea tuyo o de un rival */
+.mf .mf-tendedero {
+  --celda-base: 46px;
+  --celda: 46px;
+  width: max-content;
+}
+.mf .mf-tendedero .mb-tapete-rival {
+  --celda: var(--celda-base);
+}
+.mf .mb-tapete {
+  grid-template-columns: auto auto;
+}
+.mf-pila-vacia {
+  max-width: 160px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px dashed #f2e6cc55;
+  color: #f2e6ccb0;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+}
+
+/* ---------- Registro ---------- */
+
+.mf-registro {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 10px 10px 6px;
+  border-radius: 16px;
+  background: var(--grano), var(--lino), var(--crema);
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    0 2px 0 2px #b8a782,
+    0 8px 14px #0006;
+}
+.mf-registro h2 {
+  margin: 0 0 8px;
+  font: 800 17px var(--fuente-titulo);
+  color: var(--tinta);
+}
+.mf-registro ol {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+}
+.mf-registro li {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 6px 4px;
+  border-bottom: 1px dashed #2b201926;
+  font-size: 13px;
+  line-height: 1.3;
+  color: #3d3026;
+  animation: mf-entra 0.4s ease-out;
+}
+@keyframes mf-entra {
+  from {
+    opacity: 0;
+    translate: 0 -6px;
+  }
+}
+.mf-registro li p {
+  margin: 0;
+}
+.mf-registro-animal {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 2px var(--jugador);
+}
+.mf-registro-ronda {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--tinta);
+  color: var(--crema);
+  font: 800 10px var(--fuente-titulo);
+}
+.mf-registro-vacio {
+  opacity: 0.6;
+}
+
+/* ---------- Mano y botón de acabar el día ---------- */
+
+.mf .mano.mf-mano {
+  bottom: calc(var(--carta-w) * -0.5);
+  gap: 12px;
+}
+/* Al pasar el ratón una carta de la mano se ve grande, para leerla bien */
+.mf .mano .carta-p:not(.apagada):hover {
+  transform: translateY(calc(var(--carta-w) * -0.55)) scale(1.4);
+  z-index: 5;
+}
+.mf .mano .carta-p.apagada:hover {
+  transform: translateY(calc(var(--carta-w) * -0.45)) scale(1.3);
+  z-index: 5;
+  filter: none;
+}
+.mf-acabar {
+  position: absolute;
+  z-index: 25;
+  right: 22px;
+  bottom: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 26px;
+  border-radius: 20px;
+  font: 800 22px var(--fuente-titulo);
+  box-shadow:
+    0 0 0 3px var(--tinta),
+    0 5px 0 3px #1a6650,
+    0 12px 20px #0008;
+}
+.mf-acabar small {
+  font: 700 12px var(--fuente-texto);
+  opacity: 0.85;
+}
+.mf-acabar:disabled {
+  filter: grayscale(0.6);
+  opacity: 0.75;
+}
