@@ -17,8 +17,11 @@ import { TallerPrendas } from "./prototipos/TallerPrendas";
 
 // Cada pantalla tiene su dirección (#/local, #/crear, #/anfitrion/código, #/sala/código) para que el enlace
 // de una sala lleve directo a ella y recargar no saque a nadie de la partida.
+// La versión para enseñar se construye con VITE_INICIO=/prototipos/e para que abra directamente el juego.
+const INICIO: string = import.meta.env.VITE_INICIO || "/";
+
 function useRuta(): [string, (ruta: string) => void] {
-  const leer = () => location.hash.replace(/^#/, "") || "/";
+  const leer = () => location.hash.replace(/^#/, "") || INICIO;
   const [ruta, setRuta] = useState(leer);
   useEffect(() => {
     const alCambiar = () => setRuta(leer());
