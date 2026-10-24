@@ -38,15 +38,17 @@
 .me .loseta-gancho {
   top: calc(var(--i) * (var(--alto-linea) + var(--hueco-linea)) + var(--alto-cuerda) * 108 / 128 - 13px);
 }
+/* Pestañita sobre el borde de arriba de la carta: así nunca tapa el texto de la habilidad. */
 .me-pinzas-libres {
   position: absolute;
   z-index: 11;
-  right: 4px;
-  top: calc(var(--alto-cuerda) * 30 / 128);
-  padding: 0 6px;
-  border-radius: 999px;
-  background: #fffaf0e6;
-  box-shadow: 0 0 0 1px #2b201955;
+  right: 10px;
+  bottom: calc(100% - 1px);
+  padding: 0 7px;
+  border-radius: 6px 6px 0 0;
+  background: #fffaf0;
+  box-shadow: 0 0 0 1.5px #2b2019aa;
+  clip-path: inset(-3px -3px 0 -3px);
   font: 800 calc(var(--celda) * 0.19) / 1.4 var(--fuente-texto);
   color: #3d3026;
   pointer-events: none;

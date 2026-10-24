@@ -1,5 +1,6 @@
 import { barajar } from "../azar";
 import { ordenDeRonda } from "./ronda";
+import { anotar } from "./registro";
 import type { Partida } from "./tipos";
 
 type FaseReparto = "cesta" | "centro";
@@ -28,7 +29,7 @@ export function renovarCestas(p: Partida): void {
  * A quien ya no le queda nada que coger se lo salta.
  */
 export function empezarReparto(p: Partida): void {
-  p.registro.push(`— Reparto de prendas de la ronda ${p.ronda} —`);
+  anotar(p, "reparto", { ronda: p.ronda }, `— Reparto de prendas de la ronda ${p.ronda} —`);
   ponerEnReparto(p, "cesta", 0);
 }
 
@@ -62,5 +63,5 @@ export function empezarTurnoDeJuego(p: Partida, jugador: number): void {
   for (const l of p.jugadores[jugador].lineas) for (const t of l.cartas) delete t.protegida;
 
   p.turno = { numero: p.turno.numero + 1, jugador, fase: "jugar", cuerdasJugadas: 0, cuerdasExtra: 0, accionesJugadas: 0 };
-  p.registro.push(`— Turno ${p.turno.numero}: ${p.jugadores[jugador].nombre} —`);
+  anotar(p, "turno", { n: p.turno.numero, jugador }, `— Turno ${p.turno.numero}: ${p.jugadores[jugador].nombre} —`);
 }

@@ -1,0 +1,20 @@
+[
+  { "id": "actual", "ritmos": {}, "mirar": ["calcetinero", "parejas", "a-toda-prisa", "cuerdas-llenas", "regalo-envenenado", "conjunto-completo", "tendedero-completo", "toallero", "monton-de-ropa", "bajo-techo", "camisetero"] },
+  { "id": "calc 2-3", "ritmos": { "calcetinero": [2, 3] } },
+  { "id": "calc 2-2", "ritmos": { "calcetinero": [2, 2] } },
+  { "id": "calc 3-3", "ritmos": { "calcetinero": [3, 3] } },
+  { "id": "calc 3-2", "ritmos": { "calcetinero": [3, 2] } },
+  { "id": "calc 3-4", "ritmos": { "calcetinero": [3, 4] } },
+  { "id": "parejas 1-5", "ritmos": { "parejas": [1, 5] } },
+  { "id": "parejas 1-6", "ritmos": { "parejas": [1, 6] } },
+  { "id": "parejas 1-7", "ritmos": { "parejas": [1, 7] } },
+  { "id": "prisa 1-2", "ritmos": { "a-toda-prisa": [1, 2] } },
+  { "id": "prisa 2-4", "ritmos": { "a-toda-prisa": [2, 4] } },
+  { "id": "prisa 3-5", "ritmos": { "a-toda-prisa": [3, 5] } },
+  { "id": "llenas 1-1", "ritmos": { "cuerdas-llenas": [1, 1] } },
+  { "id": "regalo 1-6", "ritmos": { "regalo-envenenado": [1, 6] } },
+  { "id": "regalo 1-8", "ritmos": { "regalo-envenenado": [1, 8] } },
+  { "id": "conjunto 1-6", "ritmos": { "conjunto-completo": [1, 6] } },
+  { "id": "tendedero 1-7", "ritmos": { "tendedero-completo": [1, 7] } },
+  { "id": "monton 3-2", "ritmos": { "monton-de-ropa": [3, 2] } }
+]

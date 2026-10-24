@@ -129,15 +129,22 @@
   background: #d8c3a6;
   box-shadow: none;
 }
-.estilo-minimal .cb-nombre,
-.estilo-minimal .cb-tipo {
-  background: var(--g);
-  border: none;
-}
-.estilo-minimal .cb-ilustra,
 .estilo-minimal .pb-ilustra {
   border: none;
   background: var(--g-claro, var(--c-claro));
+}
+/* Cartas: sin contorno en las letras, sin tramas y con el marco liso */
+.estilo-minimal .cb,
+.estilo-minimal .dia-bosque,
+.estilo-minimal .db {
+  --contorno: transparent;
+  --letra-contorno: none;
+}
+.estilo-minimal .marco-carta [fill^="url(#trama"] {
+  display: none;
+}
+.estilo-minimal .cb-marco .m-rayos {
+  opacity: 0.2;
 }
 .estilo-minimal .mb-placa-puntos b {
   box-shadow: none;
@@ -213,14 +220,13 @@
     inset 0 0 0 4.5px #b8913f,
     0 8px 18px #0006;
 }
-.estilo-detallado .cb-nombre {
-  background:
-    linear-gradient(#ffffff26, transparent 55%),
-    var(--grano),
-    var(--g);
-  font-size: 1.2em;
+.estilo-detallado .cb {
+  --titulo-escala: 1.1;
 }
-.estilo-detallado .cb-ilustra,
+.estilo-detallado .marco-carta .m-filete {
+  stroke: #b8913f;
+  opacity: 1;
+}
 .estilo-detallado .pb-ilustra {
   background:
     radial-gradient(ellipse at 50% 25%, #fffc, transparent 65%),
@@ -335,17 +341,8 @@
 .estilo-anime .mb-tapete::before {
   border-color: #fff8;
 }
-.estilo-anime .cb {
-  border-radius: calc(var(--carta-w) / 9);
-}
-.estilo-anime .cb-nombre {
-  background: linear-gradient(90deg, var(--g), color-mix(in srgb, var(--g), #fff 30%));
-  text-shadow: 2px 2px 0 var(--tinta);
-}
-.estilo-anime .cb-ilustra {
-  background:
-    repeating-conic-gradient(from 0deg at 50% 45%, #ffffff55 0 6deg, transparent 6deg 18deg),
-    var(--g-claro);
+.estilo-anime .cb-marco .m-rayos {
+  opacity: 0.6;
 }
 .estilo-anime .anuncio-titulo {
   -webkit-text-stroke: 1.5px var(--tinta);
@@ -415,15 +412,16 @@
   border-radius: 24px;
   border-color: #fff9;
 }
-.estilo-cozy .cb,
 .estilo-cozy .pb-marco,
 .estilo-cozy .mb-placa,
 .estilo-cozy .loseta,
-.estilo-cozy .dia-bosque {
+.estilo-cozy .dia-bosque:not(.dia-carta) {
   border-radius: 14px;
 }
-.estilo-cozy .cb-nombre {
-  font-size: 1.5em;
+.estilo-cozy .cb,
+.estilo-cozy .dia-bosque,
+.estilo-cozy .db {
+  --titulo-escala: 1.3;
 }
 .estilo-cozy .mb-placa-nombre::after {
   content: " ♥";
@@ -483,8 +481,10 @@
 .estilo-acuarela .mb-pila-nombre {
   color: #5d5246;
 }
-.estilo-acuarela .cb-nombre {
-  font-size: 1.5em;
+.estilo-acuarela .cb,
+.estilo-acuarela .dia-bosque,
+.estilo-acuarela .db {
+  --titulo-escala: 1.35;
 }
 
 /* ---------- Pixel art ---------- */
@@ -554,8 +554,16 @@
     0 0 0 3px #111,
     5px 5px 0 3px #0007;
 }
-.estilo-pixel .cb {
-  font-size: calc(var(--carta-w) / 14);
+/* La letra de píxeles es muy ancha: títulos y textos de las cartas, más pequeños */
+.estilo-pixel .cb,
+.estilo-pixel .ccb,
+.estilo-pixel .dia-bosque,
+.estilo-pixel .db {
+  --titulo-escala: 0.72;
+  --texto-escala: 0.78;
+}
+.estilo-pixel .marco-carta rect {
+  rx: 0;
 }
 .estilo-pixel .mb-animal,
 .estilo-pixel .mb-placa-puntos b {
@@ -702,8 +710,10 @@
     0 0 0 3px var(--tinta),
     6px 6px 0 3px #2f6fde;
 }
-.estilo-retro .cb-nombre {
-  font-size: 1em;
+.estilo-retro .cb,
+.estilo-retro .dia-bosque,
+.estilo-retro .db {
+  --titulo-escala: 0.8;
 }
 .estilo-retro .mb-portender-titulo,
 .estilo-retro .mb-pila-nombre {
@@ -793,11 +803,10 @@
   border-radius: 20px;
   border: 2px dashed #fff9;
 }
-/* Cartas: ribete dorado, esquinas redondas y cabeceras de color con trama */
-.estilo-fusion .cb,
+/* Placas y losetas: ribete dorado y esquinas redondas (las cartas tienen su marco en CartasJuego.css) */
 .estilo-fusion .mb-placa,
 .estilo-fusion .loseta,
-.estilo-fusion .dia-bosque,
+.estilo-fusion .dia-bosque:not(.dia-carta),
 .estilo-fusion .taller-opcion,
 .estilo-fusion .taller-intro {
   border-radius: 14px;
@@ -807,21 +816,24 @@
     inset 0 0 0 4.5px var(--dorado),
     0 10px 20px #3a1d1266;
 }
-.estilo-fusion .cb-nombre,
-.estilo-fusion .cb-tipo,
-.estilo-fusion .dia-bosque-nombre {
-  background:
-    radial-gradient(circle, #ffffff40 1px, transparent 1.5px) 0 0 / 6px 6px,
-    linear-gradient(180deg, color-mix(in srgb, var(--g, #ffc531), #fff 22%), var(--g, #e8a71c));
-  text-shadow: 1.5px 1.5px 0 var(--tinta);
-  color: #fff;
-  letter-spacing: 0.01em;
+/* Cartas: colores vivos de anime para los mazos, ribete dorado en el filete y registro movido de risografía */
+.estilo-fusion {
+  --obj-color: #ff9f1c;
+  --dia-tiempo: #2f9be8;
+  --dia-suceso: #a35bd8;
+  --hoja: #39b36b;
 }
-.estilo-fusion .cb-ilustra {
-  background:
-    repeating-conic-gradient(from 0deg at 50% 45%, #ffffff40 0 6deg, transparent 6deg 18deg),
-    radial-gradient(ellipse at 50% 40%, #fff, transparent 70%),
-    var(--g-claro);
+.estilo-fusion .marco-carta .m-filete {
+  stroke: var(--dorado);
+  stroke-width: 0.55;
+  opacity: 1;
+}
+.estilo-fusion .marco-carta .m-rayos {
+  opacity: 0.55;
+}
+.estilo-fusion .cb-icono,
+.estilo-fusion .co-arte {
+  filter: drop-shadow(0.9cqw 0.6cqw 0 #ff4f8b40);
 }
 .estilo-fusion .pb-marco,
 .estilo-fusion .hp {

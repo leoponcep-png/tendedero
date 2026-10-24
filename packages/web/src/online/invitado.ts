@@ -1,7 +1,7 @@
-import type { Jugada, Partida } from "@tendedero/motor";
+import type { Entrada, Jugada, Partida } from "@tendedero/motor";
 import Peer, { type DataConnection } from "peerjs";
 import { useEffect, useRef, useState } from "react";
-import { miToken, PREFIJO, textoError, type Asiento, type MensajeAnfitrion, type MensajeInvitado } from "./protocolo";
+import { miToken, PREFIJO, textoError, type Asiento, type MensajeAnfitrion, type MensajeInvitado, type PerfilOnline } from "./protocolo";
 
 export type FaseInvitado = "conectando" | "dentro" | "reconectando" | "rechazado";
 
@@ -9,12 +9,16 @@ export type FaseInvitado = "conectando" | "dentro" | "reconectando" | "rechazado
  * La sala vista desde un invitado: se conecta al anfitrión, se presenta con su nombre y recibe la partida
  * tal como puede verla. Si se corta la conexión (o el anfitrión recarga), vuelve a intentarlo solo.
  */
-export function useInvitado(codigo: string, nombre: string | null) {
+/** `perfil`: animal, color y tapete con los que te ven los demás en la mesa nueva. */
+export function useInvitado(codigo: string, nombre: string | null, perfil?: PerfilOnline) {
   const [fase, setFase] = useState<FaseInvitado>("conectando");
   const [error, setError] = useState<string | null>(null);
-  const [aviso, setAviso] = useState<{ texto: string; n: number } | null>(null);
+  const [aviso, setAviso] = useState<{ texto: string; n: number; detalle?: Entrada } | null>(null);
   const [sala, setSala] = useState<Extract<MensajeAnfitrion, { t: "sala" }> | null>(null);
   const [partida, setPartida] = useState<Partida | null>(null);
+  const [ultima, setUltima] = useState<{ jugada: Jugada; n: number } | null>(null);
+  const perfilRef = useRef(perfil);
+  perfilRef.current = perfil;
   const conexion = useRef<DataConnection | null>(null);
 
   useEffect(() => {
@@ -38,7 +42,7 @@ export function useInvitado(codigo: string, nombre: string | null) {
       conexion.current = conn;
       conn.on("open", () => {
         setError(null);
-        conn.send({ t: "hola", nombre, token: miToken() } satisfies MensajeInvitado);
+        conn.send({ t: "hola", nombre, token: miToken(), perfil: perfilRef.current } satisfies MensajeInvitado);
       });
       conn.on("data", (d) => {
         const m = d as MensajeAnfitrion;
@@ -48,8 +52,9 @@ export function useInvitado(codigo: string, nombre: string | null) {
           if (!m.empezada) setPartida(null);
         } else if (m.t === "estado") {
           setPartida(m.partida);
+          setUltima(m.ultima ?? null);
         } else if (m.t === "error") {
-          setAviso((a) => ({ texto: m.motivo, n: (a?.n ?? 0) + 1 }));
+          setAviso((a) => ({ texto: m.motivo, n: (a?.n ?? 0) + 1, detalle: m.detalle }));
         } else if (m.t === "rechazo") {
           rechazado = true;
           setError(m.motivo);
@@ -84,6 +89,7 @@ export function useInvitado(codigo: string, nombre: string | null) {
     sala,
     asientos: (sala?.asientos ?? []) as Asiento[],
     partida,
+    ultima,
     jugar: (jugada: Jugada) => {
       const conn = conexion.current;
       if (!conn?.open) return "Sin conexión con la sala: espera a que se recupere.";

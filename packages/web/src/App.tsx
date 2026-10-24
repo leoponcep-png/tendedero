@@ -35,10 +35,10 @@ export function App() {
 
 function Rutas({ datos }: { datos: Datos }) {
   const [ruta, ir] = useRuta();
-  const [, seccion, codigo] = ruta.split("/");
+  const [, seccion, codigo, ...resto] = ruta.split("/");
   const inicio = () => ir("/");
 
-  if (seccion === "prototipos" && (codigo ?? "e") === "e") return <MesaFinal onVersion={(v) => ir(`/prototipos/${v}`)} onVolver={inicio} />;
+  if (seccion === "prototipos" && (codigo ?? "e") === "e") return <MesaFinal key={resto.join("/")} onVersion={(v) => ir(`/prototipos/${v}`)} onVolver={inicio} datos={datos} ruta={resto} />;
   if (seccion === "prototipos" && codigo === "pizarra") return <Pizarra onVersion={(v) => ir(`/prototipos/${v}`)} onVolver={inicio} />;
   if (seccion === "prototipos" && codigo === "taller") return <TallerPrendas onVersion={(v) => ir(`/prototipos/${v}`)} onVolver={inicio} />;
   if (seccion === "prototipos" && (codigo ?? "d") === "d") return <MesaBosque onVersion={(v) => ir(`/prototipos/${v}`)} onVolver={inicio} />;

@@ -329,15 +329,18 @@
 .hp-ilustra {
   flex: 1;
   min-height: 0;
-  display: grid;
-  place-items: center;
+  position: relative;
+  overflow: hidden;
   background:
     radial-gradient(circle at 50% 35%, #ffffff99, transparent 65%),
     color-mix(in srgb, var(--c), #fff 70%);
 }
+/* Encajada en el hueco que deja la escala: la ropa alta (el calcetín) se encoge en vez de salirse de la carta */
 .hp-arte {
-  width: 90%;
-  height: 90%;
+  position: absolute;
+  inset: 6%;
+  width: 88%;
+  height: 88%;
 }
 .hp-pie {
   display: flex;

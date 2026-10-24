@@ -18,23 +18,27 @@ export const colorBosque = (hex: string) => PALETA[hex] ?? hex;
 
 const trazo = { stroke: TINTA, strokeWidth: 3, strokeLinejoin: "round" as const, strokeLinecap: "round" as const };
 
-/** Filtro de «tinta a mano»: tiembla un poco el trazo para que no parezca vector perfecto. */
+/**
+ * Filtros de los estilos de dibujo. «tinta-bosque» antes hacía temblar el trazo (feTurbulence + feDisplacementMap),
+ * pero deformaba y recortaba los dibujos (los «glitch» de las cartas). Ahora no cambia nada: se conserva el id porque
+ * prendas, animales y piezas lo siguen nombrando, y el estilo fusión le añade su sombra de risografía por CSS.
+ * Todas las regiones de filtro son amplias para que ningún trazo se corte por el borde de la región.
+ */
 export function DefsBosque() {
   return (
     <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden>
-      <filter id="tinta-bosque" x="-5%" y="-5%" width="110%" height="110%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4" />
-        <feDisplacementMap in="SourceGraphic" scale="1.8" />
+      <filter id="tinta-bosque" x="-25%" y="-25%" width="150%" height="150%">
+        <feOffset dx="0" dy="0" />
       </filter>
       {/* Acuarela: bordes que se corren y color que se aclara por dentro */}
-      <filter id="acuarela" x="-10%" y="-10%" width="120%" height="120%">
+      <filter id="acuarela" x="-25%" y="-25%" width="150%" height="150%">
         <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" seed="2" result="ruido" />
         <feDisplacementMap in="SourceGraphic" in2="ruido" scale="7" result="corrido" />
         <feGaussianBlur in="corrido" stdDeviation="1.2" result="suave" />
         <feComposite in="suave" in2="corrido" operator="arithmetic" k2=".75" k3=".45" />
       </filter>
       {/* Impresionista: pinceladas cortas que rompen la forma */}
-      <filter id="pincel" x="-10%" y="-10%" width="120%" height="120%">
+      <filter id="pincel" x="-25%" y="-25%" width="150%" height="150%">
         <feTurbulence type="turbulence" baseFrequency="0.09 0.04" numOctaves="2" seed="9" result="trazos" />
         <feDisplacementMap in="SourceGraphic" in2="trazos" scale="6" result="movido" />
         <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="2" seed="3" result="grano" />
@@ -51,7 +55,7 @@ export function DefsBosque() {
         <feMorphology operator="dilate" radius="2.5" />
       </filter>
       {/* Grabado: borde áspero, como tinta de linóleo */}
-      <filter id="rugoso" x="-5%" y="-5%" width="110%" height="110%">
+      <filter id="rugoso" x="-25%" y="-25%" width="150%" height="150%">
         <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="5" />
         <feDisplacementMap in="SourceGraphic" scale="2.6" />
       </filter>
@@ -79,6 +83,26 @@ export function DefsBosque() {
       <pattern id="pat-semitono" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(20)">
         <circle cx="3" cy="3" r="1.7" fill="#1d1b3a" opacity=".55" />
       </pattern>
+      {/* Tramas de risografía para marcos y paisajes de las cartas */}
+      <pattern id="trama-puntos" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(15)">
+        <circle cx="2" cy="2" r=".75" fill="#ffffff" opacity=".55" />
+      </pattern>
+      <pattern id="trama-tinta" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(15)">
+        <circle cx="1.5" cy="1.5" r=".55" fill={TINTA} opacity=".35" />
+      </pattern>
+      <pattern id="trama-fina" width="1.6" height="1.6" patternUnits="userSpaceOnUse" patternTransform="rotate(15)">
+        <circle cx=".8" cy=".8" r=".34" fill="#ffffff" opacity=".5" />
+      </pattern>
+      <pattern id="trama-fina-tinta" width="1.6" height="1.6" patternUnits="userSpaceOnUse" patternTransform="rotate(15)">
+        <circle cx=".8" cy=".8" r=".3" fill={TINTA} opacity=".3" />
+      </pattern>
+      <pattern id="trama-rayas" width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <rect width="1.1" height="3" fill="#000000" opacity=".16" />
+      </pattern>
+      <pattern id="trama-cuadros" width="6" height="6" patternUnits="userSpaceOnUse">
+        <rect width="3" height="6" fill="#ffffff" opacity=".16" />
+        <rect width="6" height="3" fill="#ffffff" opacity=".16" />
+      </pattern>
       <linearGradient id="sombra-tejado" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" stopColor={TINTA} stopOpacity=".22" />
         <stop offset="1" stopColor={TINTA} stopOpacity="0" />
@@ -95,6 +119,8 @@ export function DefsBosque() {
 const NOMBRE_COLOR: Record<string, string> = { "#f4f1ea": "blanco", "#4a7fd0": "azul", "#d2513f": "rojo", "#e8c23a": "amarillo" };
 /** Color de una prenda en el estilo activo (variable CSS con el tono del bosque de reserva). */
 export const colorEstilo = (hex: string) => (NOMBRE_COLOR[hex] ? `var(--p-${NOMBRE_COLOR[hex]}, ${PALETA[hex]})` : hex);
+/** Nombre del color de una prenda o de unas pinzas («rojo», «azul»...), si es uno de los cuatro del juego. */
+export const nombreColor = (hex: string): string | undefined => NOMBRE_COLOR[hex];
 const oscuro = (c: string, p = 30) => `color-mix(in srgb, ${c}, var(--ilu-sombra, #1d140e) ${p}%)`;
 const claro = (c: string, p = 35) => `color-mix(in srgb, ${c}, #fff ${p}%)`;
 
@@ -281,7 +307,8 @@ function CapaRica({ tipo, c, nombre }: { tipo: string; c: string; nombre: string
 export function PrendaBosque({ tipo, color, espacios, className }: { tipo: string; color: string; espacios: number; className?: string }) {
   const Dibujo = DIBUJOS[tipo];
   return (
-    <svg viewBox={`0 0 ${60 * espacios} 78`} className={`ilu ${className ?? ""}`} preserveAspectRatio="xMidYMid meet" aria-hidden>
+    // overflow visible: la presilla de la toalla y el contorno de tinta asoman un pelo por arriba y no deben cortarse.
+    <svg viewBox={`0 0 ${60 * espacios} 78`} className={`ilu ${className ?? ""}`} preserveAspectRatio="xMidYMid meet" overflow="visible" aria-hidden>
       <g filter="url(#tinta-bosque)">
         {Dibujo ? <Dibujo c={colorEstilo(color)} /> : null}
         <CapaRica tipo={tipo} c={colorEstilo(color)} nombre={NOMBRE_COLOR[color] ?? ""} />
@@ -319,111 +346,638 @@ export function GotaBosque({ x = 0, y = 0, r = 1 }: { x?: number; y?: number; r?
   );
 }
 
-// ---------- Iconos (cuerdas y acciones), 64 × 64 ----------
+// ---------- Iconos (cuerdas, acciones, tiempo y sucesos), 64 × 64 ----------
+// Todos hablan el mismo idioma: contorno de tinta de 3, colores planos de la paleta del estilo activo (variables CSS),
+// una sombra (.sombra) que cada estilo enciende o cambia, algún reflejo blanco y piezas comunes (cuerda trenzada,
+// prendas en miniatura, sol con cara, nube, flechas y destellos) para que se reconozcan como de la misma familia.
+
+/** Colores de los iconos: salen del estilo de dibujo activo, con el tono del bosque de reserva. */
+export const COLOR = {
+  rojo: "var(--p-rojo, #c2553a)",
+  azul: "var(--p-azul, #4f7fa6)",
+  amarillo: "var(--p-amarillo, #e1a73a)",
+  blanco: "var(--p-blanco, #efe5cf)",
+  madera: "var(--pinza, #c99a62)",
+  fastidio: "var(--fastidio, #b5523b)",
+  tactica: "var(--tactica, #4f7d6a)",
+  crema: "var(--crema, #f2e6cc)",
+  agua: "#6fb2dc",
+  nube: "#eef2f4",
+  nubarron: "#8e9cad",
+  metal: "#a9b1b5",
+  cuerda: "#d8b98a",
+  cuerdaVieja: "#a48a63",
+  hierba: "#8aa37b",
+  mejilla: "#ff8f86",
+};
+/** Color de las pinzas de la carta «Pinzas de color» (la carta lo pone en --pinza-color). */
+const PINZA_COLOR = "var(--pinza-color, var(--p-rojo, #c2553a))";
+const relleno = (c: string) => ({ style: { fill: c } });
+const linea = (c: string) => ({ style: { stroke: c } });
 
 const nube = "M18 46 C8 46 6 34 15 31 C14 21 27 16 33 23 C37 13 54 14 55 26 C63 25 66 37 59 41 C64 45 60 50 53 49 Z";
+const RAYO = "M36 4 L20 32 H31 L25 58 L46 24 H35 L42 4 Z";
+
+/** Cuerda trenzada: contorno de tinta, el color y la trenza en discontinuo. */
+export function Soga({ d, g = 5, c = COLOR.cuerda }: { d: string; g?: number; c?: string }) {
+  return (
+    <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <path d={d} stroke={TINTA} strokeWidth={g + 3.2} />
+      <path d={d} {...linea(c)} strokeWidth={g} />
+      <path d={d} style={{ stroke: oscuro(c, 32) }} strokeWidth={g * 0.38} strokeDasharray={`${g * 0.5} ${g * 0.6}`} />
+    </g>
+  );
+}
+
+const SOMBRA_MINI: Record<string, string> = {
+  calcetin: "M36 8 H41.5 V43 C41.5 47 43.5 50 46.5 53 L52.5 59 C57 63.5 55 71 49 72.5 C53 66 49 61 44 56 C39 51 36 47 36 42 Z",
+  camiseta: "M78 8 L98 15 L115 33 L101 45 L90 36 V73 H74 C78 58 76 40 80 24 Z",
+  toalla: "M128 6 H172 V64 H128 Z",
+};
+const DETALLE_MINI: Record<string, string> = {
+  calcetin: "M17 17 H43",
+  camiseta: "M44 7 C47 15 53 19 60 19 C67 19 73 15 76 7",
+  toalla: "M8 17 H172",
+};
+
+/** Prenda en miniatura para iconos y escenas: silueta, sombra y contorno con un grosor que no depende de la escala. */
+export function MiniPrenda({
+  tipo,
+  c,
+  x = 0,
+  y = 0,
+  s = 0.3,
+  giro = 0,
+  fantasma = false,
+}: {
+  tipo: "calcetin" | "camiseta" | "toalla";
+  c: string;
+  x?: number;
+  y?: number;
+  s?: number;
+  giro?: number;
+  fantasma?: boolean;
+}) {
+  const contorno = CONTORNOS[tipo];
+  const t = 2.6 / s;
+  return (
+    <g transform={`translate(${x} ${y}) rotate(${giro}) scale(${s})`} opacity={fantasma ? 0.45 : undefined}>
+      <path d={contorno} {...relleno(fantasma ? "#ffffff" : c)} />
+      {!fantasma && (
+        <>
+          <path className="sombra" d={SOMBRA_MINI[tipo]} style={{ fill: oscuro(c) }} />
+          {tipo === "toalla" && <path d="M8 44 H172 M8 52 H172" stroke="#ffffff" strokeOpacity=".7" strokeWidth={t * 0.9} />}
+          <path d={DETALLE_MINI[tipo]} fill="none" stroke={TINTA} strokeWidth={t * 0.7} />
+        </>
+      )}
+      <path d={contorno} fill="none" stroke={TINTA} strokeWidth={t} strokeLinejoin="round" strokeDasharray={fantasma ? `${t * 1.6} ${t * 1.1}` : undefined} />
+    </g>
+  );
+}
+
+/** Destello de cuatro puntas (brillo anime). */
+export function Chispa({ x, y, r = 5, c = "#ffffff" }: { x: number; y: number; r?: number; c?: string }) {
+  return (
+    <path
+      transform={`translate(${x} ${y}) scale(${r / 5})`}
+      d="M0 -5 C0.8 -1.2 1.2 -0.8 5 0 C1.2 0.8 0.8 1.2 0 5 C-0.8 1.2 -1.2 0.8 -5 0 C-1.2 -0.8 -0.8 -1.2 0 -5 Z"
+      {...relleno(c)}
+      stroke={TINTA}
+      strokeWidth={(1.3 * 5) / r}
+      strokeLinejoin="round"
+    />
+  );
+}
+
+/** Flecha gruesa de tinta con punta; `punta` es [x, y, ángulo] del final del trazo. */
+export function Flecha({ d, punta, c }: { d: string; punta: [number, number, number]; c: string }) {
+  const [x, y, a] = punta;
+  return (
+    <g strokeLinecap="round" strokeLinejoin="round">
+      <path d={d} fill="none" stroke={TINTA} strokeWidth="7" />
+      <path d={d} fill="none" {...linea(c)} strokeWidth="3.6" />
+      <path transform={`translate(${x} ${y}) rotate(${a})`} d="M-2 -6.5 L8 0 L-2 6.5 Z" {...relleno(c)} stroke={TINTA} strokeWidth="2.2" />
+    </g>
+  );
+}
+
+/** Sol con rayos y, si se quiere, con cara (ojos cerrados, sonrisa y mofletes). */
+export function Sol({ x, y, r = 12, c = COLOR.amarillo, cara = true, rayos = 10 }: { x: number; y: number; r?: number; c?: string; cara?: boolean; rayos?: number }) {
+  const punto = (a: number, rr: number) => `${(Math.cos(a) * rr).toFixed(2)} ${(Math.sin(a) * rr).toFixed(2)}`;
+  return (
+    <g transform={`translate(${x} ${y})`}>
+      {Array.from({ length: rayos }, (_, i) => {
+        const a = (i * 2 * Math.PI) / rayos - Math.PI / 2;
+        return <path key={i} d={`M${punto(a + 0.2, r * 1.12)} L${punto(a, r * 1.75)} L${punto(a - 0.2, r * 1.12)} Z`} {...relleno(c)} stroke={TINTA} strokeWidth="2" strokeLinejoin="round" />;
+      })}
+      <circle r={r} {...relleno(c)} />
+      <path className="sombra" d={`M${punto(-0.35, r)} A${r} ${r} 0 0 1 ${punto(1.9, r)} A${r * 1.15} ${r * 1.15} 0 0 0 ${punto(-0.35, r)} Z`} style={{ fill: oscuro(c, 22) }} />
+      <circle cx={-r * 0.4} cy={-r * 0.42} r={r * 0.2} fill="#ffffff" opacity=".75" />
+      {cara && (
+        <g fill="none" stroke={TINTA} strokeWidth="1.8" strokeLinecap="round">
+          <path d={`M${-r * 0.48} ${-r * 0.02} q${r * 0.16} ${-r * 0.22} ${r * 0.32} 0 M${r * 0.16} ${-r * 0.02} q${r * 0.16} ${-r * 0.22} ${r * 0.32} 0`} />
+          <path d={`M${-r * 0.26} ${r * 0.3} q${r * 0.26} ${r * 0.3} ${r * 0.52} 0`} />
+          <circle cx={-r * 0.58} cy={r * 0.3} r={r * 0.13} fill={COLOR.mejilla} stroke="none" opacity=".8" />
+          <circle cx={r * 0.58} cy={r * 0.3} r={r * 0.13} fill={COLOR.mejilla} stroke="none" opacity=".8" />
+        </g>
+      )}
+      <circle r={r} fill="none" stroke={TINTA} strokeWidth="2.6" />
+    </g>
+  );
+}
+
+/** Nube (o nubarrón) con su sombra, reflejo y, si se quiere, una cara enfadada. */
+export function Nube({ x = 0, y = 0, s = 1, c = COLOR.nube, enfado = false }: { x?: number; y?: number; s?: number; c?: string; enfado?: boolean }) {
+  return (
+    <g transform={`translate(${x} ${y}) scale(${s})`}>
+      <path d={nube} {...relleno(c)} />
+      <path className="sombra" d="M10 42 C24 47 46 47 60 41 C64 45 60 50 53 49 H18 C13 49 9 46 10 42 Z" style={{ fill: oscuro(c, 22) }} />
+      <path d="M17 31 C17 26 21 23 25 24 M38 19 C42 16.5 47 17.5 49.5 21" fill="none" stroke="#ffffff" strokeWidth={2.4} strokeLinecap="round" opacity=".85" />
+      {enfado && (
+        <g stroke={TINTA} strokeWidth="2.2" strokeLinecap="round" fill="none">
+          <path d="M25 29 l7 3.5 M47 29 l-7 3.5" />
+          <circle cx="30" cy="36" r="1.6" fill={TINTA} stroke="none" />
+          <circle cx="42" cy="36" r="1.6" fill={TINTA} stroke="none" />
+          <path d="M31 43 q5 -4 10 0" />
+        </g>
+      )}
+      <path d={nube} fill="none" stroke={TINTA} strokeWidth={3 / s} strokeLinejoin="round" />
+    </g>
+  );
+}
+
+/** Pinza grande para iconos: dos palas, muelle y la raya del centro. */
+function PinzaGrande({ c = COLOR.madera, rota = 0, x = 26, y = 4 }: { c?: string; rota?: number; x?: number; y?: number }) {
+  return (
+    <g transform={`rotate(${rota} ${x} ${y + 26})`}>
+      <rect x={x - 8} y={y} width="16" height="48" rx="4.5" {...relleno(c)} />
+      <path className="sombra" d={`M${x + 1} ${y + 1} H${x + 3.5} A4.5 4.5 0 0 1 ${x + 8} ${y + 5.5} V${y + 43.5} A4.5 4.5 0 0 1 ${x + 3.5} ${y + 48} H${x + 1} Z`} style={{ fill: oscuro(c, 25) }} />
+      <path d={`M${x} ${y + 1} V${y + 47}`} stroke={TINTA} strokeWidth="1.6" />
+      <path d={`M${x - 5} ${y + 28} V${y + 42}`} stroke="#ffffff" strokeWidth="2" strokeLinecap="round" opacity=".55" />
+      <circle cx={x} cy={y + 18} r="6" fill={COLOR.metal} stroke={TINTA} strokeWidth="2.2" />
+      <path d={`M${x - 3.5} ${y + 16} h7 M${x - 3.5} ${y + 18} h7 M${x - 3.5} ${y + 20} h7`} stroke={TINTA} strokeWidth="1" />
+      <circle cx={x - 2} cy={y + 16} r="1.3" fill="#ffffff" />
+      <rect x={x - 8} y={y} width="16" height="48" rx="4.5" fill="none" {...trazo} />
+    </g>
+  );
+}
+
+/** Carta de cuerda en miniatura (para los iconos que hablan de cartas de cuerda). */
+function MiniCartaCuerda({ x, y, giro = 0, c = COLOR.tactica }: { x: number; y: number; giro?: number; c?: string }) {
+  return (
+    <g transform={`translate(${x} ${y}) rotate(${giro} 15 10.5)`}>
+      <rect width="30" height="21" rx="3" fill={CREMA} />
+      <path d="M0 3 Q0 0 3 0 H27 Q30 0 30 3 V6 H0 Z" {...relleno(c)} />
+      <path d="M0 6 H30" stroke={TINTA} strokeWidth="1.4" />
+      <Soga d="M-1 16 Q15 19 31 16" g={2.4} />
+      <rect width="30" height="21" rx="3" fill="none" {...trazo} strokeWidth={2.4} />
+    </g>
+  );
+}
 
 export const ICONOS_BOSQUE: Record<string, ReactElement> = {
+  // ----- Cuerdas -----
   basica: (
-    <g {...trazo}>
-      <circle cx="32" cy="32" r="18" fill="#d8b98a" />
-      <path d="M32 32 m-11 0 a11 11 0 1 1 11 11 a6 6 0 1 1 -6 -6" fill="none" stroke="#7a5a34" strokeWidth="3.4" />
-      <circle cx="32" cy="32" r="18" fill="none" />
+    <g>
+      <Soga d="M46 46 C51 51 55 54 60 55" g={5} />
+      <path d="M60 55 l3 -2 M60 55 l3.5 1.5 M60 55 l1 3.5" stroke={TINTA} strokeWidth="1.4" strokeLinecap="round" />
+      <Soga d="M13 33 A19 19 0 1 1 51 33 A19 19 0 1 1 13 33" g={5.5} />
+      <Soga d="M20 33 A12 12 0 1 1 44 33 A12 12 0 1 1 20 33" g={5.5} />
+      <Soga d="M27 33 A5 5 0 1 1 37 33 A5 5 0 1 1 27 33" g={4.5} />
+      <g transform="translate(32 5) scale(1.15)">
+        <PinzaBosque x={0} />
+      </g>
     </g>
   ),
   tejadillo: (
-    <g {...trazo}>
-      <path d="M8 34 L32 12 L56 34 Z" fill="#c2553a" />
-      <path d="M14 30 H50 M20 24 H44" stroke={TINTA} strokeWidth="2" />
-      <path d="M18 34 V52 H46 V34" fill={CREMA} />
-      <path d="M28 52 V42 H36 V52" fill="#7a5a34" />
+    <g>
+      <Soga d="M7 42 Q32 48 57 42" g={3.6} />
+      <MiniPrenda tipo="camiseta" c={COLOR.azul} x={19} y={42.5} s={0.22} />
+      <path d="M3 32 L32 7 L61 32 L55 36 L32 16 L9 36 Z" {...relleno(COLOR.rojo)} />
+      <path className="sombra" d="M9 36 L32 16 L55 36 L52 37.5 L32 20.5 L12 37.5 Z" style={{ fill: oscuro(COLOR.rojo, 40) }} />
+      <path d="M10.2 25.7 L14.6 30.8 M17.5 19.5 L20.8 25.4 M24.8 13.3 L27 19.8 M53.8 25.7 L49.4 30.8 M46.5 19.5 L43.2 25.4 M39.2 13.3 L37 19.8" stroke={TINTA} strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M8 29 L29 11" stroke="#ffffff" strokeWidth="1.6" strokeLinecap="round" opacity=".6" />
+      <path d="M3 32 L32 7 L61 32 L55 36 L32 16 L9 36 Z" fill="none" {...trazo} />
+      <circle cx="32" cy="8.5" r="2.8" {...relleno(COLOR.rojo)} {...trazo} strokeWidth={2} />
+      <GotaBosque x={8} y={12} r={0.7} />
+      <GotaBosque x={56} y={11} r={0.7} />
+      <path d="M3 21 l-1.5 -3 M13 19 l1 -3.5 M51 19 l-1 -3.5 M61 21 l1.5 -3" {...linea(COLOR.agua)} strokeWidth="1.6" strokeLinecap="round" />
     </g>
   ),
   resistente: (
-    <g {...trazo}>
-      <path d="M20 30 a12 12 0 0 1 24 0 V38" fill="none" stroke="#6f7a80" strokeWidth="7" />
-      <path d="M20 30 a12 12 0 0 1 24 0 V38" fill="none" stroke={TINTA} strokeWidth="2" />
-      <rect x="14" y="32" width="36" height="22" rx="5" fill="#a9b1b5" />
-      <circle cx="32" cy="43" r="4" fill={TINTA} />
+    <g>
+      <Soga d="M2 46 Q32 54 62 46" g={7} c="#a07a4e" />
+      <path d="M21 32 V22 A11 11 0 0 1 43 22 V32" fill="none" stroke={TINTA} strokeWidth="10" strokeLinecap="round" />
+      <path d="M21 32 V22 A11 11 0 0 1 43 22 V32" fill="none" stroke={COLOR.metal} strokeWidth="5.4" strokeLinecap="round" />
+      <path d="M23.4 29 V22 A8.6 8.6 0 0 1 28 14.6" fill="none" stroke="#ffffff" strokeWidth="1.6" strokeLinecap="round" opacity=".75" />
+      <rect x="13" y="29" width="38" height="27" rx="6" {...relleno(COLOR.amarillo)} />
+      <path className="sombra" d="M39 29 H45 A6 6 0 0 1 51 35 V50 A6 6 0 0 1 45 56 H37 C41 48 41 38 39 29 Z" style={{ fill: oscuro(COLOR.amarillo) }} />
+      <path d="M13 36 H51" style={{ stroke: oscuro(COLOR.amarillo, 30) }} strokeWidth="1.4" />
+      <circle cx="32" cy="41.5" r="4" fill={TINTA} />
+      <path d="M30 43 L29 50.5 H35 L34 43 Z" fill={TINTA} />
+      {[
+        [18, 33],
+        [46, 33],
+        [18, 51.5],
+        [46, 51.5],
+      ].map(([cx, cy]) => (
+        <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="1.4" fill={TINTA} />
+      ))}
+      <path d="M17.5 38 V47" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" opacity=".6" />
+      <rect x="13" y="29" width="38" height="27" rx="6" fill="none" {...trazo} />
     </g>
   ),
   "secado-rapido": (
-    <g {...trazo}>
-      {Array.from({ length: 8 }, (_, i) => {
-        const a = (i * Math.PI) / 4;
-        return <path key={i} d={`M${32 + Math.cos(a) * 18} ${32 + Math.sin(a) * 18} L${32 + Math.cos(a + 0.18) * 27} ${32 + Math.sin(a + 0.18) * 27} L${32 + Math.cos(a - 0.18) * 27} ${32 + Math.sin(a - 0.18) * 27} Z`} fill="#e1a73a" strokeWidth="2" />;
-      })}
-      <circle cx="32" cy="32" r="14" fill="#f2c25a" />
-      <path d="M26 34 q6 5 12 0" fill="none" strokeWidth="2.4" />
+    <g>
+      {[20, 31, 42].map((y, i) => (
+        <g key={y} strokeLinecap="round">
+          <path d={`M${3 + i * 2} ${y} H17`} stroke={TINTA} strokeWidth="5" />
+          <path d={`M${3 + i * 2} ${y} H17`} stroke="#ffffff" strokeWidth="2" />
+        </g>
+      ))}
+      <Sol x={39} y={31} r={13} />
+      <g opacity=".9">
+        <GotaBosque x={10} y={55} r={0.75} />
+        <path d="M15.5 51 q2 -2 0 -4 q-2 -2 0 -4" fill="none" {...linea(COLOR.agua)} strokeWidth="1.6" strokeLinecap="round" />
+      </g>
     </g>
   ),
   "modificador-puntuacion": (
-    <g {...trazo}>
-      <rect x="22" y="8" width="13" height="38" rx="4" fill="#c2553a" />
-      <circle cx="28.5" cy="22" r="5" fill="#a9b1b5" />
-      <circle cx="46" cy="44" r="12" fill="#f2c25a" />
-      <text x="46" y="49.5" textAnchor="middle" fontSize="15" fontWeight="800" fill={TINTA} stroke="none" style={{ fontFamily: "var(--fuente-texto)" }}>
+    <g>
+      <PinzaGrande c={PINZA_COLOR} rota={-18} x={24} y={3} />
+      <circle cx="45" cy="45" r="14" {...relleno(COLOR.amarillo)} />
+      <path className="sombra" d="M55 36 A14 14 0 0 1 36 56 A16 16 0 0 0 55 36 Z" style={{ fill: oscuro(COLOR.amarillo) }} />
+      <circle cx="45" cy="45" r="10.5" fill="none" style={{ stroke: oscuro(COLOR.amarillo, 35) }} strokeWidth="1.3" strokeDasharray="2 2" />
+      <text x="45" y="50.5" textAnchor="middle" fontSize="15" fontWeight="800" fill={TINTA} style={{ fontFamily: "var(--fuente-titulo)" }}>
         +1
       </text>
+      <circle cx="45" cy="45" r="14" fill="none" {...trazo} />
+      <Chispa x={57} y={27} r={4.5} />
     </g>
   ),
   fragil: (
-    <g {...trazo}>
-      <path d="M6 30 Q16 36 26 31" fill="none" stroke="#a48a63" strokeWidth="6" />
-      <path d="M38 33 Q48 28 58 34" fill="none" stroke="#a48a63" strokeWidth="6" />
-      <path d="M6 30 Q16 36 26 31 M38 33 Q48 28 58 34" fill="none" strokeWidth="1.8" />
-      <path d="M26 31 l3 -6 M26 31 l4 4 M27 32 l1 7 M38 33 l-3 -6 M38 33 l-4 5" strokeWidth="2" />
-      <path d="M30 46 l3 4 l-3 4 l3 4" fill="none" stroke="#c2553a" strokeWidth="2.6" />
+    <g>
+      <g stroke={TINTA} strokeWidth="1" fill="none" opacity=".55">
+        <path d="M2 62 V42 M2 62 L14 47 M2 62 L22 55 M2 62 H25" />
+        <path d="M2 55 Q6 55 7.5 53.5 Q10 57.5 12.5 58.5 Q16 61 18 62 M2 48 Q8 48 11 49 Q14 53 18.5 56.5 Q22 60 25 62" />
+      </g>
+      <Soga d="M3 24 Q14 32 26 28" g={6} c={COLOR.cuerdaVieja} />
+      <Soga d="M38 34 Q50 28 61 34" g={6} c={COLOR.cuerdaVieja} />
+      <g stroke={TINTA} strokeWidth="1.5" strokeLinecap="round">
+        <path d="M26 28 l5 -6 M26 28 l6 -1 M26 28 l5 4 M27 29 l2 7" />
+        <path d="M38 34 l-5 -6 M38 34 l-6 1 M38 34 l-4 5 M37 33 l-1 -8" />
+      </g>
+      {[
+        [10, 27.5],
+        [18, 30.5],
+        [48, 31],
+        [56, 32.5],
+      ].map(([cx, cy]) => (
+        <circle key={cx} cx={cx} cy={cy} r="1.4" fill="#eadcbd" />
+      ))}
+      <path d="M32 15 V8 M25 17 l-3.5 -4.5 M39 17 l3.5 -4.5" {...linea(COLOR.fastidio)} strokeWidth="2.6" strokeLinecap="round" />
+      <g transform="translate(48 50)">
+        <ellipse cx="-4.5" cy="0" rx="5" ry="3.6" fill="#d9cbb0" stroke={TINTA} strokeWidth="1.4" transform="rotate(-20 -4.5 0)" />
+        <ellipse cx="4.5" cy="0" rx="5" ry="3.6" fill="#d9cbb0" stroke={TINTA} strokeWidth="1.4" transform="rotate(20 4.5 0)" />
+        <ellipse cx="0" cy="0.5" rx="1.6" ry="4.4" fill={TINTA} />
+        <path d="M-1 -3.5 l-2 -3 M1 -3.5 l2 -3" stroke={TINTA} strokeWidth="1" strokeLinecap="round" />
+      </g>
+    </g>
+  ),
+
+  // ----- Acciones de fastidio -----
+  "mojar-cuerda-rival": (
+    <g>
+      {/* Subido para que el medallón de la carta no tape la lluvia */}
+      <Nube y={-12} c={COLOR.nubarron} enfado />
+      <path d="M11 41 l-2.5 5 M25 42 l-2.5 5 M39 42 l-2.5 5 M53 41 l-2.5 5" {...linea(COLOR.agua)} strokeWidth="2.2" strokeLinecap="round" />
+      <GotaBosque x={17} y={50} />
+      <GotaBosque x={32} y={47} />
+      <GotaBosque x={47} y={50} />
     </g>
   ),
   "rafaga-de-viento": (
-    <g {...trazo} fill="none">
-      <path d="M6 22 H38 C46 22 48 12 41 10 C36 9 34 14 37 16" strokeWidth="5.5" stroke={TINTA} />
-      <path d="M6 22 H38 C46 22 48 12 41 10 C36 9 34 14 37 16" strokeWidth="2.4" stroke="#d8e7ee" />
-      <path d="M10 34 H50 C60 34 61 22 53 21 C47 20 46 26 49 28" strokeWidth="5.5" stroke={TINTA} />
-      <path d="M10 34 H50 C60 34 61 22 53 21 C47 20 46 26 49 28" strokeWidth="2.4" stroke="#d8e7ee" />
-      <path d="M4 46 H34 C42 46 43 56 36 57 C31 58 30 52 33 51" strokeWidth="5.5" stroke={TINTA} />
-      <path d="M4 46 H34 C42 46 43 56 36 57 C31 58 30 52 33 51" strokeWidth="2.4" stroke="#d8e7ee" />
+    <g>
+      <path d="M26 8 l7 2.5 M23 15 l7 2.5" stroke={TINTA} strokeWidth="1.6" strokeLinecap="round" />
+      <MiniPrenda tipo="calcetin" c={COLOR.rojo} x={45} y={1} s={0.3} giro={30} />
+      {["M3 38 H28 C38 38 40 26 32 24 C27 23 25 29 28 31", "M9 52 H42 C52 52 53 41 46 40 C41 39 40 45 43 46", "M3 45 H20"].map((d) => (
+        <g key={d} fill="none" strokeLinecap="round">
+          <path d={d} stroke={TINTA} strokeWidth="6" />
+          <path d={d} stroke="#e3f1f7" strokeWidth="2.6" />
+        </g>
+      ))}
+    </g>
+  ),
+  "pinza-rota": (
+    <g>
+      <g transform="rotate(-14 30 20)">
+        <path d="M22 4 H38 Q40 4 40 7 V24 L37 27 L34 23 L31 28 L28 23 L25 27 L22 24 Z" {...relleno(COLOR.madera)} />
+        <path className="sombra" d="M33 5 H38 Q39.5 5 39.5 7 V24 L37 26.5 L34 23 Z" style={{ fill: oscuro(COLOR.madera, 25) }} />
+        <path d="M31 5 V22" stroke={TINTA} strokeWidth="1.5" />
+        <path d="M22 4 H38 Q40 4 40 7 V24 L37 27 L34 23 L31 28 L28 23 L25 27 L22 24 Z" fill="none" {...trazo} />
+      </g>
+      <g transform="translate(1 8) rotate(10 31 46)">
+        <path d="M22 34 L25 31 L28 35 L31 30 L34 35 L37 31 L40 34 V54 Q40 58 36 58 H26 Q22 58 22 54 Z" {...relleno(COLOR.madera)} />
+        <path className="sombra" d="M34 35 L37 31 L39.5 33.5 V54 Q39.5 57.5 36 57.5 H33 Z" style={{ fill: oscuro(COLOR.madera, 25) }} />
+        <path d="M31 37 V56" stroke={TINTA} strokeWidth="1.5" />
+        <path d="M22 34 L25 31 L28 35 L31 30 L34 35 L37 31 L40 34 V54 Q40 58 36 58 H26 Q22 58 22 54 Z" fill="none" {...trazo} />
+      </g>
+      {/* El muelle de la pinza, saltando por los aires */}
+      <g transform="translate(50 28) rotate(-25)" fill="none" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M-7 0 l2 -4 l2.5 8 l2.5 -8 l2.5 8 l2.5 -8 l2 4" stroke={TINTA} strokeWidth="4.4" />
+        <path d="M-7 0 l2 -4 l2.5 8 l2.5 -8 l2.5 8 l2.5 -8 l2 4" stroke={COLOR.metal} strokeWidth="2" />
+      </g>
+      <path d="M44 16 l-2 -3 M50 14 v-4 M56 17 l2 -3" fill="none" stroke={TINTA} strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M10 31 l3.5 2 l-4 1.5 Z M14 39 l3 1 l-2.5 2 Z" {...relleno(COLOR.madera)} stroke={TINTA} strokeWidth="1.2" strokeLinejoin="round" />
+      <path d="M9 22 l-5 -2 M9 27 h-6" {...linea(COLOR.fastidio)} strokeWidth="2.4" strokeLinecap="round" />
     </g>
   ),
   "retrasar-secado": (
-    <g {...trazo}>
-      <path d={nube} fill="#e8ecef" />
-      <path d="M40 30 C44 32 52 32 54 28" fill="none" stroke="#b8c3cb" strokeWidth="2" />
-      <GotaBosque x={32} y={56} r={1.15} />
+    <g>
+      <Sol x={43} y={20} r={10} cara={false} />
+      <Nube x={-6} y={7} s={0.85} />
+      <GotaBosque x={50} y={50} r={1.35} />
+      <path d="M50 48.5 v6 M47 51.5 h6" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" />
     </g>
   ),
-  "mojar-cuerda-rival": (
-    <g {...trazo}>
-      <path d={nube} fill="#9fb0bd" />
-      <GotaBosque x={20} y={56} />
-      <GotaBosque x={33} y={60} />
-      <GotaBosque x={46} y={56} />
+  // Una pinza vacía donde estaba la prenda y la prenda, ya en otro hueco; la flecha va por encima de la cuerda.
+  "mover-prenda-rival": (
+    <g>
+      <Soga d="M2 22 Q32 30 62 22" g={3.4} />
+      <g transform="translate(9 23.5) scale(.6)">
+        <PinzaBosque x={0} />
+      </g>
+      <MiniPrenda tipo="camiseta" c={COLOR.rojo} x={17.2} y={23} s={0.38} />
+      <g transform="translate(0 23.6) scale(.5)">
+        <PinzaBosque x={67.8} />
+        <PinzaBosque x={92.2} />
+      </g>
+      <path d="M17 36 h-4 M18 41 h-4" stroke={TINTA} strokeWidth="1.6" strokeLinecap="round" />
+      <Flecha d="M6 15 Q16 1 28 9" punta={[28, 9, 30]} c={COLOR.fastidio} />
+    </g>
+  ),
+  // ----- Acciones tácticas -----
+  "colocar-cuerda-extra": (
+    <g>
+      <g opacity=".85">
+        <MiniCartaCuerda x={14} y={7} giro={10} c={COLOR.tactica} />
+      </g>
+      <MiniCartaCuerda x={5} y={16} giro={-6} c={COLOR.tactica} />
+      <circle cx="47" cy="45" r="12.5" {...relleno(COLOR.tactica)} />
+      <path className="sombra" d="M56 37 A12.5 12.5 0 0 1 39 55 A14 14 0 0 0 56 37 Z" style={{ fill: oscuro(COLOR.tactica, 30) }} />
+      <path d="M47 39 V51 M41 45 H53" stroke="#ffffff" strokeWidth="4" strokeLinecap="round" />
+      <circle cx="47" cy="45" r="12.5" fill="none" {...trazo} />
+      <Chispa x={58} y={30} r={3.6} />
     </g>
   ),
   "secar-prenda": (
-    <g {...trazo}>
-      <path d="M6 54 Q32 40 58 54 V60 H6 Z" fill="#8aa37b" />
-      {Array.from({ length: 8 }, (_, i) => {
-        const a = (i * Math.PI) / 4 + 0.2;
-        return <path key={i} d={`M${32 + Math.cos(a) * 15} ${28 + Math.sin(a) * 15} L${32 + Math.cos(a) * 23} ${28 + Math.sin(a) * 23}`} stroke="#e1a73a" strokeWidth="5" />;
-      })}
-      <circle cx="32" cy="28" r="12" fill="#f2c25a" />
+    <g>
+      <Sol x={32} y={24} r={12} cara={false} rayos={12} />
+      <MiniPrenda tipo="camiseta" c={COLOR.azul} x={10} y={26} s={0.37} />
+      <Chispa x={8} y={47} r={5} />
+      <Chispa x={57} y={47} r={4} />
+      <Chispa x={54} y={9} r={3.4} c={COLOR.amarillo} />
     </g>
   ),
   "reducir-humedad": (
-    <g {...trazo}>
-      <GotaBosque x={28} y={34} r={2.6} />
-      <circle cx="46" cy="44" r="10" fill={CREMA} />
-      <path d="M41 44 H51" strokeWidth="3.4" />
+    <g>
+      <GotaBosque x={26} y={33} r={2.7} />
+      <path d="M19.5 33 q0 -6 4.5 -11" stroke="#ffffff" strokeWidth="2.6" fill="none" strokeLinecap="round" opacity=".85" />
+      <circle cx="45" cy="45" r="12" fill={CREMA} />
+      <path className="sombra" d="M54 37 A12 12 0 0 1 37 54 A14 14 0 0 0 54 37 Z" style={{ fill: oscuro("#f2e6cc", 15) }} />
+      <path d="M39 45 H51" {...linea(COLOR.tactica)} strokeWidth="4.6" strokeLinecap="round" />
+      <circle cx="45" cy="45" r="12" fill="none" {...trazo} />
+      <Chispa x={52} y={15} r={4.2} />
+      <Chispa x={9} y={54} r={3} />
     </g>
   ),
-};
+  // Como «Mover una prenda rival», con un calcetín propio y la flecha verde.
+  "mover-prenda-propia": (
+    <g>
+      <Soga d="M2 22 Q32 30 62 22" g={3.4} />
+      <g transform="translate(12 23) scale(.7)">
+        <PinzaBosque x={0} />
+      </g>
+      <MiniPrenda tipo="calcetin" c={COLOR.azul} x={30.5} y={22.7} s={0.45} />
+      <g transform="translate(44 23.2) scale(.6)">
+        <PinzaBosque x={0} />
+      </g>
+      <path d="M30 36 h-5 M31 41.5 h-5" stroke={TINTA} strokeWidth="1.6" strokeLinecap="round" />
+      <Flecha d="M9 15 Q21 1 33 9.5" punta={[33, 9.5, 35]} c={COLOR.tactica} />
+    </g>
+  ),
+  "proteger-cuerda": (
+    <g>
+      {/* Escudo verde con una carta de cuerda pintada: la cuerda y sus tres pinzas */}
+      <path d="M32 5 L53 12 V29 C53 43 44 52 32 59 C20 52 11 43 11 29 V12 Z" {...relleno(COLOR.tactica)} />
+      <path className="sombra" d="M32 5 L53 12 V29 C53 43 44 52 32 59 Z" style={{ fill: oscuro(COLOR.tactica, 25) }} />
+      <path d="M32 10.5 L48 15.8 V29 C48 40 41 47.5 32 53 C23 47.5 16 40 16 29 V15.8 Z" fill={CREMA} stroke={TINTA} strokeWidth="1.6" />
+      <Soga d="M16.5 27 Q32 33 47.5 27" g={2.6} />
+      {[22, 32, 42].map((x) => (
+        <g key={x} transform={`translate(${x} 27) scale(.6)`}>
+          <PinzaBosque x={0} />
+        </g>
+      ))}
+      <path d="M14 17 V28" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" opacity=".55" />
+      <path d="M32 5 L53 12 V29 C53 43 44 52 32 59 C20 52 11 43 11 29 V12 Z" fill="none" {...trazo} />
+      <Chispa x={56} y={7} r={3.6} />
+      <Chispa x={8} y={50} r={2.8} />
+    </g>
+  ),
+  "buscar-cuerda": (
+    <g>
+      {/* Mazo de cuerdas boca abajo y la carta que se roba, saliendo hacia arriba */}
+      {[0, 1, 2].map((i) => (
+        <g key={i} transform={`translate(${5 + i * 2} ${40 - i * 2})`}>
+          <rect width="30" height="21" rx="3" fill="#8a5a30" stroke={TINTA} strokeWidth="2.2" />
+          <rect x="2.4" y="2.4" width="25.2" height="16.2" rx="1.6" fill="none" stroke={CREMA} strokeWidth="1" opacity=".8" />
+        </g>
+      ))}
+      <path d="M14 46.5 Q24 49.5 34 46.5" fill="none" stroke={CREMA} strokeWidth="1.6" strokeLinecap="round" opacity=".9" />
+      <MiniCartaCuerda x={27} y={7} giro={14} c={COLOR.tactica} />
+      <path d="M22 13 l-5 -2 M21 19 h-6" stroke={TINTA} strokeWidth="1.6" strokeLinecap="round" />
+      <g transform="translate(51 48)">
+        <circle r="9.5" {...relleno(COLOR.tactica)} {...trazo} strokeWidth={2.4} />
+        <text y="4.2" textAnchor="middle" fontSize="12" fontWeight="800" fill="#ffffff" style={{ fontFamily: "var(--fuente-titulo)" }}>
+          +1
+        </text>
+      </g>
+    </g>
+  ),
+  "cambiar-prendas": (
+    <g>
+      <MiniPrenda tipo="calcetin" c={COLOR.rojo} x={-1} y={16} s={0.4} />
+      <MiniPrenda tipo="camiseta" c={COLOR.azul} x={30} y={22} s={0.28} />
+      <Flecha d="M13 13 Q32 0 47 13" punta={[47, 13, 41]} c={COLOR.tactica} />
+      <Flecha d="M51 52 Q32 65 17 53" punta={[17, 53, -143]} c={COLOR.tactica} />
+    </g>
+  ),
+  "cambiar-cuerdas": (
+    <g>
+      <Soga d="M2 11 Q22 16 42 11" g={3.6} />
+      <MiniPrenda tipo="camiseta" c={COLOR.rojo} x={10} y={12.5} s={0.2} />
+      <Soga d="M2 37 Q22 42 42 37" g={3.6} />
+      <MiniPrenda tipo="calcetin" c={COLOR.amarillo} x={14} y={37} s={0.28} />
+      <Flecha d="M50 32 V16" punta={[50, 16, -90]} c={COLOR.tactica} />
+      <Flecha d="M58 28 V45" punta={[58, 45, 90]} c={COLOR.tactica} />
+    </g>
+  ),
+  "mover-cuerda": (
+    <g>
+      <rect x="33" y="30" width="28" height="20" rx="3" fill="none" stroke={TINTA} strokeWidth="1.8" strokeDasharray="3 2.5" opacity=".6" />
+      <MiniCartaCuerda x={3} y={8} giro={-10} c={COLOR.tactica} />
+      <Flecha d="M17 40 Q24 55 38 49" punta={[38, 49, -25]} c={COLOR.tactica} />
+    </g>
+  ),
+  "anular-fastidio": (
+    <g>
+      {/* Bocadillo que grita «¡NO!» y, debajo, el rayo de fastidio tachado */}
+      <path d="M14 6 H50 Q60 6 60 16 V30 Q60 40 50 40 H30 L18 50 L21 40 H14 Q4 40 4 30 V16 Q4 6 14 6 Z" fill="#ffffff" {...trazo} />
+      <path className="sombra" d="M50 6.5 Q59.5 6.5 59.5 16 V30 Q59.5 39.5 50 39.5 H44 Q54 36 54 26 V14 Q54 8 50 6.5 Z" style={{ fill: oscuro("#ffffff", 12) }} />
+      <text x="32" y="30" textAnchor="middle" fontSize="20" fontWeight="800" style={{ fill: COLOR.tactica, fontFamily: "var(--fuente-titulo)" }} stroke={TINTA} strokeWidth="2.6" strokeLinejoin="round" paintOrder="stroke">
+        ¡NO!
+      </text>
+      <g transform="translate(43.8 45.3) scale(.28)">
+        <path d={RAYO} {...relleno(COLOR.amarillo)} stroke={TINTA} strokeWidth="6" strokeLinejoin="round" />
+      </g>
+      <circle cx="53" cy="54" r="8" fill="none" stroke={TINTA} strokeWidth="5.4" />
+      <circle cx="53" cy="54" r="8" fill="none" {...linea(COLOR.fastidio)} strokeWidth="2.6" />
+      <path d="M47.4 48.4 L58.6 59.6" stroke={TINTA} strokeWidth="5.4" strokeLinecap="round" />
+      <path d="M47.4 48.4 L58.6 59.6" {...linea(COLOR.fastidio)} strokeWidth="2.6" strokeLinecap="round" />
+    </g>
+  ),
+
+  // ----- Tiempo y sucesos (cartas del día) -----
+  soleado: (
+    <g>
+      <Sol x={32} y={32} r={15} rayos={12} />
+    </g>
+  ),
+  lluvia: (
+    <g>
+      <Nube y={-9} c="#dfe6ec" />
+      <path d="M14 45 l-3 7 M24 47 l-3 7 M36 45 l-3 7 M48 47 l-3 7 M58 44 l-3 7" {...linea(COLOR.agua)} strokeWidth="2.4" strokeLinecap="round" />
+      <GotaBosque x={20} y={57} r={0.8} />
+      <GotaBosque x={42} y={58} r={0.8} />
+    </g>
+  ),
+  viento: (
+    <g>
+      {["M3 22 H34 C44 22 46 10 38 8 C33 7 31 13 34 15", "M8 36 H48 C58 36 59 48 51 49 C46 50 45 44 48 43", "M4 50 H30"].map((d) => (
+        <g key={d} fill="none" strokeLinecap="round">
+          <path d={d} stroke={TINTA} strokeWidth="6" />
+          <path d={d} stroke="#e3f1f7" strokeWidth="2.6" />
+        </g>
+      ))}
+      <g transform="translate(46 56) rotate(-30)">
+        <path d="M-8 0 C-4 -6 4 -6 8 0 C4 6 -4 6 -8 0 Z" fill={COLOR.hierba} stroke={TINTA} strokeWidth="2" />
+        <path d="M-8 0 H8" stroke={TINTA} strokeWidth="1.2" />
+      </g>
+    </g>
+  ),
+  "tormenta-repentina": (
+    <g>
+      <Nube y={-9} c={COLOR.nubarron} />
+      <g transform="translate(18 26) scale(.6)">
+        <path d={RAYO} {...relleno(COLOR.amarillo)} stroke={TINTA} strokeWidth={5} strokeLinejoin="round" />
+      </g>
+      <path d="M12 46 l-3 7 M46 46 l-3 7 M56 44 l-3 7" {...linea(COLOR.agua)} strokeWidth="2.4" strokeLinecap="round" />
+      <GotaBosque x={50} y={58} r={0.8} />
+    </g>
+  ),
+  "ola-de-calor": (
+    <g>
+      <Sol x={30} y={25} r={13} c="#ff8a3d" rayos={12} />
+      {[50, 57].map((y) => (
+        <g key={y} fill="none" strokeLinecap="round">
+          <path d={`M4 ${y} q5 -4 10 0 t10 0 t10 0 t10 0 t10 0`} stroke={TINTA} strokeWidth="5" />
+          <path d={`M4 ${y} q5 -4 10 0 t10 0 t10 0 t10 0 t10 0`} {...linea(COLOR.rojo)} strokeWidth="2.2" />
+        </g>
+      ))}
+      <g transform="translate(55 12)">
+        <rect x="-3.5" y="0" width="7" height="24" rx="3.5" fill="#ffffff" stroke={TINTA} strokeWidth="2" />
+        <circle cx="0" cy="27" r="5.5" {...relleno(COLOR.rojo)} stroke={TINTA} strokeWidth="2" />
+        <rect x="-1.4" y="6" width="2.8" height="18" {...relleno(COLOR.rojo)} />
+      </g>
+    </g>
+  ),
+  "vecina-sacude-alfombra": (
+    <g>
+      <rect x="4" y="5" width="30" height="27" rx="2" fill="#f6d7a8" {...trazo} />
+      <path d="M4 12 H34 M19 12 V32" stroke={TINTA} strokeWidth="2" />
+      <path d="M4 5 H34 V12 H4 Z" {...relleno(COLOR.rojo)} stroke={TINTA} strokeWidth="2.2" />
+      <path d="M8 5 V12 M14 5 V12 M20 5 V12 M26 5 V12" stroke="#ffffff" strokeWidth="2" opacity=".7" />
+      <path d="M17 30 C24 30 30 33 36 31 C42 29 46 33 50 32 L48 46 C44 47 40 43 34 45 C28 47 22 44 16 44 Z" {...relleno(COLOR.azul)} {...trazo} />
+      <path d="M22 37 C28 38 34 36 40 37 C44 37.5 46 38 48 38" fill="none" stroke="#ffffff" strokeWidth="1.8" opacity=".8" />
+      <path d="M50 32 l3 -1 M49.4 36 l3 0 M48.8 40 l3 0.6 M48.2 44 l3 1" stroke={TINTA} strokeWidth="1.4" strokeLinecap="round" />
+      {[
+        [52, 52, 6],
+        [40, 56, 5],
+        [58, 42, 3.6],
+        [28, 54, 3.4],
+      ].map(([cx, cy, r]) => (
+        <circle key={cx} cx={cx} cy={cy} r={r} fill="#d8cbb4" stroke={TINTA} strokeWidth="1.6" opacity=".95" />
+      ))}
+      <path d="M46 50 l-1 0.4 M34 60 l-1 -0.6 M60 56 l1 0.6" stroke={TINTA} strokeWidth="1.6" strokeLinecap="round" />
+    </g>
+  ),
+  // Pinzas viejas: pinza agrietada en una cuerda vieja y el calcetín que se le cae
+  "pinzas-viejas": (
+    <g transform="translate(0 7)">
+      <g stroke={TINTA} strokeWidth="1" fill="none" opacity=".5">
+        <path d="M62 30 V48 M62 30 L50 42 M62 30 H44" />
+        <path d="M62 37 Q57 36 55 36 Q54 33 54 30 M62 43 Q56 42 52 40 Q49 35 48 30" />
+      </g>
+      <Soga d="M2 14 Q32 22 62 14" g={3.4} c={COLOR.cuerdaVieja} />
+      <g transform="translate(20 13) rotate(-12) scale(1.5)">
+        <PinzaBosque x={0} color="#b8a27e" />
+        <path d="M-4.5 9 l2.6 1.4 l-1.6 1.8 l2.6 1.6" fill="none" {...linea(COLOR.fastidio)} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+      </g>
+      <g transform="translate(40 24) rotate(28)">
+        <MiniPrenda tipo="calcetin" c={COLOR.azul} x={-11.4} y={-2.3} s={0.38} />
+      </g>
+      <path d="M33 22 v-4 M39 20 v-4 M45 21 v-4" stroke={TINTA} strokeWidth="1.6" strokeLinecap="round" />
+    </g>
+  ),
+  // La ropa se engancha: camiseta con la cuerda enredada en el hombro
+  "ropa-se-engancha": (
+    <g transform="translate(0 5)">
+      <Soga d="M2 18 Q32 26 62 18" g={3.6} />
+      <MiniPrenda tipo="camiseta" c={COLOR.amarillo} x={9} y={20} s={0.38} giro={-5} />
+      <path d="M21 18 c5 -8 13 3 6 6 c-7 3 -3 -9 4 -7 c7 2 3 9 -2 8 c-5 -1 -3 -7 2 -6" fill="none" stroke={TINTA} strokeWidth="4.4" strokeLinecap="round" />
+      <path d="M21 18 c5 -8 13 3 6 6 c-7 3 -3 -9 4 -7 c7 2 3 9 -2 8 c-5 -1 -3 -7 2 -6" fill="none" {...linea(COLOR.cuerda)} strokeWidth="2" strokeLinecap="round" />
+      <g transform="translate(53 47)">
+        <circle r="8.5" {...relleno(COLOR.fastidio)} stroke={TINTA} strokeWidth="2.4" />
+        <path d="M0 -4.6 V1.3" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
+        <circle cy="4.6" r="1.6" fill="#ffffff" />
+      </g>
+    </g>
+  ),
+  // Viento traicionero: la toalla sale volando y deja la pinza sola en la cuerda
+  "viento-traicionero": (
+    <g>
+      <Soga d="M2 46 Q32 52 62 46" g={3.4} />
+      <g transform="translate(14 46.5) scale(.75)">
+        <PinzaBosque x={0} />
+      </g>
+      {["M2 32 H13 C19 32 20 25 15 24 C12 23.5 11 27 13 28", "M4 38 H18"].map((d) => (
+        <g key={d} fill="none" strokeLinecap="round">
+          <path d={d} stroke={TINTA} strokeWidth="5.4" />
+          <path d={d} stroke="#e3f1f7" strokeWidth="2.2" />
+        </g>
+      ))}
+      <g transform="translate(22 30) rotate(-24)">
+        <MiniPrenda tipo="toalla" c={COLOR.rojo} x={0} y={-10} s={0.24} />
+      </g>
+      <path d="M12 12 l7 2 M10 18 l7 2" stroke={TINTA} strokeWidth="1.6" strokeLinecap="round" />
+    </g>
+  ),};
 
 export function IconoBosque({ id, className }: { id: string; className?: string }) {
   return (
-    <svg viewBox="0 0 64 64" className={`ilu ${className ?? ""}`} aria-hidden>
-      <g filter="url(#tinta-bosque)">{ICONOS_BOSQUE[id] ?? <circle cx="32" cy="32" r="16" fill={CREMA} {...trazo} />}</g>
+    // Sin filtro de tinta temblorosa: los iconos de las cartas van con trazo limpio y sin recortes.
+    <svg viewBox="0 0 64 64" className={`ilu icono-limpio ${className ?? ""}`} overflow="visible" aria-hidden>
+      {ICONOS_BOSQUE[id] ?? <circle cx="32" cy="32" r="16" fill={CREMA} {...trazo} />}
     </svg>
   );
 }
@@ -501,7 +1055,8 @@ export function CieloSoleado({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 100 64" className={`ilu ${className ?? ""}`} aria-hidden preserveAspectRatio="xMidYMid slice">
       <rect width="100" height="64" fill="#a9cfe0" />
-      <g filter="url(#tinta-bosque)" {...trazo}>
+      {/* Trazo limpio, sin el filtro de tinta temblorosa (daba microcortes en las cartas) */}
+      <g {...trazo}>
         {Array.from({ length: 10 }, (_, i) => {
           const a = (i * Math.PI) / 5;
           return <path key={i} d={`M${62 + Math.cos(a) * 14} ${24 + Math.sin(a) * 14} L${62 + Math.cos(a) * 21} ${24 + Math.sin(a) * 21}`} stroke="#e1a73a" strokeWidth="4" />;

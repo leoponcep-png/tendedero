@@ -1,0 +1,1006 @@
+/*
+ * Mesa de juego (src/juego): la mesa E con las reglas del motor. Encima de mesa-hud.css y mesa-final.css:
+ * huecos donde soltar, contornos que se iluminan, interfaz más compacta, lupa, opciones y ventanas.
+ */
+
+/* ---------- Esqueleto: sin barras de prototipos, todo el alto para jugar ---------- */
+
+.mb.mj {
+  display: block;
+}
+/* Tamaño de la interfaz (90 % – 130 %): `zoom` escala textos y piezas; el alto se compensa para seguir llenando la ventana. */
+.mj-escala {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  zoom: var(--tamano, 1);
+}
+.mj .mf-juego.mj-juego {
+  height: 100%;
+  box-sizing: border-box;
+  grid-template-columns: 206px minmax(0, 1fr) 236px;
+  grid-template-rows: clamp(150px, 22vh, 230px) minmax(0, 1fr);
+  padding: 8px 10px calc(var(--carta-w) * 0.7);
+  gap: 8px;
+}
+.mj .mf-juego.mj-juego.sin-registro {
+  grid-template-columns: 206px minmax(0, 1fr) 34px;
+}
+
+/* ---------- Paneles de jugador, más compactos ---------- */
+
+.mj-jugadores {
+  gap: 7px;
+}
+.mj-arriba {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.mj-arriba .estado-conexion {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #1d140ebb;
+  color: #f2e6cc;
+}
+.mj-boton-menu {
+  padding: 4px 12px;
+  font-weight: 800;
+  font-size: 13px;
+}
+.mj .mj-panel {
+  padding: 7px 9px 7px 13px;
+  border-radius: 12px;
+}
+.mj .mj-panel .mf-panel-animal {
+  width: 38px;
+  height: 38px;
+}
+.mj .mj-panel .mf-panel-nombre {
+  font-size: 16px;
+}
+.mj .mj-panel .mf-panel-puntos {
+  min-width: 34px;
+  height: 34px;
+  font-size: 17px;
+}
+.mj .mj-panel .mf-panel-datos {
+  margin-top: 5px;
+  gap: 1px 6px;
+  font-size: 11px;
+}
+.mj .mj-panel-mano {
+  --carta-w: 20px;
+  height: 30px;
+  margin-top: 3px;
+}
+.mj .mj-panel-mano .carta-p {
+  margin-right: -11px;
+}
+.mj .mj-panel-mano span {
+  font-size: 11px;
+  margin-left: 18px;
+}
+.mj-icono-trofeo {
+  background: #b9a27a;
+  border-radius: 2px;
+}
+.mj .mf-turno {
+  top: -8px;
+  font-size: 11px;
+}
+
+/* ---------- Zona común: objetivos y carta del día ---------- */
+
+.mj .mf-comun-contenido {
+  gap: 20px;
+}
+.mj-objetivos {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+/* Objetivos y carta del día: las cartas de CartasBosque (se miden por su ancho) con lo que lleva cada uno */
+.mj-objetivo {
+  position: relative;
+  flex: none;
+  width: 104px;
+}
+.mj-objetivo > .cb {
+  width: 100%;
+  aspect-ratio: 63 / 88;
+}
+.mj-objetivo.tapado {
+  aspect-ratio: 63 / 88;
+}
+.mj-objetivo.tapado .db {
+  position: absolute;
+  inset: 0;
+}
+.mj-objetivo-progreso {
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  translate: -50% 0;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #f2c25a;
+  box-shadow: 0 0 0 1.5px var(--tinta);
+  color: var(--tinta);
+  font: 800 10.5px var(--fuente-texto);
+  white-space: nowrap;
+}
+/* La carta del día es apaisada (88 × 63 mm): tan alta como ancho tiene un objetivo (63 × 88 mm). */
+.mj .mj-dia {
+  position: relative;
+  flex: none;
+  width: calc(104px * 88 / 63);
+}
+.mj-dia > .dia-bosque {
+  width: 100%;
+  rotate: none;
+}
+.mj-dia.vacia {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px dashed #f2e6cc66;
+  color: #f2e6cccc;
+  font-size: 12px;
+}
+.mj-dia-quedan {
+  position: absolute;
+  z-index: 3;
+  top: -9px;
+  right: -6px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--tinta);
+  color: var(--crema);
+  font: 800 11px var(--fuente-titulo);
+  box-shadow: 0 0 0 1.5px var(--crema);
+}.mj-ultima {
+  background: #c2553a;
+}
+
+/* ---------- Tendedero: lienzo con acercar, alejar y desplazar ---------- */
+
+.mj .mj-lienzo {
+  overflow: auto;
+  padding: 12px;
+  scrollbar-width: thin;
+}
+.mj-desplazable {
+  min-width: 100%;
+  min-height: 100%;
+  display: flex;
+}
+.mj-marco {
+  position: relative;
+  flex: none;
+  margin: auto;
+}
+.mj .mj-tendedero {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+.mj-zoom {
+  margin-left: auto;
+  align-self: center;
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  background: #1d140ebb;
+}
+.mj-zoom button {
+  min-width: 30px;
+  padding: 2px 8px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: #f2e6cc;
+  font-weight: 800;
+  font-size: 13px;
+}
+.mj-zoom button:hover {
+  background: #f2e6cc33;
+}
+
+/* ---------- Huecos de las cartas de cuerda (3 por carta: uno por pinza) ---------- */
+
+.mj-ranura {
+  position: absolute;
+  z-index: 30;
+  top: 0;
+  left: calc(var(--celda) * var(--i));
+  width: var(--celda);
+  height: var(--alto-linea);
+  pointer-events: none;
+}
+.mj-ranura.activa {
+  pointer-events: auto;
+}
+.mj-ranura.valida {
+  cursor: pointer;
+}
+/* Pinza donde se puede soltar: brilla un poco, sin tapar la carta */
+.mj-ranura.valida::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: calc(var(--alto-cuerda) * 104 / 128);
+  width: calc(var(--celda) * 0.36);
+  height: calc(var(--celda) * 0.36);
+  translate: -50% -50%;
+  border-radius: 50%;
+  border: 2px dashed #f2c25a;
+  background: #f2c25a33;
+  animation: latido 0.9s ease-in-out infinite alternate;
+}
+
+/* Destinos que valen: un contorno suave; el que tienes debajo del ratón, un contorno que brilla. */
+.mj .mj-cuerda.posible > .me-cuerda-carta {
+  outline: 2px dashed #f2c25aaa;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+.mj .mj-cuerda.resaltada > .me-cuerda-carta,
+.mj .mj-cuerda.moviendo > .me-cuerda-carta {
+  outline: 4px solid #ffd34d;
+  outline-offset: 2px;
+  border-radius: 9px;
+  box-shadow: 0 0 22px 6px #ffd34dcc;
+}
+.mj .me-colgada.posible {
+  outline: 2px dashed #f2c25a;
+  outline-offset: 2px;
+}
+.mj .me-colgada.resaltada,
+.mj .me-colgada.moviendo {
+  z-index: 20;
+  outline: 4px solid #ffd34d;
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    0 0 24px 6px #ffd34dcc;
+}
+.mj-fantasma {
+  position: absolute;
+  z-index: 25;
+  left: calc(var(--celda) * var(--x));
+  width: var(--ancho-prenda);
+  top: calc(var(--alto-cuerda) - (5 - var(--h)) * var(--paso));
+  height: var(--alto-prenda);
+  border-radius: 6px;
+  border: 3px dashed #ffd34d;
+  background: #ffd34d2e;
+  box-shadow: 0 0 20px 4px #ffd34d99;
+  pointer-events: none;
+}
+.mj .mj-hueco.valido.resaltada,
+.mj .mj-hueco.valido:hover {
+  border: 4px solid #ffd34d;
+  background: #ffd34d33;
+  box-shadow: 0 0 22px 4px #ffd34dcc;
+}
+.mj-notas {
+  position: absolute;
+  z-index: 11;
+  left: 10px;
+  bottom: calc(100% - 1px);
+  max-width: 62%;
+  padding: 0 7px;
+  border-radius: 6px 6px 0 0;
+  background: #2b2019e6;
+  color: #fff6e6;
+  font: 800 calc(var(--celda) * 0.18) / 1.4 var(--fuente-texto);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+.mj-notas.peligro {
+  background: #b5523b;
+}
+.mj .mj-cuerda.rompe > .me-cuerda-carta {
+  animation: mj-cruje 2.4s ease-in-out infinite;
+}
+@keyframes mj-cruje {
+  0%,
+  90%,
+  100% {
+    rotate: 0deg;
+  }
+  93% {
+    rotate: -0.6deg;
+  }
+  96% {
+    rotate: 0.6deg;
+  }
+}
+.mj .mj-cuerda.protegida > .me-cuerda-carta {
+  filter: drop-shadow(0 0 6px #7fc4ff);
+}
+
+/* Prendas por tender: se arrastran o se pulsan */
+.mj-pendiente {
+  flex: none;
+  touch-action: none;
+}
+.mj-pendiente.arrastrando {
+  opacity: 0.35;
+}
+
+/* ---------- Mano ---------- */
+
+.mj .mj-mano {
+  z-index: 22;
+}
+.mj .mano .mj-cuerda-mano {
+  position: relative;
+  touch-action: none;
+}
+.mj-llena {
+  position: absolute !important;
+  inset: 0;
+}
+.mj .mano .mj-cuerda-mano.elegida {
+  filter: drop-shadow(0 0 10px #f2c25a) drop-shadow(0 0 4px #f2c25a);
+}
+.mj .mano .mb-accion {
+  touch-action: none;
+}
+.mj .mano .carta-p.arrastrando {
+  opacity: 0.3;
+}
+.mj .mj-mano.descartando .carta-p:hover {
+  filter: drop-shadow(0 0 10px #ff5a4f) drop-shadow(0 0 3px #ff5a4f);
+}
+.mj .mj-ayuda {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  top: -40px;
+  max-width: 70vw;
+  white-space: normal;
+  text-align: center;
+}
+.mj-jugar-ya {
+  padding: 2px 12px;
+  font-size: 13px;
+}
+.mj-arrastrada {
+  --carta-w: clamp(92px, 12vh, 130px);
+  rotate: 4deg;
+  filter: drop-shadow(0 16px 20px #0008);
+  cursor: grabbing;
+}
+.mj-arrastrada.mj-cuerda-mano {
+  width: calc(var(--carta-w) * 1.4);
+  height: var(--carta-w);
+}
+.mj-arrastrada-prenda {
+  --celda: 44px;
+  --paso: calc(var(--celda) * 0.24);
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  width: calc(var(--celda) * 1.45);
+  height: calc(5 * var(--paso) + var(--celda) * 1.3);
+  rotate: 5deg;
+  filter: drop-shadow(0 16px 20px #0008);
+}
+
+/* ---------- Terminar turno y robo ---------- */
+
+.mj-turno-caja {
+  position: absolute;
+  z-index: 25;
+  right: 16px;
+  bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.mj .mj-turno-caja .mf-acabar {
+  position: static;
+}
+.mj-contadores,
+.mj-robo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #1d140ecc;
+  color: #f2e6cc;
+  font-size: 12.5px;
+  font-weight: 800;
+}
+.mj-robo button {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 800;
+}
+.mj-robo button.activa {
+  background: #f2c25a;
+  border-color: var(--tinta);
+}
+.mj-ico {
+  display: inline-block;
+  margin-right: 4px;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1.5px var(--tinta);
+}
+.mj-ico.cuerda {
+  width: 14px;
+  height: 10px;
+  background: #c9a877;
+}
+.mj-ico.accion {
+  width: 9px;
+  height: 13px;
+  background: #4f7d6a;
+}
+
+/* ---------- Avisos sobre el tendedero ---------- */
+
+.mj-bandas {
+  position: absolute;
+  z-index: 26;
+  left: 50%;
+  top: 44px;
+  translate: -50% 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+.mf-vista {
+  position: relative;
+}
+.mj-banda {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: var(--grano), var(--crema);
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    0 8px 16px #0007;
+  font-weight: 800;
+  font-size: 14px;
+  pointer-events: auto;
+}
+.mj-banda.ultima {
+  background: #c2553a;
+  color: #fff6e6;
+}
+.mj-banda.paso {
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    0 0 0 5px #f2c25a,
+    0 8px 16px #0007;
+}
+.mj-banda.aviso {
+  background: #2b2019;
+  color: #fff6e6;
+}
+
+/* ---------- Registro plegable ---------- */
+
+.mj-registro h2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mj-plegar {
+  padding: 0 9px;
+  font-size: 18px;
+  line-height: 1.2;
+}
+.mj-separador p {
+  font-weight: 800;
+  opacity: 0.7;
+}
+.mj-registro-cerrado {
+  padding: 8px 0;
+  cursor: pointer;
+  border: none;
+  display: grid;
+  place-items: center;
+}
+.mj-registro-cerrado span {
+  writing-mode: vertical-rl;
+  font: 800 14px var(--fuente-titulo);
+  color: var(--tinta);
+}
+
+/* ---------- Menú de opciones ---------- */
+
+.mj-menu {
+  position: absolute;
+  z-index: 70;
+  left: 14px;
+  top: 46px;
+  width: min(520px, 90vw);
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--grano), var(--crema);
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    0 20px 40px #000a;
+  color: var(--tinta);
+  font-size: 14px;
+}
+.mj-menu h3 {
+  margin: 0;
+  font: 800 18px var(--fuente-titulo);
+}
+.mj-menu label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+.mj-menu-fila {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.mj-menu-fila > span {
+  width: 100%;
+  font-weight: 800;
+}
+.mj-menu-fila button,
+.mj-menu-fila a {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.mj-menu-fila a {
+  color: var(--tinta);
+  box-shadow: 0 0 0 1.5px #2b201955;
+  text-decoration: none;
+}
+.mj-menu-fila button.activa {
+  background: #f2c25a;
+}
+.mj-menu-botones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ---------- Ventanas: objetivo secreto, reacción, final ---------- */
+
+.mj-modal-fondo {
+  z-index: 65;
+  display: grid;
+  place-items: center;
+  background: #1d140e99;
+  backdrop-filter: blur(2px);
+}
+.mj-modal {
+  max-width: min(900px, 94vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 18px 24px 20px;
+  border-radius: 20px;
+  background: var(--grano), var(--crema);
+  box-shadow:
+    0 0 0 3px var(--tinta),
+    0 30px 60px #000c;
+  color: var(--tinta);
+  text-align: center;
+}
+.mj-modal h2 {
+  margin: 0 0 6px;
+  font: 800 26px var(--fuente-titulo);
+}
+.mj-modal p {
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+.mj-elegir-objetivo {
+  display: flex;
+  justify-content: center;
+  gap: 26px;
+  margin: 10px 0 16px;
+}
+.mj-opcion-objetivo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: none;
+  border-radius: 16px;
+  background: transparent;
+  cursor: pointer;
+}
+.mj-opcion-objetivo:hover {
+  background: #f2c25a44;
+}
+.mj-opcion-objetivo .principal {
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-weight: 800;
+}
+.mj-objetivo.grande {
+  width: 220px;
+}
+.mj-comunes h3 {
+  margin: 0 0 8px;
+  font: 800 15px var(--fuente-titulo);
+}
+.mj-comunes .mj-objetivos {
+  justify-content: center;
+}
+.mj-reaccion-cartas {
+  --carta-w: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin: 10px 0 14px;
+}
+.mj-flecha {
+  font-size: 34px;
+  font-weight: 800;
+}
+.mj-final {
+  min-width: min(620px, 94vw);
+}
+.mj-clasificacion {
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+.mj-clasificacion li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 14px;
+  background: #ffffff66;
+  box-shadow: inset 6px 0 0 var(--jugador);
+}
+.mj-clasificacion li.ganador {
+  background: #f2c25a66;
+}
+.mj-clasificacion li.yo {
+  box-shadow:
+    inset 6px 0 0 var(--jugador),
+    0 0 0 2px var(--tinta);
+}
+.mj-clasificacion .mf-panel-animal {
+  width: 44px;
+  height: 44px;
+}
+.mj-puesto {
+  font: 800 22px var(--fuente-titulo);
+  width: 38px;
+}
+.mj-final-nombre {
+  flex: 1;
+  font-size: 16px;
+}
+.mj-final-nombre small {
+  margin-left: 6px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--tinta);
+  color: var(--crema);
+  font-size: 11px;
+}
+.mj-desglose {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin-top: 3px;
+  font-size: 13px;
+  color: #4d4036;
+}
+.mj-total {
+  min-width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffe39a, #f0b52c);
+  box-shadow:
+    0 0 0 2.5px var(--tinta),
+    inset 0 -3px 0 #c98f22;
+  font: 800 22px var(--fuente-titulo);
+}
+.mj-ver-final {
+  position: absolute;
+  z-index: 40;
+  left: 50%;
+  top: 12px;
+  translate: -50% 0;
+}
+
+/* ---------- Muestra oculta (para clonar la carta de un rival) y lupa ---------- */
+
+.mj-muestra {
+  position: fixed;
+  left: -3000px;
+  top: 0;
+  pointer-events: none;
+}
+.mj-lupa {
+  position: fixed;
+  z-index: 60;
+  top: 50%;
+  translate: 0 -50%;
+  padding: 14px;
+  border-radius: 22px;
+  background: #1d140ecc;
+  box-shadow: 0 30px 60px #000a;
+  pointer-events: none;
+  animation: mj-lupa 0.18s ease-out;
+}
+.mj-lupa.derecha {
+  right: 270px;
+}
+.mj-lupa.izquierda {
+  left: 230px;
+}
+@keyframes mj-lupa {
+  from {
+    opacity: 0;
+    scale: 0.92;
+  }
+}
+.mj-lupa .mj-lupa-accion {
+  --carta-w: 270px;
+}
+.mj-lupa .mj-lupa-cuerda {
+  --celda: 130px;
+  --alto-cuerda: calc(var(--celda) * 3 * 128 / 180);
+  position: relative;
+  width: calc(var(--celda) * 3);
+  height: var(--alto-cuerda);
+}
+.mj-lupa .mj-lupa-prenda {
+  --celda: 150px;
+  --paso: calc(var(--celda) * 0.24);
+  position: relative;
+  left: auto;
+  top: auto;
+  width: calc(var(--celda) * 1.45);
+  height: calc(5 * var(--paso) + var(--celda) * 1.3);
+  font-size: calc(var(--celda) * 0.19);
+}
+.mj-lupa .mj-lupa-objetivo {
+  width: 280px;
+}
+.mj-lupa .mj-lupa-dia {
+  width: 420px;
+}
+
+/* ---------- Menú de inicio: cómo se juega ---------- */
+
+.mj-modo {
+  position: relative;
+  z-index: 5;
+  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  max-width: 94%;
+  padding: 6px 14px;
+  border-radius: 18px;
+  background: var(--grano), var(--crema);
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    0 8px 16px #0007;
+  color: var(--tinta);
+  font-weight: 800;
+}
+.mj-modo button {
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+}
+.mj-modo button.activa {
+  background: #f2c25a;
+  border-color: var(--tinta);
+}
+.mj-modo input {
+  width: 150px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+.mj-modo small {
+  width: 100%;
+  text-align: center;
+  font-weight: 700;
+  opacity: 0.75;
+}
+
+/* Huecos de línea: que se vean sobre cualquier tapete */
+.mj .mj-hueco {
+  border: 2px dashed #2b201966;
+  background: #2b201914;
+  color: #2b2019aa;
+}
+.mj .mj-hueco.valido {
+  border: 3px dashed #f2c25a;
+  background: #f2c25a26;
+  color: #2b2019;
+}
+/* Muchas prendas por tender: en varias filas, para que el tendedero no se estreche */
+.mj .mb-portender-cartas {
+  flex-wrap: wrap;
+  justify-content: center;
+  row-gap: 10px;
+  max-width: calc(var(--ancho-prenda) * 4.4);
+}
+.mj-zoom button:nth-child(2) {
+  min-width: 56px;
+  white-space: nowrap;
+}
+
+/* Columna derecha: la carta del día y los objetivos arriba, y debajo el registro (plegable) */
+.mj-derecha {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+.mj-derecha .mf-registro {
+  flex: 1;
+  min-height: 0;
+}
+.mj-info {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 6px 14px;
+  border-radius: 14px;
+  background: #0000002a;
+  box-shadow: inset 0 0 0 2px #f2e6cc22;
+}
+.mj-info .mj-dia {
+  width: 100%;
+}
+.mj-info .mj-objetivos {
+  width: 100%;
+  justify-content: center;
+  gap: 6px;
+}
+.mj-info .mj-objetivo {
+  width: calc((100% - 12px) / 3);
+}
+.mj-info .mj-objetivo-progreso {
+  font-size: 9.5px;
+  padding: 0 5px;
+}
+
+/* Con muchas cartas la mano se apretuja un poco para no meterse bajo el botón de terminar */
+.mj .mj-mano {
+  gap: 0;
+}
+.mj .mj-mano .carta-p {
+  margin: 0 calc(var(--carta-w) * -0.1);
+}
+/* Un montón vacío no abre el panel al pasar el ratón */
+.me-monton:has(.me-cesta-vacia) .me-monton-cartas::before {
+  display: none;
+}
+
+/* Columna derecha: tres bloques en flujo que no se tocan: registro (con su scroll), bloque de robo y botón */
+.mj .mf-juego.mj-juego.sin-registro {
+  grid-template-columns: 206px minmax(0, 1fr) 214px;
+}
+.mj-derecha {
+  min-width: 0;
+}
+.mj-derecha .mj-turno-caja {
+  position: static;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.mj-robo-bloque {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 14px;
+  background: var(--grano), var(--lino), var(--crema);
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    0 2px 0 2px #b8a782,
+    0 6px 12px #0006;
+  color: var(--tinta);
+}
+.mj-derecha .mj-robo,
+.mj-derecha .mj-contadores {
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--tinta);
+  font-size: 12px;
+}
+.mj-derecha .mj-robo span {
+  width: 100%;
+  text-align: center;
+}
+.mj-derecha .mj-robo button {
+  padding: 1px 7px;
+}
+.mj-derecha .mj-acabar {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  font-size: 20px;
+}
+/* Registro plegado: queda una barra arriba y la columna conserva el bloque de robo y el botón */
+.mj-derecha.plegada .mj-registro-cerrado {
+  flex: none;
+  padding: 8px 12px;
+}
+.mj-derecha.plegada .mj-registro-cerrado span {
+  writing-mode: horizontal-tb;
+}
+.mj-derecha.plegada .mj-turno-caja {
+  margin-top: auto;
+}
+/* Mazo de prendas boca abajo (carta mini de 41 × 63 mm), en lugar del saco */
+.mj-mazo-prendas {
+  position: relative;
+  flex: none;
+  width: calc(var(--ancho-prenda, 60px) * 0.8);
+  aspect-ratio: 41 / 63;
+  margin-bottom: 16px;
+}
+.mj-dorso-prenda {
+  position: absolute;
+  inset: 0;
+}
+.mj-dorso-prenda .db {
+  position: absolute;
+  inset: 0;
+}

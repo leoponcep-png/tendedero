@@ -4,6 +4,7 @@ import type { Partida, PuntosObjetivo, ResultadoJugador } from "./tipos";
 import { empezarReparto, empezarTurnoDeJuego, renovarCestas } from "./reparto";
 import { inicioDeRonda, jugadorInicial, ordenDeRonda } from "./ronda";
 import { romperCuerdas } from "./rotura";
+import { anotar } from "./registro";
 import { faseDeSecado } from "./secado";
 
 /**
@@ -18,7 +19,7 @@ export function comprobarUmbral(p: Partida): void {
   p.ultimaRonda = true;
   p.primeroEnLlegar = primero;
   const j = p.jugadores[primero];
-  p.registro.push(`${j.nombre} llega a ${j.puntos} puntos: la partida acaba al terminar esta ronda y después se cuentan los objetivos.`);
+  anotar(p, "llegaAlFinal", { jugador: primero, puntos: j.puntos }, `${j.nombre} llega a ${j.puntos} puntos: la partida acaba al terminar esta ronda y después se cuentan los objetivos.`);
 }
 
 /** Pasa al siguiente jugador; si ya han jugado todos, se acaba la ronda. */
@@ -33,23 +34,23 @@ export function pasarTurno(p: Partida): void {
  * carta del día, cestas nuevas y reparto de prendas. Si ya no queda ropa que repartir, la partida acaba.
  */
 function finDeRonda(p: Partida): void {
-  p.registro.push(`— Fin de la ronda ${p.ronda}: secado y puntos de todos —`);
+  anotar(p, "finRonda", { ronda: p.ronda }, `— Fin de la ronda ${p.ronda}: secado y puntos de todos —`);
   for (const jugador of ordenDeRonda(p)) faseDeSecado(p, jugador);
   romperCuerdas(p);
   comprobarUmbral(p);
   if (!p.ultimaRonda && p.bolsa.length + p.centro.length + p.cestas.flat().length === 0) {
     p.ultimaRonda = true;
-    p.registro.push("Se ha acabado la ropa (no queda en la bolsa, ni en las cestas, ni en el centro): la partida termina.");
+    anotar(p, "sinRopa", {}, "Se ha acabado la ropa (no queda en la bolsa, ni en las cestas, ni en el centro): la partida termina.");
   }
   if (p.ultimaRonda) {
     terminarPartida(p);
     return;
   }
   p.ronda++;
-  p.registro.push(`Empieza la ronda ${p.ronda}; abre ${p.jugadores[jugadorInicial(p)].nombre}.`);
+  anotar(p, "empiezaRonda", { ronda: p.ronda, jugador: jugadorInicial(p) }, `Empieza la ronda ${p.ronda}; abre ${p.jugadores[jugadorInicial(p)].nombre}.`);
   inicioDeRonda(p);
   renovarCestas(p);
-  p.registro.push("Lo que sobraba en las cestas y el centro vuelve a la bolsa y se llenan cestas nuevas.");
+  anotar(p, "cestasNuevas", {}, "Lo que sobraba en las cestas y el centro vuelve a la bolsa y se llenan cestas nuevas.");
   empezarReparto(p);
 }
 
@@ -77,9 +78,14 @@ function terminarPartida(p: Partida): void {
   });
   p.final = resultados;
 
-  p.registro.push("— Fin de la partida: recuento de objetivos —");
+  anotar(p, "finPartida", {}, "— Fin de la partida: recuento de objetivos —");
   for (const r of resultados) {
     const extra = r.objetivos.map((o) => `${o.nombre} +${o.puntos}`).join(", ");
-    p.registro.push(`${r.puesto}.º ${p.jugadores[r.jugador].nombre}: ${r.puntosPartida} + objetivos = ${r.total}${extra ? ` (${extra})` : ""}.`);
+    anotar(
+      p,
+      "puesto",
+      { puesto: r.puesto, jugador: r.jugador, puntos: r.puntosPartida, total: r.total, objetivos: r.objetivos.map((o) => `${o.objetivo}:${o.puntos}`) },
+      `${r.puesto}.º ${p.jugadores[r.jugador].nombre}: ${r.puntosPartida} + objetivos = ${r.total}${extra ? ` (${extra})` : ""}.`,
+    );
   }
 }

@@ -72,6 +72,34 @@ function bocetos(): Plugin {
   };
 }
 
+const VALORACIONES = fileURLToPath(new URL("../../valoraciones/cartas.json", import.meta.url));
+
+// Lee y guarda las valoraciones carta por carta de la galería, para que Claude pueda leerlas.
+function valoraciones(): Plugin {
+  return {
+    name: "tendedero-valoraciones",
+    configureServer(server) {
+      server.middlewares.use("/api/valoraciones", async (req, res) => {
+        try {
+          if (req.method === "GET") {
+            const texto = await fs.readFile(VALORACIONES, "utf8").catch(() => "{}");
+            return enviar(res, 200, JSON.parse(texto));
+          }
+          if (req.method === "POST") {
+            const datos = JSON.parse(await leerCuerpo(req));
+            await fs.mkdir(path.dirname(VALORACIONES), { recursive: true });
+            await fs.writeFile(VALORACIONES, JSON.stringify(datos, null, 2) + "\n");
+            return enviar(res, 200, { archivo: "valoraciones/cartas.json" });
+          }
+          enviar(res, 405, { error: "Operación no admitida." });
+        } catch (e) {
+          enviar(res, 500, { error: String(e) });
+        }
+      });
+    },
+  };
+}
+
 function aArchivo(nombre: string): string {
   const base = nombre
     .normalize("NFD")
@@ -98,7 +126,7 @@ function enviar(res: ServerResponse, estado: number, datos: unknown) {
 }
 
 export default defineConfig({
-  plugins: [react(), configuraciones(), bocetos()],
+  plugins: [react(), configuraciones(), bocetos(), valoraciones()],
   server: { port: 5180 },
   // Rutas relativas: la web publicada funciona en cualquier carpeta (p. ej. usuario.github.io/tendedero/).
   base: "./",

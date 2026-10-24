@@ -1,14 +1,26 @@
 import type { Datos } from "@tendedero/motor";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { MesaJuego } from "../juego/MesaJuego";
+import { perfilesDe } from "../juego/vista";
+import type { Perfil } from "../prototipos/MenuPartida";
 import { useAnfitrion, type SalaGuardada } from "../online/anfitrion";
 import { useInvitado } from "../online/invitado";
 import { enlaceDeSala, type Asiento } from "../online/protocolo";
 import { Portada } from "./Inicio";
 import { Mesa } from "./Mesa";
 
-function Enlace({ codigo }: { codigo: string }) {
+/**
+ * Sala jugada desde la mesa nueva (#/prototipos/e): `perfil` es tu animal y color, y `ruta` es dónde se abren
+ * las salas en esa interfaz (para el enlace de invitación).
+ */
+export interface SalaNueva {
+  perfil: Perfil;
+  ruta: string;
+}
+
+function Enlace({ codigo, ruta }: { codigo: string; ruta?: string }) {
   const [copiado, setCopiado] = useState(false);
-  const enlace = enlaceDeSala(codigo);
+  const enlace = enlaceDeSala(codigo, ruta);
   return (
     <div className="enlace-sala">
       <span>
@@ -63,14 +75,40 @@ function ListaAsientos({ asientos, plazas, yo, onQuitar }: { asientos: Asiento[]
 }
 
 /** Sala vista por quien la creó: invita, espera, empieza y juega. */
-export function SalaAnfitrion({ inicial, datos, onSalir }: { inicial: SalaGuardada; datos: Datos; onSalir: () => void }) {
+export function SalaAnfitrion({ inicial, datos, onSalir, nueva }: { inicial: SalaGuardada; datos: Datos; onSalir: () => void; nueva?: SalaNueva }) {
   const s = useAnfitrion(inicial, datos);
+  const tuPerfil = nueva?.perfil;
+  // En la mesa nueva, los demás te ven con tu animal y tu color.
+  useEffect(() => {
+    if (tuPerfil) s.cambiarPerfil({ animal: tuPerfil.animal, color: tuPerfil.color, tapete: tuPerfil.tapete });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tuPerfil?.animal, tuPerfil?.color, tuPerfil?.tapete]);
   const conectados = s.asientos.filter((a) => a.conectado).length;
   const estadoConexion = (
     <span className={`estado-conexion ${s.abierta ? "bien" : "mal"}`}>
       Sala {s.sala.codigo} · {s.abierta ? `${conectados} conectado${conectados === 1 ? "" : "s"}` : (s.error ?? "abriendo…")}
     </span>
   );
+
+  if (s.vista && nueva) {
+    const otros = s.asientos.map((a) => a.perfil);
+    return (
+      <MesaJuego
+        partida={s.vista}
+        ultima={s.ultima}
+        perfiles={perfilesDe(s.vista, 0, nueva.perfil, otros)}
+        miAsiento={0}
+        modo="online"
+        codigoSala={s.sala.codigo}
+        conexion={estadoConexion}
+        onJugada={s.jugar}
+        onSalir={() => {
+          if (confirm("¿Salir? La partida queda guardada en este navegador y se reanuda al volver a esta sala.")) onSalir();
+        }}
+        onNueva={s.volverASala}
+      />
+    );
+  }
 
   if (s.vista) {
     return (
@@ -98,7 +136,7 @@ export function SalaAnfitrion({ inicial, datos, onSalir }: { inicial: SalaGuarda
       {estadoConexion}
       {s.error && !s.abierta && <p className="error">{s.error}</p>}
       <p>Pasa este enlace a tus amigos. Cuando estén dentro, empieza la partida.</p>
-      <Enlace codigo={s.sala.codigo} />
+      <Enlace codigo={s.sala.codigo} ruta={nueva?.ruta} />
       <label className="campo">
         <span>Tu nombre</span>
         <input value={nombre} maxLength={24} onChange={(e) => s.cambiarNombre(e.target.value)} />
@@ -138,10 +176,11 @@ function nombreDentro(codigo: string): string | null {
 }
 
 /** Sala vista por un invitado: pone su nombre, entra y juega. */
-export function SalaInvitado({ codigo, onSalir }: { codigo: string; onSalir: () => void }) {
-  const [borrador, setBorrador] = useState(leerNombre);
+export function SalaInvitado({ codigo, onSalir, nueva }: { codigo: string; onSalir: () => void; nueva?: SalaNueva }) {
+  const [borrador, setBorrador] = useState(() => leerNombre() || nueva?.perfil.nombre || "");
   const [nombre, setNombre] = useState<string | null>(() => nombreDentro(codigo));
-  const s = useInvitado(codigo, nombre);
+  const perfil = nueva ? { animal: nueva.perfil.animal, color: nueva.perfil.color, tapete: nueva.perfil.tapete } : undefined;
+  const s = useInvitado(codigo, nombre, perfil);
   // Al salir a propósito, recargar ya no te mete de nuevo.
   const salir = () => {
     try {
@@ -187,6 +226,27 @@ export function SalaInvitado({ codigo, onSalir }: { codigo: string; onSalir: () 
       Sala {codigo} · {s.fase === "dentro" ? "conectado" : s.fase === "rechazado" ? "fuera" : "reconectando…"}
     </span>
   );
+
+  if (s.partida && s.sala && s.fase !== "rechazado" && nueva) {
+    const otros = s.asientos.map((a) => a.perfil);
+    return (
+      <MesaJuego
+        partida={s.partida}
+        ultima={s.ultima}
+        perfiles={perfilesDe(s.partida, s.sala.tuAsiento, nueva.perfil, otros)}
+        miAsiento={s.sala.tuAsiento}
+        modo="online"
+        codigoSala={codigo}
+        conexion={estadoConexion}
+        avisoExterno={s.aviso?.texto ?? null}
+        onJugada={s.jugar}
+        onSalir={() => {
+          if (confirm("¿Salir de la partida? Puedes volver con el mismo enlace.")) salir();
+        }}
+        onNueva={salir}
+      />
+    );
+  }
 
   if (s.partida && s.sala && s.fase !== "rechazado") {
     return (

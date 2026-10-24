@@ -8,7 +8,10 @@ import {
   cargarDatos,
   crearPartida,
   ErrorDatos,
+  motivoInvalida,
+  porQueNoVale,
   puntuarObjetivo,
+  siguienteJugadaIA,
   vistaPara,
   type Ajustes,
   type DatosCrudos,
@@ -827,5 +830,63 @@ describe("reparto de prendas y vistas", () => {
     expect(v.jugadores[1].mano.every((c) => c === "?")).toBe(true);
     expect(v.jugadores[0].mano.some((c) => c !== "?")).toBe(true);
     expect(v.semilla).toBe("");
+  });
+});
+
+describe("jugadores automáticos", () => {
+  // Azar con semilla, para que la prueba juegue siempre la misma partida.
+  function azarFijo(semilla: number) {
+    let s = semilla;
+    return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32);
+  }
+
+  function partidaDeBots(jugadores: number, semilla: string): Partida {
+    let p = crearPartida(datos, { ...ajustesIniciales(datos), jugadores, semilla });
+    const azar = azarFijo(jugadores * 31 + 7);
+    for (let pasos = 0; !p.terminada; pasos++) {
+      if (pasos > 5000) throw new Error("Los bots se han quedado atascados.");
+      // Le toca al que tiene que elegir objetivo, al que responde a un fastidio o al del turno.
+      const quien = p.jugadores.findIndex((j) => j.objetivosOfrecidos.length > 0);
+      const i = quien >= 0 ? quien : p.reaccion ? p.reaccion.defensor : p.turno.jugador;
+      const jugada = siguienteJugadaIA(p, i, { azar });
+      if (!jugada) throw new Error(`El bot ${i} no sabe qué hacer.`);
+      p = jugar(p, jugada);
+    }
+    return p;
+  }
+
+  it.each([2, 4])("una partida de %i bots llega al final", (n) => {
+    const p = partidaDeBots(n, `bots-${n}`);
+    expect(p.final).toHaveLength(n);
+    expect(p.final!.map((r) => r.puesto)).toContain(1);
+  }, 60000);
+
+  it("el registro estructurado va a la par que el registro en castellano", () => {
+    const p = partidaDeBots(2, "bots-registro");
+    expect(p.entradas).toHaveLength(p.registro.length);
+    // Cada entrada tiene su clave, y las que nombran prendas las dan como «tipo:color».
+    for (const e of p.entradas!) {
+      expect(e.clave).toMatch(/^[a-zA-Z]+$/);
+      if (typeof e.datos.prenda === "string") expect(e.datos.prenda).toMatch(/^[a-z]+:[a-z]+$/);
+    }
+    const i = p.entradas!.findIndex((e) => e.clave === "seca");
+    expect(i).toBeGreaterThanOrEqual(0);
+    const seca = p.entradas![i];
+    expect(p.registro[i]).toContain(`${p.jugadores[seca.datos.jugador as number].nombre} seca`);
+    expect(p.entradas!.at(-1)!.clave).toBe("puesto");
+  }, 60000);
+});
+
+describe("motivos estructurados", () => {
+  it("una jugada que no vale da la clave, los datos y el mismo texto en castellano", () => {
+    const p = partida();
+    const otro = (p.turno.jugador + 1) % p.jugadores.length;
+    const r = aplicar(p, { tipo: "terminarTurno", jugador: otro, cuerdas: 0 });
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.detalle.clave).toBe("noEsTuTurno");
+    expect(r.detalle.datos.jugador).toBe(otro);
+    expect(r.detalle.texto).toBe(r.motivo);
+    expect(porQueNoVale(p, { tipo: "terminarTurno", jugador: otro, cuerdas: 0 })?.texto).toBe(motivoInvalida(p, { tipo: "terminarTurno", jugador: otro, cuerdas: 0 }));
   });
 });

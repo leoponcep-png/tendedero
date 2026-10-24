@@ -185,29 +185,68 @@
     0 5px 0 2.5px #7d6439,
     0 12px 14px #0007;
 }
+/* Leyenda: panel de papel cosido, cinta con el título y cada cuerda con su icono en un medallón */
 .loseta-leyenda {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
-  padding: 4px 4px 4px 7px;
+  margin: calc(var(--celda) * 0.12) calc(var(--celda) * 0.06) calc(var(--celda) * 0.12) calc(var(--celda) * 0.12);
+  padding: calc(var(--celda) * 0.3) calc(var(--celda) * 0.08) calc(var(--celda) * 0.08);
   min-width: 0;
+  border-radius: calc(var(--celda) * 0.14);
+  background: color-mix(in srgb, var(--crema), #fff 45%);
+  box-shadow:
+    0 0 0 1.5px var(--tinta),
+    inset 0 0 0 calc(var(--celda) * 0.05) color-mix(in srgb, var(--crema), #fff 45%),
+    inset 0 0 0 calc(var(--celda) * 0.05 + 1px) #8a5a3099;
+  outline: 1px dashed #8a5a3077;
+  outline-offset: calc(var(--celda) * -0.09);
 }
 .loseta-titulo {
-  font: 800 calc(var(--celda) * 0.27) var(--fuente-titulo);
-  color: var(--tinta);
-  border-bottom: 1.5px solid #2b201955;
-  line-height: 1.2;
+  position: absolute;
+  left: 50%;
+  top: calc(var(--celda) * -0.12);
+  translate: -50% 0;
+  padding: calc(var(--celda) * 0.03) calc(var(--celda) * 0.26);
+  border-radius: calc(var(--celda) * 0.08);
+  background:
+    radial-gradient(circle, #ffffff40 0.6px, transparent 1px) 0 0 / 4px 4px,
+    linear-gradient(180deg, #a8743f, #8a5a30);
+  box-shadow: 0 0 0 1.5px var(--tinta);
+  font: 800 calc(var(--celda) * 0.24) / 1.1 var(--fuente-titulo);
+  color: #fff;
+  text-shadow:
+    1px 0 0 var(--tinta),
+    -1px 0 0 var(--tinta),
+    0 1px 0 var(--tinta),
+    0 -1px 0 var(--tinta),
+    1px 1.5px 0 var(--tinta);
+  white-space: nowrap;
 }
 .loseta-fila {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: calc(var(--celda) * 0.1);
   line-height: 1.02;
 }
+.loseta-fila + .loseta-fila {
+  padding-top: calc(var(--celda) * 0.04);
+  border-top: 1px dashed #8a5a3055;
+}
+/* El icono, entero dentro de un medallón de papel (sin recortes) */
 .loseta-icono {
   flex: none;
-  width: calc(var(--celda) * 0.5);
-  height: calc(var(--celda) * 0.5);
+  box-sizing: border-box;
+  width: calc(var(--celda) * 0.56);
+  height: calc(var(--celda) * 0.56);
+  padding: calc(var(--celda) * 0.05);
+  border-radius: 50%;
+  background: var(--crema);
+  box-shadow:
+    0 0 0 1.2px var(--tinta),
+    inset 0 0 0 calc(var(--celda) * 0.025) #8a5a3055;
+  overflow: visible;
 }
 .loseta-fila b {
   display: block;
@@ -216,7 +255,7 @@
 }
 .loseta-fila span {
   display: block;
-  font-size: calc(var(--celda) * 0.18);
+  font-size: calc(var(--celda) * 0.17);
   font-weight: 700;
   color: #5d4b39;
 }
@@ -579,36 +618,7 @@
   border-color: #f2e6cc55;
   color: #f2e6cc88;
 }
-.dia-bosque {
-  width: calc(var(--celda-base) * 3);
-  border-radius: 10px;
-  overflow: hidden;
-  background: var(--grano), var(--crema);
-  box-shadow:
-    0 0 0 2.5px var(--tinta),
-    0 8px 14px #0006;
-  rotate: 2deg;
-}
-.dia-bosque-nombre {
-  padding: 2px 8px;
-  background: #e1a73a;
-  border-bottom: 2px solid var(--tinta);
-  font: 800 15px var(--fuente-titulo);
-  color: var(--tinta);
-}
-.dia-bosque-arte {
-  display: block;
-  width: 100%;
-  height: calc(var(--celda-base) * 1.2);
-  border-bottom: 2px solid var(--tinta);
-}
-.dia-bosque-texto {
-  padding: 4px 8px 6px;
-  font-size: 11.5px;
-  font-weight: 700;
-  line-height: 1.15;
-  color: #4d4036;
-}
+/* La carta del día y las cartas de acción, objetivo y dorsos se dibujan en CartasJuego.css. */
 .mb-mano-rival {
   --carta-w: calc(var(--celda-base) * 1.05);
   position: absolute;
@@ -626,96 +636,6 @@
 }
 .mb .carta-giro > .db {
   transform: rotateY(180deg);
-}
-.cb {
-  --g: var(--tactica);
-  --g-claro: #cfe0cf;
-  display: grid;
-  grid-template-rows: auto 44% 1fr auto;
-  border-radius: calc(var(--carta-w) / 14);
-  overflow: hidden;
-  background: var(--grano), var(--crema);
-  box-shadow:
-    0 0 0 calc(var(--carta-w) / 45) var(--tinta),
-    0 8px 18px #0005;
-  font-size: calc(var(--carta-w) / 11.5);
-  color: var(--tinta);
-}
-.cb-fastidio {
-  --g: var(--fastidio);
-  --g-claro: #ebcdbb;
-}
-.cb-nombre {
-  padding: 0.3em 0.35em 0.25em;
-  background: var(--grano), var(--g);
-  border-bottom: 2px solid var(--tinta);
-  color: var(--crema);
-  text-align: center;
-  font: 800 1.12em/1.05 var(--fuente-titulo);
-  text-shadow: 0 1px 0 #0005;
-}
-.cb-ilustra {
-  display: grid;
-  place-items: center;
-  background:
-    radial-gradient(ellipse at 50% 30%, #ffffffaa, transparent 60%),
-    linear-gradient(transparent 70%, color-mix(in srgb, var(--g), transparent 70%)),
-    var(--g-claro);
-  border-bottom: 2px solid var(--tinta);
-}
-.cb-icono {
-  width: 66%;
-  height: 90%;
-}
-.cb-texto {
-  display: grid;
-  place-items: center;
-  padding: 0.35em 0.45em;
-  font-weight: 700;
-  font-size: 0.9em;
-  line-height: 1.12;
-  text-align: center;
-  color: #3d3026;
-}
-.cb-tipo {
-  padding: 0.12em 0;
-  background: var(--g);
-  border-top: 2px solid var(--tinta);
-  color: var(--crema);
-  text-align: center;
-  font: 800 0.72em var(--fuente-titulo);
-  letter-spacing: 0.1em;
-}
-.db {
-  display: grid;
-  place-items: center;
-  border-radius: calc(var(--carta-w) / 14);
-  background:
-    var(--grano),
-    radial-gradient(circle at 50% 50%, #ffffff14, transparent 60%),
-    repeating-linear-gradient(45deg, #3e5a46 0 6px, #36513f 6px 12px);
-  box-shadow:
-    0 0 0 calc(var(--carta-w) / 45) var(--tinta),
-    0 6px 14px #0005;
-}
-.db-cuerdas {
-  border-radius: 8px;
-  background:
-    var(--grano),
-    radial-gradient(circle at 50% 50%, #ffffff14, transparent 60%),
-    repeating-linear-gradient(-45deg, #8a5a30 0 6px, #7d5129 6px 12px);
-  box-shadow:
-    0 0 0 2.5px var(--tinta),
-    0 6px 14px #0005;
-}
-.db svg {
-  width: 86%;
-  height: 86%;
-}
-.db-cuerdas svg {
-  rotate: 90deg;
-  width: 62%;
-  height: 120%;
 }
 
 /* ---------- Mano ---------- */

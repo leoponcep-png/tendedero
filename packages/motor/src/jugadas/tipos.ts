@@ -1,3 +1,4 @@
+import type { Motivo } from "../estado/registro";
 import type { Partida } from "../estado/tipos";
 
 /** Las prendas se cogen todas las de un color o todas las de un tipo. */
@@ -36,10 +37,10 @@ export type JugadaDe<T extends Jugada["tipo"]> = Extract<Jugada, { tipo: T }>;
 
 /**
  * Cada jugada se programa en dos partes: `validar` devuelve el motivo por el que no se puede
- * (o null si se puede) y `aplicar` la ejecuta sobre una copia de la partida.
+ * (clave, datos y texto en castellano; o null si se puede) y `aplicar` la ejecuta sobre una copia de la partida.
  */
 export interface Manejador<J extends Jugada> {
   soloEnSuTurno: boolean;
-  validar(p: Partida, j: J): string | null;
+  validar(p: Partida, j: J): Motivo | null;
   aplicar(p: Partida, j: J): void;
 }

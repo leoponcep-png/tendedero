@@ -1,0 +1,13 @@
+/* Letra de respaldo para los caracteres que no tiene la letra del estilo (chino, japonés, coreano, cirílico).
+ * fuentes.ts la cambia según el idioma; este valor es el de arranque, para que las pilas de letra que la usan
+ * nunca queden con una variable sin definir. */
+:root {
+  --fuente-respaldo: "Nunito";
+}
+
+/* En chino, japonés y coreano no hay versalitas ni cursivas que valgan: se quitan para que no se deformen. */
+:root:lang(zh-Hans),
+:root:lang(ja),
+:root:lang(ko) {
+  font-synthesis: none;
+}

@@ -347,7 +347,8 @@ export function Barra({
   onVersion: (v: string) => void;
   onVolver: () => void;
   ocupado: boolean;
-  onRival: () => void;
+  /** Sin él no sale el botón (en la mesa E la ronda avanza sola). */
+  onRival?: () => void;
   onReiniciar: () => void;
   textoRival?: string;
 }) {
@@ -367,9 +368,11 @@ export function Barra({
         ))}
       </nav>
       <div className="proto-acciones">
-        <button disabled={ocupado} onClick={onRival}>
-          {textoRival}
-        </button>
+        {onRival && (
+          <button disabled={ocupado} onClick={onRival}>
+            {textoRival}
+          </button>
+        )}
         <button disabled={ocupado} onClick={onReiniciar}>
           Reiniciar
         </button>

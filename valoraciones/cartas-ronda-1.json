@@ -1,0 +1,289 @@
+{
+  "accion:mojar-cuerda-rival": {
+    "carta": "Mojar cuerda rival (acción)",
+    "estrellas": 4,
+    "nota": "no pueden cortarse los iconos de la plantilla, se supone que el dibujo si acaso pasaría por detrás, ajustar microcorte ",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:52:33.905Z"
+  },
+  "general": {
+    "carta": "Comentario general",
+    "estrellas": 0,
+    "nota": "Los nuevos marcos está brutales, pero hay muchas cartas que cuentan con un icono dependiendo del tipo de carta que sean por ejmplo el rayo en las de fastidio, el dibujo de la carta no puede tapar estos iconos ni ninguna parte de la plantilla de la carta. no entiendo las dos curvas que tienen en las esquinas inferiorres las cartas de fastido y tacticas, hay una linea ahi en medio por la cara, quitala, sin eso están bien. has hecho 2 versiones de cuerdas y no entiendo porqué, la de huecos y pinzas por que las has hecho? nos quedamos con las otras, con las normales, has diviido las cartas de objetivos por secretas y comues cuando todas pueden se de los 2 tipos, pertenecen todas al mismomazo sin difrenciarse y se roban 2 al azar para ser comunes y2 para especiales. en general todas las cartas de dia las veo un poco raras, son sin duda las que pero han salido y hay cierta cartas que tienen partes con microerrores como una gota de mojar cuerda rival que tiene como un derrape en una linea. es como un efecto glich. no voy a puntuarte las de objetivos una a una pero a parte de lo del color y que no se deben separar por tipos, hay glich en la mayoria de ellas",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T23:00:12.890Z"
+  },
+  "accion:rafaga-de-viento": {
+    "carta": "Ráfaga de viento (acción)",
+    "estrellas": 4,
+    "nota": "que no haya micrococrte",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:52:41.248Z"
+  },
+  "accion:pinza-rota": {
+    "carta": "Pinza rota (acción)",
+    "estrellas": 4,
+    "nota": "no entiendo el circulo gris que hay a la derecha que significa? ",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:53:16.718Z"
+  },
+  "accion:retrasar-secado": {
+    "carta": "Retrasar secado (acción)",
+    "estrellas": 4,
+    "nota": "tambien tiene los microcortes el efecto glich ",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:53:32.951Z"
+  },
+  "accion:mover-prenda-rival": {
+    "carta": "Mover una prenda rival (acción)",
+    "estrellas": 2,
+    "nota": "se ve feo ",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:53:52.602Z"
+  },
+  "accion:colocar-cuerda-extra": {
+    "carta": "Colocar cuerda extra (acción)",
+    "estrellas": 3,
+    "nota": "glich",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:54:07.861Z"
+  },
+  "accion:secar-prenda": {
+    "carta": "Secar prenda inmediatamente (acción)",
+    "estrellas": 3,
+    "nota": "glich",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:54:10.127Z"
+  },
+  "accion:reducir-humedad": {
+    "carta": "Reducir humedad (acción)",
+    "estrellas": 3,
+    "nota": "glich",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:54:15.452Z"
+  },
+  "accion:mover-prenda-propia": {
+    "carta": "Mover prenda propia (acción)",
+    "estrellas": 2,
+    "nota": "se ve feo",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:54:23.485Z"
+  },
+  "accion:proteger-cuerda": {
+    "carta": "Proteger cuerda (acción)",
+    "estrellas": 3,
+    "nota": "se ve rara",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:54:38.094Z"
+  },
+  "accion:ni-hablar": {
+    "carta": "¡Ni hablar! (acción)",
+    "estrellas": 2,
+    "nota": "super glich",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:54:46.430Z"
+  },
+  "accion:mover-cuerda": {
+    "carta": "Mover cuerda (acción)",
+    "estrellas": 3,
+    "nota": "glich",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:55:29.709Z"
+  },
+  "accion:cambiar-cuerdas": {
+    "carta": "Cambiar la ropa de cuerda (acción)",
+    "estrellas": 3,
+    "nota": "glich",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:55:31.941Z"
+  },
+  "accion:buscar-cuerda": {
+    "carta": "Buscar cuerda (acción)",
+    "estrellas": 2,
+    "nota": "glich",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:55:38.741Z"
+  },
+  "accion:cambiar-prendas": {
+    "carta": "Cambiar prendas de sitio (acción)",
+    "estrellas": 3,
+    "nota": "glich",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:55:34.837Z"
+  },
+  "cuerda:basica": {
+    "carta": "Cuerda básica (cuerda)",
+    "estrellas": 5,
+    "nota": "",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:55:43.013Z"
+  },
+  "cuerda:tejadillo": {
+    "carta": "Tejadillo (cuerda)",
+    "estrellas": 5,
+    "nota": "se sale un poco la linea del tejadito",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:56:04.315Z"
+  },
+  "cuerda:resistente": {
+    "carta": "Cuerda resistente (cuerda)",
+    "estrellas": 5,
+    "nota": "",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:55:46.701Z"
+  },
+  "cuerda:secado-rapido": {
+    "carta": "Secado rápido (cuerda)",
+    "estrellas": 5,
+    "nota": "",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:56:09.725Z"
+  },
+  "cuerda:modificador-puntuacion": {
+    "carta": "Pinzas amarillas (cuerda)",
+    "estrellas": 5,
+    "nota": "",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:56:10.397Z"
+  },
+  "cuerda:fragil": {
+    "carta": "Cuerda vieja (cuerda)",
+    "estrellas": 5,
+    "nota": "",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:56:11.189Z"
+  },
+  "cuerda:pinzas-#f4f1ea": {
+    "carta": "Pinzas de color #f4f1ea (cuerda)",
+    "estrellas": 5,
+    "nota": "",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:56:13.701Z"
+  },
+  "cuerda:pinzas-#e8c23a": {
+    "carta": "Pinzas de color #e8c23a (cuerda)",
+    "estrellas": 5,
+    "nota": "",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:56:14.590Z"
+  },
+  "cuerda:pinzas-#4a7fd0": {
+    "carta": "Pinzas de color #4a7fd0 (cuerda)",
+    "estrellas": 5,
+    "nota": "",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:56:15.629Z"
+  },
+  "dia:soleado": {
+    "carta": "Soleado (día)",
+    "estrellas": 2,
+    "nota": "glich",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:56:23.576Z"
+  },
+  "dia:racha-de-sol": {
+    "carta": "Racha de sol (día)",
+    "estrellas": 2,
+    "nota": "glich",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:56:24.438Z"
+  },
+  "dia:chaparron": {
+    "carta": "Chaparrón (día)",
+    "estrellas": 2,
+    "nota": "glich",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:56:25.156Z"
+  },
+  "dia:lluvia": {
+    "carta": "Días de lluvia (día)",
+    "estrellas": 2,
+    "nota": "glich",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:56:28.413Z"
+  },
+  "dia:viento": {
+    "carta": "Viento (día)",
+    "estrellas": 2,
+    "nota": "glich",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:56:31.527Z"
+  },
+  "dia:tormenta-repentina": {
+    "carta": "Tormenta repentina (día)",
+    "estrellas": 2,
+    "nota": "glich",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:56:32.108Z"
+  },
+  "dia:ola-de-calor": {
+    "carta": "Ola de calor (día)",
+    "estrellas": 2,
+    "nota": "glich",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:56:35.021Z"
+  },
+  "dia:vecina-sacude-alfombra": {
+    "carta": "Vecina sacude alfombra (día)",
+    "estrellas": 1,
+    "nota": "glich",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:57:05.965Z"
+  },
+  "dia:pinzas-viejas": {
+    "carta": "Pinzas viejas (día)",
+    "estrellas": 1,
+    "nota": "glich",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:57:09.669Z"
+  },
+  "dia:viento-traicionero": {
+    "carta": "Viento traicionero (día)",
+    "estrellas": 2,
+    "nota": "glich",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:56:55.899Z"
+  },
+  "dia:ropa-se-engancha": {
+    "carta": "Ropa se engancha (día)",
+    "estrellas": 1,
+    "nota": "glich",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:56:54.819Z"
+  },
+  "dorso:acciones": {
+    "carta": "Dorso de acciones",
+    "estrellas": 4,
+    "nota": "que no ponga tendedero y glich ",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:59:13.431Z"
+  },
+  "dorso:objetivos": {
+    "carta": "Dorso de objetivos",
+    "estrellas": 3,
+    "nota": "que no ponga tendedero y glich ",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:59:18.873Z"
+  },
+  "dorso:cuerdas": {
+    "carta": "Dorso de cuerdas",
+    "estrellas": 3,
+    "nota": "que no ponga tendedero y glich ",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:59:21.103Z"
+  },
+  "dorso:dias": {
+    "carta": "Dorso de dias",
+    "estrellas": 0,
+    "nota": "que no ponga tendedero y glich ",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:59:22.709Z"
+  },
+  "loseta": {
+    "carta": "Loseta de cartón",
+    "estrellas": 3,
+    "nota": "que no se corten los iconos y que tenga mejor disñeo",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T22:59:04.013Z"
+  }
+}

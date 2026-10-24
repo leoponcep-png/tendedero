@@ -1,5 +1,6 @@
 import { barajar } from "../azar";
 import type { DefCarta, Mazo, Parametros, TipoPrenda } from "../datos/esquemas";
+import { anotar, no, refPrenda, type Motivo } from "./registro";
 import type { Colgada, CartaTendida, Partida, Pila } from "./tipos";
 
 export function pilaDe(mazo: Mazo): Pila {
@@ -66,19 +67,19 @@ export function motivoNoCabe(
   sitio: { jugador: number; linea: number; posicion: number; inicio: number },
   prenda: string,
   ignorar: string | string[] = [],
-): string | null {
+): Motivo | null {
   const ignoradas = typeof ignorar === "string" ? [ignorar] : ignorar;
   const tendida = p.jugadores[sitio.jugador]?.lineas[sitio.linea]?.cartas[sitio.posicion];
-  if (!tendida) return "Ahí no hay ninguna carta de cuerda.";
+  if (!tendida) return no("sinCuerdaAhi", "Ahí no hay ninguna carta de cuerda.");
   const huecos = defCarta(p, tendida.carta).espacios;
   const ocupa = tipoDe(p, prenda).espacios;
   if (!Number.isInteger(sitio.inicio) || sitio.inicio < 0 || sitio.inicio + ocupa > huecos) {
-    return `No cabe: ocupa ${espacios(ocupa)} y tiene que caber entera en una sola carta.`;
+    return no("noCabe", `No cabe: ocupa ${espacios(ocupa)} y tiene que caber entera en una sola carta.`, { n: ocupa });
   }
   for (const c of tendida.colgadas) {
     if (ignoradas.includes(c.prenda)) continue;
     const fin = c.inicio + tipoDe(p, c.prenda).espacios;
-    if (sitio.inicio < fin && c.inicio < sitio.inicio + ocupa) return "Esos espacios ya están ocupados.";
+    if (sitio.inicio < fin && c.inicio < sitio.inicio + ocupa) return no("ocupado", "Esos espacios ya están ocupados.");
   }
   return null;
 }
@@ -94,7 +95,7 @@ export function caer(p: Partida, prenda: string): void {
   descolgar(u);
   p.prendas[prenda].humedad = tipoDe(p, prenda).humedad;
   p.jugadores[u.jugador].pendientes.push(prenda);
-  p.registro.push(`${nombrePrenda(p, prenda)} se cae y vuelve a las prendas por tender de ${p.jugadores[u.jugador].nombre}.`);
+  anotar(p, "seCae", { prenda: refPrenda(p, prenda), jugador: u.jugador }, `${nombrePrenda(p, prenda)} se cae y vuelve a las prendas por tender de ${p.jugadores[u.jugador].nombre}.`);
 }
 
 /** Roba hasta `n` cartas; si el mazo se acaba, baraja su descarte. Devuelve cuántas robó. */
@@ -105,7 +106,7 @@ export function robar(p: Partida, jugador: number, pila: "cuerdas" | "acciones",
       p.mazos[pila] = p.descartes[pila];
       p.descartes[pila] = [];
       barajar(p, p.mazos[pila]);
-      p.registro.push(`Se baraja el descarte de ${pila} para formar un mazo nuevo.`);
+      anotar(p, "barajaDescarte", { pila }, `Se baraja el descarte de ${pila} para formar un mazo nuevo.`);
     }
     const carta = p.mazos[pila].pop();
     if (!carta) break;

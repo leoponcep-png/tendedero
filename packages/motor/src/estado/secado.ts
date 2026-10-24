@@ -1,5 +1,6 @@
 import { efectos, type EfectoClima, type EfectoCuerda, type Etiqueta } from "../efectos";
 import type { Parametros } from "../datos/esquemas";
+import { anotar, refPrenda } from "./registro";
 import type { CartaTendida, Partida } from "./tipos";
 import { defCarta, descolgar, localizar, nombrePrenda, tipoDe } from "./utilidades";
 
@@ -65,7 +66,7 @@ export function secarPrenda(p: Partida, prenda: string): void {
   jugador.secadoEn[prenda] = [defCarta(p, u.tendida.carta).id, ...cubre];
   jugador.puntos += puntos;
   const extra = puntos !== base ? ` (${base} ${puntos > base ? "+" : "−"} ${Math.abs(puntos - base)} por la cuerda)` : "";
-  p.registro.push(`${jugador.nombre} seca ${nombrePrenda(p, prenda)}: +${puntos} pts${extra}.`);
+  anotar(p, "seca", { jugador: u.jugador, prenda: refPrenda(p, prenda), puntos, base }, `${jugador.nombre} seca ${nombrePrenda(p, prenda)}: +${puntos} pts${extra}.`);
 }
 
 /**

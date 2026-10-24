@@ -1,4 +1,5 @@
 import { efectoCuerda } from "./secado";
+import { anotar, refPrenda } from "./registro";
 import type { CartaTendida, Partida } from "./tipos";
 import { defCarta, nombrePrenda } from "./utilidades";
 
@@ -30,7 +31,12 @@ export function romperCuerdas(p: Partida): void {
 
       const conElla = rotas.length > 1 ? ` y con ella ${rotas.length - 1} carta(s) a su derecha` : "";
       const perdidas = prendas.length ? `; se pierden ${prendas.map((id) => nombrePrenda(p, id)).join(", ")}` : "";
-      p.registro.push(`Se rompe ${defCarta(p, rotas[0].carta).nombre} de ${jugador.nombre} en la línea ${l + 1}${conElla}${perdidas}.`);
+      anotar(
+        p,
+        "seRompe",
+        { carta: defCarta(p, rotas[0].carta).id, jugador: p.jugadores.indexOf(jugador), linea: l + 1, n: rotas.length - 1, prendas: prendas.map((id) => refPrenda(p, id)) },
+        `Se rompe ${defCarta(p, rotas[0].carta).nombre} de ${jugador.nombre} en la línea ${l + 1}${conElla}${perdidas}.`,
+      );
 
       // La que puso un rival se la queda él como trofeo; el resto va al descarte.
       for (const t of rotas) {
@@ -39,7 +45,7 @@ export function romperCuerdas(p: Partida): void {
           continue;
         }
         p.jugadores[t.colocadaPor].trofeos.push(t.carta);
-        p.registro.push(`${p.jugadores[t.colocadaPor].nombre} se queda ${defCarta(p, t.carta).nombre} como trofeo.`);
+        anotar(p, "trofeo", { jugador: t.colocadaPor, carta: defCarta(p, t.carta).id }, `${p.jugadores[t.colocadaPor].nombre} se queda ${defCarta(p, t.carta).nombre} como trofeo.`);
       }
     }
   }

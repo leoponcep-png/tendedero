@@ -1,5 +1,6 @@
 import { secarPrenda } from "../estado/secado";
 import { caer, defCarta, descolgar, localizar, nombrePrenda, numero, prendaEn, robar } from "../estado/utilidades";
+import { anotar, no, refPrenda } from "../estado/registro";
 import type { Partida } from "../estado/tipos";
 import type { JugadaDe } from "../jugadas/tipos";
 import type { EfectoAccion } from ".";
@@ -22,12 +23,23 @@ function mover(p: Partida, j: JugadaDe<"jugarAccion">) {
   const u = localizar(p, prenda!)!;
   descolgar(u);
   p.jugadores[jugador].lineas[destino!.linea].cartas[destino!.posicion].colgadas.push({ prenda: prenda!, inicio: destino!.inicio });
-  p.registro.push(`Se mueve ${nombrePrenda(p, prenda!)} a la línea ${destino!.linea + 1}, carta ${destino!.posicion + 1}.`);
+  anotar(
+    p,
+    "seMueve",
+    { prenda: refPrenda(p, prenda!), linea: destino!.linea + 1, posicion: destino!.posicion + 1 },
+    `Se mueve ${nombrePrenda(p, prenda!)} a la línea ${destino!.linea + 1}, carta ${destino!.posicion + 1}.`,
+  );
 }
 
 function sitio(p: Partida, j: JugadaDe<"jugarAccion">): string {
   const o = j.objetivo!;
   return `${defCarta(p, cartaObjetivo(p, j).carta).nombre} (línea ${o.linea + 1}, carta ${o.posicion + 1})`;
+}
+
+/** Los datos de `sitio` para el registro estructurado. */
+function datosSitio(p: Partida, j: JugadaDe<"jugarAccion">) {
+  const o = j.objetivo!;
+  return { carta: defCarta(p, cartaObjetivo(p, j).carta).id, linea: o.linea + 1, posicion: o.posicion + 1 };
 }
 
 export const efectosAccion: Record<string, EfectoAccion> = {
@@ -36,11 +48,11 @@ export const efectosAccion: Record<string, EfectoAccion> = {
     tipo: "accion",
     blanco: "cartaRival",
     etiquetas: ["fastidio", "moja"],
-    validar: (p, j) => (cartaObjetivo(p, j).colgadas.length ? null : "Esa carta de cuerda no tiene prendas."),
+    validar: (p, j) => (cartaObjetivo(p, j).colgadas.length ? null : no("cuerdaSinPrendas", "Esa carta de cuerda no tiene prendas.")),
     aplicar(p, j, params) {
       const h = numero(params, "humedad", 1);
       for (const { prenda } of cartaObjetivo(p, j).colgadas) p.prendas[prenda].humedad += h;
-      p.registro.push(`Las prendas de esa cuerda de ${p.jugadores[j.objetivo!.jugador].nombre} ganan ${h} de humedad.`);
+      anotar(p, "mojaCuerda", { jugador: j.objetivo!.jugador, h }, `Las prendas de esa cuerda de ${p.jugadores[j.objetivo!.jugador].nombre} ganan ${h} de humedad.`);
     },
   },
 
@@ -60,7 +72,7 @@ export const efectosAccion: Record<string, EfectoAccion> = {
     aplicar(p, j, params) {
       const h = numero(params, "humedad", 1);
       p.prendas[j.objetivo!.prenda!].humedad += h;
-      p.registro.push(`${nombrePrenda(p, j.objetivo!.prenda!)} gana ${h} de humedad.`);
+      anotar(p, "ganaHumedad", { prenda: refPrenda(p, j.objetivo!.prenda!), h }, `${nombrePrenda(p, j.objetivo!.prenda!)} gana ${h} de humedad.`);
     },
   },
 
@@ -75,7 +87,7 @@ export const efectosAccion: Record<string, EfectoAccion> = {
     aplicar(p, _j, params) {
       const n = numero(params, "cuerdas", 1);
       p.turno.cuerdasExtra += n;
-      p.registro.push(`Este turno puede jugar ${n} cuerda(s) más.`);
+      anotar(p, "cuerdasExtra", { n }, `Este turno puede jugar ${n} cuerda(s) más.`);
     },
   },
 
@@ -93,7 +105,7 @@ export const efectosAccion: Record<string, EfectoAccion> = {
     etiquetas: [],
     aplicar(p, j, params) {
       const h = numero(params, "humedad", 1);
-      p.registro.push(`${nombrePrenda(p, j.objetivo!.prenda!)} pierde ${h} de humedad.`);
+      anotar(p, "pierdeHumedad", { prenda: refPrenda(p, j.objetivo!.prenda!), h }, `${nombrePrenda(p, j.objetivo!.prenda!)} pierde ${h} de humedad.`);
       cambiarHumedad(p, j.objetivo!.prenda!, -h);
     },
   },
@@ -112,7 +124,7 @@ export const efectosAccion: Record<string, EfectoAccion> = {
       descolgar(ub);
       ub.tendida.colgadas.push({ prenda: a, inicio: ub.colgada.inicio });
       ua.tendida.colgadas.push({ prenda: b, inicio: ua.colgada.inicio });
-      p.registro.push(`Se intercambian ${nombrePrenda(p, a)} y ${nombrePrenda(p, b)}.`);
+      anotar(p, "intercambianPrendas", { prenda: refPrenda(p, a), otraPrenda: refPrenda(p, b) }, `Se intercambian ${nombrePrenda(p, a)} y ${nombrePrenda(p, b)}.`);
     },
   },
 
@@ -126,7 +138,12 @@ export const efectosAccion: Record<string, EfectoAccion> = {
       const a = cartaObjetivo(p, j);
       const b = p.jugadores[j.jugador].lineas[destino!.linea].cartas[destino!.posicion];
       [a.colgadas, b.colgadas] = [b.colgadas, a.colgadas];
-      p.registro.push(`Se intercambia lo colgado en ${sitio(p, j)} con lo de la línea ${destino!.linea + 1}, carta ${destino!.posicion + 1}.`);
+      anotar(
+        p,
+        "intercambianCuerdas",
+        { ...datosSitio(p, j), lineaDestino: destino!.linea + 1, posicionDestino: destino!.posicion + 1 },
+        `Se intercambia lo colgado en ${sitio(p, j)} con lo de la línea ${destino!.linea + 1}, carta ${destino!.posicion + 1}.`,
+      );
     },
   },
 
@@ -140,15 +157,16 @@ export const efectosAccion: Record<string, EfectoAccion> = {
       const d = o.destino!;
       const lineas = p.jugadores[j.jugador].lineas;
       const nombre = sitio(p, j);
+      const datos = datosSitio(p, j);
       if (d.posicion < lineas[d.linea].cartas.length) {
         const otra = lineas[d.linea].cartas[d.posicion];
         lineas[d.linea].cartas[d.posicion] = lineas[o.linea].cartas[o.posicion];
         lineas[o.linea].cartas[o.posicion] = otra;
-        p.registro.push(`${nombre} cambia de sitio con ${defCarta(p, otra.carta).nombre}.`);
+        anotar(p, "cuerdaCambiaSitio", { ...datos, otra: defCarta(p, otra.carta).id }, `${nombre} cambia de sitio con ${defCarta(p, otra.carta).nombre}.`);
       } else {
         const [movida] = lineas[o.linea].cartas.splice(o.posicion, 1);
         lineas[d.linea].cartas.push(movida);
-        p.registro.push(`${nombre} pasa al final de la línea ${d.linea + 1}.`);
+        anotar(p, "cuerdaAlFinal", { ...datos, lineaDestino: d.linea + 1 }, `${nombre} pasa al final de la línea ${d.linea + 1}.`);
       }
     },
   },
@@ -160,7 +178,7 @@ export const efectosAccion: Record<string, EfectoAccion> = {
     etiquetas: [],
     aplicar(p, j, params) {
       const n = robar(p, j.jugador, "cuerdas", numero(params, "cartas", 1));
-      p.registro.push(`${p.jugadores[j.jugador].nombre} roba ${n} carta(s) de cuerda.`);
+      anotar(p, "robaCuerdas", { jugador: j.jugador, n }, `${p.jugadores[j.jugador].nombre} roba ${n} carta(s) de cuerda.`);
     },
   },
 
@@ -173,7 +191,7 @@ export const efectosAccion: Record<string, EfectoAccion> = {
     etiquetas: [],
     aplicar(p, j) {
       cartaObjetivo(p, j).protegida = true;
-      p.registro.push("Esa cuerda queda protegida del fastidio hasta su próximo turno.");
+      anotar(p, "cuerdaProtegida", {}, "Esa cuerda queda protegida del fastidio hasta su próximo turno.");
     },
   },
 };

@@ -1,12 +1,13 @@
-import { aplicar, crearPartida, vistaPara, type Ajustes, type Datos, type Jugada, type Partida } from "@tendedero/motor";
+import { aplicar, crearPartida, porQueNoVale, vistaPara, type Ajustes, type Datos, type Jugada, type Partida } from "@tendedero/motor";
 import Peer, { type DataConnection } from "peerjs";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { LINEAS_DE_REGISTRO, PREFIJO, textoError, type Asiento, type MensajeAnfitrion, type MensajeInvitado } from "./protocolo";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { LINEAS_DE_REGISTRO, PREFIJO, textoError, type Asiento, type MensajeAnfitrion, type MensajeInvitado, type PerfilOnline } from "./protocolo";
 
 interface Participante {
   asiento: number;
   nombre: string;
   token: string;
+  perfil?: PerfilOnline;
 }
 
 /** Lo que el anfitrión guarda en su navegador: si recarga la página, la sala sigue donde estaba. */
@@ -15,6 +16,8 @@ export interface SalaGuardada {
   ajustes: Ajustes;
   participantes: Participante[];
   partida: Partida | null;
+  /** La última jugada aplicada y su número (la mesa nueva la anima). */
+  ultima?: { jugada: Jugada; n: number } | null;
 }
 
 const TOKEN_ANFITRION = "anfitrion";
@@ -37,13 +40,15 @@ export function leerSala(codigo: string): SalaGuardada | null {
   }
 }
 
-export function nuevaSala(codigo: string, ajustes: Ajustes, nombre: string): SalaGuardada {
-  return { codigo, ajustes, participantes: [{ asiento: 0, nombre, token: TOKEN_ANFITRION }], partida: null };
+export function nuevaSala(codigo: string, ajustes: Ajustes, nombre: string, perfil?: PerfilOnline): SalaGuardada {
+  return { codigo, ajustes, participantes: [{ asiento: 0, nombre, token: TOKEN_ANFITRION, perfil }], partida: null };
 }
 
 function vistaRecortada(p: Partida, asiento: number): Partida {
   const v = vistaPara(p, asiento);
   v.registro = v.registro.slice(-LINEAS_DE_REGISTRO);
+  // El registro estructurado (para traducirlo) se recorta igual: van a la par contando desde el final.
+  if (v.entradas) v.entradas = v.entradas.slice(-LINEAS_DE_REGISTRO);
   return v;
 }
 
@@ -79,7 +84,7 @@ export function useAnfitrion(inicial: SalaGuardada, datos: Datos) {
       if (j.jugador !== asiento) return "Solo puedes jugar por ti.";
       const r = aplicar(p, j);
       if (!r.ok) return r.motivo;
-      actualizar((s) => ({ ...s, partida: r.partida }));
+      actualizar((s) => ({ ...s, partida: r.partida, ultima: { jugada: j, n: (s.ultima?.n ?? 0) + 1 } }));
       return null;
     },
     [actualizar],
@@ -124,9 +129,9 @@ export function useAnfitrion(inicial: SalaGuardada, datos: Datos) {
         actualizar((s) => {
           const nombre = m.nombre.trim().slice(0, 24) || "Invitado";
           if (s.participantes.some((p) => p.token === m.token)) {
-            return { ...s, participantes: s.participantes.map((p) => (p.token === m.token ? { ...p, nombre } : p)) };
+            return { ...s, participantes: s.participantes.map((p) => (p.token === m.token ? { ...p, nombre, perfil: m.perfil ?? p.perfil } : p)) };
           }
-          return { ...s, participantes: [...s.participantes, { asiento: s.participantes.length, nombre, token: m.token }] };
+          return { ...s, participantes: [...s.participantes, { asiento: s.participantes.length, nombre, token: m.token, perfil: m.perfil }] };
         });
         setConectados([...conexiones.current.keys()]);
         return;
@@ -136,7 +141,10 @@ export function useAnfitrion(inicial: SalaGuardada, datos: Datos) {
         const yo = salaRef.current.participantes.find((p) => p.token === token);
         if (!yo) return;
         const motivo = jugarComo(yo.asiento, m.jugada);
-        if (motivo) enviar(conn, { t: "error", motivo });
+        // Con el motivo estructurado, el invitado lo puede leer en su idioma.
+        const p = salaRef.current.partida;
+        const detalle = p && motivo ? (porQueNoVale(p, m.jugada) ?? undefined) : undefined;
+        if (motivo) enviar(conn, { t: "error", motivo, detalle });
       }
     };
 
@@ -189,12 +197,13 @@ export function useAnfitrion(inicial: SalaGuardada, datos: Datos) {
       asiento: p.asiento,
       nombre: p.nombre,
       conectado: p.token === TOKEN_ANFITRION || conectados.includes(p.token),
+      perfil: p.perfil,
     }));
     for (const p of sala.participantes) {
       const conn = conexiones.current.get(p.token);
       if (!conn) continue;
       enviar(conn, { t: "sala", asientos, plazas: sala.ajustes.jugadores, tuAsiento: p.asiento, empezada: sala.partida !== null });
-      if (sala.partida) enviar(conn, { t: "estado", partida: vistaRecortada(sala.partida, p.asiento) });
+      if (sala.partida) enviar(conn, { t: "estado", partida: vistaRecortada(sala.partida, p.asiento), ultima: sala.ultima ?? null });
     }
   }, [sala, conectados]);
 
@@ -202,7 +211,10 @@ export function useAnfitrion(inicial: SalaGuardada, datos: Datos) {
     asiento: p.asiento,
     nombre: p.nombre,
     conectado: p.token === TOKEN_ANFITRION || conectados.includes(p.token),
+    perfil: p.perfil,
   }));
+  // Memorizada: la mesa nueva compara la partida que recibe para saber si ha cambiado.
+  const vista = useMemo(() => (sala.partida ? vistaRecortada(sala.partida, 0) : null), [sala.partida]);
 
   return {
     sala,
@@ -210,7 +222,8 @@ export function useAnfitrion(inicial: SalaGuardada, datos: Datos) {
     abierta,
     error,
     /** La partida tal como la ve el anfitrión (sin las manos de los demás). */
-    vista: sala.partida ? vistaRecortada(sala.partida, 0) : null,
+    vista,
+    ultima: sala.ultima ?? null,
     jugar: (j: Jugada) => jugarComo(0, j),
     cambiarNombre: (nombre: string) =>
       actualizar((s) => ({ ...s, participantes: s.participantes.map((p) => (p.asiento === 0 ? { ...p, nombre } : p)) })),
@@ -233,8 +246,11 @@ export function useAnfitrion(inicial: SalaGuardada, datos: Datos) {
         const ajustes = { ...s.ajustes, jugadores: s.participantes.length };
         const partida = crearPartida(datos, ajustes);
         s.participantes.forEach((p) => (partida.jugadores[p.asiento].nombre = p.nombre));
-        return { ...s, partida };
+        return { ...s, partida, ultima: null };
       }),
-    volverASala: () => actualizar((s) => ({ ...s, partida: null })),
+    volverASala: () => actualizar((s) => ({ ...s, partida: null, ultima: null })),
+    /** Tu animal, color y tapete para la mesa nueva. */
+    cambiarPerfil: (perfil: PerfilOnline) =>
+      actualizar((s) => ({ ...s, participantes: s.participantes.map((p) => (p.asiento === 0 ? { ...p, perfil } : p)) })),
   };
 }

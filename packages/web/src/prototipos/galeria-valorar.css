@@ -1,0 +1,65 @@
+/* Valoración carta por carta en la galería: estrellas y comentario debajo de cada carta. */
+
+.valorar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.valorar-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  background: #fff6e6ee;
+  box-shadow: 0 0 0 2px #2b2019, 0 4px 8px #0005;
+}
+.valorar-estrellas {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+}
+.valorar-estrellas button {
+  padding: 0 2px;
+  border: none;
+  background: none;
+  font-size: 22px;
+  line-height: 1;
+  color: #2b201933;
+  cursor: pointer;
+}
+.valorar-estrellas button.llena {
+  color: #f0b52c;
+  text-shadow: 0 1px 0 #a5600f;
+}
+.valorar-estrellas button:hover {
+  transform: scale(1.15);
+}
+.valorar-panel textarea,
+.valorar-general textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  resize: vertical;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1.5px solid #2b201955;
+  font: 600 12.5px "Nunito", sans-serif;
+}
+.valorar-general {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 760px;
+  margin: 0 0 22px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fff6e6ee;
+  box-shadow: 0 0 0 2px #2b2019, 0 6px 12px #0005;
+  font: 600 14px "Nunito", sans-serif;
+  color: #2b2019;
+}
+.valorar-contador {
+  margin-left: auto;
+  white-space: nowrap;
+}

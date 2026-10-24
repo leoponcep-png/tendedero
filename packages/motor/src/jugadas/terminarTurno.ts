@@ -1,5 +1,6 @@
 import { pasarTurno } from "../estado/final";
 import { defCarta, pilaDe, robar } from "../estado/utilidades";
+import { anotar, no } from "../estado/registro";
 import type { Partida } from "../estado/tipos";
 import type { JugadaDe, Manejador } from "./tipos";
 
@@ -15,8 +16,8 @@ export const terminarTurno: Manejador<JugadaDe<"terminarTurno">> = {
   validar(p, j) {
     const maximo = maxCuerdasRobadas(p);
     const cuerdas = j.cuerdas ?? Math.min(1, maximo);
-    if (!Number.isInteger(cuerdas) || cuerdas < 0) return "Elige cuántas cartas de cuerda robas.";
-    if (cuerdas > maximo) return `Como mucho puedes robar ${maximo} de cuerda.`;
+    if (!Number.isInteger(cuerdas) || cuerdas < 0) return no("eligeRobo", "Elige cuántas cartas de cuerda robas.");
+    if (cuerdas > maximo) return no("maxRobo", `Como mucho puedes robar ${maximo} de cuerda.`, { n: maximo });
     return null;
   },
   aplicar(p, j) {
@@ -25,10 +26,15 @@ export const terminarTurno: Manejador<JugadaDe<"terminarTurno">> = {
     const deAccion = robar(p, j.jugador, "acciones", p.ajustes.roboPorTurno.cartas - cuerdas);
 
     const jugador = p.jugadores[j.jugador];
-    p.registro.push(`${jugador.nombre} roba ${deCuerda} de cuerda y ${deAccion} de acción.`);
+    anotar(p, "roba", { jugador: j.jugador, cuerdas: deCuerda, acciones: deAccion }, `${jugador.nombre} roba ${deCuerda} de cuerda y ${deAccion} de acción.`);
     if (jugador.mano.length > p.ajustes.limiteMano) {
       p.turno.fase = "descartar";
-      p.registro.push(`${jugador.nombre} tiene ${jugador.mano.length} cartas y debe descartar hasta quedarse con ${p.ajustes.limiteMano}.`);
+      anotar(
+        p,
+        "debeDescartar",
+        { jugador: j.jugador, n: jugador.mano.length, limite: p.ajustes.limiteMano },
+        `${jugador.nombre} tiene ${jugador.mano.length} cartas y debe descartar hasta quedarse con ${p.ajustes.limiteMano}.`,
+      );
       return;
     }
     pasarTurno(p);
@@ -38,8 +44,8 @@ export const terminarTurno: Manejador<JugadaDe<"terminarTurno">> = {
 export const descartar: Manejador<JugadaDe<"descartar">> = {
   soloEnSuTurno: true,
   validar(p, j) {
-    if (p.turno.fase !== "descartar") return "Solo se descarta al pasarte del límite de mano.";
-    if (!p.jugadores[j.jugador].mano.includes(j.carta)) return "Esa carta no está en tu mano.";
+    if (p.turno.fase !== "descartar") return no("noDescartar", "Solo se descarta al pasarte del límite de mano.");
+    if (!p.jugadores[j.jugador].mano.includes(j.carta)) return no("noEnMano", "Esa carta no está en tu mano.");
     return null;
   },
   aplicar(p, j) {
@@ -47,7 +53,7 @@ export const descartar: Manejador<JugadaDe<"descartar">> = {
     jugador.mano = jugador.mano.filter((c) => c !== j.carta);
     const def = defCarta(p, j.carta);
     p.descartes[pilaDe(def.mazo)].push(j.carta);
-    p.registro.push(`${jugador.nombre} descarta ${def.nombre}.`);
+    anotar(p, "descarta", { jugador: j.jugador, carta: def.id }, `${jugador.nombre} descarta ${def.nombre}.`);
     if (jugador.mano.length <= p.ajustes.limiteMano) pasarTurno(p);
   },
 };

@@ -1,0 +1,23 @@
+{
+  "accion:mojar-cuerda-rival": {
+    "carta": "Mojar cuerda rival (acción)",
+    "estrellas": 0,
+    "nota": "sube un poco el dibujo para que no se tape tanto la lluvia",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T23:21:43.790Z"
+  },
+  "accion:ni-hablar": {
+    "carta": "¡Ni hablar! (acción)",
+    "estrellas": 0,
+    "nota": "",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T23:22:40.355Z"
+  },
+  "general": {
+    "carta": "Comentario general",
+    "estrellas": 0,
+    "nota": "todas muchisimo mejores, pero las de dia no me cuadran abandona el concepto de ver plano general del tendederocon el clima, y haz algo mas iconográfico parecido al resto de cartas. entiendo que la puntuación de los objetivos estarán igual que como estaban en mi juego, los proximos cambios que hagamos en base a ponerle mas puntuación o menos habrá que cambiarlos directamente aqui, por ejemplo asi de primera vista que cada calcetin te de 2 puntos me parece super poderoso, quizá que cada 2 2 o cada 3 2 o 3 3 no se, supongo que eso será ir probando, buen trabajo sigue intentando lo de los dias ",
+    "estilo": "fusion",
+    "fecha": "2026-10-23T23:26:53.759Z"
+  }
+}

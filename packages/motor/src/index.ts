@@ -9,7 +9,8 @@ export { puntuarObjetivo } from "./estado/final";
 export { defCarta, localizar, nombrePrenda, prendaEn, tipoDe } from "./estado/utilidades";
 export { efectoDeCuerda } from "./estado/secado";
 export * from "./jugadas/tipos";
-export { aplicar, esValida, motivoInvalida, type Resultado } from "./jugadas";
+export { aplicar, esValida, motivoInvalida, porQueNoVale, type Resultado } from "./jugadas";
+export type { DatoEntrada, DatosEntrada, Entrada, Motivo } from "./estado/registro";
 export { cumple, prendasDe } from "./jugadas/draft";
 export { rondasHastaRomperse } from "./estado/rotura";
 export { cartaDeReaccion, efectoAccion, FALTA_DESTINO, pideDestino } from "./jugadas/jugarAccion";
@@ -26,3 +27,15 @@ export {
   type Etiqueta,
 } from "./efectos";
 export { OCULTA, vistaPara } from "./vistas";
+export {
+  cuerdasARobar,
+  descarteDeBot,
+  eleccionDeObjetivo,
+  mejorDraft,
+  mejorJugada,
+  respuestaDeBot,
+  siguienteJugadaIA,
+  valoracion,
+  type AzarIA,
+  type OpcionesIA,
+} from "./ia";

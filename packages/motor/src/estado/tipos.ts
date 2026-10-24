@@ -2,6 +2,7 @@ import type { Ajustes } from "../ajustes";
 import type { Color, DefCarta, DefObjetivo, TipoPrenda } from "../datos/esquemas";
 import type { Etiqueta } from "../efectos";
 import type { JugadaDe } from "../jugadas/tipos";
+import type { Entrada } from "./registro";
 
 export interface Prenda {
   id: string;
@@ -131,6 +132,11 @@ export interface Partida {
   ultimaRonda: boolean;
   primeroEnLlegar: number | null;
   registro: string[];
+  /**
+   * El registro estructurado (clave del mensaje + datos), a la par que `registro`: la entrada i corresponde a la
+   * línea registro.length - entradas.length + i. Falta en partidas guardadas antes de que existiera.
+   */
+  entradas?: Entrada[];
   terminada: boolean;
   /** Clasificación tras el recuento de objetivos, ordenada por puesto. */
   final: ResultadoJugador[] | null;

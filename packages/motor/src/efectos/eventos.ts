@@ -1,4 +1,5 @@
 import { protegidaDe, secarPrenda } from "../estado/secado";
+import { anotar } from "../estado/registro";
 import type { CartaTendida, Partida } from "../estado/tipos";
 import { caer, numero, texto, tipoDe } from "../estado/utilidades";
 import type { Etiqueta, EfectoEvento } from ".";
@@ -36,7 +37,7 @@ export const efectosEvento: Record<string, EfectoEvento> = {
     resolver(p, params) {
       const h = numero(params, "humedad", 1);
       sumarHumedad(p, h, (_prenda, tendida) => !protegidaDe(p, tendida, "moja"));
-      p.registro.push(`Todas las prendas sin tejadillo ganan ${h} de humedad.`);
+      anotar(p, "tormenta", { h }, `Todas las prendas sin tejadillo ganan ${h} de humedad.`);
     },
   },
 
@@ -45,7 +46,7 @@ export const efectosEvento: Record<string, EfectoEvento> = {
     tipo: "evento",
     resolver(p, params) {
       const h = numero(params, "humedad", 1);
-      p.registro.push(`Todas las prendas colgadas pierden ${h} de humedad.`);
+      anotar(p, "olaDeCalor", { h }, `Todas las prendas colgadas pierden ${h} de humedad.`);
       for (const { prenda } of colgadas(p)) {
         p.prendas[prenda].humedad = Math.max(0, p.prendas[prenda].humedad - h);
         if (p.prendas[prenda].humedad === 0) secarPrenda(p, prenda);
@@ -60,7 +61,7 @@ export const efectosEvento: Record<string, EfectoEvento> = {
       const color = texto(params, "color") ?? "blanco";
       const h = numero(params, "humedad", 1);
       sumarHumedad(p, h, (prenda) => p.prendas[prenda].color === color);
-      p.registro.push(`Las prendas ${p.catalogo.colores[color]?.nombre.toLowerCase() ?? color} colgadas ganan ${h} de humedad.`);
+      anotar(p, "prendasDeColor", { color, h }, `Las prendas ${p.catalogo.colores[color]?.nombre.toLowerCase() ?? color} colgadas ganan ${h} de humedad.`);
     },
   },
 
@@ -81,7 +82,7 @@ export const efectosEvento: Record<string, EfectoEvento> = {
     tipo: "evento",
     resolver(p) {
       p.rondaProtegeDe = ["tira", "mueve"] satisfies Etiqueta[];
-      p.registro.push("Durante esta ronda ninguna prenda se puede tirar ni mover.");
+      anotar(p, "ropaEnganchada", {}, "Durante esta ronda ninguna prenda se puede tirar ni mover.");
     },
   },
 };

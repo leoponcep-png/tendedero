@@ -1,4 +1,4 @@
-import type { Jugada, Partida } from "@tendedero/motor";
+import type { Entrada, Jugada, Partida } from "@tendedero/motor";
 
 // Modo online: el navegador de quien crea la sala (el anfitrión) guarda la partida de verdad y aplica las
 // jugadas; los demás se conectan directamente a él (WebRTC, con PeerJS) y reciben solo lo que pueden ver.
@@ -12,21 +12,31 @@ export function nuevoCodigo(): string {
   return Array.from(crypto.getRandomValues(new Uint8Array(6)), (n) => letras[n % letras.length]).join("");
 }
 
+/** Cómo se ve cada jugador en la mesa nueva (animal, color y tapete); la mesa antigua no lo usa. */
+export interface PerfilOnline {
+  animal: string;
+  color: string;
+  tapete?: string;
+}
+
 export interface Asiento {
   asiento: number;
   nombre: string;
   conectado: boolean;
+  perfil?: PerfilOnline;
 }
 
 export type MensajeInvitado =
   /** Al conectarse. `token` identifica al invitado para que pueda volver a su asiento si se le corta. */
-  | { t: "hola"; nombre: string; token: string }
+  | { t: "hola"; nombre: string; token: string; perfil?: PerfilOnline }
   | { t: "jugada"; jugada: Jugada };
 
 export type MensajeAnfitrion =
   | { t: "sala"; asientos: Asiento[]; plazas: number; tuAsiento: number; empezada: boolean }
-  | { t: "estado"; partida: Partida }
-  | { t: "error"; motivo: string }
+  /** `ultima`: la jugada que llevó a esta partida y su número, para que la mesa nueva la anime antes de enseñarla. */
+  | { t: "estado"; partida: Partida; ultima?: { jugada: Jugada; n: number } | null }
+  /** `detalle`: el mismo motivo estructurado, para enseñarlo traducido. */
+  | { t: "error"; motivo: string; detalle?: Entrada }
   | { t: "rechazo"; motivo: string };
 
 /** Para no mandar el registro entero en cada jugada. */
@@ -49,8 +59,9 @@ export function miToken(): string {
   }
 }
 
-export function enlaceDeSala(codigo: string): string {
-  return `${location.origin}${location.pathname}#/sala/${codigo}`;
+/** `ruta`: dónde se abre la sala (la mesa nueva vive en #/prototipos/e/sala/…). */
+export function enlaceDeSala(codigo: string, ruta = "/sala"): string {
+  return `${location.origin}${location.pathname}#${ruta}/${codigo}`;
 }
 
 /** Errores de PeerJS en castellano. */

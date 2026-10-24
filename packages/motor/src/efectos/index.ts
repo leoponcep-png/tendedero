@@ -5,6 +5,7 @@
 // con el mismo id que usará el JSON. El registro se arma solo.
 
 import type { Parametros } from "../datos/esquemas";
+import type { Motivo } from "../estado/registro";
 import type { CartaTendida, Partida } from "../estado/tipos";
 import type { JugadaDe } from "../jugadas/tipos";
 import { efectosAccion } from "./acciones";
@@ -45,7 +46,7 @@ export interface EfectoAccion {
   blanco: Blanco;
   etiquetas: Etiqueta[];
   /** Comprobaciones propias, además de las comunes (mano, límite, blanco, protecciones). */
-  validar?(p: Partida, j: JugadaDe<"jugarAccion">, params: Parametros): string | null;
+  validar?(p: Partida, j: JugadaDe<"jugarAccion">, params: Parametros): Motivo | null;
   aplicar(p: Partida, j: JugadaDe<"jugarAccion">, params: Parametros): void;
 }
 

@@ -1,0 +1,520 @@
+/*
+ * Cartas de Tendedero: acción, cuerda, día, objetivo y dorsos (componentes en CartasBosque.tsx).
+ * Tamaños reales en medidas.ts: las cartas verticales miden 63 × 88 mm y las apaisadas 88 × 63 mm.
+ * Cada carta es un contenedor (container-type) y todo lo de dentro se mide en cqw (centésimas de su ancho):
+ * la misma carta se ve igual de proporcionada en la mano, en la mesa o en grande.
+ * Colores con variables del estilo de dibujo: --tinta, --crema, --fastidio, --tactica, --p-*, --grano...
+ */
+
+/* ---------- Piezas comunes ---------- */
+
+.marco-carta [stroke="#2b2019"] {
+  stroke: var(--tinta, #2b2019);
+}
+.marco-carta [fill="#2b2019"] {
+  fill: var(--tinta, #2b2019);
+}
+.marco-carta [fill="#f2e6cc"] {
+  fill: var(--crema, #f2e6cc);
+}
+.marco-carta [stroke="#f2e6cc"] {
+  stroke: var(--crema, #f2e6cc);
+}
+
+/* Dibujos de las cartas: trazo limpio, sin filtros que deformen ni regiones que recorten */
+.icono-limpio {
+  overflow: visible;
+}
+
+/* Contorno de tinta para los títulos en blanco (se lee sobre cualquier color) */
+.cb,
+.dia-bosque,
+.db {
+  --contorno: var(--tinta, #2b2019);
+  --letra-contorno:
+    0.06em 0 0 var(--contorno),
+    -0.06em 0 0 var(--contorno),
+    0 0.06em 0 var(--contorno),
+    0 -0.06em 0 var(--contorno),
+    0.045em 0.045em 0 var(--contorno),
+    -0.045em 0.045em 0 var(--contorno),
+    0.045em -0.045em 0 var(--contorno),
+    -0.045em -0.045em 0 var(--contorno),
+    0.07em 0.12em 0 var(--contorno);
+}
+
+/* ---------- Cartas verticales: acción y objetivo (63 × 88 mm) ---------- */
+
+.cb {
+  --g: var(--tactica, #4f7d6a);
+  --g-claro: color-mix(in srgb, var(--g), #fff 72%);
+  --g-oscuro: color-mix(in srgb, var(--g), #000 32%);
+  position: relative;
+  container-type: inline-size;
+  overflow: hidden;
+  border-radius: 5.4% / 3.9%;
+  background: var(--g);
+  box-shadow:
+    0 0 0 1.5px var(--tinta, #2b2019),
+    0 8px 18px #0005;
+  color: var(--tinta, #2b2019);
+}
+.cb-fastidio {
+  --g: var(--fastidio, #b5523b);
+}
+.co {
+  --g: var(--obj-color, #e0962a);
+}
+/* Papel con grano por encima del dibujo y por debajo de las letras */
+.cb::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--grano, none);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.cb > .cb-marco {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.marco-carta .m-marco {
+  fill: var(--g);
+}
+.marco-carta .m-filete {
+  stroke: #fff;
+  stroke-width: 0.4;
+  opacity: 0.6;
+}
+.marco-carta .m-panel {
+  fill: color-mix(in srgb, var(--crema, #f2e6cc), var(--g) 7%);
+}
+.marco-carta .m-ventana {
+  fill: var(--g-claro);
+}
+.marco-carta .m-rayos {
+  fill: #fff;
+  opacity: 0.42;
+}
+.marco-carta .m-cinta {
+  fill: var(--g);
+}
+.marco-carta .m-cinta-fondo {
+  fill: var(--g-oscuro);
+}
+.marco-carta .m-caja {
+  fill: color-mix(in srgb, var(--crema, #f2e6cc), #fff 55%);
+}
+.marco-carta .m-placa {
+  fill: color-mix(in srgb, var(--crema, #f2e6cc), #fff 40%);
+}
+.marco-carta .m-pespunte,
+.marco-carta .m-adorno,
+.marco-carta .m-medallon-aro,
+.marco-carta .m-anillo {
+  stroke: var(--g);
+}
+.marco-carta .m-pespunte {
+  opacity: 0.75;
+}
+.marco-carta .m-medallon {
+  fill: var(--crema, #f2e6cc);
+}
+.marco-carta .m-hoja {
+  fill: var(--hoja, #5f9a52);
+}
+.marco-carta .m-estrella {
+  fill: var(--p-amarillo, #e1a73a);
+}
+
+.cb-nombre,
+.cb-ilustra,
+.cb-texto,
+.cb-tipo,
+.co-ilustra,
+.co-puntos {
+  position: absolute;
+  z-index: 4;
+}
+/* El dibujo va entre el fondo y el frente del marco: pasa por detrás de la cinta, el medallón y el borde */
+.cb-ilustra,
+.co-ilustra {
+  z-index: 2;
+}
+.cb > .cb-marco-frente {
+  z-index: 3;
+  pointer-events: none;
+}
+.cb-nombre {
+  left: 8%;
+  right: 8%;
+  top: 4.55%;
+  height: 13.4%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font: 800 calc(7.6cqw * var(--titulo-escala, 1))/0.98 var(--fuente-carta, var(--fuente-titulo));
+  color: var(--titulo-carta, #fff);
+  text-shadow: var(--letra-contorno);
+  letter-spacing: 0.01em;
+  text-wrap: balance;
+}
+.cb-nombre[data-largo="corto"] {
+  font-size: calc(9cqw * var(--titulo-escala, 1));
+}
+.cb-nombre[data-largo="largo"] {
+  font-size: calc(6.6cqw * var(--titulo-escala, 1));
+}
+.cb-ilustra {
+  left: 8.7%;
+  width: 82.6%;
+  top: 21.8%;
+  height: 29.5%;
+  display: grid;
+  place-items: center;
+}
+.cb-icono {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0.7cqw 0 #0000001f);
+}
+.cb-texto {
+  left: 10.5%;
+  width: 79%;
+  top: 58.6%;
+  height: 31.2%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font: 700 calc(var(--tam-texto, 6.6cqw) * var(--texto-escala, 1))/1.14 var(--fuente-texto);
+  color: #3d3026;
+  text-wrap: pretty;
+}
+.cb-tipo {
+  left: 0;
+  right: 0;
+  top: 92.5%;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  font: 800 4.5cqw/1 var(--fuente-titulo);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 0.35cqw 0 var(--g-oscuro);
+  white-space: nowrap;
+}
+.cb-tipo i {
+  font-style: normal;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}
+
+/* Objetivo: medallón redondo, placa de puntos y caja de texto más baja */
+.co-ilustra {
+  left: 33.3%;
+  width: 33.4%;
+  top: 23.8%;
+  height: 23.9%;
+  display: grid;
+  place-items: center;
+}
+.co-arte {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.co-puntos {
+  left: 9.5%;
+  width: 81%;
+  top: 55%;
+  height: 11.6%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.8cqw;
+  font: 800 4.8cqw/1 var(--fuente-texto);
+  color: #4d4036;
+}
+.co-cada b {
+  font: 800 8.2cqw/1 var(--fuente-titulo);
+  color: var(--tinta, #2b2019);
+}
+.co-flecha {
+  font-size: 5.6cqw;
+  color: var(--g);
+}
+.co-moneda {
+  display: grid;
+  place-items: center;
+  width: 8.6cqw;
+  height: 8.6cqw;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff8, transparent 45%), var(--p-amarillo, #f2c25a);
+  box-shadow:
+    0 0 0 0.6cqw var(--tinta, #2b2019),
+    inset 0 -0.8cqw 0 #0002;
+  font: 800 6cqw/1 var(--fuente-titulo);
+  color: var(--tinta, #2b2019);
+}
+.co-pts {
+  font-size: 4.4cqw;
+}
+.co-texto {
+  top: 69.6%;
+  height: 20.2%;
+}
+
+/* ---------- Carta de cuerda (88 × 63 mm, apaisada) ---------- */
+
+.ccb {
+  container-type: inline-size;
+}
+.ccb .ccb-texto {
+  position: absolute;
+  left: 10.5%;
+  right: 10.5%;
+  top: 27%;
+  height: 34.5%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font: 700 calc(var(--tam-texto, 5.5cqw) * var(--texto-escala, 1))/1.13 var(--fuente-texto);
+  color: #3d3026;
+  text-wrap: pretty;
+}
+/* ---------- Carta del día (tiempo y sucesos) ---------- */
+
+/* Base: también vale para cartas del día con otro marcado (nombre, arte y texto uno debajo de otro). */
+.dia-bosque {
+  --d: var(--dia-tiempo, #3f8fd2);
+  position: relative;
+  width: calc(var(--celda-base, 40px) * 3);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--grano, none), var(--crema, #f2e6cc);
+  box-shadow:
+    0 0 0 2.5px var(--tinta, #2b2019),
+    0 8px 14px #0006;
+  rotate: 2deg;
+  color: var(--tinta, #2b2019);
+}
+.dia-suceso {
+  --d: var(--dia-suceso, #8b5bc0);
+}
+.dia-bosque-nombre {
+  padding: 2px 8px;
+  background:
+    radial-gradient(circle, #ffffff40 1px, transparent 1.5px) 0 0 / 6px 6px,
+    linear-gradient(180deg, color-mix(in srgb, var(--d), #fff 22%), var(--d));
+  border-bottom: 2px solid var(--tinta, #2b2019);
+  font: 800 15px var(--fuente-titulo);
+  color: #fff;
+  text-shadow: var(--letra-contorno);
+}
+.dia-bosque-arte {
+  display: block;
+  width: 100%;
+  height: calc(var(--celda-base, 40px) * 1.2);
+  border-bottom: 2px solid var(--tinta, #2b2019);
+}
+.dia-bosque-texto {
+  padding: 4px 8px 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: #4d4036;
+}
+
+/* Carta del día completa: apaisada (88 × 63 mm), con el marco dibujado en dos capas como las de acción.
+ * Posiciones en % de la carta: x / 88 y y / 63 de las medidas en mm del marco (CartasBosque.tsx, MarcoDia). */
+.dia-carta {
+  --g: var(--d);
+  --g-claro: color-mix(in srgb, var(--d), #fff 72%);
+  --g-oscuro: color-mix(in srgb, var(--d), #000 32%);
+  container-type: inline-size;
+  aspect-ratio: 88 / 63;
+  border-radius: 3.9% / 5.4%;
+  background: var(--d);
+  box-shadow:
+    0 0 0 1.5px var(--tinta, #2b2019),
+    0 8px 14px #0006;
+}
+.dia-carta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--grano, none);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.dia-carta > .dia-marco {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.dia-carta > .dia-marco-frente {
+  z-index: 3;
+  pointer-events: none;
+}
+/* Icono grande en la ventana cuadrada de la izquierda (pasa por detrás del medallón) */
+.dia-carta .dia-icono {
+  position: absolute;
+  z-index: 2;
+  left: 8.2%;
+  top: 26.4%;
+  width: 30.2%;
+  height: 42.2%;
+}
+.dia-carta .dia-icono-arte {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.estilo-fusion .dia-carta .dia-icono-arte {
+  filter: drop-shadow(0.9cqw 0.6cqw 0 #ff4f8b40);
+}.dia-carta .dia-bosque-nombre {
+  position: absolute;
+  z-index: 4;
+  left: 7%;
+  right: 7%;
+  top: 5.7%;
+  height: 14.6%;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  background: none;
+  font: 800 calc(7.2cqw * var(--titulo-escala, 1))/1 var(--fuente-carta, var(--fuente-titulo));
+  color: var(--titulo-carta, #fff);
+  text-shadow: var(--letra-contorno);
+  white-space: nowrap;
+}
+.dia-carta .dia-bosque-nombre[data-largo="largo"] {
+  font-size: calc(6cqw * var(--titulo-escala, 1));
+}
+/* Número de días, dentro del sello de la derecha */
+.dia-carta .dia-dias {
+  position: absolute;
+  z-index: 4;
+  left: 84.3%;
+  top: 73.8%;
+  width: 10.45%;
+  height: 14.6%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1cqw;
+  pointer-events: none;
+}
+.dia-carta .dia-dias b {
+  font: 800 4.6cqw/0.9 var(--fuente-titulo);
+  color: var(--tinta, #2b2019);
+}
+.dia-carta .dia-dias span {
+  font: 800 1.9cqw/1 var(--fuente-texto);
+  color: #5d4b39;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.dia-carta .dia-bosque-texto {
+  position: absolute;
+  z-index: 4;
+  left: 46.2%;
+  width: 46.2%;
+  top: 26.4%;
+  height: 48.6%;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  text-align: center;
+  font: 700 calc(var(--tam-texto, 4.5cqw) * var(--texto-escala, 1))/1.14 var(--fuente-texto);
+  color: #3d3026;
+  text-wrap: pretty;
+}
+.dia-carta .dia-pie {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  top: 90.8%;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  font: 800 3.2cqw/1 var(--fuente-titulo);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 0.3cqw 0 var(--g-oscuro);
+}
+
+/* ---------- Dorsos ---------- */
+
+.db {
+  --db: #2f6f5e;
+  --db-cinta: var(--fastidio, #b5523b);
+  position: relative;
+  overflow: hidden;
+  border-radius: 5.4% / 3.9%;
+  background: var(--db);
+  box-shadow:
+    0 0 0 1.5px var(--tinta, #2b2019),
+    0 6px 14px #0005;
+}
+.db-cuerdas,
+.db-dias {
+  border-radius: 3.9% / 5.4%;
+}
+.db-cuerdas {
+  --db: #8a5a30;
+  --db-cinta: #3f7d6a;
+}
+.db-dias {
+  --db: var(--dia-tiempo, #3f8fd2);
+  --db-cinta: var(--dia-suceso, #8b5bc0);
+}
+.db-objetivos {
+  --db: var(--obj-color, #e0962a);
+  --db-cinta: #7b4fd6;
+}
+/* Dorso del mazo de prendas: carta mini (41 × 63 mm), rosa con lunares */
+.db-prendas {
+  --db: var(--dorso-prendas, #d9577f);
+  --db-cinta: var(--p-azul, #2f86e8);
+  border-radius: 8.3% / 5.4%;
+}
+.db > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.db .d-fondo {
+  fill: var(--db);
+}
+.db .d-medallon {
+  fill: var(--crema, #f2e6cc);
+}
+.db .d-aro {
+  stroke: var(--db);
+}
+.db .d-cinta {
+  fill: var(--db-cinta);
+}
+.db::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--brillo-carta, none), var(--grano, none);
+  pointer-events: none;
+}

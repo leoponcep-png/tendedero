@@ -1,5 +1,6 @@
 import { barajar } from "../azar";
 import { efectos } from "../efectos";
+import { anotar } from "./registro";
 import type { Partida } from "./tipos";
 import { defCarta, numero } from "./utilidades";
 
@@ -39,7 +40,7 @@ export function inicioDeRonda(p: Partida): void {
 
   const restantes = diasRestantes(p);
   if (p.dia && restantes !== null && restantes <= 0) {
-    p.registro.push(`Se acaba ${defCarta(p, p.dia).nombre}.`);
+    anotar(p, "seAcabaDia", { carta: defCarta(p, p.dia).id }, `Se acaba ${defCarta(p, p.dia).nombre}.`);
     p.descartes.dia.push(p.dia);
     p.dia = null;
     p.diaDesde = null;
@@ -50,14 +51,14 @@ export function inicioDeRonda(p: Partida): void {
       p.mazos.dia = p.descartes.dia;
       p.descartes.dia = [];
       barajar(p, p.mazos.dia);
-      p.registro.push("Se baraja el descarte del mazo del día para formar un mazo nuevo.");
+      anotar(p, "barajaDia", {}, "Se baraja el descarte del mazo del día para formar un mazo nuevo.");
     }
     const carta = p.mazos.dia.pop();
     if (!carta) return;
     p.dia = carta;
     p.diaDesde = p.ronda;
     const dias = diasRestantes(p)!;
-    p.registro.push(`Ronda ${p.ronda}: sale ${defCarta(p, carta).nombre} (${dias === 1 ? "1 día" : `${dias} días`}).`);
+    anotar(p, "saleDia", { ronda: p.ronda, carta: defCarta(p, carta).id, n: dias }, `Ronda ${p.ronda}: sale ${defCarta(p, carta).nombre} (${dias === 1 ? "1 día" : `${dias} días`}).`);
   }
 
   const def = defCarta(p, p.dia);
