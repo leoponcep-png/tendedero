@@ -34,7 +34,21 @@ jobs:
       - name: Construir la web
         run: npm run web -w @tendedero/escritorio
 
-      - name: Empaquetar y publicar la release
+      # La release se crea antes como borrador: si la creara electron-builder, cada archivo que sube a la vez
+      # podría crear su propia release y quedarían dos con el mismo tag, cada una con la mitad de los archivos.
+      - name: Crear la release en borrador
+        shell: bash
+        run: gh release create "$GITHUB_REF_NAME" --draft --title "${GITHUB_REF_NAME#v}" --notes "Tendedero ${GITHUB_REF_NAME#v} para Windows."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Empaquetar y subir los archivos
         run: npm run publicar -w @tendedero/escritorio
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publicar la release
+        shell: bash
+        run: gh release edit "$GITHUB_REF_NAME" --draft=false --latest
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
