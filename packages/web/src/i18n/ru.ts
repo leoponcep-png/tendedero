@@ -30,6 +30,13 @@ export const ru: Textos = {
     "menu.modoUnirse": "Онлайн: войти",
     "menu.codigoSala": "Код комнаты",
     "menu.ayudaIA": "За соперников играет компьютер.",
+    "menu.dificultad": "Сложность",
+    "menu.dificultad.facil": "Лёгкая",
+    "menu.dificultad.normal": "Обычная",
+    "menu.dificultad.dificil": "Сложная",
+    "menu.ayudaDificultad.facil": "Рассеянные соперники: много случайности, ошибки и почти никаких пакостей.",
+    "menu.ayudaDificultad.normal": "Соперники ищут лучший ход в каждый момент.",
+    "menu.ayudaDificultad.dificil": "Соперники играют на победу: добиваются своих целей, берегут «Ещё чего!» и бьют по лидеру.",
     "menu.ayudaCrear": "Откроется комната на столько мест, сколько игроков выберешь; отправь ссылку друзьям.",
     "menu.ayudaUnirse": "Введи код, который тебе прислали, и нажми «Начать партию».",
     "menu.pestana.partida": "Партия",
@@ -207,7 +214,7 @@ export const ru: Textos = {
 
     // ---------- Logros ----------
     "logros.nuevo": "Новое достижение!",
-    "logros.hasDesbloqueado": "Тебе открыт {recompensa}",
+    "logros.hasDesbloqueado": "Открыто: {recompensa}",
     "logros.deTotal": "из {n}",
     "logros.conseguidos": "достижений получено",
     "logros.recompensas": "наград открыто",

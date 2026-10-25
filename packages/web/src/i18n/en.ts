@@ -30,6 +30,13 @@ export const en: Textos = {
     "menu.modoUnirse": "Online: join",
     "menu.codigoSala": "Room code",
     "menu.ayudaIA": "The computer plays your rivals.",
+    "menu.dificultad": "Difficulty",
+    "menu.dificultad.facil": "Easy",
+    "menu.dificultad.normal": "Normal",
+    "menu.dificultad.dificil": "Hard",
+    "menu.ayudaDificultad.facil": "Scatterbrained rivals: lots of luck, plenty of mistakes and hardly any nuisances.",
+    "menu.ayudaDificultad.normal": "Rivals who look for the best move each time.",
+    "menu.ayudaDificultad.dificil": "Rivals who play to win: they chase their goals, save their “No Way!” and go after whoever is in the lead.",
     "menu.ayudaCrear": "Opens a room with as many seats as players you pick; send the link to your friends.",
     "menu.ayudaUnirse": "Type the code you were given and hit “Start game”.",
     "menu.pestana.partida": "Game",
@@ -201,7 +208,7 @@ export const en: Textos = {
 
     // ---------- Achievements ----------
     "logros.nuevo": "New achievement!",
-    "logros.hasDesbloqueado": "You've unlocked the {recompensa}",
+    "logros.hasDesbloqueado": "Unlocked: {recompensa}",
     "logros.deTotal": "of {n}",
     "logros.conseguidos": "achievements earned",
     "logros.recompensas": "rewards unlocked",
