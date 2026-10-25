@@ -53,6 +53,9 @@ function jugar(d: Duelo, k: number) {
   let p = crearPartida(datos, { ...base, jugadores: n, cestas: { ...base.cestas, numero: cestasPorDefecto(datos, n) }, semilla: `${d.id}-${k}` });
   p.registro = [];
   let pasos = 0;
+  // Ropa por tender de cada uno justo antes del último reparto (la del último reparto ya no da tiempo a tenderla).
+  let antesDelReparto = p.jugadores.map((j) => j.pendientes.length);
+  let enReparto = false;
   while (!p.terminada && pasos++ < 5000) {
     const i = quienJuega(p);
     const t0 = performance.now();
@@ -66,6 +69,9 @@ function jugar(d: Duelo, k: number) {
     const r = aplicar(p, j);
     if (!r.ok) throw new Error(`Jugada inválida de ${niveles[i]}: ${r.motivo} ${JSON.stringify(j)}`);
     p = r.partida;
+    const reparto = p.turno.fase === "cesta" || p.turno.fase === "centro";
+    if (reparto && !enReparto) antesDelReparto = p.jugadores.map((j) => j.pendientes.length);
+    enReparto = reparto;
     p.registro = [];
     p.entradas = [];
   }
@@ -78,7 +84,18 @@ function jugar(d: Duelo, k: number) {
     abortada: !p.terminada,
     totales: niveles.map((_, s) => final.find((r) => r.jugador === s)?.total ?? 0),
     puestos: niveles.map((_, s) => final.find((r) => r.jugador === s)?.puesto ?? 0),
+    /** Por asiento: prendas secas de cada tipo, las que quedaron colgadas de cada tipo y las que quedaron por tender. */
+    secas: p.jugadores.map((j) => porTipo(p, j.seca)),
+    colgadas: p.jugadores.map((j) => porTipo(p, j.lineas.flatMap((l) => l.cartas.flatMap((t) => t.colgadas.map((c) => c.prenda))))),
+    pendientes: p.jugadores.map((j) => j.pendientes.length),
+    pendientesAntesDelUltimoReparto: antesDelReparto,
   };
+}
+
+function porTipo(p: Partida, prendas: string[]): Record<string, number> {
+  const r: Record<string, number> = {};
+  for (const id of prendas) r[p.prendas[id].tipo] = (r[p.prendas[id].tipo] ?? 0) + 1;
+  return r;
 }
 
 const [, , archivoTanda, salida = "torneo.jsonl"] = process.argv;

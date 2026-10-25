@@ -17,6 +17,7 @@ import { esValida } from "./jugadas";
 import { efectoAccion } from "./jugadas/jugarAccion";
 import type { Jugada } from "./jugadas/tipos";
 import { aplicada, candidatas, cuerdasARobarBase, type AzarIA } from "./ia";
+import { ropaPorTender } from "./iaRopa";
 
 // ---------- Cuánto queda de partida ----------
 
@@ -155,26 +156,10 @@ function valorJugador(p: Partida, i: number, R: number, vistoPor: number): numbe
   const cuerdasUtiles = Math.min(cuerdasEnMano, huecos, Math.max(1, R - 1));
   v += libres * 0.25 * futuro;
 
-  // Ropa por tender: vale si tiene sitio a tiempo (ahora, o con una cuerda de la mano el turno que viene).
-  let cabe = libres;
-  let cabeLuego = cuerdasUtiles * 3;
-  const pendientes = [...j.pendientes].sort((a, b) => tipoDe(p, b).puntos - tipoDe(p, a).puntos);
-  for (const id of pendientes) {
-    const t = tipoDe(p, id);
-    const h = p.prendas[id].humedad;
-    let espera: number;
-    if (t.espacios <= cabe) {
-      cabe -= t.espacios;
-      espera = p.turno.jugador === i && p.turno.fase === "jugar" ? 0 : 1;
-    } else if (t.espacios <= cabeLuego) {
-      cabeLuego -= t.espacios;
-      espera = 1;
-    } else espera = 2;
-    const k = espera + h;
-    const prob = sigueViva(k, R, ultima) * Math.pow(0.93, k - 1) * (espera === 2 ? 0.4 : 0.85);
-    v += t.puntos * prob;
-    proy.secas.set(id, prob);
-  }
+  // Ropa por tender: solo la que cabe y se seca a tiempo, empezando por la que más rinde por pinza y ronda.
+  const porTender = ropaPorTender(p, i, R, cuerdasEnMano, 0.6);
+  v += porTender.valor;
+  for (const [id, q] of porTender.prob) proy.secas.set(id, q);
 
   // Objetivos: lo que darían con la ropa seca más la que lleva camino de secarse.
   const ids = [...p.objetivosComunes, ...(i === vistoPor && j.objetivoSecreto ? [j.objetivoSecreto] : [])];

@@ -55,8 +55,8 @@ export const es = {
   "menu.dificultad.facil": "Fácil",
   "menu.dificultad.normal": "Normal",
   "menu.dificultad.dificil": "Difícil",
-  "menu.ayudaDificultad.facil": "Rivales despistados: juegan con mucho azar, se equivocan y casi no fastidian.",
-  "menu.ayudaDificultad.normal": "Rivales que buscan la mejor jugada de cada momento.",
+  "menu.ayudaDificultad.facil": "Rivales sin mucha maña: cuelgan casi siempre toallas, que tardan en secarse, y acumulan ropa que no les da tiempo a tender.",
+  "menu.ayudaDificultad.normal": "Rivales que sacan partido a su tendedero: cuelgan lo que más rinde por pinza y solo cogen la ropa que pueden secar a tiempo.",
   "menu.ayudaDificultad.dificil": "Rivales que juegan para ganar: persiguen sus objetivos, guardan sus «¡Ni hablar!» y van a por quien va primero.",
 
   // ---------- Perfil ----------

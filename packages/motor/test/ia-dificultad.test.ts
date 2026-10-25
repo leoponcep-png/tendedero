@@ -49,7 +49,8 @@ function jugar(p: Partida, j: Jugada): Partida {
 
 /** Partida entera con un nivel por asiento; devuelve también el tiempo máximo por jugada de cada nivel. */
 function partidaEntre(niveles: Dificultad[], semilla: string) {
-  const azar = azarCon(semilla.length * 7919 + semilla.charCodeAt(0));
+  // Un azar distinto en cada partida, sacado de su semilla.
+  const azar = azarCon([...semilla].reduce((h, ch) => Math.imul(h ^ ch.charCodeAt(0), 16777619), 2166136261));
   let p = nueva(niveles.length, semilla);
   const maximo: Partial<Record<Dificultad, number>> = {};
   for (let pasos = 0; !p.terminada; pasos++) {
@@ -113,19 +114,38 @@ describe("IA: niveles de dificultad", () => {
     expect(rondasRestantes({ ...p, ultimaRonda: true })).toBe(1);
   });
 
-  it("la difícil gana a la normal y la normal a la fácil (12 partidas con semilla)", () => {
-    const victorias = (a: Dificultad, b: Dificultad) => {
-      let ganadas = 0;
-      for (let k = 0; k < 12; k++) {
+  it("la difícil saca más puntos que la normal y la normal más que la fácil (20 partidas con semilla)", () => {
+    // Con pocas partidas se mira la media de puntos, que varía menos que las victorias (ver informes/ia-dificultad).
+    const diferencia = (a: Dificultad, b: Dificultad) => {
+      let total = 0;
+      for (let k = 0; k < 20; k++) {
         // Se alternan los asientos para que abrir no favorezca a nadie.
         const niveles: Dificultad[] = k % 2 ? [b, a] : [a, b];
         const { p } = partidaEntre(niveles, `duelo-${a}-${b}-${k}`);
-        const asiento = niveles.indexOf(a);
-        if (p.final!.find((r) => r.jugador === asiento)!.puesto === 1) ganadas++;
+        const puntos = (n: Dificultad) => p.final!.find((r) => r.jugador === niveles.indexOf(n))!.total;
+        total += puntos(a) - puntos(b);
       }
-      return ganadas;
+      return total / 20;
     };
-    expect(victorias("dificil", "normal")).toBeGreaterThanOrEqual(8);
-    expect(victorias("normal", "facil")).toBeGreaterThanOrEqual(8);
+    expect(diferencia("dificil", "normal")).toBeGreaterThan(2);
+    expect(diferencia("normal", "facil")).toBeGreaterThan(2);
+  }, 240000);
+
+  it("la normal no cuelga toallas por sistema ni acumula ropa por tender, como la fácil", () => {
+    const cuenta = { normal: { toallas: 0, secas: 0, pendientes: 0 }, facil: { toallas: 0, secas: 0, pendientes: 0 } };
+    for (let k = 0; k < 8; k++) {
+      const niveles: Dificultad[] = k % 2 ? ["facil", "normal"] : ["normal", "facil"];
+      const { p } = partidaEntre(niveles, `ropa-${k}`);
+      niveles.forEach((n, s) => {
+        const c = cuenta[n as "normal" | "facil"];
+        const j = p.jugadores[s];
+        c.secas += j.seca.length;
+        c.toallas += j.seca.filter((id) => p.prendas[id].tipo === "toalla").length;
+        c.pendientes += j.pendientes.length;
+      });
+    }
+    expect(cuenta.normal.toallas / cuenta.normal.secas).toBeLessThan(cuenta.facil.toallas / cuenta.facil.secas);
+    expect(cuenta.normal.pendientes).toBeLessThan(cuenta.facil.pendientes);
+    expect(cuenta.normal.secas).toBeGreaterThan(cuenta.facil.secas);
   }, 120000);
 });

@@ -1,7 +1,7 @@
 {
   "name": "@tendedero/escritorio",
   "productName": "Tendedero",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "Tendedero, el juego de mesa, como aplicación de escritorio para Windows.",
   "author": "Leo Ponce",

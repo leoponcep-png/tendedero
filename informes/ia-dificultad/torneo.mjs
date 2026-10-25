@@ -7149,6 +7149,69 @@ function aplicarParaIA(p, j) {
 	return nueva;
 }
 //#endregion
+//#region packages/motor/src/iaRopa.ts
+/** Humedad que pierden por ronda las prendas de esta cuerda (sin contar el tiempo del día). */
+function secadoDeCuerda(p, t) {
+	const cuerda = efectoCuerda(p, t);
+	return Math.max(1, cuerda?.efecto.secado?.(cuerda.params) ?? 1);
+}
+/** Rondas que tarda en secarse (contando la actual) una prenda colgada en `t`. */
+function rondasParaSecar(p, t, prenda) {
+	return Math.max(1, Math.ceil(p.prendas[prenda].humedad / secadoDeCuerda(p, t)));
+}
+/** Puntos por pinza y por ronda de una prenda: lo que se ordena para decidir qué tender primero. */
+function rendimiento(p, prenda) {
+	const t = tipoDe(p, prenda);
+	return t.puntos / (t.espacios * Math.max(1, p.prendas[prenda].humedad));
+}
+/**
+* Valor de la ropa por tender del jugador `i` si quedan `R` rondas. `cuerdasEnMano`: las que puede añadir al
+* tendedero (solo se saben las propias). `factor`: cuánto vale una prenda por tender frente a una colgada.
+*/
+function ropaPorTender(p, i, R, cuerdasEnMano, factor) {
+	const j = p.jugadores[i];
+	let presupuesto = 0;
+	let cartas = 0;
+	for (const l of j.lineas) {
+		let rota = false;
+		for (const t of l.cartas) {
+			cartas++;
+			const quedan = rondasHastaRomperse(p, t);
+			if (quedan !== null && quedan <= R) rota = true;
+			if (rota) continue;
+			presupuesto += defCarta(p, t.carta).espacios * R;
+			for (const c of t.colgadas) presupuesto -= tipoDe(p, c.prenda).espacios * Math.min(R, rondasParaSecar(p, t, c.prenda));
+		}
+	}
+	const { lineas, cartasPorLinea } = p.ajustes.tendedero;
+	const nuevas = Math.min(cuerdasEnMano, lineas * cartasPorLinea - cartas, Math.max(0, R - 1));
+	presupuesto += nuevas * 3 * Math.max(0, R - 1);
+	presupuesto *= .85;
+	const ahora = p.turno.jugador === i && p.turno.fase === "jugar" ? 0 : 1;
+	const orden = [...j.pendientes].sort((a, b) => rendimiento(p, b) - rendimiento(p, a) || tipoDe(p, b).puntos - tipoDe(p, a).puntos);
+	const prob = /* @__PURE__ */ new Map();
+	let valor = 0;
+	for (const id of orden) {
+		const t = tipoDe(p, id);
+		const h = Math.max(1, p.prendas[id].humedad);
+		const k = h + ahora;
+		const gasto = t.espacios * h;
+		if (k <= R && gasto <= presupuesto) {
+			presupuesto -= gasto;
+			const q = Math.pow(.92, k - 1);
+			valor += t.puntos * q * factor;
+			prob.set(id, q * .9);
+		} else {
+			valor -= .4;
+			prob.set(id, 0);
+		}
+	}
+	return {
+		valor,
+		prob
+	};
+}
+//#endregion
 //#region packages/motor/src/iaDificil.ts
 /** Rondas que quedan contando la actual (su secado incluido); en la última ronda, 1. */
 function rondasRestantes(p) {
@@ -7259,25 +7322,9 @@ function valorJugador(p, i, R, vistoPor) {
 	const cuerdasEnMano = vistoPor === i ? j.mano.filter((x) => defCarta(p, x).mazo === "cuerdas").length : 0;
 	const cuerdasUtiles = Math.min(cuerdasEnMano, huecos, Math.max(1, R - 1));
 	v += libres * .25 * futuro;
-	let cabe = libres;
-	let cabeLuego = cuerdasUtiles * 3;
-	const pendientes = [...j.pendientes].sort((a, b) => tipoDe(p, b).puntos - tipoDe(p, a).puntos);
-	for (const id of pendientes) {
-		const t = tipoDe(p, id);
-		const h = p.prendas[id].humedad;
-		let espera;
-		if (t.espacios <= cabe) {
-			cabe -= t.espacios;
-			espera = p.turno.jugador === i && p.turno.fase === "jugar" ? 0 : 1;
-		} else if (t.espacios <= cabeLuego) {
-			cabeLuego -= t.espacios;
-			espera = 1;
-		} else espera = 2;
-		const k = espera + h;
-		const prob = sigueViva(k, R, ultima) * Math.pow(.93, k - 1) * (espera === 2 ? .4 : .85);
-		v += t.puntos * prob;
-		proy.secas.set(id, prob);
-	}
+	const porTender = ropaPorTender(p, i, R, cuerdasEnMano, .6);
+	v += porTender.valor;
+	for (const [id, q] of porTender.prob) proy.secas.set(id, q);
 	const ids = [...p.objetivosComunes, ...i === vistoPor && j.objetivoSecreto ? [j.objetivoSecreto] : []];
 	if (ids.length) {
 		const seguras = [...proy.secas].filter(([, q]) => q >= .55).map(([id]) => id);
@@ -7517,7 +7564,7 @@ function contexto(o = {}) {
 	const dificultad = o.dificultad && DIFICULTADES.includes(o.dificultad) ? o.dificultad : "normal";
 	return {
 		azar: o.azar ?? Math.random,
-		rivales: o.rivales ?? (dificultad === "facil" ? "media" : "mejor"),
+		rivales: o.rivales ?? "mejor",
 		dificultad
 	};
 }
@@ -7535,8 +7582,8 @@ function espaciosLibres(p, i) {
 	}
 	return libres;
 }
-/** Lo que vale para un jugador cómo está la mesa ahora: puntos, ropa en camino, objetivos y capacidad. */
-function valor(p, i) {
+/** La valoración de la IA fácil (la primera del juego): puntos, ropa en camino, objetivos y capacidad. */
+function valorFacil(p, i) {
 	const j = p.jugadores[i];
 	let v = j.puntos;
 	for (const l of j.lineas) {
@@ -7567,6 +7614,34 @@ function valor(p, i) {
 	v += j.trofeos.length * .5;
 	return v;
 }
+/**
+* La valoración de la IA normal: puntos, ropa en camino (según lo que tarda en secarse y lo que cabe), algo de
+* objetivos y capacidad. `R`: rondas que quedan (contando la actual).
+*/
+function valor(p, i, R) {
+	const j = p.jugadores[i];
+	let v = j.puntos;
+	for (const l of j.lineas) {
+		let rota = false;
+		for (const t of l.cartas) {
+			if (rondasHastaRomperse(p, t) !== null) rota = true;
+			for (const c of t.colgadas) {
+				const tipo = tipoDe(p, c.prenda);
+				const k = rondasParaSecar(p, t, c.prenda);
+				v += rota ? -.3 * tipo.puntos : tipo.puntos * (k <= R ? .9 * Math.pow(.92, k - 1) : .1);
+			}
+			v += rota ? -3 : .25 * defCarta(p, t.carta).espacios;
+			if (efectoDeCuerda(p, t.carta)) v += 1;
+		}
+	}
+	const cuerdas = j.mano.filter((x) => defCarta(p, x).mazo === "cuerdas").length;
+	v += ropaPorTender(p, i, R, cuerdas, .6).valor;
+	const ids = [...p.objetivosComunes, ...j.objetivoSecreto ? [j.objetivoSecreto] : []];
+	for (const id of ids) v += puntuarObjetivo(p, i, p.catalogo.objetivos[id]).puntos * .4;
+	v += j.mano.length * .1;
+	v += j.trofeos.length * .5;
+	return v;
+}
 /** Cómo de bien le va al jugador `i` frente a los rivales. */
 function valoracion(p, i, opciones = {}) {
 	const c = contexto(opciones);
@@ -7576,9 +7651,11 @@ function valoracion(p, i, opciones = {}) {
 		const mejorRival = Math.max(...p.final.filter((r) => r.jugador !== i).map((r) => r.total));
 		return (mio.total - mejorRival) * 10;
 	}
-	const valores = p.jugadores.map((_, k) => k).filter((k) => k !== i).map((k) => valor(p, k));
+	const R = rondasRestantes(p);
+	const v = (k) => c.dificultad === "facil" ? valorFacil(p, k) : valor(p, k, R);
+	const valores = p.jugadores.map((_, k) => k).filter((k) => k !== i).map(v);
 	const rival = c.rivales === "media" ? valores.reduce((a, b) => a + b, 0) / valores.length : Math.max(...valores);
-	return valor(p, i) - (c.dificultad === "facil" ? .3 : .8) * rival;
+	return v(i) - .8 * rival;
 }
 function objetivosPosibles(p) {
 	const lista = [];
@@ -7693,12 +7770,9 @@ function candidatas(p, i, unicas = false) {
 function mejorJugada(p, i, opciones = {}) {
 	const c = contexto(opciones);
 	if (c.dificultad === "dificil") return mejorJugadaDificil(p, i, c.azar);
-	const facil = c.dificultad === "facil";
-	if (facil && c.azar() < .15) return null;
 	const ahora = valoracion(p, i, c);
 	let mejor = null;
 	for (const jugada of candidatas(p, i)) {
-		if (facil && esFastidio(p, jugada) && c.azar() < .8) continue;
 		if (!esValida(p, jugada)) continue;
 		const q = aplicada(p, jugada);
 		if (!q) continue;
@@ -7706,7 +7780,7 @@ function mejorJugada(p, i, opciones = {}) {
 			tipo: "responder",
 			jugador: q.reaccion.defensor,
 			anular: false
-		}) ?? q : q, i, c) + c.azar() * (facil ? 2.5 : .05);
+		}) ?? q : q, i, c) + c.azar() * .05;
 		if (!mejor || v > mejor.v) mejor = {
 			jugada,
 			partida: q,
@@ -7717,12 +7791,6 @@ function mejorJugada(p, i, opciones = {}) {
 		jugada: mejor.jugada,
 		partida: mejor.partida
 	} : null;
-}
-/** Jugada contra un rival (fastidio o cuerda vieja en su tendedero). */
-function esFastidio(p, j) {
-	if (j.tipo === "colocarCuerda") return j.en !== void 0 && j.en !== j.jugador;
-	if (j.tipo !== "jugarAccion" || !j.objetivo || j.objetivo.jugador === j.jugador) return false;
-	return !!efectoAccion(p, j.carta)?.etiquetas.includes("fastidio");
 }
 /** Qué coger en el reparto de prendas (de una cesta o del centro, según la fase). */
 function mejorDraft(p, i, opciones = {}) {
@@ -7742,7 +7810,7 @@ function mejorDraft(p, i, opciones = {}) {
 			};
 			const q = aplicada(p, jugada);
 			if (!q) continue;
-			const v = valoracion(q, i, c) + c.azar() * (c.dificultad === "facil" ? 4 : .2);
+			const v = valoracion(q, i, c) + c.azar() * .2;
 			if (!mejor || v > mejor.v) mejor = {
 				jugada,
 				v
@@ -7768,11 +7836,6 @@ function descarteDeBot(p, i, opciones = {}) {
 	const c = contexto(opciones);
 	if (c.dificultad === "dificil") return descarteDificil(p, i);
 	const j = p.jugadores[i];
-	if (c.dificultad === "facil") return {
-		tipo: "descartar",
-		jugador: i,
-		carta: j.mano[Math.floor(c.azar() * j.mano.length)]
-	};
 	const cuerdas = j.mano.filter((x) => defCarta(p, x).mazo === "cuerdas");
 	const otras = j.mano.filter((x) => efectoAccion(p, x)?.blanco !== "reaccion");
 	const entre = otras.length ? otras : j.mano;
@@ -7788,9 +7851,7 @@ function huecosLibres(p, i) {
 }
 /** Cuántas de las cartas que roba al terminar el turno son de cuerda: las que le caben en el tendedero. */
 function cuerdasARobar(p, i, opciones = {}) {
-	const c = contexto(opciones);
-	if (c.dificultad === "dificil") return cuerdasARobarDificil(p, i);
-	if (c.dificultad === "facil") return Math.floor(c.azar() * (maxCuerdasRobadas(p) + 1));
+	if (contexto(opciones).dificultad === "dificil") return cuerdasARobarDificil(p, i);
 	return cuerdasARobarBase(p, i);
 }
 /** Lo que hace la IA normal: tantas como le caben en el tendedero. */
@@ -7803,11 +7864,6 @@ function respuestaDeBot(p, opciones = {}) {
 	const c = contexto(opciones);
 	if (c.dificultad === "dificil") return respuestaDificil(p);
 	const defensor = p.reaccion.defensor;
-	if (c.dificultad === "facil" && c.azar() < .5) return {
-		tipo: "responder",
-		jugador: defensor,
-		anular: false
-	};
 	const anulada = aplicada(p, {
 		tipo: "responder",
 		jugador: defensor,
@@ -7871,6 +7927,8 @@ function jugar(d, k) {
 	});
 	p.registro = [];
 	let pasos = 0;
+	let antesDelReparto = p.jugadores.map((j) => j.pendientes.length);
+	let enReparto = false;
 	while (!p.terminada && pasos++ < 5e3) {
 		const i = quienJuega(p);
 		const t0 = performance.now();
@@ -7891,6 +7949,9 @@ function jugar(d, k) {
 		const r = aplicar(p, j);
 		if (!r.ok) throw new Error(`Jugada inválida de ${niveles[i]}: ${r.motivo} ${JSON.stringify(j)}`);
 		p = r.partida;
+		const reparto = p.turno.fase === "cesta" || p.turno.fase === "centro";
+		if (reparto && !enReparto) antesDelReparto = p.jugadores.map((j) => j.pendientes.length);
+		enReparto = reparto;
 		p.registro = [];
 		p.entradas = [];
 	}
@@ -7902,8 +7963,18 @@ function jugar(d, k) {
 		rondas: p.ronda,
 		abortada: !p.terminada,
 		totales: niveles.map((_, s) => final.find((r) => r.jugador === s)?.total ?? 0),
-		puestos: niveles.map((_, s) => final.find((r) => r.jugador === s)?.puesto ?? 0)
+		puestos: niveles.map((_, s) => final.find((r) => r.jugador === s)?.puesto ?? 0),
+		/** Por asiento: prendas secas de cada tipo, las que quedaron colgadas de cada tipo y las que quedaron por tender. */
+		secas: p.jugadores.map((j) => porTipo(p, j.seca)),
+		colgadas: p.jugadores.map((j) => porTipo(p, j.lineas.flatMap((l) => l.cartas.flatMap((t) => t.colgadas.map((c) => c.prenda))))),
+		pendientes: p.jugadores.map((j) => j.pendientes.length),
+		pendientesAntesDelUltimoReparto: antesDelReparto
 	};
+}
+function porTipo(p, prendas) {
+	const r = {};
+	for (const id of prendas) r[p.prendas[id].tipo] = (r[p.prendas[id].tipo] ?? 0) + 1;
+	return r;
 }
 const [, , archivoTanda, salida = "torneo.jsonl"] = process.argv;
 if (!archivoTanda) throw new Error("Uso: node torneo.mjs tanda.json salida.jsonl");
