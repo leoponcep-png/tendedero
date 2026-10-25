@@ -1,11 +1,13 @@
+import { DIFICULTADES, type Dificultad } from "@tendedero/motor";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { esNombreTu, nombreVisible, t, useT, type Clave } from "../i18n";
 import { Animal, ANIMALES } from "./Animales";
 import { AvisoLogros } from "./perfil/AvisoLogros";
-import { COLORES, nombreColor, nombreTapete } from "./perfil/catalogo";
+import { COLORES, nombreAnimal, nombreColor, nombreTapete } from "./perfil/catalogo";
 import { MuestraTapete } from "./perfil/Comunes";
 import { calcularEstadisticas } from "./perfil/estadisticas";
 import { IconoPerfil, type Icono } from "./perfil/Iconos";
-import { actualizarLogros, bloqueo, estadoLogros, EVENTO_LOGRO, logrosConseguidos } from "./perfil/logros";
+import { actualizarLogros, bloqueo, estadoLogros, EVENTO_LOGRO, logrosConseguidos, respetarElegidas } from "./perfil/logros";
 import { PanelAmigos } from "./perfil/PanelAmigos";
 import { PanelLogros } from "./perfil/PanelLogros";
 import { PanelPerfil } from "./perfil/PanelPerfil";
@@ -17,9 +19,14 @@ import "./tapetes.css";
 // Menú antes de empezar, con pestañas: la partida (cuántos jugáis y quiénes son los rivales), tu perfil
 // (nombre, animal, color y tapete), tus récords, tus logros y tus amigos. Todo se recuerda en este navegador.
 
-/** `tapete`: diseño de tapete elegido (desbloqueable); el color del tapete sale de `color`. */
-export type Perfil = { nombre: string; animal: string; color: string; tapete?: string };
-export type ConfigPartida = { jugadores: Perfil[] };
+/**
+ * `tapete`: diseño de tapete elegido (desbloqueable); el color del tapete sale de `color`.
+ * `marco`, `titulo` y `fondo`: recompensas que se ven en la mesa (marco del avatar en el panel de jugador,
+ * título bajo el nombre y fondo de la mesa de quien juega). Ids en perfil/catalogo.ts.
+ */
+export type Perfil = { nombre: string; animal: string; color: string; tapete?: string; marco?: string; titulo?: string; fondo?: string };
+/** `dificultad`: nivel de la IA de los rivales (sin ella, «normal»). */
+export type ConfigPartida = { jugadores: Perfil[]; dificultad?: Dificultad };
 
 export const COLORES_JUGADOR = COLORES.map((c) => c.valor);
 const NOMBRES_RIVALES = ["Lu", "Bruno", "Marta", "Nico"];
@@ -56,23 +63,28 @@ export function leerConfig(): ConfigPartida {
   } catch {
     // Sin almacenamiento se empieza con los valores de siempre.
   }
-  const yo = { nombre: "Tú", animal: "raton", color: COLORES_JUGADOR[0], tapete: "basico" };
+  const yo = { nombre: t("menu.tu"), animal: "raton", color: COLORES_JUGADOR[0], tapete: "basico" };
   return { jugadores: [yo, ...rivales(yo, 1)] };
 }
 
-/** Si en la configuración guardada hay algo aún bloqueado (p. ej. se borraron los logros), se cambia por algo libre. */
-function sinBloqueados(c: ConfigPartida, hechos: Record<string, string>): ConfigPartida {
-  const animales = ANIMALES.map((a) => a.id).filter((id) => !bloqueo("animal", id, hechos));
-  const colores = COLORES_JUGADOR.filter((v) => !bloqueo("color", v, hechos));
-  const [yo, ...otros] = c.jugadores;
-  const limpio: Perfil = {
-    ...yo,
-    animal: animales.includes(yo.animal) ? yo.animal : animales[0],
-    color: colores.includes(yo.color) ? yo.color : colores[0],
-    tapete: yo.tapete && !bloqueo("tapete", yo.tapete, hechos) ? yo.tapete : "basico",
-  };
-  const previos = otros.map((o) => ({ ...o, animal: animales.includes(o.animal) && o.animal !== limpio.animal ? o.animal : "", color: colores.includes(o.color) && o.color !== limpio.color ? o.color : "" }));
-  return { jugadores: [limpio, ...rivales(limpio, otros.length, previos, animales, colores)] };
+/**
+ * Un perfil guardado que ya usa algo que ahora es recompensa (de antes de que hubiera logros) se respeta: eso queda
+ * desbloqueado para siempre. Los rivales guardados también conservan su animal y su color.
+ */
+function respetarGuardado(c: ConfigPartida, hechos: Record<string, string>): ConfigPartida {
+  const [yo] = c.jugadores;
+  respetarElegidas(
+    [
+      { tipo: "animal", id: yo.animal },
+      { tipo: "color", id: yo.color },
+      { tipo: "tapete", id: yo.tapete ?? "" },
+      { tipo: "marco", id: yo.marco ?? "" },
+      { tipo: "titulo", id: yo.titulo ?? "" },
+      { tipo: "fondo", id: yo.fondo ?? "" },
+    ],
+    hechos,
+  );
+  return c;
 }
 
 function guardarConfig(c: ConfigPartida) {
@@ -87,7 +99,7 @@ function ElegirAnimal({ valor, ocupados, disponibles, onCambio }: { valor: strin
   return (
     <div className="menu-animales pequeno">
       {ANIMALES.filter((a) => disponibles.includes(a.id) || a.id === valor).map((a) => (
-        <button key={a.id} className={`menu-animal ${a.id === valor ? "activa" : ""}`} disabled={ocupados.includes(a.id) && a.id !== valor} onClick={() => onCambio(a.id)} title={a.nombre}>
+        <button key={a.id} className={`menu-animal ${a.id === valor ? "activa" : ""}`} disabled={ocupados.includes(a.id) && a.id !== valor} onClick={() => onCambio(a.id)} title={nombreAnimal(a.id)}>
           <Animal id={a.id} />
         </button>
       ))}
@@ -98,7 +110,7 @@ function ElegirAnimal({ valor, ocupados, disponibles, onCambio }: { valor: strin
 function ElegirColor({ valor, ocupados, disponibles, onCambio }: { valor: string; ocupados: string[]; disponibles: string[]; onCambio: (c: string) => void }) {
   return (
     <div className="menu-colores">
-      {disponibles.map((c) => (
+      {(disponibles.includes(valor) ? disponibles : [...disponibles, valor]).map((c) => (
         <button key={c} className={c === valor ? "activa" : ""} style={{ background: c }} disabled={ocupados.includes(c) && c !== valor} onClick={() => onCambio(c)} aria-label={nombreColor(c)} title={nombreColor(c)} />
       ))}
     </div>
@@ -106,12 +118,12 @@ function ElegirColor({ valor, ocupados, disponibles, onCambio }: { valor: string
 }
 
 type Pestana = "partida" | "perfil" | "records" | "logros" | "amigos";
-const PESTANAS: { id: Pestana; nombre: string; icono: Icono }[] = [
-  { id: "partida", nombre: "Partida", icono: "cesta" },
-  { id: "perfil", nombre: "Perfil", icono: "perfil" },
-  { id: "records", nombre: "Récords", icono: "grafica" },
-  { id: "logros", nombre: "Logros", icono: "medalla" },
-  { id: "amigos", nombre: "Amigos", icono: "amigos" },
+const PESTANAS: { id: Pestana; nombre: Clave; icono: Icono }[] = [
+  { id: "partida", nombre: "menu.pestana.partida", icono: "cesta" },
+  { id: "perfil", nombre: "menu.pestana.perfil", icono: "perfil" },
+  { id: "records", nombre: "menu.pestana.records", icono: "grafica" },
+  { id: "logros", nombre: "menu.pestana.logros", icono: "medalla" },
+  { id: "amigos", nombre: "menu.pestana.amigos", icono: "amigos" },
 ];
 
 /**
@@ -119,6 +131,7 @@ const PESTANAS: { id: Pestana; nombre: string; icono: Icono }[] = [
  * código creado (el enlace que se comparte es #/sala/código).
  */
 export function MenuPartida({ onEmpezar, onAbrirSala }: { onEmpezar: (c: ConfigPartida) => void; onAbrirSala?: (codigo: string) => void }) {
+  const t = useT();
   const [pestana, setPestana] = useState<Pestana>("partida");
   // Al abrir el menú se ponen al día los logros con las partidas guardadas (los nuevos salen en el aviso).
   const [partidas, setPartidas] = useState(() => {
@@ -127,8 +140,10 @@ export function MenuPartida({ onEmpezar, onAbrirSala }: { onEmpezar: (c: ConfigP
     return lista;
   });
   const [hechos, setHechos] = useState(logrosConseguidos);
-  const [config, setConfig] = useState(() => sinBloqueados(leerConfig(), logrosConseguidos()));
-  const [yo, ...otros] = config.jugadores;
+  const [config, setConfig] = useState(() => respetarGuardado(leerConfig(), logrosConseguidos()));
+  const [yoGuardado, ...otros] = config.jugadores;
+  // Si no te has cambiado el nombre, se ve el «Tú» del idioma elegido.
+  const yo = esNombreTu(yoGuardado.nombre) ? { ...yoGuardado, nombre: t("menu.tu") } : yoGuardado;
 
   useEffect(() => {
     const refrescar = () => {
@@ -145,10 +160,13 @@ export function MenuPartida({ onEmpezar, onAbrirSala }: { onEmpezar: (c: ConfigP
   const coloresLibres = COLORES_JUGADOR.filter((c) => !bloqueo("color", c, hechos));
   const conseguidos = estados.filter((s) => s.conseguido).length;
 
+  // Lo que no se cambia (p. ej. la dificultad al tocar los rivales) se conserva.
   const cambiarConfig = (c: ConfigPartida) => {
-    setConfig(c);
-    guardarConfig(c);
+    const nueva = { ...config, ...c };
+    setConfig(nueva);
+    guardarConfig(nueva);
   };
+  const dificultad: Dificultad = config.dificultad && DIFICULTADES.includes(config.dificultad) ? config.dificultad : "normal";
   const cambiarYo = (cambio: Partial<Perfil>) => {
     const nuevo = { ...yo, ...cambio };
     // Si tu animal o color nuevo lo tenía un rival, a ese rival se le da otro.
@@ -159,7 +177,7 @@ export function MenuPartida({ onEmpezar, onAbrirSala }: { onEmpezar: (c: ConfigP
   const cuantos = (n: number) => cambiarConfig({ jugadores: [yo, ...rivales(yo, n - 1, otros, animalesLibres, coloresLibres)] });
 
   const empezar = () => {
-    const limpio = { jugadores: config.jugadores.map((p, i) => ({ ...p, nombre: p.nombre.trim() || (i === 0 ? "Tú" : NOMBRES_RIVALES[i - 1]) })) };
+    const limpio = { jugadores: [yo, ...otros].map((p, i) => ({ ...p, nombre: p.nombre.trim() || (i === 0 ? t("menu.tu") : NOMBRES_RIVALES[i - 1]) })), dificultad };
     guardarConfig(limpio);
     onEmpezar(limpio);
   };
@@ -169,31 +187,29 @@ export function MenuPartida({ onEmpezar, onAbrirSala }: { onEmpezar: (c: ConfigP
       <AvisoLogros color={yo.color} />
 
       <aside className="menu-tarjeta mp-ficha">
-        <MuestraTapete className="mp-tapete-grande" animal={yo.animal} color={yo.color} tapete={yo.tapete} nombre={yo.nombre.trim() || "Tú"} />
-        <p className="mp-ficha-detalle">
-          {ANIMALES.find((a) => a.id === yo.animal)?.nombre} · {nombreColor(yo.color)} · Tapete {nombreTapete(yo.tapete).toLowerCase()}
-        </p>
+        <MuestraTapete className="mp-tapete-grande" animal={yo.animal} color={yo.color} tapete={yo.tapete} marco={yo.marco} titulo={yo.titulo} nombre={nombreVisible(yo.nombre.trim()) || t("menu.tu")} />
+        <p className="mp-ficha-detalle">{t("menu.fichaDetalle", { animal: nombreAnimal(yo.animal), color: nombreColor(yo.color), tapete: nombreTapete(yo.tapete) })}</p>
         <button className="mp-ficha-editar" onClick={() => setPestana("perfil")}>
-          Cambiar personaje y tapete
+          {t("menu.cambiarPersonaje")}
         </button>
         <div className="mp-ficha-cifras">
           <button onClick={() => setPestana("records")}>
             <strong>{estadisticas.partidas}</strong>
-            <span>partidas</span>
+            <span>{t("menu.cifraPartidas", { n: estadisticas.partidas })}</span>
           </button>
           <button onClick={() => setPestana("records")}>
             <strong>{estadisticas.ganadas}</strong>
-            <span>ganadas</span>
+            <span>{t("menu.cifraGanadas", { n: estadisticas.ganadas })}</span>
           </button>
           <button onClick={() => setPestana("logros")}>
             <strong>
               {conseguidos}/{estados.length}
             </strong>
-            <span>logros</span>
+            <span>{t("menu.cifraLogros")}</span>
           </button>
         </div>
         <button className="principal menu-empezar" onClick={empezar}>
-          Empezar partida
+          {t("menu.empezar")}
         </button>
       </aside>
 
@@ -202,7 +218,7 @@ export function MenuPartida({ onEmpezar, onAbrirSala }: { onEmpezar: (c: ConfigP
           {PESTANAS.map((p) => (
             <button key={p.id} role="tab" aria-selected={pestana === p.id} className={pestana === p.id ? "activa" : ""} onClick={() => setPestana(p.id)}>
               <IconoPerfil icono={p.icono} />
-              <span>{p.nombre}</span>
+              <span>{t(p.nombre)}</span>
               {p.id === "logros" && <small className="mp-pestana-num">{conseguidos}</small>}
             </button>
           ))}
@@ -211,15 +227,24 @@ export function MenuPartida({ onEmpezar, onAbrirSala }: { onEmpezar: (c: ConfigP
         <div className="mp-panel" role="tabpanel">
           {pestana === "partida" && (
             <div className="mp-partida">
-              <h2>¿Cuántos jugáis?</h2>
+              <h2>{t("menu.cuantosJugais")}</h2>
               <div className="menu-cuantos">
                 {[2, 3, 4].map((n) => (
                   <button key={n} className={config.jugadores.length === n ? "activa" : ""} onClick={() => cuantos(n)}>
-                    {n} jugadores
+                    {t("menu.jugadores", { n })}
                   </button>
                 ))}
               </div>
-              <h2>Rivales</h2>
+              <h2>{t("menu.dificultad")}</h2>
+              <div className="menu-cuantos menu-dificultad" role="group" aria-label={t("menu.dificultad")}>
+                {DIFICULTADES.map((d) => (
+                  <button key={d} className={dificultad === d ? "activa" : ""} aria-pressed={dificultad === d} onClick={() => cambiarConfig({ jugadores: config.jugadores, dificultad: d })}>
+                    {t(`menu.dificultad.${d}`)}
+                  </button>
+                ))}
+              </div>
+              <p className="menu-ayuda-dificultad">{t(`menu.ayudaDificultad.${dificultad}`)}</p>
+              <h2>{t("menu.rivales")}</h2>
               <div className="menu-rivales">
                 {otros.map((o, i) => {
                   const usados = config.jugadores.filter((_, k) => k !== i + 1);
@@ -229,7 +254,7 @@ export function MenuPartida({ onEmpezar, onAbrirSala }: { onEmpezar: (c: ConfigP
                         <Animal id={o.animal} />
                       </div>
                       <div className="menu-rival-datos">
-                        <input value={o.nombre} maxLength={16} onChange={(e) => cambiarRival(i, { nombre: e.target.value })} aria-label="Nombre del rival" />
+                        <input value={o.nombre} maxLength={16} onChange={(e) => cambiarRival(i, { nombre: e.target.value })} aria-label={t("menu.nombreRival")} />
                         <ElegirAnimal valor={o.animal} disponibles={animalesLibres} ocupados={usados.map((p) => p.animal)} onCambio={(animal) => cambiarRival(i, { animal })} />
                         <ElegirColor valor={o.color} disponibles={coloresLibres} ocupados={usados.map((p) => p.color)} onCambio={(color) => cambiarRival(i, { color })} />
                       </div>

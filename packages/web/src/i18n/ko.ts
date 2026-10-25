@@ -54,11 +54,17 @@ export const ko: Textos = {
     "perfil.personaje": "캐릭터",
     "perfil.color": "색",
     "perfil.tapete": "매트",
+    "perfil.marco": "아바타 테두리",
+    "perfil.titulo": "칭호",
+    "perfil.fondo": "테이블 배경",
     "perfil.miraLogros": "도전 과제 탭에서 확인해 보세요.",
     "perfil.seDesbloquea": "도전 과제 「{logro}」 달성 시 해금: {descripcion}",
     "recompensa.animal": "캐릭터 {nombre}",
     "recompensa.tapete": "매트 {nombre}",
     "recompensa.color": "색 {nombre}",
+    "recompensa.marco": "테두리 {nombre}",
+    "recompensa.titulo": "칭호 「{nombre}」",
+    "recompensa.fondo": "배경 {nombre}",
 
     // ---------- Personajes ----------
     "animal.raton": "생쥐",
@@ -77,6 +83,8 @@ export const ko: Textos = {
     "animal.pato": "오리",
     "animal.ciervo": "사슴",
     "animal.castor": "비버",
+    "animal.oveja": "양",
+    "animal.gallina": "암탉",
 
     // ---------- Colores de jugador ----------
     "color.pino": "솔잎색",
@@ -95,6 +103,11 @@ export const ko: Textos = {
     "color.rosa": "풍선껌 분홍",
     "color.lavanda": "라벤더",
     "color.esmeralda": "에메랄드",
+    "color.menta": "민트",
+    "color.cielo": "하늘색",
+    "color.mandarina": "귤색",
+    "color.carbon": "숯색",
+    "color.uva": "포도색",
     "color.otro": "색",
 
     // ---------- Tapetes ----------
@@ -108,6 +121,41 @@ export const ko: Textos = {
     "tapete.ondas": "물결",
     "tapete.flores": "꽃",
     "tapete.pinzas": "빨래집게",
+    "tapete.escoces": "타탄체크",
+    "tapete.espiga": "헤링본",
+    "tapete.nubes": "구름",
+    "tapete.calcetines": "양말",
+
+    // ---------- Marcos ----------
+    "marco.sencillo": "심플",
+    "marco.madera": "나무",
+    "marco.cuerda": "빨랫줄",
+    "marco.laurel": "월계수",
+    "marco.plata": "은",
+    "marco.oro": "금",
+    "marco.arcoiris": "무지개",
+
+    // ---------- Títulos ----------
+    "titulo.ninguno": "칭호 없음",
+    "titulo.aprendiz": "빨래 견습생",
+    "titulo.vecina-red": "인터넷 스타",
+    "titulo.terror": "동네의 골칫덩이",
+    "titulo.impermeable": "소나기도 끄떡없어",
+    "titulo.cerebro": "빨래 브레인",
+    "titulo.plusmarquista": "기록 제조기",
+    "titulo.campeona": "마당의 챔피언",
+    "titulo.agente": "비밀 요원",
+    "titulo.rey-calcetin": "양말왕",
+    "titulo.leyenda": "빨래터의 전설",
+    "titulo.gran-maestra": "빨래터의 그랜드 마스터",
+
+    // ---------- Fondos de mesa ----------
+    "fondo.madera": "참나무",
+    "fondo.pino": "밝은 소나무",
+    "fondo.nogal": "호두나무",
+    "fondo.baldosas": "마당 타일",
+    "fondo.mantel": "소풍 돗자리",
+    "fondo.cesped": "잔디밭",
 
     // ---------- Estilos de dibujo ----------
     "estilo.fusion": "퓨전 (나만의 조합)",
@@ -203,6 +251,28 @@ export const ko: Textos = {
     "logro.leyenda.desc": "25승을 거두세요.",
     "logro.secadero.nombre": "건조의 달인",
     "logro.secadero.desc": "빨래를 총 250개 말리세요.",
+    "logro.pinza-a-pinza.nombre": "집게 하나하나",
+    "logro.pinza-a-pinza.desc": "빨래를 총 10개 말리세요.",
+    "logro.tres-coladas.nombre": "슬슬 감이 와요",
+    "logro.tres-coladas.desc": "게임을 3판 플레이하세요.",
+    "logro.casa-con-jaleo.nombre": "시끌벅적한 집",
+    "logro.casa-con-jaleo.desc": "3인 또는 4인 게임을 플레이하세요.",
+    "logro.vecina-traviesa.nombre": "장난꾸러기 이웃",
+    "logro.vecina-traviesa.desc": "훼방 카드를 5장 쓰세요.",
+    "logro.hola-vecinos.nombre": "안녕하세요, 이웃님",
+    "logro.hola-vecinos.desc": "온라인 게임을 플레이하세요.",
+    "logro.entrenamiento.nombre": "마당 훈련",
+    "logro.entrenamiento.desc": "AI와 게임을 10판 플레이하세요.",
+    "logro.costumbre.nombre": "동네 단골",
+    "logro.costumbre.desc": "서로 다른 7일 동안 플레이하세요.",
+    "logro.tendedero-lleno.nombre": "넘치는 빨래 건조대",
+    "logro.tendedero-lleno.desc": "한 게임에서 빨래를 14개 말리세요.",
+    "logro.temporada.nombre": "한 시즌 내내",
+    "logro.temporada.desc": "서로 다른 30일 동안 플레이하세요.",
+    "logro.lavanderia.nombre": "대형 세탁소",
+    "logro.lavanderia.desc": "빨래를 총 1000개 말리세요.",
+    "logro.gran-maestra.nombre": "빨래터의 그랜드 마스터",
+    "logro.gran-maestra.desc": "50승을 거두세요.",
 
     // ---------- Amigos ----------
     "amigos.copiar": "복사",
@@ -258,6 +328,7 @@ export const ko: Textos = {
     "dorso.cuerdas": "빨랫줄",
     "dorso.dias": "오늘의 카드",
     "dorso.objetivos": "목표",
+    "dorso.prendas": "빨래",
     "loseta.titulo": "빨랫줄",
     "leyenda.basica.nombre": "기본",
     "leyenda.basica.texto": "능력 없음.",
@@ -423,6 +494,16 @@ export const ko: Textos = {
     "mesa.trofeosTitulo": "상대에게 놓아 거기서 끊어진 낡은 빨랫줄",
     "mesa.cartasEnMano#other": "손패 {n}장",
     "mesa.cartas#other": "{n}장",
+    "mesa.vistazo": "길게 눌러 전체 보기",
+    "mesa.vistazoTitulo": "길게 누르면(또는 Tab 키) 모든 빨래 건조대를 한눈에 볼 수 있어요",
+    "mesa.secas.ver": "{nombre}의 마른 빨래 보기",
+    "mesa.secas.verTuyas": "내 마른 빨래 보기",
+    "mesa.secas.titulo": "{nombre}의 마른 빨래",
+    "mesa.secas.tuyas": "내 마른 빨래",
+    "mesa.secas.total#other": "빨래 {n}개",
+    "mesa.secas.ninguna": "아직 마른 빨래가 없어요.",
+    "mesa.secas.porColor": "색깔별:",
+    "mesa.secas.objetivos": "목표 진행 상황",
 
     "mesa.loQueHaPasado": "지금까지 일어난 일",
     "mesa.abrirRegistro": "기록 펼치기",
@@ -434,6 +515,9 @@ export const ko: Textos = {
     "mesa.mazoAcciones": "액션 덱: {n}장",
     "mesa.pilaCuerdas": "빨랫줄 · {n}",
     "mesa.pilaAcciones": "액션 · {n}",
+    "mesa.mazoPrendas": "빨래 덱: {n}장",
+    "mesa.pilaPrendas": "빨래 · {n}",
+    "mesa.mojadas": "적시는 카드로 생긴 습기 {n}",
     "mesa.descarte": "버린 카드",
     "mesa.descarteVacio": "버린 카드",
 
@@ -475,6 +559,7 @@ export const ko: Textos = {
     "anuncio.seRompe": "빨랫줄이 끊어졌어요!",
     "anuncio.cuerdaDe": "{jugador}의 「{carta}」",
     "anuncio.jugadorN": "플레이어 {n}",
+    "anuncio.repartoRonda": "분배: 각자 바구니에서 가져가요",
 
     // ---------- Registro de la partida ----------
     "registro.partidaCreada": "{n}인 게임을 만들었어요.",
@@ -675,6 +760,7 @@ export const ko: Textos = {
     "galeria.objetivos": "목표 (63 × 88 mm): 덱은 하나, 공동 목표와 비밀 목표는 같은 카드",
     "galeria.dorsos": "카드 뒷면",
     "galeria.loseta": "타일 (100 × 132 mm)",
+    "galeria.prendas": "빨래 (칸당 41 × 63 mm, 그림 검토용)",
   },
 
   cartas: {

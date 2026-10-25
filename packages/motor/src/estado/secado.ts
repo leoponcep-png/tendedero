@@ -2,7 +2,7 @@ import { efectos, type EfectoClima, type EfectoCuerda, type Etiqueta } from "../
 import type { Parametros } from "../datos/esquemas";
 import { anotar, refPrenda } from "./registro";
 import type { CartaTendida, Partida } from "./tipos";
-import { defCarta, descolgar, localizar, nombrePrenda, tipoDe } from "./utilidades";
+import { defCarta, descolgar, localizar, nombrePrenda, quitarHumedad, tipoDe } from "./utilidades";
 
 /** Efecto pasivo de una carta de cuerda (por el id de la copia), si tiene. */
 export function efectoDeCuerda(p: Partida, carta: string): { efecto: EfectoCuerda; params: Parametros } | null {
@@ -59,6 +59,7 @@ export function secarPrenda(p: Partida, prenda: string): void {
 
   descolgar(u);
   p.prendas[prenda].humedad = 0;
+  p.prendas[prenda].extra = 0;
   jugador.seca.push(prenda);
   // Para objetivos como «Bajo techo»: su cuerda y, si la cubre, el tejadillo de arriba.
   const arriba = cartaDeArriba(p, u.tendida);
@@ -83,8 +84,7 @@ export function faseDeSecado(p: Partida, jugador: number): void {
       const ajuste = clima?.efecto.ajusteSecado?.(p, tendida, clima.params) ?? 0;
       const baja = Math.max(0, (cuerda?.efecto.secado?.(cuerda.params) ?? 1) + ajuste);
       for (const { prenda } of [...tendida.colgadas]) {
-        p.prendas[prenda].humedad = Math.max(0, p.prendas[prenda].humedad - baja);
-        if (p.prendas[prenda].humedad === 0) secarPrenda(p, prenda);
+        if (quitarHumedad(p, prenda, baja)) secarPrenda(p, prenda);
       }
     }
   }

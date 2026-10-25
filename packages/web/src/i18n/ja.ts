@@ -54,11 +54,17 @@ export const ja: Textos = {
     "perfil.personaje": "キャラクター",
     "perfil.color": "カラー",
     "perfil.tapete": "プレイマット",
+    "perfil.marco": "アイコンのフレーム",
+    "perfil.titulo": "称号",
+    "perfil.fondo": "テーブルの背景",
     "perfil.miraLogros": "実績タブで確認できます。",
     "perfil.seDesbloquea": "実績「{logro}」で解放：{descripcion}",
     "recompensa.animal": "キャラクター「{nombre}」",
     "recompensa.tapete": "プレイマット「{nombre}」",
     "recompensa.color": "カラー「{nombre}」",
+    "recompensa.marco": "フレーム「{nombre}」",
+    "recompensa.titulo": "称号「{nombre}」",
+    "recompensa.fondo": "背景「{nombre}」",
 
     // ---------- Personajes ----------
     "animal.raton": "ネズミ",
@@ -77,6 +83,8 @@ export const ja: Textos = {
     "animal.pato": "アヒル",
     "animal.ciervo": "シカ",
     "animal.castor": "ビーバー",
+    "animal.oveja": "ヒツジ",
+    "animal.gallina": "ニワトリ",
 
     // ---------- Colores de jugador ----------
     "color.pino": "パイングリーン",
@@ -95,6 +103,11 @@ export const ja: Textos = {
     "color.rosa": "バブルガムピンク",
     "color.lavanda": "ラベンダー",
     "color.esmeralda": "エメラルド",
+    "color.menta": "ミント",
+    "color.cielo": "スカイブルー",
+    "color.mandarina": "マンダリン",
+    "color.carbon": "チャコール",
+    "color.uva": "グレープ",
     "color.otro": "カラー",
 
     // ---------- Tapetes ----------
@@ -108,6 +121,41 @@ export const ja: Textos = {
     "tapete.ondas": "波模様",
     "tapete.flores": "花柄",
     "tapete.pinzas": "洗濯ばさみ",
+    "tapete.escoces": "タータンチェック",
+    "tapete.espiga": "ヘリンボーン",
+    "tapete.nubes": "雲",
+    "tapete.calcetines": "靴下",
+
+    // ---------- Marcos ----------
+    "marco.sencillo": "シンプル",
+    "marco.madera": "木",
+    "marco.cuerda": "物干しロープ",
+    "marco.laurel": "月桂冠",
+    "marco.plata": "銀",
+    "marco.oro": "金",
+    "marco.arcoiris": "虹",
+
+    // ---------- Títulos ----------
+    "titulo.ninguno": "称号なし",
+    "titulo.aprendiz": "洗濯見習い",
+    "titulo.vecina-red": "ネットの人気者",
+    "titulo.terror": "ご近所の恐怖",
+    "titulo.impermeable": "にわか雨もへっちゃら",
+    "titulo.cerebro": "洗濯の頭脳",
+    "titulo.plusmarquista": "記録保持者",
+    "titulo.campeona": "物干し場の女王",
+    "titulo.agente": "秘密エージェント",
+    "titulo.rey-calcetin": "靴下の王様",
+    "titulo.leyenda": "物干しの伝説",
+    "titulo.gran-maestra": "物干しの大師匠",
+
+    // ---------- Fondos ----------
+    "fondo.madera": "オーク",
+    "fondo.pino": "明るいパイン",
+    "fondo.nogal": "ウォルナット",
+    "fondo.baldosas": "中庭のタイル",
+    "fondo.mantel": "ピクニックシート",
+    "fondo.cesped": "芝生",
 
     // ---------- Estilos de dibujo ----------
     "estilo.fusion": "フュージョン（あなたのミックス）",
@@ -203,6 +251,28 @@ export const ja: Textos = {
     "logro.leyenda.desc": "ゲームに25回勝つ。",
     "logro.secadero.nombre": "乾燥の達人",
     "logro.secadero.desc": "洗濯物を合計250枚乾かす。",
+    "logro.pinza-a-pinza.nombre": "ひとつずつ、こつこつ",
+    "logro.pinza-a-pinza.desc": "洗濯物を合計10枚乾かす。",
+    "logro.tres-coladas.nombre": "コツがわかってきた",
+    "logro.tres-coladas.desc": "ゲームを3回遊ぶ。",
+    "logro.casa-con-jaleo.nombre": "にぎやかな家",
+    "logro.casa-con-jaleo.desc": "3人か4人のゲームを遊ぶ。",
+    "logro.vecina-traviesa.nombre": "いたずらなご近所さん",
+    "logro.vecina-traviesa.desc": "いじわるカードを5枚使う。",
+    "logro.hola-vecinos.nombre": "こんにちは、ご近所さん",
+    "logro.hola-vecinos.desc": "オンラインゲームを遊ぶ。",
+    "logro.entrenamiento.nombre": "中庭で特訓",
+    "logro.entrenamiento.desc": "AIと10回対戦する。",
+    "logro.costumbre.nombre": "いつもの習慣",
+    "logro.costumbre.desc": "7日間、別々の日に遊ぶ。",
+    "logro.tendedero-lleno.nombre": "物干しは満員",
+    "logro.tendedero-lleno.desc": "1回のゲームで洗濯物を14枚乾かす。",
+    "logro.temporada.nombre": "ワンシーズン皆勤",
+    "logro.temporada.desc": "30日間、別々の日に遊ぶ。",
+    "logro.lavanderia.nombre": "業務用ランドリー",
+    "logro.lavanderia.desc": "洗濯物を合計1000枚乾かす。",
+    "logro.gran-maestra.nombre": "物干しの大師匠",
+    "logro.gran-maestra.desc": "ゲームに50回勝つ。",
 
     // ---------- Amigos ----------
     "amigos.copiar": "コピー",
@@ -258,6 +328,7 @@ export const ja: Textos = {
     "dorso.cuerdas": "ロープ",
     "dorso.dias": "今日のカード",
     "dorso.objetivos": "目標",
+    "dorso.prendas": "洗濯物",
     "loseta.titulo": "ロープ",
     "leyenda.basica.nombre": "ふつう",
     "leyenda.basica.texto": "能力なし。",
@@ -339,6 +410,16 @@ export const ja: Textos = {
     "mesa.partidaTerminada": "ゲーム終了",
     "mesa.noTuTurno": "あなたの手番ではありません",
     "mesa.jugarla": "使う",
+    "mesa.vistazo": "長押しで全員を見る",
+    "mesa.vistazoTitulo": "長押し（またはTabキー）で全員の物干しを一度に見られます",
+    "mesa.secas.ver": "{nombre}の乾いた洗濯物を見る",
+    "mesa.secas.verTuyas": "あなたの乾いた洗濯物を見る",
+    "mesa.secas.titulo": "{nombre}の乾いた洗濯物",
+    "mesa.secas.tuyas": "あなたの乾いた洗濯物",
+    "mesa.secas.total#other": "{n}枚",
+    "mesa.secas.ninguna": "まだ洗濯物を乾かしていません。",
+    "mesa.secas.porColor": "色別：",
+    "mesa.secas.objetivos": "目標の進み具合",
 
     "mesa.turno.respondes": "対抗しますか？",
     "mesa.turno.decidiendo": "考え中…",
@@ -434,6 +515,9 @@ export const ja: Textos = {
     "mesa.mazoAcciones": "アクションの山札：{n}枚",
     "mesa.pilaCuerdas": "ロープ・{n}",
     "mesa.pilaAcciones": "アクション・{n}",
+    "mesa.mazoPrendas": "洗濯物の山札：{n}枚",
+    "mesa.pilaPrendas": "洗濯物・{n}",
+    "mesa.mojadas": "濡らすカードによる湿り気{n}",
     "mesa.descarte": "捨て札",
     "mesa.descarteVacio": "捨て札",
 
@@ -475,6 +559,7 @@ export const ja: Textos = {
     "anuncio.seRompe": "ロープが切れた！",
     "anuncio.cuerdaDe": "{jugador}の「{carta}」",
     "anuncio.jugadorN": "プレイヤー{n}",
+    "anuncio.repartoRonda": "配布：それぞれかごから取ります",
 
     // ---------- Registro de la partida ----------
     "registro.partidaCreada": "{n}人用のゲームを作成しました。",
@@ -675,6 +760,7 @@ export const ja: Textos = {
     "galeria.objetivos": "目標（63 × 88 mm）：山札は1つ。共通と秘密は同じカードです",
     "galeria.dorsos": "裏面",
     "galeria.loseta": "タイル（100 × 132 mm）",
+    "galeria.prendas": "洗濯物（1枠 41 × 63 mm、絵の確認用）",
   },
 
   cartas: {

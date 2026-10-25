@@ -1,0 +1,51 @@
+/* Selector de idioma (i18n/react.tsx). Hereda el color y la letra de donde se ponga. */
+.selector-idioma {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  white-space: nowrap;
+}
+
+.selector-idioma svg {
+  flex: none;
+  opacity: 0.8;
+}
+
+.selector-idioma select {
+  font: inherit;
+  font-weight: 700;
+  color: inherit;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  border: 1.5px solid color-mix(in srgb, currentColor 35%, transparent);
+  border-radius: 999px;
+  padding: 3px 26px 3px 10px;
+  cursor: pointer;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 55%,
+    calc(100% - 9px) 55%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.selector-idioma select option {
+  color: #2b2019;
+  background: #fff8ec;
+}
+
+/* En el menú de inicio, el selector va en la esquina de arriba a la derecha, sobre una ficha de papel. */
+.me-idioma-esquina {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  z-index: 6;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #fff6e6ee;
+  color: #2b2019;
+  box-shadow:
+    0 0 0 2px #2b2019,
+    0 4px 8px #0005;
+}

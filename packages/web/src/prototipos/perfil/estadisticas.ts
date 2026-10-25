@@ -26,6 +26,8 @@ export interface Estadisticas {
   fastidiosRecibidos: number;
   /** Ganada recibiendo 3 o más fastidios. */
   ganadasConFastidios: number;
+  /** Días distintos en los que has jugado alguna partida. */
+  diasJugados: number;
   porJugadores: Record<2 | 3 | 4, Balance>;
   contraIA: Balance;
   online: Balance;
@@ -64,6 +66,7 @@ export function calcularEstadisticas(partidas: ResumenPartida[]): Estadisticas {
     fastidiosJugados: suma((p) => p.fastidiosJugados),
     fastidiosRecibidos: suma((p) => p.fastidiosRecibidos),
     ganadasConFastidios: ganadas.filter((p) => p.fastidiosRecibidos >= 3).length,
+    diasJugados: new Set(orden.map((p) => p.fecha.slice(0, 10))).size,
     porJugadores: {
       2: balance(orden.filter((p) => p.jugadores === 2)),
       3: balance(orden.filter((p) => p.jugadores === 3)),

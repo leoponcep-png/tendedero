@@ -8,11 +8,11 @@
   --paso: calc(var(--celda) * 0.24);
   --ancho-prenda: calc(var(--celda) * 1.45);
   /* Sitio bajo cada línea: hasta 4 gotas visibles más el dibujo de la prenda */
-  --colgante: calc(4 * var(--paso) + var(--celda) * 1.35);
+  --colgante: calc(var(--filas, 3) * var(--paso) + var(--celda) * 1.55);
   --alto-linea: calc(var(--alto-cuerda) + var(--colgante));
 }
 .me .hp {
-  height: calc(5 * var(--paso) + var(--celda) * 1.3);
+  height: calc(var(--filas, 3) * var(--paso) + var(--celda) * 1.5);
   font-size: calc(var(--celda) * 0.19);
 }
 
@@ -109,7 +109,7 @@
   top: auto;
   flex: none;
   width: var(--ancho-prenda);
-  height: calc(5 * var(--paso) + var(--celda) * 1.3);
+  height: calc(var(--filas, 3) * var(--paso) + var(--celda) * 1.5);
   margin: 0 -6px;
   transition: transform 0.25s var(--curva);
 }
@@ -168,8 +168,8 @@
 .me .me-monton {
   --paso: calc(var(--celda) * 0.24);
   --ancho-prenda: calc(var(--celda) * 1.45);
-  --alto-prenda: calc(5 * var(--paso) + var(--celda) * 1.3);
-  --colgante: calc(4 * var(--paso) + var(--celda) * 1.35);
+  --alto-prenda: calc(var(--filas, 3) * var(--paso) + var(--celda) * 1.5);
+  --colgante: calc(var(--filas, 3) * var(--paso) + var(--celda) * 1.55);
   --alto-linea: calc(var(--alto-cuerda) + var(--colgante));
 }
 

@@ -73,3 +73,28 @@ export function aplicar(p: Partida, j: Jugada): Resultado {
   if (!nueva.terminada) comprobarUmbral(nueva);
   return { ok: true, partida: nueva };
 }
+
+/** Copia profunda de datos planos (objetos, listas y valores sueltos), bastante más rápida que structuredClone. */
+function copiar<T>(x: T): T {
+  if (Array.isArray(x)) return x.map(copiar) as T;
+  if (x !== null && typeof x === "object") {
+    const o: Record<string, unknown> = {};
+    for (const k in x) o[k] = copiar((x as Record<string, unknown>)[k]);
+    return o as T;
+  }
+  return x;
+}
+
+/**
+ * Como `aplicar`, para la IA, que prueba cientos de jugadas en cada decisión: devuelve null si no vale, la partida
+ * nueva comparte con la original lo que no cambia durante la partida (catálogo, ajustes y qué es cada carta) y
+ * empieza con el registro vacío.
+ */
+export function aplicarParaIA(p: Partida, j: Jugada): Partida | null {
+  if (porQueNoVale(p, j)) return null;
+  const { catalogo, ajustes, cartas, registro: _registro, entradas: _entradas, ...resto } = p;
+  const nueva = { ...copiar(resto), catalogo, ajustes, cartas, registro: [], entradas: [] } as Partida;
+  manejadorDe(j).aplicar(nueva, j);
+  if (!nueva.terminada) comprobarUmbral(nueva);
+  return nueva;
+}

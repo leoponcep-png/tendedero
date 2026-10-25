@@ -54,11 +54,17 @@ export const zhHans: Textos = {
     "perfil.personaje": "角色",
     "perfil.color": "颜色",
     "perfil.tapete": "桌垫",
+    "perfil.marco": "头像框",
+    "perfil.titulo": "称号",
+    "perfil.fondo": "牌桌背景",
     "perfil.miraLogros": "去「成就」页看看吧。",
     "perfil.seDesbloquea": "达成成就「{logro}」解锁：{descripcion}",
     "recompensa.animal": "角色「{nombre}」",
     "recompensa.tapete": "桌垫「{nombre}」",
     "recompensa.color": "颜色「{nombre}」",
+    "recompensa.marco": "头像框「{nombre}」",
+    "recompensa.titulo": "称号「{nombre}」",
+    "recompensa.fondo": "背景「{nombre}」",
 
     // ---------- Personajes ----------
     "animal.raton": "老鼠",
@@ -77,6 +83,8 @@ export const zhHans: Textos = {
     "animal.pato": "鸭子",
     "animal.ciervo": "鹿",
     "animal.castor": "河狸",
+    "animal.oveja": "绵羊",
+    "animal.gallina": "母鸡",
 
     // ---------- Colores de jugador ----------
     "color.pino": "松绿",
@@ -95,6 +103,11 @@ export const zhHans: Textos = {
     "color.rosa": "泡泡糖粉",
     "color.lavanda": "薰衣草紫",
     "color.esmeralda": "翡翠绿",
+    "color.menta": "薄荷绿",
+    "color.cielo": "天空蓝",
+    "color.mandarina": "橘子橙",
+    "color.carbon": "炭黑",
+    "color.uva": "葡萄紫",
     "color.otro": "颜色",
 
     // ---------- Tapetes ----------
@@ -108,6 +121,41 @@ export const zhHans: Textos = {
     "tapete.ondas": "波浪",
     "tapete.flores": "花朵",
     "tapete.pinzas": "衣夹",
+    "tapete.escoces": "苏格兰格",
+    "tapete.espiga": "人字纹",
+    "tapete.nubes": "云朵",
+    "tapete.calcetines": "袜子",
+
+    // ---------- Marcos del avatar ----------
+    "marco.sencillo": "简约",
+    "marco.madera": "木质",
+    "marco.cuerda": "晾衣绳",
+    "marco.laurel": "桂冠",
+    "marco.plata": "白银",
+    "marco.oro": "黄金",
+    "marco.arcoiris": "彩虹",
+
+    // ---------- Títulos ----------
+    "titulo.ninguno": "无称号",
+    "titulo.aprendiz": "晾衣学徒",
+    "titulo.vecina-red": "网络红人",
+    "titulo.terror": "街坊克星",
+    "titulo.impermeable": "雨打不湿",
+    "titulo.cerebro": "晾衣军师",
+    "titulo.plusmarquista": "纪录保持者",
+    "titulo.campeona": "大院冠军",
+    "titulo.agente": "秘密特工",
+    "titulo.rey-calcetin": "袜子大王",
+    "titulo.leyenda": "晾衣传奇",
+    "titulo.gran-maestra": "晾衣宗师",
+
+    // ---------- Fondos de mesa ----------
+    "fondo.madera": "橡木",
+    "fondo.pino": "浅色松木",
+    "fondo.nogal": "胡桃木",
+    "fondo.baldosas": "院子地砖",
+    "fondo.mantel": "野餐布",
+    "fondo.cesped": "草坪",
 
     // ---------- Estilos de dibujo ----------
     "estilo.fusion": "融合（你的混搭）",
@@ -203,6 +251,28 @@ export const zhHans: Textos = {
     "logro.leyenda.desc": "赢 25 局。",
     "logro.secadero.nombre": "晾晒大王",
     "logro.secadero.desc": "累计晾干 250 件衣物。",
+    "logro.pinza-a-pinza.nombre": "一夹一夹来",
+    "logro.pinza-a-pinza.desc": "累计晾干 10 件衣物。",
+    "logro.tres-coladas.nombre": "渐入佳境",
+    "logro.tres-coladas.desc": "玩 3 局。",
+    "logro.casa-con-jaleo.nombre": "家里真热闹",
+    "logro.casa-con-jaleo.desc": "玩一局 3 人或 4 人对局。",
+    "logro.vecina-traviesa.nombre": "调皮邻居",
+    "logro.vecina-traviesa.desc": "打出 5 张捣乱牌。",
+    "logro.hola-vecinos.nombre": "邻居们好",
+    "logro.hola-vecinos.desc": "玩一局在线对局。",
+    "logro.entrenamiento.nombre": "院子特训",
+    "logro.entrenamiento.desc": "对战电脑玩 10 局。",
+    "logro.costumbre.nombre": "街坊老习惯",
+    "logro.costumbre.desc": "在 7 个不同的日子里玩游戏。",
+    "logro.tendedero-lleno.nombre": "晾衣架都满了",
+    "logro.tendedero-lleno.desc": "一局中晾干 14 件衣物。",
+    "logro.temporada.nombre": "整整一季",
+    "logro.temporada.desc": "在 30 个不同的日子里玩游戏。",
+    "logro.lavanderia.nombre": "工业洗衣房",
+    "logro.lavanderia.desc": "累计晾干 1000 件衣物。",
+    "logro.gran-maestra.nombre": "晾衣宗师",
+    "logro.gran-maestra.desc": "赢 50 局。",
 
     // ---------- Amigos ----------
     "amigos.copiar": "复制",
@@ -258,6 +328,7 @@ export const zhHans: Textos = {
     "dorso.cuerdas": "晾衣绳",
     "dorso.dias": "天",
     "dorso.objetivos": "目标",
+    "dorso.prendas": "衣物",
     "loseta.titulo": "晾衣绳",
     "leyenda.basica.nombre": "普通晾衣绳",
     "leyenda.basica.texto": "无能力。",
@@ -339,6 +410,16 @@ export const zhHans: Textos = {
     "mesa.partidaTerminada": "对局已结束",
     "mesa.noTuTurno": "还没轮到你",
     "mesa.jugarla": "打出",
+    "mesa.vistazo": "按住查看全部",
+    "mesa.vistazoTitulo": "按住（或按 Tab 键）同时查看所有晾衣架",
+    "mesa.secas.ver": "查看{nombre}晾干的衣物",
+    "mesa.secas.verTuyas": "查看你晾干的衣物",
+    "mesa.secas.titulo": "{nombre}晾干的衣物",
+    "mesa.secas.tuyas": "你晾干的衣物",
+    "mesa.secas.total#other": "{n} 件衣物",
+    "mesa.secas.ninguna": "还没有晾干任何衣物。",
+    "mesa.secas.porColor": "按颜色：",
+    "mesa.secas.objetivos": "你的目标进度",
 
     "mesa.turno.respondes": "要回应吗？",
     "mesa.turno.decidiendo": "考虑中…",
@@ -434,6 +515,9 @@ export const zhHans: Textos = {
     "mesa.mazoAcciones": "行动牌堆：{n} 张",
     "mesa.pilaCuerdas": "晾衣绳 · {n}",
     "mesa.pilaAcciones": "行动 · {n}",
+    "mesa.mazoPrendas": "衣物牌堆：{n} 张",
+    "mesa.pilaPrendas": "衣物 · {n}",
+    "mesa.mojadas": "淋湿类卡牌带来的湿度 {n}",
     "mesa.descarte": "弃牌堆",
     "mesa.descarteVacio": "弃牌堆",
 
@@ -475,6 +559,7 @@ export const zhHans: Textos = {
     "anuncio.seRompe": "晾衣绳断了！",
     "anuncio.cuerdaDe": "{jugador}的「{carta}」",
     "anuncio.jugadorN": "玩家 {n}",
+    "anuncio.repartoRonda": "分衣：每人从一个洗衣篮里拿",
 
     // ---------- Registro de la partida ----------
     "registro.partidaCreada": "已创建 {n} 人对局。",
@@ -675,6 +760,7 @@ export const zhHans: Textos = {
     "galeria.objetivos": "目标（63 × 88 mm）：同一个牌堆，公共目标和秘密目标一样",
     "galeria.dorsos": "牌背",
     "galeria.loseta": "板块（100 × 132 mm）",
+    "galeria.prendas": "衣物（每个空位 41 × 63 mm；用于检查画面）",
   },
 
   cartas: {

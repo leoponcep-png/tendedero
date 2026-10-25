@@ -1,3 +1,4 @@
+import { t as tr } from "../../i18n";
 import { nuevoCodigo } from "../../online/protocolo";
 import { CLAVES, guardarJSON, leerJSON } from "./almacen";
 import type { ResumenPartida } from "./registro";
@@ -56,14 +57,14 @@ export function guardarAmigos(lista: Amigo[]): void {
 /** Añade por nombre o por código. Devuelve la lista nueva o un texto de error. */
 export function añadirAmigo(lista: Amigo[], texto: string): Amigo[] | string {
   const t = texto.trim();
-  if (!t) return "Escribe un nombre o un código de amigo.";
+  if (!t) return tr("amigos.errorVacio");
   const codigo = leerCodigoAmigo(t);
-  if (codigo && codigo === miCodigoAmigo()) return "Ese es tu propio código.";
-  if (codigo && lista.some((a) => a.codigo === codigo)) return "Ya tienes a ese amigo.";
-  if (!codigo && lista.some((a) => a.nombre.toLowerCase() === t.toLowerCase())) return "Ya tienes un amigo con ese nombre.";
+  if (codigo && codigo === miCodigoAmigo()) return tr("amigos.errorPropio");
+  if (codigo && lista.some((a) => a.codigo === codigo)) return tr("amigos.errorYaCodigo");
+  if (!codigo && lista.some((a) => a.nombre.toLowerCase() === t.toLowerCase())) return tr("amigos.errorYaNombre");
   const amigo: Amigo = {
     id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
-    nombre: codigo ? `Amigo ${codigo.slice(4, 8)}` : t.slice(0, 16),
+    nombre: codigo ? tr("amigos.nombreCodigo", { codigo: codigo.slice(4, 8) }) : t.slice(0, 16),
     codigo: codigo ?? undefined,
     añadido: new Date().toISOString(),
   };

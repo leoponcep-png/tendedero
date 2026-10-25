@@ -3,6 +3,8 @@
 // la partida nueva. Después se animan las consecuencias que solo se ven al aplicarla (puntos, cartas robadas).
 
 import { cumple, defCarta, efectoAccion, prendasDe, tipoDe, type Jugada, type Partida } from "@tendedero/motor";
+import { nombreVisible, t, t as tr, tLibre, textoCarta } from "../i18n";
+import { nombreCarta } from "../i18n/juego";
 import * as fx from "../prototipos/efectos";
 import type { Perfil } from "../prototipos/MenuPartida";
 import { textoPatron } from "./vista";
@@ -82,13 +84,36 @@ async function alDescarte(e: Escena, clon: HTMLElement, ancho: number) {
 }
 
 function nombre(e: Escena, j: number) {
-  return j === e.yo ? "Tú" : (e.perfiles[j]?.nombre ?? `Jugador ${j + 1}`);
+  return j === e.yo ? t("menu.tu") : e.perfiles[j]?.nombre ? nombreVisible(e.perfiles[j].nombre) : t("anuncio.jugadorN", { n: j + 1 });
 }
 
 // ---------- Cada jugada ----------
 
 export async function animarJugada(e: Escena, p: Partida, j: Jugada, despues: Partida): Promise<void> {
   if (rapido(e)) return;
+  await animarSegunTipo(e, p, j, despues);
+  await irseMojadas(e, p, despues);
+}
+
+/**
+ * Las cartas de mojar que se quitan (al secarse, la humedad se lleva primero esas): suben y se desvanecen junto
+ * a su prenda antes de enseñar la partida nueva.
+ */
+async function irseMojadas(e: Escena, p: Partida, despues: Partida) {
+  const anims: Promise<unknown>[] = [];
+  for (const [id, pr] of Object.entries(p.prendas)) {
+    const antes = Math.min(pr.extra ?? 0, pr.humedad);
+    const ahora = Math.min(despues.prendas[id]?.extra ?? 0, despues.prendas[id]?.humedad ?? 0);
+    if (ahora >= antes) continue;
+    const fichas = [...e.raiz.querySelectorAll<HTMLElement>(`[data-mojadas="${id}"] .mj-ficha-moja`)].slice(ahora);
+    fichas.forEach((f, i) =>
+      anims.push(f.animate([{ opacity: 1, translate: "0 0" }, { opacity: 0, translate: "6px -26px", rotate: "25deg" }], { duration: 500, delay: i * 90, fill: "forwards", easing: "ease-in" }).finished),
+    );
+  }
+  await Promise.all(anims);
+}
+
+async function animarSegunTipo(e: Escena, p: Partida, j: Jugada, despues: Partida): Promise<void> {
   switch (j.tipo) {
     case "draft":
       return animarDraft(e, p, j);
@@ -114,8 +139,13 @@ async function animarDraft(e: Escena, p: Partida, j: Extract<Jugada, { tipo: "dr
   const prendas = prendasDe(p, j.origen) ?? [];
   const cogidas = prendas.filter((id) => cumple(p.prendas[id], j.patron));
   const resto = prendas.filter((id) => !cumple(p.prendas[id], j.patron));
-  const deDonde = j.origen === "centro" ? "del centro" : `de la cesta ${j.origen.cesta + 1}`;
-  fx.anunciar(`${nombre(e, j.jugador)} ${j.jugador === e.yo ? "coges" : "coge"} ${textoPatron(j.patron, cogidas.length)}`, `${deDonde}${j.origen !== "centro" && resto.length ? " · el resto va al centro" : ""}`, "tactica");
+  const deDonde = j.origen === "centro" ? t("anuncio.delCentro") : t("anuncio.deCesta", { n: j.origen.cesta + 1 });
+  const lo = textoPatron(j.patron, cogidas.length);
+  fx.anunciar(
+    j.jugador === e.yo ? t("anuncio.coge.yo", { lo }) : t("anuncio.coge", { jugador: nombre(e, j.jugador), lo }),
+    `${deDonde}${j.origen !== "centro" && resto.length ? ` · ${t("anuncio.restoCentro")}` : ""}`,
+    "tactica",
+  );
   const pila = rectDe(e, `[data-pila="porTender-${j.jugador}"]`, `[data-panel-portender="${j.jugador}"]`, `[data-panel="${j.jugador}"]`);
   const centro = rectDe(e, "[data-centro]");
   const sel = (id: string) => (j.origen === "centro" ? `[data-encentro="${id}"]` : `[data-encesta="${id}"]`);
@@ -135,14 +165,13 @@ async function animarDraft(e: Escena, p: Partida, j: Extract<Jugada, { tipo: "dr
 }
 
 async function animarCuerda(e: Escena, p: Partida, j: Extract<Jugada, { tipo: "colocarCuerda" | "mejorarCuerda" }>) {
-  const def = defCarta(p, j.carta);
   const en = j.tipo === "colocarCuerda" ? (j.en ?? j.jugador) : j.jugador;
   const volver = await e.mirar(en);
   const destino =
     j.tipo === "colocarCuerda" ? rectDe(e, `[data-hueco="${en}:${j.linea}"]`) : rectDe(e, `[data-tendida="${en}:${j.linea}:${j.posicion}"]`);
   const detalle =
-    j.tipo === "mejorarCuerda" ? "mejora una cuerda" : en !== j.jugador ? `se la pone a ${nombre(e, en)}` : `tiende una cuerda en la línea ${j.linea + 1}`;
-  fx.anunciar(def.nombre, `${nombre(e, j.jugador)} · ${detalle}`, en !== j.jugador ? "fastidio" : "cuerda");
+    j.tipo === "mejorarCuerda" ? t("anuncio.mejora") : en !== j.jugador ? t("anuncio.seLaPone", { nombre: nombre(e, en) }) : t("anuncio.tiende", { n: j.linea + 1 });
+  fx.anunciar(nombreCarta(p, j.carta), `${nombre(e, j.jugador)} · ${detalle}`, en !== j.jugador ? "fastidio" : "cuerda");
   const c = await cartaJugada(e, j.jugador, j.carta);
   if (c && destino) {
     await fx.volar(c.clon, fx.centro(destino), { arco: 160, escala: destino.width / c.ancho, giro: 0, duracion: 800, voltear: c.rival });
@@ -178,7 +207,7 @@ async function animarColgar(e: Escena, p: Partida, j: Extract<Jugada, { tipo: "c
   const esp = tipoDe(p, j.prenda).espacios;
   const ranuras = Array.from({ length: esp }, (_, k) => rectDe(e, `[data-ranura="${j.jugador}:${j.linea}:${j.posicion}:${j.inicio + k}"]`)).filter(Boolean) as Rect[];
   const carta = rectDe(e, `[data-tendida="${j.jugador}:${j.linea}:${j.posicion}"]`);
-  if (j.jugador !== e.yo) fx.anunciar(`${nombre(e, j.jugador)} cuelga`, p.catalogo.tipos[p.prendas[j.prenda].tipo].nombre.toLowerCase(), "cuerda");
+  if (j.jugador !== e.yo) fx.anunciar(t("anuncio.cuelga", { jugador: nombre(e, j.jugador) }), tLibre(`prenda.${p.prendas[j.prenda].tipo}`), "cuerda");
   if (origen && ranuras.length && carta) {
     const izq = Math.min(...ranuras.map((r) => r.left));
     const der = Math.max(...ranuras.map((r) => r.right));
@@ -247,12 +276,11 @@ async function efectoSobre(e: Escena, p: Partida, j: Extract<Jugada, { tipo: "ju
 }
 
 async function animarAccion(e: Escena, p: Partida, j: Extract<Jugada, { tipo: "jugarAccion" }>, despues: Partida) {
-  const def = defCarta(p, j.carta);
   const fastidio = efectoAccion(p, j.carta)?.etiquetas.includes("fastidio") ?? false;
   const o = j.objetivo;
   const volver = o ? await e.mirar(o.jugador) : async () => {};
-  const detalle = !o || o.jugador === j.jugador ? `${nombre(e, j.jugador)} · en su tendedero` : `${nombre(e, j.jugador)}  ➜  ${nombre(e, o.jugador)}`;
-  fx.anunciar(def.nombre, o ? detalle : nombre(e, j.jugador), fastidio ? "fastidio" : "tactica");
+  const detalle = !o || o.jugador === j.jugador ? `${nombre(e, j.jugador)} · ${t("anuncio.enSuTendedero")}` : `${nombre(e, j.jugador)}  ➜  ${nombre(e, o.jugador)}`;
+  fx.anunciar(nombreCarta(p, j.carta), o ? detalle : nombre(e, j.jugador), fastidio ? "fastidio" : "tactica");
   const c = await cartaJugada(e, j.jugador, j.carta);
   const destino = o
     ? (o.prenda ? rectDe(e, `[data-prenda="${o.prenda}"]`) : null) ?? rectDe(e, `[data-tendida="${o.jugador}:${o.linea}:${o.posicion}"]`)
@@ -276,7 +304,11 @@ async function animarRespuesta(e: Escena, p: Partida, j: Extract<Jugada, { tipo:
   if (!ataque) return;
   if (j.anular) {
     const carta = p.jugadores[j.jugador].mano.find((c) => p.cartas[c] === "ni-hablar") ?? null;
-    fx.anunciar("¡Ni hablar!", `${nombre(e, j.jugador)} ${j.jugador === e.yo ? "anulas" : "anula"} ${defCarta(p, ataque.carta).nombre}`, "fastidio");
+    fx.anunciar(
+      t("anuncio.niHablar"),
+      j.jugador === e.yo ? t("anuncio.anula.yo", { carta: nombreCarta(p, ataque.carta) }) : t("anuncio.anula", { jugador: nombre(e, j.jugador), carta: nombreCarta(p, ataque.carta) }),
+      "fastidio",
+    );
     const c = carta ? await cartaJugada(e, j.jugador, carta) : null;
     const zona = rectDe(e, `[data-zona="${j.jugador}"]`, `[data-panel="${j.jugador}"]`);
     if (c && zona) {
@@ -296,14 +328,14 @@ async function animarRespuesta(e: Escena, p: Partida, j: Extract<Jugada, { tipo:
 async function animarDescarte(e: Escena, p: Partida, j: Extract<Jugada, { tipo: "descartar" }>) {
   const c = await cartaJugada(e, j.jugador, j.carta);
   if (!c) return;
-  if (c.rival) fx.anunciar(`${nombre(e, j.jugador)} descarta`, defCarta(p, j.carta).nombre, "tactica");
+  if (c.rival) fx.anunciar(t("anuncio.descarta", { jugador: nombre(e, j.jugador) }), nombreCarta(p, j.carta), "tactica");
   await alDescarte(e, c.clon, c.ancho);
 }
 
 async function animarFinTurno(e: Escena, p: Partida, j: Extract<Jugada, { tipo: "terminarTurno" }>, despues: Partida) {
   if (despues.ronda === p.ronda && !despues.terminada) return;
   // Se acaba el día: la ropa pierde humedad, la seca vuela al panel de su dueño y las viejas se rompen.
-  fx.anunciar(despues.terminada ? "Fin de la partida" : "Se acaba el día", "La ropa se seca un poco", "tactica");
+  fx.anunciar(despues.terminada ? t("anuncio.finPartida") : t("anuncio.seAcabaDia"), t("anuncio.seSeca"), "tactica");
   await fx.esperar(500);
   const visibles = [...e.raiz.querySelectorAll<HTMLElement>("[data-prenda]")];
   await Promise.all(visibles.map((el, i) => fx.esperar(i * 40).then(() => fx.evaporar(el, 1))));
@@ -343,7 +375,7 @@ async function animarFinTurno(e: Escena, p: Partida, j: Extract<Jugada, { tipo: 
         if (sigue) return;
         const el = buscar(e, `[data-tendida="${k}:${li}:${pos}"]`);
         if (!el) return;
-        fx.anunciar("¡Se rompe la cuerda!", `${defCarta(p, t.carta).nombre} de ${nombre(e, k)}`, "fastidio");
+        fx.anunciar(tr("anuncio.seRompe"), tr("anuncio.cuerdaDe", { carta: nombreCarta(p, t.carta), jugador: nombre(e, k) }), "fastidio");
         void fx.temblar(el, 10).then(() => el.animate([{ translate: "0 0", opacity: 1 }, { translate: "0 60px", opacity: 0 }], { duration: 500, fill: "forwards" }));
       }),
     );
@@ -376,10 +408,10 @@ export async function despuesDe(e: Escena, antes: Partida, despues: Partida): Pr
   if (despues.ronda !== antes.ronda && !despues.terminada) {
     if (despues.dia && despues.dia !== antes.dia) {
       const def = defCarta(despues, despues.dia);
-      fx.anunciar(def.nombre, def.texto, "tactica");
+      fx.anunciar(nombreCarta(despues, despues.dia), textoCarta(def.id, "texto", def.texto), "tactica");
       await fx.esperar(1400);
     }
-    fx.anunciar(`Ronda ${despues.ronda}`, "Reparto: cada uno coge de una cesta", "tactica");
+    fx.anunciar(t("reparto.ronda", { n: despues.ronda }), t("anuncio.repartoRonda"), "tactica");
     const bolsa = rectDe(e, "[data-bolsa]");
     const llenas = despues.cestas.flat().filter((id) => !antes.cestas.flat().includes(id));
     if (bolsa) await Promise.all(llenas.map((id, i) => fx.esperar(i * 60).then(() => {

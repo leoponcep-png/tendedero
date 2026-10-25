@@ -116,3 +116,154 @@
   --estampado:
     url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='56'><g transform='rotate(28 18 22)'><rect x='13.5' y='8' width='4.4' height='28' rx='2' fill='white' fill-opacity='.32'/><rect x='18.6' y='8' width='4.4' height='28' rx='2' fill='white' fill-opacity='.22'/><circle cx='18.2' cy='22' r='2.6' fill='none' stroke='white' stroke-opacity='.32' stroke-width='1.3'/></g><g transform='rotate(-24 42 42)'><rect x='38.6' y='32' width='3.4' height='21' rx='1.6' fill='black' fill-opacity='.28'/><rect x='42.4' y='32' width='3.4' height='21' rx='1.6' fill='black' fill-opacity='.2'/></g></svg>") 0 0 / 56px 56px;
 }
+
+/* =====================================================================
+ * Marcos del avatar (data-marco en el panel del jugador o en la placa, o en .mp-avatar).
+ * Son anillos alrededor del círculo del animal: valen para cualquier tamaño y color.
+ * ===================================================================== */
+
+.mp-avatar {
+  display: inline-block;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #fff8, transparent 60%), color-mix(in srgb, var(--jugador), #fff 55%);
+  box-shadow:
+    0 0 0 3px var(--jugador),
+    0 0 0 5px var(--tinta);
+}
+.mp-avatar svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.mp-avatar[data-marco="madera"],
+[data-marco="madera"] :is(.mf-panel-animal, .mb-animal) {
+  box-shadow:
+    0 0 0 2.5px var(--jugador),
+    0 0 0 4px var(--tinta),
+    0 0 0 6px #c99560,
+    0 0 0 7.5px #9a6634,
+    0 0 0 9px var(--tinta);
+}
+.mp-avatar[data-marco="cuerda"],
+[data-marco="cuerda"] :is(.mf-panel-animal, .mb-animal) {
+  box-shadow:
+    0 0 0 3px var(--jugador),
+    0 0 0 4.5px var(--tinta);
+  outline: 3.5px dotted #ead3a2;
+  outline-offset: 2.5px;
+}
+.mp-avatar[data-marco="laurel"],
+[data-marco="laurel"] :is(.mf-panel-animal, .mb-animal) {
+  box-shadow:
+    0 0 0 3px var(--jugador),
+    0 0 0 4.5px var(--tinta),
+    0 0 0 8.5px #3f6e2c;
+  outline: 4px dashed #8cc35c;
+  outline-offset: 0.5px;
+}
+.mp-avatar[data-marco="plata"],
+[data-marco="plata"] :is(.mf-panel-animal, .mb-animal) {
+  box-shadow:
+    0 0 0 2.5px #f3f5f7,
+    0 0 0 4.5px #9aa4ad,
+    0 0 0 6.5px #dde2e7,
+    0 0 0 8px var(--tinta),
+    0 0 10px 3px #ffffff66;
+}
+.mp-avatar[data-marco="oro"],
+[data-marco="oro"] :is(.mf-panel-animal, .mb-animal) {
+  box-shadow:
+    0 0 0 2.5px #fff1b8,
+    0 0 0 4.5px #d9a032,
+    0 0 0 6.5px #f7d36b,
+    0 0 0 8px var(--tinta),
+    0 0 14px 4px #f2c25a99;
+}
+.mp-avatar[data-marco="arcoiris"],
+[data-marco="arcoiris"] :is(.mf-panel-animal, .mb-animal) {
+  border: 3.5px solid transparent;
+  background:
+    radial-gradient(circle at 50% 40%, #fff8, transparent 60%) padding-box,
+    linear-gradient(color-mix(in srgb, var(--jugador), #fff 55%), color-mix(in srgb, var(--jugador), #fff 55%)) padding-box,
+    conic-gradient(#e85d5d, #f2a03a, #f2d34a, #6cc06a, #4a9fe0, #8e6bd6, #e85d5d) border-box;
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    0 0 10px 2px #ffffff55;
+}
+
+/* ---------- Título: una cinta de tela bajo el nombre ---------- */
+
+.mp-cinta {
+  display: inline-block;
+  max-width: 100%;
+  padding: 1px 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: linear-gradient(180deg, #f6d27a, #e8b04a);
+  color: #4a3212;
+  font: 800 10.5px/1.5 var(--fuente-texto, sans-serif);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 50%, 100% 100%, 0 100%, 6px 50%);
+}
+.mf-panel-titulo {
+  display: block;
+  margin-top: 1px;
+}
+.mf-panel-titulo .mp-cinta {
+  font-size: 9.5px;
+}
+
+/* =====================================================================
+ * Fondos de mesa (data-fondo en la mesa de quien juega y en las muestras del perfil).
+ * El roble es el de siempre: no se toca.
+ * ===================================================================== */
+
+[data-fondo="madera"] {
+  --fondo-mesa: var(--veta) 0 0 / 900px 300px, linear-gradient(180deg, #8a5a34, #6c4325);
+}
+[data-fondo="pino"] {
+  --fondo-mesa: repeating-linear-gradient(0deg, transparent 0 158px, #5a3a1a55 158px 160px), var(--veta) 0 0 / 900px 300px, linear-gradient(180deg, #d6ac74, #b5864f);
+}
+[data-fondo="nogal"] {
+  --fondo-mesa: repeating-linear-gradient(0deg, transparent 0 158px, #12090466 158px 160px), var(--veta) 0 0 / 900px 300px, linear-gradient(180deg, #5c3b25, #3a2416);
+}
+[data-fondo="baldosas"] {
+  --fondo-mesa:
+    var(--grano),
+    repeating-linear-gradient(0deg, #3a1d0f40 0 3px, transparent 3px 72px),
+    repeating-linear-gradient(90deg, #3a1d0f40 0 3px, transparent 3px 72px),
+    linear-gradient(45deg, #00000012 25%, transparent 25% 75%, #00000012 75%) 0 0 / 144px 144px,
+    linear-gradient(45deg, #00000012 25%, transparent 25% 75%, #00000012 75%) 72px 72px / 144px 144px,
+    linear-gradient(180deg, #c8784f, #a65b3a);
+}
+[data-fondo="mantel"] {
+  --fondo-mesa:
+    var(--grano),
+    repeating-linear-gradient(0deg, #ffffff40 0 24px, transparent 24px 48px),
+    repeating-linear-gradient(90deg, #ffffff40 0 24px, transparent 24px 48px),
+    linear-gradient(180deg, #c4493b, #a5372b);
+}
+[data-fondo="cesped"] {
+  --fondo-mesa:
+    var(--grano),
+    repeating-linear-gradient(98deg, #ffffff0d 0 2px, transparent 2px 7px),
+    repeating-linear-gradient(82deg, #0000000f 0 2px, transparent 2px 9px),
+    radial-gradient(ellipse at 30% 20%, #8fbf5a55, transparent 60%),
+    linear-gradient(180deg, #6f9f45, #4c7a31);
+}
+.mb.mb[data-fondo]:not([data-fondo="madera"]) {
+  background: var(--fondo-mesa);
+}
+/* En la mesa de juego, la misma luz cálida y el viñeteado de siempre por encima del fondo elegido */
+.mb[data-fondo]:not([data-fondo="madera"]) .mf-juego.mf-juego {
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 40%, #ffe3ad33, transparent 70%),
+    radial-gradient(ellipse 100% 90% at 50% 50%, transparent 55%, #1d0f06aa 100%),
+    var(--fondo-mesa);
+}
+.mp-fondo-muestra {
+  display: block;
+  background: var(--fondo-mesa);
+}

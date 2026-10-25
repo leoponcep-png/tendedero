@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { fecha, t, useT } from "../../i18n";
+import { tNodos } from "../../i18n/react";
 import { añadirAmigo, enlaceSala, guardarAmigos, leerAmigos, miCodigoAmigo, nuevaInvitacion, partidasCon, type Amigo } from "./amigos";
 import { IconoPerfil } from "./Iconos";
 import { plataforma } from "./plataforma";
@@ -29,7 +31,7 @@ async function copiar(texto: string): Promise<boolean> {
   }
 }
 
-function BotonCopiar({ texto, etiqueta = "Copiar" }: { texto: string; etiqueta?: string }) {
+function BotonCopiar({ texto, etiqueta = t("amigos.copiar") }: { texto: string; etiqueta?: string }) {
   const [hecho, setHecho] = useState(false);
   return (
     <button
@@ -42,34 +44,28 @@ function BotonCopiar({ texto, etiqueta = "Copiar" }: { texto: string; etiqueta?:
       }}
     >
       <IconoPerfil icono="copiar" />
-      {hecho ? "¡Copiado!" : etiqueta}
+      {hecho ? t("amigos.copiado") : etiqueta}
     </button>
   );
 }
 
 function Invitacion({ codigo, para, onAbrirSala }: { codigo: string; para?: string; onAbrirSala?: (codigo: string) => void }) {
   const enlace = enlaceSala(codigo);
-  const mensaje = `¡Vamos a tender la colada! Únete a mi partida de Tendedero: ${enlace} (código ${codigo})`;
+  const mensaje = t("amigos.mensaje", { enlace, codigo });
   const compartir = typeof navigator !== "undefined" && "share" in navigator;
   return (
     <div className="mp-invitacion">
       <p>
-        {para ? (
-          <>
-            Pásale este enlace a <strong>{para}</strong>:
-          </>
-        ) : (
-          "Pasa este enlace (o el código) a quien quieras invitar:"
-        )}
+        {para ? tNodos("amigos.pasaleA", { nombre: <strong>{para}</strong> }) : t("amigos.pasaEnlace")}
       </p>
       <div className="mp-invitacion-fila">
         <code className="mp-enlace">{enlace}</code>
-        <BotonCopiar texto={enlace} etiqueta="Copiar enlace" />
+        <BotonCopiar texto={enlace} etiqueta={t("amigos.copiarEnlace")} />
       </div>
       <div className="mp-invitacion-fila">
         <span className="mp-codigo-sala">{codigo}</span>
-        <BotonCopiar texto={codigo} etiqueta="Copiar código" />
-        <BotonCopiar texto={mensaje} etiqueta="Copiar mensaje" />
+        <BotonCopiar texto={codigo} etiqueta={t("amigos.copiarCodigo")} />
+        <BotonCopiar texto={mensaje} etiqueta={t("amigos.copiarMensaje")} />
         {compartir && (
           <button
             onClick={() => {
@@ -79,12 +75,12 @@ function Invitacion({ codigo, para, onAbrirSala }: { codigo: string; para?: stri
             }}
           >
             <IconoPerfil icono="enlace" />
-            Compartir…
+            {t("amigos.compartir")}
           </button>
         )}
         {onAbrirSala && (
           <button className="principal" onClick={() => onAbrirSala(codigo)}>
-            Abrir la sala
+            {t("amigos.abrirSala")}
           </button>
         )}
       </div>
@@ -101,6 +97,7 @@ const iniciales = (n: string) =>
     .join("") || "?";
 
 export function PanelAmigos({ partidas, onAbrirSala }: { partidas: ResumenPartida[]; onAbrirSala?: (codigo: string) => void }) {
+  const t = useT();
   const [amigos, setAmigosEstado] = useState(leerAmigos);
   const [texto, setTexto] = useState("");
   const [error, setError] = useState("");
@@ -132,28 +129,28 @@ export function PanelAmigos({ partidas, onAbrirSala }: { partidas: ResumenPartid
     <div className="mp-amigos">
       <div className="mp-dos-columnas">
         <section className="mp-bloque mp-mi-codigo">
-          <h2>Tu código de amigo</h2>
-          <p>Dáselo a tus amigos para que te añadan.</p>
+          <h2>{t("amigos.tuCodigo")}</h2>
+          <p>{t("amigos.daselo")}</p>
           <div className="mp-invitacion-fila">
             <span className="mp-codigo-sala">{miCodigo}</span>
             <BotonCopiar texto={miCodigo} />
           </div>
         </section>
         <section className="mp-bloque">
-          <h2>Invitar a una partida online</h2>
+          <h2>{t("amigos.invitarOnline")}</h2>
           {invitacion ? (
             <>
               <Invitacion codigo={invitacion} onAbrirSala={onAbrirSala} />
               <button className="mp-enlace-boton" onClick={() => setInvitacion(nuevaInvitacion())}>
-                Crear otra sala
+                {t("amigos.otraSala")}
               </button>
             </>
           ) : (
             <>
-              <p>Crea una sala y comparte el enlace por donde quieras.</p>
+              <p>{t("amigos.creaSala")}</p>
               <button className="principal" onClick={() => setInvitacion(nuevaInvitacion())}>
                 <IconoPerfil icono="enlace" />
-                Crear invitación
+                {t("amigos.crearInvitacion")}
               </button>
             </>
           )}
@@ -162,7 +159,7 @@ export function PanelAmigos({ partidas, onAbrirSala }: { partidas: ResumenPartid
 
       <section className="mp-bloque">
         <div className="mp-seccion-titulo">
-          <h2>Amigos</h2>
+          <h2>{t("amigos.titulo")}</h2>
           <span>{amigos.length}</span>
         </div>
         <form
@@ -172,9 +169,9 @@ export function PanelAmigos({ partidas, onAbrirSala }: { partidas: ResumenPartid
             añadir();
           }}
         >
-          <input value={texto} onChange={(ev) => setTexto(ev.target.value)} placeholder="Nombre o código (TND-XXXX-XXXX)" maxLength={20} />
+          <input value={texto} onChange={(ev) => setTexto(ev.target.value)} placeholder={t("amigos.placeholder")} maxLength={20} />
           <button type="submit" className="principal">
-            Añadir
+            {t("amigos.anadir")}
           </button>
         </form>
         {error && <p className="mp-error">{error}</p>}
@@ -182,7 +179,7 @@ export function PanelAmigos({ partidas, onAbrirSala }: { partidas: ResumenPartid
         {!amigos.length ? (
           <div className="mp-vacio pequeno">
             <IconoPerfil icono="amigos" />
-            <p>Aún no tienes amigos guardados. Añádelos por su nombre en el juego o por su código.</p>
+            <p>{t("amigos.vacio")}</p>
           </div>
         ) : (
           <ul className="mp-lista-amigos">
@@ -206,23 +203,23 @@ export function PanelAmigos({ partidas, onAbrirSala }: { partidas: ResumenPartid
                           onKeyDown={(ev) => ev.key === "Enter" && (ev.target as HTMLInputElement).blur()}
                         />
                       ) : (
-                        <strong onDoubleClick={() => setEditando(a.id)} title="Doble clic para cambiar el nombre">
+                        <strong onDoubleClick={() => setEditando(a.id)} title={t("amigos.dobleClic")}>
                           {a.nombre}
                         </strong>
                       )}
                       <small>
                         {a.codigo ? `${a.codigo} · ` : ""}
                         {juntas.length
-                          ? `${juntas.length} ${juntas.length === 1 ? "partida" : "partidas"} juntos · ganaste ${juntas.filter((p) => p.puesto === 1).length}${ultima ? ` · la última el ${new Date(ultima.fecha).toLocaleDateString("es-ES")}` : ""}`
-                          : "Aún no habéis jugado juntos"}
+                          ? `${t("amigos.juntas", { n: juntas.length })} · ${t("amigos.ganaste", { n: juntas.filter((p) => p.puesto === 1).length })}${ultima ? ` · ${t("amigos.ultima", { fecha: fecha(ultima.fecha, { day: "numeric", month: "numeric", year: "numeric" }) })}` : ""}`
+                          : t("amigos.nunca")}
                       </small>
                     </div>
                     <div className="mp-amigo-acciones">
                       <button className="principal" onClick={() => invitar(a)}>
-                        Invitar
+                        {t("amigos.invitar")}
                       </button>
-                      <button onClick={() => setEditando(a.id)} title="Cambiar el nombre">
-                        Renombrar
+                      <button onClick={() => setEditando(a.id)} title={t("amigos.cambiarNombre")}>
+                        {t("amigos.renombrar")}
                       </button>
                       {quitando === a.id ? (
                         <button
@@ -232,10 +229,10 @@ export function PanelAmigos({ partidas, onAbrirSala }: { partidas: ResumenPartid
                             setQuitando(null);
                           }}
                         >
-                          ¿Seguro?
+                          {t("amigos.seguro")}
                         </button>
                       ) : (
-                        <button onClick={() => setQuitando(a.id)}>Quitar</button>
+                        <button onClick={() => setQuitando(a.id)}>{t("amigos.quitar")}</button>
                       )}
                     </div>
                   </div>

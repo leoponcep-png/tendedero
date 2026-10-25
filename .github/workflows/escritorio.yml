@@ -1,0 +1,40 @@
+# Construye la aplicación de escritorio para Windows y la publica en GitHub Releases
+# cada vez que se sube un tag de versión (por ejemplo v0.2.0).
+# Las aplicaciones ya instaladas ven la release nueva y se actualizan solas.
+name: Aplicación de escritorio
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+      - name: Comprobar que el tag coincide con la versión
+        shell: bash
+        run: |
+          VERSION=$(node -p "require('./packages/escritorio/package.json').version")
+          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "El tag $GITHUB_REF_NAME no coincide con la versión v$VERSION de packages/escritorio/package.json"
+            exit 1
+          fi
+
+      - name: Construir la web
+        run: npm run web -w @tendedero/escritorio
+
+      - name: Empaquetar y publicar la release
+        run: npm run publicar -w @tendedero/escritorio
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

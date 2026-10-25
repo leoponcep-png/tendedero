@@ -2,19 +2,37 @@
 //
 // Cada bot, en cada paso, prueba todas las jugadas válidas, valora cómo queda la mesa para él frente
 // al mejor rival y se queda con la mejor; cuando ninguna mejora, termina el turno. No mira más allá.
+//
+// Hay tres niveles de dificultad:
+// - «facil»: decide con mucho azar, a veces se planta antes de tiempo y casi no fastidia.
+// - «normal» (por defecto): lo de arriba.
+// - «dificil»: ver iaDificil.ts (mira cuántas rondas quedan, persigue sus objetivos, guarda las reacciones…).
 
 import { puntuarObjetivo } from "./estado/final";
 import { rondasHastaRomperse } from "./estado/rotura";
 import { efectoDeCuerda } from "./estado/secado";
 import type { Partida } from "./estado/tipos";
 import { defCarta, tipoDe } from "./estado/utilidades";
-import { aplicar, esValida, motivoInvalida } from "./jugadas";
+import { aplicarParaIA, esValida, motivoInvalida } from "./jugadas";
 import { efectoAccion, FALTA_DESTINO, pideDestino } from "./jugadas/jugarAccion";
 import { maxCuerdasRobadas } from "./jugadas/terminarTurno";
 import type { Jugada, ObjetivoAccion } from "./jugadas/tipos";
+import {
+  cuerdasARobarDificil,
+  descarteDificil,
+  eleccionDificil,
+  mejorDraftDificil,
+  mejorJugadaDificil,
+  respuestaDificil,
+  valoracionDificil,
+} from "./iaDificil";
 
 /** Un número entre 0 y 1; se pasa desde fuera para que la simulación pueda repetir partidas con semilla. */
 export type AzarIA = () => number;
+
+/** Nivel de la IA de los rivales. */
+export type Dificultad = "facil" | "normal" | "dificil";
+export const DIFICULTADES: readonly Dificultad[] = ["facil", "normal", "dificil"];
 
 export interface OpcionesIA {
   azar?: AzarIA;
@@ -23,21 +41,24 @@ export interface OpcionesIA {
    * de los rivales, así que da igual a quién se ataque y los fastidios se reparten.
    */
   rivales?: "mejor" | "media";
+  /** Nivel de juego; sin él, «normal». */
+  dificultad?: Dificultad;
 }
 
 interface Contexto {
   azar: AzarIA;
   rivales: "mejor" | "media";
+  dificultad: Dificultad;
 }
 
 function contexto(o: OpcionesIA = {}): Contexto {
-  return { azar: o.azar ?? Math.random, rivales: o.rivales ?? "mejor" };
+  const dificultad = o.dificultad && DIFICULTADES.includes(o.dificultad) ? o.dificultad : "normal";
+  return { azar: o.azar ?? Math.random, rivales: o.rivales ?? (dificultad === "facil" ? "media" : "mejor"), dificultad };
 }
 
 /** La jugada aplicada sin registro (los bots prueban muchas y no hace falta copiarlo cada vez). */
-function aplicada(p: Partida, j: Jugada): Partida | null {
-  const r = aplicar({ ...p, registro: [], entradas: [] }, j);
-  return r.ok ? r.partida : null;
+export function aplicada(p: Partida, j: Jugada): Partida | null {
+  return aplicarParaIA(p, j);
 }
 
 // ---------- Valoración ----------
@@ -101,6 +122,7 @@ function valor(p: Partida, i: number): number {
 /** Cómo de bien le va al jugador `i` frente a los rivales. */
 export function valoracion(p: Partida, i: number, opciones: OpcionesIA = {}): number {
   const c = contexto(opciones);
+  if (c.dificultad === "dificil") return valoracionDificil(p, i);
   if (p.terminada && p.final) {
     const mio = p.final.find((r) => r.jugador === i)!;
     const mejorRival = Math.max(...p.final.filter((r) => r.jugador !== i).map((r) => r.total));
@@ -108,7 +130,8 @@ export function valoracion(p: Partida, i: number, opciones: OpcionesIA = {}): nu
   }
   const valores = p.jugadores.map((_, k) => k).filter((k) => k !== i).map((k) => valor(p, k));
   const rival = c.rivales === "media" ? valores.reduce((a, b) => a + b, 0) / valores.length : Math.max(...valores);
-  return valor(p, i) - 0.8 * rival;
+  // La fácil apenas mira a los rivales.
+  return valor(p, i) - (c.dificultad === "facil" ? 0.3 : 0.8) * rival;
 }
 
 // ---------- Jugadas candidatas ----------
@@ -137,7 +160,8 @@ function destinosPosibles(p: Partida, jugador: number): { linea: number; posicio
   return lista;
 }
 
-function candidatas(p: Partida, i: number): Jugada[] {
+/** `unicas`: las prendas por tender iguales (tipo, color y humedad) se prueban una sola vez. */
+export function candidatas(p: Partida, i: number, unicas = false): Jugada[] {
   const j = p.jugadores[i];
   const lista: Jugada[] = [];
 
@@ -172,7 +196,14 @@ function candidatas(p: Partida, i: number): Jugada[] {
     }
   }
 
+  const vistas = new Set<string>();
   for (const prenda of j.pendientes) {
+    if (unicas) {
+      const { tipo, color, humedad, extra } = p.prendas[prenda];
+      const clave = `${tipo}|${color}|${humedad}|${extra ?? 0}`;
+      if (vistas.has(clave)) continue;
+      vistas.add(clave);
+    }
     j.lineas.forEach((l, linea) =>
       l.cartas.forEach((t, posicion) => {
         for (let inicio = 0; inicio < defCarta(p, t.carta).espacios; inicio++) {
@@ -189,23 +220,37 @@ function candidatas(p: Partida, i: number): Jugada[] {
 /** La mejor jugada del turno, o null si ninguna mejora lo que hay (entonces toca terminar el turno). */
 export function mejorJugada(p: Partida, i: number, opciones: OpcionesIA = {}): { jugada: Jugada; partida: Partida } | null {
   const c = contexto(opciones);
+  if (c.dificultad === "dificil") return mejorJugadaDificil(p, i, c.azar);
+  const facil = c.dificultad === "facil";
+  // La fácil a veces se planta sin hacer nada más.
+  if (facil && c.azar() < 0.15) return null;
   const ahora = valoracion(p, i, c);
   let mejor: { jugada: Jugada; partida: Partida; v: number } | null = null;
   for (const jugada of candidatas(p, i)) {
+    // Y casi nunca fastidia.
+    if (facil && esFastidio(p, jugada) && c.azar() < 0.8) continue;
     if (!esValida(p, jugada)) continue;
     const q = aplicada(p, jugada);
     if (!q) continue;
     // El bot no ve la mano del rival: valora el fastidio como si no lo fueran a anular.
     const vista = q.reaccion ? (aplicada(q, { tipo: "responder", jugador: q.reaccion.defensor, anular: false }) ?? q) : q;
-    const v = valoracion(vista, i, c) + c.azar() * 0.05;
+    const v = valoracion(vista, i, c) + c.azar() * (facil ? 2.5 : 0.05);
     if (!mejor || v > mejor.v) mejor = { jugada, partida: q, v };
   }
   return mejor && mejor.v > ahora + 0.05 ? { jugada: mejor.jugada, partida: mejor.partida } : null;
 }
 
+/** Jugada contra un rival (fastidio o cuerda vieja en su tendedero). */
+function esFastidio(p: Partida, j: Jugada): boolean {
+  if (j.tipo === "colocarCuerda") return j.en !== undefined && j.en !== j.jugador;
+  if (j.tipo !== "jugarAccion" || !j.objetivo || j.objetivo.jugador === j.jugador) return false;
+  return !!efectoAccion(p, j.carta)?.etiquetas.includes("fastidio");
+}
+
 /** Qué coger en el reparto de prendas (de una cesta o del centro, según la fase). */
 export function mejorDraft(p: Partida, i: number, opciones: OpcionesIA = {}): Jugada {
   const c = contexto(opciones);
+  if (c.dificultad === "dificil") return mejorDraftDificil(p, i, c.azar);
   const origenes = p.turno.fase === "centro" ? (["centro"] as const) : p.cestas.map((_, cesta) => ({ cesta }));
   let mejor: { jugada: Jugada; v: number } | null = null;
   for (const origen of origenes) {
@@ -219,7 +264,7 @@ export function mejorDraft(p: Partida, i: number, opciones: OpcionesIA = {}): Ju
       const jugada: Jugada = { tipo: "draft", jugador: i, origen, patron };
       const q = aplicada(p, jugada);
       if (!q) continue;
-      const v = valoracion(q, i, c) + c.azar() * 0.2;
+      const v = valoracion(q, i, c) + c.azar() * (c.dificultad === "facil" ? 4 : 0.2);
       if (!mejor || v > mejor.v) mejor = { jugada, v };
     }
   }
@@ -227,9 +272,10 @@ export function mejorDraft(p: Partida, i: number, opciones: OpcionesIA = {}): Ju
   return mejor.jugada;
 }
 
-/** Uno de los objetivos que le ofrecen, al azar. */
+/** Uno de los objetivos que le ofrecen: al azar (la difícil, el que mejor le encaja). */
 export function eleccionDeObjetivo(p: Partida, i: number, opciones: OpcionesIA = {}): Jugada {
   const c = contexto(opciones);
+  if (c.dificultad === "dificil") return eleccionDificil(p, i, c.azar);
   const ofrecidos = p.jugadores[i].objetivosOfrecidos;
   return { tipo: "elegirObjetivo", jugador: i, objetivo: ofrecidos[Math.floor(c.azar() * ofrecidos.length)] };
 }
@@ -237,7 +283,9 @@ export function eleccionDeObjetivo(p: Partida, i: number, opciones: OpcionesIA =
 /** Qué carta suelta al pasarse del límite de mano. */
 export function descarteDeBot(p: Partida, i: number, opciones: OpcionesIA = {}): Jugada {
   const c = contexto(opciones);
+  if (c.dificultad === "dificil") return descarteDificil(p, i);
   const j = p.jugadores[i];
+  if (c.dificultad === "facil") return { tipo: "descartar", jugador: i, carta: j.mano[Math.floor(c.azar() * j.mano.length)] };
   const cuerdas = j.mano.filter((x) => defCarta(p, x).mazo === "cuerdas");
   // Sobran cuerdas si no caben en el tendedero; las de reacción se guardan mientras haya otra que tirar.
   const otras = j.mano.filter((x) => efectoAccion(p, x)?.blanco !== "reaccion");
@@ -252,7 +300,15 @@ function huecosLibres(p: Partida, i: number): number {
 }
 
 /** Cuántas de las cartas que roba al terminar el turno son de cuerda: las que le caben en el tendedero. */
-export function cuerdasARobar(p: Partida, i: number): number {
+export function cuerdasARobar(p: Partida, i: number, opciones: OpcionesIA = {}): number {
+  const c = contexto(opciones);
+  if (c.dificultad === "dificil") return cuerdasARobarDificil(p, i);
+  if (c.dificultad === "facil") return Math.floor(c.azar() * (maxCuerdasRobadas(p) + 1));
+  return cuerdasARobarBase(p, i);
+}
+
+/** Lo que hace la IA normal: tantas como le caben en el tendedero. */
+export function cuerdasARobarBase(p: Partida, i: number): number {
   const enMano = p.jugadores[i].mano.filter((x) => defCarta(p, x).mazo === "cuerdas").length;
   return Math.max(0, Math.min(maxCuerdasRobadas(p), huecosLibres(p, i) - enMano));
 }
@@ -260,7 +316,10 @@ export function cuerdasARobar(p: Partida, i: number): number {
 /** Si el atacado anula el fastidio: solo cuando le perjudica (lo que pierde pesa más que gastar la carta). */
 export function respuestaDeBot(p: Partida, opciones: OpcionesIA = {}): Jugada {
   const c = contexto(opciones);
+  if (c.dificultad === "dificil") return respuestaDificil(p);
   const defensor = p.reaccion!.defensor;
+  // La fácil se despista la mitad de las veces y no responde.
+  if (c.dificultad === "facil" && c.azar() < 0.5) return { tipo: "responder", jugador: defensor, anular: false };
   const anulada = aplicada(p, { tipo: "responder", jugador: defensor, anular: true });
   const aceptada = aplicada(p, { tipo: "responder", jugador: defensor, anular: false });
   const anular = !!anulada && (!aceptada || valoracion(anulada, defensor, c) > valoracion(aceptada, defensor, c) + 0.3);
@@ -282,5 +341,5 @@ export function siguienteJugadaIA(p: Partida, i: number, opciones: OpcionesIA = 
   const fase = p.turno.fase;
   if (fase === "cesta" || fase === "centro") return mejorDraft(p, i, opciones);
   if (fase === "descartar") return descarteDeBot(p, i, opciones);
-  return mejorJugada(p, i, opciones)?.jugada ?? { tipo: "terminarTurno", jugador: i, cuerdas: cuerdasARobar(p, i) };
+  return mejorJugada(p, i, opciones)?.jugada ?? { tipo: "terminarTurno", jugador: i, cuerdas: cuerdasARobar(p, i, opciones) };
 }

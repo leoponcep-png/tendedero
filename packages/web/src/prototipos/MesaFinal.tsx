@@ -1,13 +1,13 @@
 import { ajustesIniciales, cestasPorDefecto, type Datos } from "@tendedero/motor";
 import { useState } from "react";
+import { useT } from "../i18n";
+import { SelectorIdioma } from "../i18n/react";
 import { PartidaContraIA, partidaGuardada } from "../juego/ContraIA";
 import { guardarSala, leerSala, nuevaSala } from "../online/anfitrion";
 import { nuevoCodigo } from "../online/protocolo";
 import { SalaAnfitrion, SalaInvitado, type SalaNueva } from "../pantallas/SalaOnline";
 import { DefsBosque } from "./ArteBosque";
-import { ESTILOS } from "./MesaBosque";
 import { leerConfig, MenuPartida, type ConfigPartida } from "./MenuPartida";
-import { Barra } from "./Prototipos";
 import "./prototipos.css";
 import "./mesa-bosque.css";
 import "./estilos-dibujo.css";
@@ -26,14 +26,6 @@ type Modo = "ia" | "crear" | "unirse";
 /** Dónde se abren las salas jugadas con la mesa nueva (#/prototipos/e/anfitrion/… y #/prototipos/e/sala/…). */
 const RUTA = "/prototipos/e";
 
-function leerEstilo(): string {
-  try {
-    return localStorage.getItem("tendedero-estilo") ?? "fusion";
-  } catch {
-    return "fusion";
-  }
-}
-
 function recordarNombre(nombre: string) {
   try {
     localStorage.setItem("tendedero-nombre", nombre);
@@ -46,10 +38,12 @@ export function MesaFinal({ onVersion, onVolver, datos, ruta = [] }: { onVersion
   // Si había una partida contra la IA a medias en esta pestaña, se sigue con ella.
   const [config, setConfig] = useState<ConfigPartida | null>(() => {
     const g = partidaGuardada();
-    return g ? { jugadores: g.perfiles } : null;
+    return g ? { jugadores: g.perfiles, dificultad: g.dificultad } : null;
   });
-  const [estilo, setEstiloActual] = useState(leerEstilo);
+  // El estilo de dibujo ya está decidido: siempre la fusión.
+  const estilo = "fusion";
   const [modo, setModo] = useState<Modo>("ia");
+  const t = useT();
   const [codigo, setCodigo] = useState("");
   const ir = (r: string) => (location.hash = r);
   const volverAlMenu = () => {
@@ -67,16 +61,7 @@ export function MesaFinal({ onVersion, onVolver, datos, ruta = [] }: { onVersion
   }
   if (que === "sala" && sala) return <SalaInvitado key={sala} codigo={sala} onSalir={volverAlMenu} nueva={nueva} />;
 
-  if (config) return <PartidaContraIA datos={datos} perfiles={config.jugadores} onSalir={() => setConfig(null)} />;
-
-  function elegirEstilo(id: string) {
-    setEstiloActual(id);
-    try {
-      localStorage.setItem("tendedero-estilo", id);
-    } catch {
-      // Sin almacenamiento solo se pierde la elección al recargar.
-    }
-  }
+  if (config) return <PartidaContraIA datos={datos} perfiles={config.jugadores} dificultad={config.dificultad} onSalir={() => setConfig(null)} />;
 
   /** Crea la sala online con tantas plazas como jugadores tenga el menú, y la abre como anfitrión. */
   function abrirSala(c: ConfigPartida, cod = nuevoCodigo()) {
@@ -102,38 +87,24 @@ export function MesaFinal({ onVersion, onVolver, datos, ruta = [] }: { onVersion
   return (
     <div className={`proto mb me con-estilos estilo-${estilo}`}>
       <DefsBosque />
-      <Barra version="e" onVersion={onVersion} onVolver={onVolver} ocupado onReiniciar={() => {}} />
-      <nav className="mb-estilos">
-        <span>Estilo de dibujo:</span>
-        {ESTILOS.map((e) => (
-          <button key={e.id} className={e.id === estilo ? "activa" : ""} onClick={() => elegirEstilo(e.id)}>
-            {e.nombre}
-          </button>
-        ))}
-      </nav>
       <div className="escenario mb-escenario me-menu-fondo">
         <div className="mb-luz" aria-hidden />
-        <div className="mj-modo" role="group" aria-label="Cómo se juega">
-          <span>¿Cómo jugáis?</span>
+        <SelectorIdioma className="mb-idioma me-idioma-esquina" />
+        <div className="mj-modo" role="group" aria-label={t("menu.comoSeJuega")}>
+          <span>{t("menu.comoJugais")}</span>
           <button className={modo === "ia" ? "activa" : ""} onClick={() => setModo("ia")}>
-            Contra la IA
+            {t("menu.modoIA")}
           </button>
           <button className={modo === "crear" ? "activa" : ""} onClick={() => setModo("crear")}>
-            Online: crear sala
+            {t("menu.modoCrear")}
           </button>
           <button className={modo === "unirse" ? "activa" : ""} onClick={() => setModo("unirse")}>
-            Online: unirse
+            {t("menu.modoUnirse")}
           </button>
           {modo === "unirse" && (
-            <input value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder="Código de la sala" maxLength={12} aria-label="Código de la sala" />
+            <input value={codigo} onChange={(e) => setCodigo(e.target.value)} placeholder={t("menu.codigoSala")} maxLength={12} aria-label={t("menu.codigoSala")} />
           )}
-          <small>
-            {modo === "ia"
-              ? "Los rivales los juega el ordenador."
-              : modo === "crear"
-                ? "Se abre una sala con tantas plazas como jugadores elijas; pasa el enlace a tus amigos."
-                : "Escribe el código que te han pasado y pulsa «Empezar partida»."}
-          </small>
+          <small>{modo === "ia" ? t("menu.ayudaIA") : modo === "crear" ? t("menu.ayudaCrear") : t("menu.ayudaUnirse")}</small>
         </div>
         <MenuPartida onEmpezar={empezar} onAbrirSala={(cod) => abrirSala(leerConfig(), cod)} />
       </div>

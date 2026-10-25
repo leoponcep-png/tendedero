@@ -36,3 +36,7 @@ export function useJuego(): Juego {
 
 /** Lo que está en la mano del ratón: lo arrastrado o, si no, lo elegido con un clic. */
 export const activo = (j: Juego): Arrastre | null => j.arrastre ?? j.sel;
+
+/** Dentro del mosaico de todos los tendederos solo se mira: sus huecos no admiten soltar ni arrastrar nada. */
+export const SoloVer = createContext(false);
+export const useSoloVer = () => useContext(SoloVer);

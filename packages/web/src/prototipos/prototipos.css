@@ -19,7 +19,7 @@
   grid-template-columns: minmax(0, 1fr);
   overflow: hidden;
   color: var(--tinta);
-  font-family: "Nunito", system-ui, sans-serif;
+  font-family: "Nunito", var(--fuente-respaldo), system-ui, sans-serif;
   user-select: none;
 }
 
@@ -43,7 +43,7 @@
   min-width: 0;
 }
 .proto-titulo strong {
-  font-family: "Fredoka", "Nunito", sans-serif;
+  font-family: "Fredoka", "Nunito", var(--fuente-respaldo), sans-serif;
   font-size: 18px;
 }
 .proto-titulo span {

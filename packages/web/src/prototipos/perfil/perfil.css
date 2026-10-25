@@ -1095,6 +1095,123 @@
 
 /* ---------- Pantallas estrechas ---------- */
 
+/* ---------- Marcos, títulos y fondos (pestaña Perfil, logros y aviso) ---------- */
+
+.mp-rejilla-marcos {
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 10px;
+}
+.mp .mp-ficha-marco {
+  width: 46px;
+  height: 46px;
+  margin: 10px 0 8px;
+}
+.mp-titulos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.mp .mp-ficha-titulo {
+  position: relative;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 2px solid var(--mp-linea);
+  background: #fff9;
+  box-shadow: 0 2px 0 var(--mp-linea);
+  font: 800 13px var(--fuente-titulo);
+}
+.mp .mp-ficha-titulo.activa {
+  border-color: var(--tinta);
+  background: var(--mp-oro);
+  box-shadow: 0 3px 0 var(--tinta);
+}
+.mp .mp-ficha-titulo.bloqueada {
+  opacity: 0.6;
+}
+.mp-ficha-titulo .mp-candado {
+  top: -9px;
+  right: -9px;
+  width: 20px;
+  height: 20px;
+}
+.mp-ficha-titulo .mp-candado .mp-icono {
+  width: 14px;
+  height: 14px;
+}
+.mp-fondo-muestra.mp-fondo-mini {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 10px;
+  box-shadow:
+    inset 0 0 0 2px #0003,
+    inset 0 -14px 20px #0003,
+    0 0 0 2px #1b1714;
+}
+.mp .bloqueada .mp-fondo-mini,
+.mp .bloqueada .mp-ficha-marco {
+  filter: saturate(0.5);
+  opacity: 0.6;
+}
+.mp-tapete-grande .mp-cinta {
+  margin-top: 2px;
+}
+.mp-logro-premios {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.mp-logro-premio {
+  width: auto;
+  min-width: 64px;
+}
+.mp-logro-premios > * {
+  flex: none;
+}
+.mp-logro-premios .mp-recompensa-animal,
+.mp-logro-premios .mp-recompensa-color {
+  width: 38px;
+  height: 38px;
+}
+.mp-logro-premios .mp-tapete-mini {
+  width: 48px;
+}
+.mp-recompensa-marco.mp-avatar {
+  width: 30px;
+  height: 30px;
+  margin: 6px;
+}
+.mp-recompensa-titulo {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--mp-oro, #f2c25a) 45%, #fff);
+  box-shadow: 0 0 0 2px var(--tinta);
+}
+.mp-recompensa-titulo .mp-icono {
+  width: 26px;
+  height: 26px;
+}
+.mp-fondo-muestra.mp-recompensa-fondo {
+  width: 48px;
+  height: 34px;
+  border-radius: 7px;
+  box-shadow: 0 0 0 2px var(--tinta);
+}
+.mp-logro-regalo {
+  margin-top: 1px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--tactica);
+}
+.mp-aviso-dibujo {
+  width: auto;
+  display: flex;
+  gap: 6px;
+}
+
 @media (max-width: 900px) {
   .menu-partida.mp {
     grid-template-columns: minmax(0, 1fr);

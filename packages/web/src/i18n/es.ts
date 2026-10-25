@@ -51,6 +51,13 @@ export const es = {
   "menu.jugadores#other": "{n} jugadores",
   "menu.rivales": "Rivales",
   "menu.nombreRival": "Nombre del rival",
+  "menu.dificultad": "Dificultad",
+  "menu.dificultad.facil": "Fácil",
+  "menu.dificultad.normal": "Normal",
+  "menu.dificultad.dificil": "Difícil",
+  "menu.ayudaDificultad.facil": "Rivales despistados: juegan con mucho azar, se equivocan y casi no fastidian.",
+  "menu.ayudaDificultad.normal": "Rivales que buscan la mejor jugada de cada momento.",
+  "menu.ayudaDificultad.dificil": "Rivales que juegan para ganar: persiguen sus objetivos, guardan sus «¡Ni hablar!» y van a por quien va primero.",
 
   // ---------- Perfil ----------
   "perfil.tuNombre": "Tu nombre en el juego",
@@ -58,11 +65,17 @@ export const es = {
   "perfil.personaje": "Personaje",
   "perfil.color": "Color",
   "perfil.tapete": "Tapete",
+  "perfil.marco": "Marco del avatar",
+  "perfil.titulo": "Título",
+  "perfil.fondo": "Fondo de mesa",
   "perfil.miraLogros": "Míralo en la pestaña Logros.",
   "perfil.seDesbloquea": "Se desbloquea con el logro «{logro}»: {descripcion}",
   "recompensa.animal": "personaje {nombre}",
   "recompensa.tapete": "tapete {nombre}",
   "recompensa.color": "color {nombre}",
+  "recompensa.marco": "marco {nombre}",
+  "recompensa.titulo": "título «{nombre}»",
+  "recompensa.fondo": "fondo {nombre}",
 
   // ---------- Personajes ----------
   "animal.raton": "Ratón",
@@ -81,6 +94,8 @@ export const es = {
   "animal.pato": "Pato",
   "animal.ciervo": "Ciervo",
   "animal.castor": "Castor",
+  "animal.oveja": "Oveja",
+  "animal.gallina": "Gallina",
 
   // ---------- Colores de jugador ----------
   "color.pino": "Pino",
@@ -99,6 +114,11 @@ export const es = {
   "color.rosa": "Rosa chicle",
   "color.lavanda": "Lavanda",
   "color.esmeralda": "Esmeralda",
+  "color.menta": "Menta",
+  "color.cielo": "Cielo",
+  "color.mandarina": "Mandarina",
+  "color.carbon": "Carbón",
+  "color.uva": "Uva",
   "color.otro": "Color",
 
   // ---------- Tapetes ----------
@@ -112,6 +132,41 @@ export const es = {
   "tapete.ondas": "Ondas",
   "tapete.flores": "Flores",
   "tapete.pinzas": "Pinzas",
+  "tapete.escoces": "Escocés",
+  "tapete.espiga": "Espiga",
+  "tapete.nubes": "Nubes",
+  "tapete.calcetines": "Calcetines",
+
+  // ---------- Marcos del avatar ----------
+  "marco.sencillo": "Sencillo",
+  "marco.madera": "Madera",
+  "marco.cuerda": "Cuerda de tender",
+  "marco.laurel": "Laurel",
+  "marco.plata": "Plata",
+  "marco.oro": "Oro",
+  "marco.arcoiris": "Arcoíris",
+
+  // ---------- Títulos (bajo tu nombre) ----------
+  "titulo.ninguno": "Sin título",
+  "titulo.aprendiz": "Aprendiz de la colada",
+  "titulo.vecina-red": "Estrella de internet",
+  "titulo.terror": "Terror del vecindario",
+  "titulo.impermeable": "A prueba de chaparrones",
+  "titulo.cerebro": "Cerebro de la colada",
+  "titulo.plusmarquista": "Plusmarquista",
+  "titulo.campeona": "Campeona del patio",
+  "titulo.agente": "Agente secreta",
+  "titulo.rey-calcetin": "Rey del calcetín",
+  "titulo.leyenda": "Leyenda del tendal",
+  "titulo.gran-maestra": "Gran maestra del tendal",
+
+  // ---------- Fondos de mesa ----------
+  "fondo.madera": "Roble",
+  "fondo.pino": "Pino claro",
+  "fondo.nogal": "Nogal",
+  "fondo.baldosas": "Baldosas del patio",
+  "fondo.mantel": "Mantel de merienda",
+  "fondo.cesped": "Césped",
 
   // ---------- Estilos de dibujo ----------
   "estilo.fusion": "Fusión (tu mezcla)",
@@ -154,7 +209,7 @@ export const es = {
 
   // ---------- Logros ----------
   "logros.nuevo": "¡Nuevo logro!",
-  "logros.hasDesbloqueado": "Has desbloqueado el {recompensa}",
+  "logros.hasDesbloqueado": "Desbloqueas: {recompensa}",
   "logros.deTotal": "de {n}",
   "logros.conseguidos": "logros conseguidos",
   "logros.recompensas": "recompensas desbloqueadas",
@@ -207,6 +262,28 @@ export const es = {
   "logro.leyenda.desc": "Gana 25 partidas.",
   "logro.secadero.nombre": "Secadero mayor",
   "logro.secadero.desc": "Seca 250 prendas en total.",
+  "logro.pinza-a-pinza.nombre": "Pinza a pinza",
+  "logro.pinza-a-pinza.desc": "Seca 10 prendas en total.",
+  "logro.tres-coladas.nombre": "Le vas cogiendo el tranquillo",
+  "logro.tres-coladas.desc": "Juega 3 partidas.",
+  "logro.casa-con-jaleo.nombre": "Casa con jaleo",
+  "logro.casa-con-jaleo.desc": "Juega una partida de 3 o 4 jugadores.",
+  "logro.vecina-traviesa.nombre": "Vecina traviesa",
+  "logro.vecina-traviesa.desc": "Juega 5 cartas de fastidio.",
+  "logro.hola-vecinos.nombre": "Hola, vecinos",
+  "logro.hola-vecinos.desc": "Juega una partida online.",
+  "logro.entrenamiento.nombre": "Entrenamiento de patio",
+  "logro.entrenamiento.desc": "Juega 10 partidas contra la IA.",
+  "logro.costumbre.nombre": "Costumbre de barrio",
+  "logro.costumbre.desc": "Juega en 7 días distintos.",
+  "logro.tendedero-lleno.nombre": "Tendedero a rebosar",
+  "logro.tendedero-lleno.desc": "Seca 14 prendas en una sola partida.",
+  "logro.temporada.nombre": "Toda una temporada",
+  "logro.temporada.desc": "Juega en 30 días distintos.",
+  "logro.lavanderia.nombre": "Lavandería industrial",
+  "logro.lavanderia.desc": "Seca 1000 prendas en total.",
+  "logro.gran-maestra.nombre": "Gran maestra del tendal",
+  "logro.gran-maestra.desc": "Gana 50 partidas.",
 
   // ---------- Amigos ----------
   "amigos.copiar": "Copiar",
@@ -266,6 +343,7 @@ export const es = {
   "dorso.cuerdas": "Cuerdas",
   "dorso.dias": "Días",
   "dorso.objetivos": "Objetivos",
+  "dorso.prendas": "Prendas",
   "loseta.titulo": "Cuerdas",
   "leyenda.basica.nombre": "Básica",
   "leyenda.basica.texto": "Sin habilidad.",
@@ -354,6 +432,17 @@ export const es = {
   "mesa.partidaTerminada": "partida terminada",
   "mesa.noTuTurno": "no es tu turno",
   "mesa.jugarla": "Jugarla",
+  "mesa.vistazo": "Mantén para ver todos",
+  "mesa.vistazoTitulo": "Mantén pulsado (o la tecla Tab) para ver todos los tendederos a la vez",
+  "mesa.secas.ver": "Ver las prendas secas de {nombre}",
+  "mesa.secas.verTuyas": "Ver tus prendas secas",
+  "mesa.secas.titulo": "Prendas secas de {nombre}",
+  "mesa.secas.tuyas": "Tus prendas secas",
+  "mesa.secas.total#one": "{n} prenda",
+  "mesa.secas.total#other": "{n} prendas",
+  "mesa.secas.ninguna": "Todavía no ha secado ninguna prenda.",
+  "mesa.secas.porColor": "Por color:",
+  "mesa.secas.objetivos": "Cómo vas con tus objetivos",
 
   "mesa.turno.respondes": "¿Respondes?",
   "mesa.turno.decidiendo": "Decidiendo…",
@@ -455,6 +544,9 @@ export const es = {
   "mesa.mazoAcciones": "Mazo de acciones: {n} cartas",
   "mesa.pilaCuerdas": "Cuerdas · {n}",
   "mesa.pilaAcciones": "Acciones · {n}",
+  "mesa.mazoPrendas": "Mazo de prendas: {n} cartas",
+  "mesa.pilaPrendas": "Prendas · {n}",
+  "mesa.mojadas": "{n} de humedad por cartas que mojan",
   "mesa.descarte": "Descarte",
   "mesa.descarteVacio": "descarte",
 
@@ -496,6 +588,7 @@ export const es = {
   "anuncio.seRompe": "¡Se rompe la cuerda!",
   "anuncio.cuerdaDe": "{carta} de {jugador}",
   "anuncio.jugadorN": "Jugador {n}",
+  "anuncio.repartoRonda": "Reparto: cada uno coge de una cesta",
 
   // ---------- Registro de la partida (lo que escribe el motor) ----------
   // «.yo»: la misma línea cuando la protagonizas tú.
@@ -709,4 +802,5 @@ export const es = {
   "galeria.objetivos": "Objetivos (63 × 88 mm): un solo mazo, comunes y secretos son iguales",
   "galeria.dorsos": "Dorsos",
   "galeria.loseta": "Loseta (100 × 132 mm)",
+  "galeria.prendas": "Prendas (41 × 63 mm por hueco; para revisar el dibujo)",
 };

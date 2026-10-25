@@ -13,15 +13,24 @@ import {
   type Partida,
   type Patron,
 } from "@tendedero/motor";
+import { hayTexto, tLibre } from "../i18n";
 import { admisible, jugadaDe, type Arrastre, type Destino } from "../mesa/contexto";
 import { ANIMALES } from "../prototipos/Animales";
 import { COLORES_JUGADOR, type Perfil } from "../prototipos/MenuPartida";
 import type { Prenda as PrendaDibujo, TIPOS } from "../prototipos/Prototipos";
 
-/** Una prenda del motor en el formato de las cartas dibujadas (el color va en hexadecimal). */
+/**
+ * Una prenda del motor en el formato de las cartas dibujadas (el color va en hexadecimal). La humedad es la de
+ * su escala: la que viene de cartas que mojan se dibuja aparte, como cartitas junto a la prenda (`humedadExtra`).
+ */
 export function prendaDibujo(p: Partida, id: string): PrendaDibujo {
   const pr = p.prendas[id];
-  return { id, tipo: pr.tipo as keyof typeof TIPOS, color: p.catalogo.colores[pr.color]?.hex ?? "#ccc", humedad: pr.humedad };
+  return { id, tipo: pr.tipo as keyof typeof TIPOS, color: p.catalogo.colores[pr.color]?.hex ?? "#ccc", humedad: pr.humedad - humedadExtra(p, id) };
+}
+
+/** Cartas de mojar que tiene al lado una prenda (una gota cada una). */
+export function humedadExtra(p: Partida, id: string): number {
+  return Math.min(p.prendas[id]?.extra ?? 0, p.prendas[id]?.humedad ?? 0);
 }
 
 /** Cómo se dibuja una carta de cuerda: su efecto y, en las de pinzas de color, el color de las pinzas. */
@@ -40,13 +49,10 @@ export function huecosLibres(p: Partida, jugador: number, linea: number, posicio
   return defCarta(p, t.carta).espacios - t.colgadas.reduce((s, c) => s + tipoDe(p, c.prenda).espacios, 0);
 }
 
-const NOMBRE_TIPO: Record<string, [string, string]> = { calcetin: ["calcetín", "calcetines"], camiseta: ["camiseta", "camisetas"], toalla: ["toalla", "toallas"] };
-const NOMBRE_COLOR: Record<string, [string, string]> = { blanco: ["blanca", "blancas"], azul: ["azul", "azules"], rojo: ["roja", "rojas"], amarillo: ["amarilla", "amarillas"] };
-
-/** «3 rojas», «1 toalla»… para el botón de cada opción del reparto. */
+/** «3 rojas», «1 toalla»… para el botón de cada opción del reparto, en el idioma elegido (claves reparto.color.* y reparto.tipo.*). */
 export function textoPatron(patron: Patron, n: number): string {
-  const nombres = "color" in patron ? (NOMBRE_COLOR[patron.color] ?? [patron.color, patron.color]) : (NOMBRE_TIPO[patron.tipo] ?? [patron.tipo, patron.tipo]);
-  return `${n} ${nombres[n === 1 ? 0 : 1]}`;
+  const clave = "color" in patron ? `reparto.color.${patron.color}` : `reparto.tipo.${patron.tipo}`;
+  return hayTexto(clave) ? tLibre(clave, { n }) : `${n} ${"color" in patron ? patron.color : patron.tipo}`;
 }
 
 /** Lo que se puede coger de una cesta o del centro: cada color y cada tipo que haya, con cuántas prendas son. */

@@ -1,4 +1,5 @@
 import { useState, type CSSProperties, type HTMLAttributes } from "react";
+import { t } from "../i18n";
 import { GotaBosque, PrendaBosque } from "./ArteBosque";
 import { CartaCuerdaBosque } from "./CartasBosque";
 import { COLORES, TIPOS, type Prenda } from "./Prototipos";
@@ -7,8 +8,11 @@ import { COLORES, TIPOS, type Prenda } from "./Prototipos";
 // Lo que asoma por debajo del borde es la humedad que le queda; al secarse se sube un paso y se esconde una
 // gota. Tres diseños de escala para comparar, con botones para secar y mojar.
 
-/** Filas de la escala: la humedad más alta que puede marcar una prenda. */
-export const MAXIMO = 5;
+/**
+ * Filas de la escala: la humedad inicial más alta (la de la toalla). Lo que se moje de más no sube por la escala:
+ * se marca con cartas de mojar junto a la prenda. Va a la par con --filas del CSS.
+ */
+export const MAXIMO = 3;
 
 export type Variante = "columna" | "regla" | "filas";
 
@@ -94,7 +98,7 @@ export function CartaPrendaHumeda({ p, variante = "columna", className, style, .
       </div>
       <div className="hp-pie">
         <span className="pb-puntos">{TIPOS[p.tipo].puntos}</span>
-        <span className="hp-coste" title={`Gasta ${esp} ${esp === 1 ? "pinza" : "pinzas"}`}>
+        <span className="hp-coste" title={t("carta.gastaPinzas", { n: esp })}>
           {Array.from({ length: esp }, (_, i) => (
             <i key={i} />
           ))}

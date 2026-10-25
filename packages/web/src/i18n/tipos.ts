@@ -12,7 +12,9 @@ export type Categoria = "zero" | "one" | "two" | "few" | "many" | "other";
 type ClaveEs = keyof typeof es & string;
 
 /** Claves que tienen plural, sin el «#categoría». */
-export type ClavePlural = ClaveEs extends `${infer B}#${string}` ? B : never;
+export type ClavePlural = BaseDePlural<ClaveEs>;
+// Genérico para que el condicional se reparta clave a clave por la unión.
+type BaseDePlural<K> = K extends `${infer B}#${string}` ? B : never;
 
 /** Las claves que se piden con t(): las simples y las de plural sin su «#categoría». */
 export type Clave = Exclude<ClaveEs, `${string}#${string}`> | ClavePlural;

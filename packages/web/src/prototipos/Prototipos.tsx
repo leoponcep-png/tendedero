@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { flushSync } from "react-dom";
+import { useT } from "../i18n";
 import acciones from "../../../../data/acciones.json";
 import cuerdas from "../../../../data/cuerdas.json";
 import { ArteCesta, ArteCuerda } from "../arte/Escena";
@@ -353,11 +354,13 @@ export function Barra({
   textoRival?: string;
 }) {
   const v = VERSIONES.find((x) => x.id === version) ?? VERSIONES[0];
+  const t = useT();
+  // Barra de herramienta de desarrollo: los nombres y lemas de las versiones se quedan en español.
   return (
     <header className="proto-barra">
-      <button onClick={onVolver}>← Inicio</button>
+      <button onClick={onVolver}>{t("barra.inicio")}</button>
       <div className="proto-titulo">
-        <strong>Prototipos de mesa</strong>
+        <strong>{t("barra.titulo")}</strong>
         <span>{v.lema}</span>
       </div>
       <nav className="proto-versiones">
@@ -374,7 +377,7 @@ export function Barra({
           </button>
         )}
         <button disabled={ocupado} onClick={onReiniciar}>
-          Reiniciar
+          {t("barra.reiniciar")}
         </button>
       </div>
     </header>

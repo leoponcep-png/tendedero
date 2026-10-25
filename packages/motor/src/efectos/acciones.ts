@@ -1,5 +1,5 @@
 import { secarPrenda } from "../estado/secado";
-import { caer, defCarta, descolgar, localizar, nombrePrenda, numero, prendaEn, robar } from "../estado/utilidades";
+import { caer, defCarta, descolgar, localizar, mojarPrenda, nombrePrenda, numero, prendaEn, quitarHumedad, robar } from "../estado/utilidades";
 import { anotar, no, refPrenda } from "../estado/registro";
 import type { Partida } from "../estado/tipos";
 import type { JugadaDe } from "../jugadas/tipos";
@@ -14,8 +14,8 @@ function cartaObjetivo(p: Partida, j: JugadaDe<"jugarAccion">) {
 }
 
 function cambiarHumedad(p: Partida, prenda: string, cambio: number) {
-  p.prendas[prenda].humedad = Math.max(0, p.prendas[prenda].humedad + cambio);
-  if (p.prendas[prenda].humedad === 0) secarPrenda(p, prenda);
+  if (cambio > 0) mojarPrenda(p, prenda, cambio);
+  else if (quitarHumedad(p, prenda, -cambio)) secarPrenda(p, prenda);
 }
 
 function mover(p: Partida, j: JugadaDe<"jugarAccion">) {
@@ -51,7 +51,8 @@ export const efectosAccion: Record<string, EfectoAccion> = {
     validar: (p, j) => (cartaObjetivo(p, j).colgadas.length ? null : no("cuerdaSinPrendas", "Esa carta de cuerda no tiene prendas.")),
     aplicar(p, j, params) {
       const h = numero(params, "humedad", 1);
-      for (const { prenda } of cartaObjetivo(p, j).colgadas) p.prendas[prenda].humedad += h;
+      // En digital, cada prenda de la cuerda se marca con su carta de mojar.
+      for (const { prenda } of cartaObjetivo(p, j).colgadas) mojarPrenda(p, prenda, h);
       anotar(p, "mojaCuerda", { jugador: j.objetivo!.jugador, h }, `Las prendas de esa cuerda de ${p.jugadores[j.objetivo!.jugador].nombre} ganan ${h} de humedad.`);
     },
   },
@@ -71,7 +72,7 @@ export const efectosAccion: Record<string, EfectoAccion> = {
     etiquetas: ["fastidio", "moja"],
     aplicar(p, j, params) {
       const h = numero(params, "humedad", 1);
-      p.prendas[j.objetivo!.prenda!].humedad += h;
+      mojarPrenda(p, j.objetivo!.prenda!, h);
       anotar(p, "ganaHumedad", { prenda: refPrenda(p, j.objetivo!.prenda!), h }, `${nombrePrenda(p, j.objetivo!.prenda!)} gana ${h} de humedad.`);
     },
   },

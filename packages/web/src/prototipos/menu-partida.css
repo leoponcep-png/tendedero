@@ -137,6 +137,11 @@
   border-color: var(--tactica);
   color: #fff;
 }
+.menu-ayuda-dificultad {
+  margin: 6px 0 0;
+  font-size: 0.85em;
+  opacity: 0.75;
+}
 .menu-rivales {
   display: flex;
   flex-direction: column;

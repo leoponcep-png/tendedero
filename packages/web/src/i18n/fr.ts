@@ -60,11 +60,17 @@ export const fr: Textos = {
     "perfil.personaje": "Personnage",
     "perfil.color": "Couleur",
     "perfil.tapete": "Tapis",
+    "perfil.marco": "Cadre de l'avatar",
+    "perfil.titulo": "Titre",
+    "perfil.fondo": "Fond de table",
     "perfil.miraLogros": "Regarde dans l'onglet Succès.",
     "perfil.seDesbloquea": "Se débloque avec le succès « {logro} » : {descripcion}",
     "recompensa.animal": "personnage {nombre}",
     "recompensa.tapete": "tapis {nombre}",
     "recompensa.color": "couleur {nombre}",
+    "recompensa.marco": "cadre {nombre}",
+    "recompensa.titulo": "titre « {nombre} »",
+    "recompensa.fondo": "fond {nombre}",
 
     // ---------- Personajes ----------
     "animal.raton": "Souris",
@@ -83,6 +89,8 @@ export const fr: Textos = {
     "animal.pato": "Canard",
     "animal.ciervo": "Cerf",
     "animal.castor": "Castor",
+    "animal.oveja": "Brebis",
+    "animal.gallina": "Poule",
 
     // ---------- Colores de jugador ----------
     "color.pino": "Sapin",
@@ -101,6 +109,11 @@ export const fr: Textos = {
     "color.rosa": "Rose bonbon",
     "color.lavanda": "Lavande",
     "color.esmeralda": "Émeraude",
+    "color.menta": "Menthe",
+    "color.cielo": "Ciel",
+    "color.mandarina": "Mandarine",
+    "color.carbon": "Charbon",
+    "color.uva": "Raisin",
     "color.otro": "Couleur",
 
     // ---------- Tapetes ----------
@@ -114,6 +127,41 @@ export const fr: Textos = {
     "tapete.ondas": "Vagues",
     "tapete.flores": "Fleurs",
     "tapete.pinzas": "Pinces",
+    "tapete.escoces": "Écossais",
+    "tapete.espiga": "Chevrons",
+    "tapete.nubes": "Nuages",
+    "tapete.calcetines": "Chaussettes",
+
+    // ---------- Marcos del avatar ----------
+    "marco.sencillo": "Simple",
+    "marco.madera": "Bois",
+    "marco.cuerda": "Corde à linge",
+    "marco.laurel": "Laurier",
+    "marco.plata": "Argent",
+    "marco.oro": "Or",
+    "marco.arcoiris": "Arc-en-ciel",
+
+    // ---------- Títulos ----------
+    "titulo.ninguno": "Sans titre",
+    "titulo.aprendiz": "Petite main de la lessive",
+    "titulo.vecina-red": "Star d'Internet",
+    "titulo.terror": "Terreur du quartier",
+    "titulo.impermeable": "À l'épreuve des averses",
+    "titulo.cerebro": "Cerveau de la lessive",
+    "titulo.plusmarquista": "As du record",
+    "titulo.campeona": "Championne de la cour",
+    "titulo.agente": "Agente secrète",
+    "titulo.rey-calcetin": "Roi de la chaussette",
+    "titulo.leyenda": "Légende de l'étendoir",
+    "titulo.gran-maestra": "Grande prêtresse de l'étendoir",
+
+    // ---------- Fondos de mesa ----------
+    "fondo.madera": "Chêne",
+    "fondo.pino": "Pin clair",
+    "fondo.nogal": "Noyer",
+    "fondo.baldosas": "Carrelage de la cour",
+    "fondo.mantel": "Nappe de goûter",
+    "fondo.cesped": "Pelouse",
 
     // ---------- Estilos de dibujo ----------
     "estilo.fusion": "Fusion (ton mélange)",
@@ -209,6 +257,28 @@ export const fr: Textos = {
     "logro.leyenda.desc": "Gagne 25 parties.",
     "logro.secadero.nombre": "Grand séchoir",
     "logro.secadero.desc": "Fais sécher 250 vêtements au total.",
+    "logro.pinza-a-pinza.nombre": "Pince après pince",
+    "logro.pinza-a-pinza.desc": "Fais sécher 10 vêtements au total.",
+    "logro.tres-coladas.nombre": "Tu prends le pli",
+    "logro.tres-coladas.desc": "Joue 3 parties.",
+    "logro.casa-con-jaleo.nombre": "Du monde à la maison",
+    "logro.casa-con-jaleo.desc": "Joue une partie à 3 ou 4 joueurs.",
+    "logro.vecina-traviesa.nombre": "Voisine espiègle",
+    "logro.vecina-traviesa.desc": "Joue 5 cartes Embêtement.",
+    "logro.hola-vecinos.nombre": "Bonjour, les voisins",
+    "logro.hola-vecinos.desc": "Joue une partie en ligne.",
+    "logro.entrenamiento.nombre": "Entraînement dans la cour",
+    "logro.entrenamiento.desc": "Joue 10 parties contre l'IA.",
+    "logro.costumbre.nombre": "Habituée du quartier",
+    "logro.costumbre.desc": "Joue 7 jours différents.",
+    "logro.tendedero-lleno.nombre": "Étendoir plein à craquer",
+    "logro.tendedero-lleno.desc": "Fais sécher 14 vêtements en une seule partie.",
+    "logro.temporada.nombre": "Toute une saison",
+    "logro.temporada.desc": "Joue 30 jours différents.",
+    "logro.lavanderia.nombre": "Blanchisserie industrielle",
+    "logro.lavanderia.desc": "Fais sécher 1000 vêtements au total.",
+    "logro.gran-maestra.nombre": "Grande prêtresse de l'étendoir",
+    "logro.gran-maestra.desc": "Gagne 50 parties.",
 
     // ---------- Amigos ----------
     "amigos.copiar": "Copier",
@@ -272,6 +342,7 @@ export const fr: Textos = {
     "dorso.cuerdas": "Cordes",
     "dorso.dias": "Jours",
     "dorso.objetivos": "Objectifs",
+    "dorso.prendas": "Vêtements",
     "loseta.titulo": "Cordes",
     "leyenda.basica.nombre": "Simple",
     "leyenda.basica.texto": "Sans pouvoir.",
@@ -367,6 +438,18 @@ export const fr: Textos = {
     "mesa.partidaTerminada": "partie terminée",
     "mesa.noTuTurno": "ce n'est pas ton tour",
     "mesa.jugarla": "La jouer",
+    "mesa.vistazo": "Maintiens pour tout voir",
+    "mesa.vistazoTitulo": "Maintiens appuyé (ou la touche Tab) pour voir tous les étendoirs à la fois",
+    "mesa.secas.ver": "Voir le linge sec chez {nombre}",
+    "mesa.secas.verTuyas": "Voir tes vêtements secs",
+    "mesa.secas.titulo": "Linge sec chez {nombre}",
+    "mesa.secas.tuyas": "Tes vêtements secs",
+    "mesa.secas.total#one": "{n} vêtement",
+    "mesa.secas.total#many": "{n} vêtements",
+    "mesa.secas.total#other": "{n} vêtements",
+    "mesa.secas.ninguna": "Aucun vêtement sec pour l'instant.",
+    "mesa.secas.porColor": "Par couleur :",
+    "mesa.secas.objetivos": "Où tu en es de tes objectifs",
 
     "mesa.turno.respondes": "Tu réponds ?",
     "mesa.turno.decidiendo": "Réfléchit…",
@@ -474,6 +557,9 @@ export const fr: Textos = {
     "mesa.mazoAcciones": "Pioche d'actions : {n} cartes",
     "mesa.pilaCuerdas": "Cordes · {n}",
     "mesa.pilaAcciones": "Actions · {n}",
+    "mesa.mazoPrendas": "Pioche de vêtements : {n} cartes",
+    "mesa.pilaPrendas": "Vêtements · {n}",
+    "mesa.mojadas": "{n} d'humidité due aux cartes qui mouillent",
     "mesa.descarte": "Défausse",
     "mesa.descarteVacio": "défausse",
 
@@ -515,6 +601,7 @@ export const fr: Textos = {
     "anuncio.seRompe": "La corde casse !",
     "anuncio.cuerdaDe": "{carta} ({jugador})",
     "anuncio.jugadorN": "Joueur {n}",
+    "anuncio.repartoRonda": "Distribution : chacun se sert dans un panier",
 
     // ---------- Registro de la partida ----------
     "registro.partidaCreada": "Partie créée pour {n} joueurs.",
@@ -739,6 +826,7 @@ export const fr: Textos = {
     "galeria.objetivos": "Objectifs (63 × 88 mm) : une seule pioche, communs et secrets sont pareils",
     "galeria.dorsos": "Dos",
     "galeria.loseta": "Tuile (100 × 132 mm)",
+    "galeria.prendas": "Vêtements (41 × 63 mm par emplacement ; pour vérifier le dessin)",
   },
 
   cartas: {

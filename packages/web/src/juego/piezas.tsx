@@ -14,15 +14,18 @@ import {
   type Patron,
   type Partida,
 } from "@tendedero/motor";
+import { esNombreTu, nombreVisible, t, t as tr, useT } from "../i18n";
+import { lineasRegistro } from "../i18n/juego";
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { admisible, jugadaDe, movidaHacia, type Arrastre, type Destino } from "../mesa/contexto";
 import { Animal } from "../prototipos/Animales";
-import { colorEstilo, PrendaBosque } from "../prototipos/ArteBosque";
+import { colorEstilo, IconoBosque, PrendaBosque } from "../prototipos/ArteBosque";
 import { DorsoBosque, LosetaBosque } from "../prototipos/CartasBosque";
 import type { Perfil } from "../prototipos/MenuPartida";
+import { CintaTitulo } from "../prototipos/perfil/Comunes";
 import { CartaAccion, CartaCuerda, CartaDeMano, CartaObjetivoJuego, CartaPrenda } from "./cartas";
-import { activo, useJuego } from "./contexto";
-import { cuerdaDibujo, huecosLibres, opcionesReparto, sePuedeJugar } from "./vista";
+import { activo, useJuego, useSoloVer } from "./contexto";
+import { cuerdaDibujo, huecosLibres, humedadExtra, opcionesReparto, sePuedeJugar } from "./vista";
 
 /** Ancho de la carta de prenda colgada, en huecos (las cartas de cuerda miden 3). */
 const ANCHO_PRENDA = 1.45;
@@ -78,11 +81,11 @@ export function Tapete({ jugador, perfil }: { jugador: number; perfil: Perfil })
 function avisos(p: Partida, jugador: number, linea: number, posicion: number, t: CartaTendida): string[] {
   const lista: string[] = [];
   const quedan = rondasHastaRomperse(p, t);
-  if (quedan !== null) lista.push(quedan <= 1 ? "se rompe al acabar la ronda" : `se rompe en ${quedan} rondas`);
-  if (t.protegida) lista.push("protegida");
+  if (quedan !== null) lista.push(quedan <= 1 ? tr("mesa.nota.rompeYa") : tr("mesa.nota.rompeEn", { n: quedan }));
+  if (t.protegida) lista.push(tr("mesa.nota.protegida"));
   const arriba = p.jugadores[jugador].lineas[linea - 1]?.cartas[posicion];
-  if (arriba && efectoDeCuerda(p, arriba.carta)?.efecto.cubreAbajo?.length) lista.push("bajo techo");
-  if (t.colocadaPor !== undefined && t.colocadaPor !== jugador) lista.push(`la puso ${p.jugadores[t.colocadaPor].nombre}`);
+  if (arriba && efectoDeCuerda(p, arriba.carta)?.efecto.cubreAbajo?.length) lista.push(tr("mesa.nota.bajoTecho"));
+  if (t.colocadaPor !== undefined && t.colocadaPor !== jugador) lista.push(tr("mesa.nota.laPuso", { nombre: nombreVisible(p.jugadores[t.colocadaPor].nombre) }));
   return lista;
 }
 
@@ -147,7 +150,7 @@ function CuerdaTendida({ jugador, linea, posicion, tendida }: { jugador: number;
       ].join(" ")}
     >
       <CartaCuerda p={p} carta={tendida.carta} className="mb-cuerda-carta me-cuerda-carta" data-lupa={`carta:${tendida.carta}`} />
-      <span className={`me-pinzas-libres ${libres === 0 ? "llena" : ""}`}>{libres === 0 ? "llena" : `${libres} ${libres === 1 ? "pinza libre" : "pinzas libres"}`}</span>
+      <span className={`me-pinzas-libres ${libres === 0 ? "llena" : ""}`}>{libres === 0 ? t("mesa.llena") : t("mesa.pinzasLibres", { n: libres })}</span>
       {notas.length > 0 && (
         <span className={`mj-notas ${rompe ? "peligro" : ""}`} title={notas.join(" · ")}>
           {notas.join(" · ")}
@@ -156,7 +159,8 @@ function CuerdaTendida({ jugador, linea, posicion, tendida }: { jugador: number;
       {tendida.colgadas.map((c, i) => {
         const esp = tipoDe(p, c.prenda).espacios;
         const x = c.inicio + esp / 2 - ANCHO_PRENDA / 2;
-        return (
+        const mojadas = humedadExtra(p, c.prenda);
+        return [
           <CartaPrenda
             key={c.prenda}
             p={p}
@@ -171,11 +175,21 @@ function CuerdaTendida({ jugador, linea, posicion, tendida }: { jugador: number;
               o?.prenda === c.prenda ? "moviendo" : "",
             ].join(" ")}
             style={{ "--x": x, "--orden": i } as CSSProperties}
-          />
-        );
+          />,
+          // Las cartas que la han mojado, al lado de la prenda: una gota cada una (se quitan antes que su escala).
+          mojadas > 0 && (
+            <div key={`${c.prenda}-mojada`} className="mj-mojadas" data-mojadas={c.prenda} style={{ "--x": x, "--orden": i } as CSSProperties} title={t("mesa.mojadas", { n: mojadas })}>
+              {Array.from({ length: mojadas }, (_, k) => (
+                <span key={k} className="mj-ficha-moja" style={{ "--k": k } as CSSProperties}>
+                  <IconoBosque id="mojar-cuerda-rival" />
+                </span>
+              ))}
+            </div>
+          ),
+        ];
       })}
       {actual?.tipo === "fantasma" && (
-        <div className="mj-fantasma" style={{ "--x": actual.x, "--h": p.prendas[actual.prenda].humedad, "--colgada-pinzas": colorEstilo(dib.pinzas ?? "#c99a62") } as CSSProperties} />
+        <div className="mj-fantasma" style={{ "--x": actual.x, "--h": p.prendas[actual.prenda].humedad - humedadExtra(p, actual.prenda), "--colgada-pinzas": colorEstilo(dib.pinzas ?? "#c99a62") } as CSSProperties} />
       )}
       {destinos.map((d, i) => (
         <Ranura key={i} destino={d as Destino & { tipo: "espacio" }} jugada={jugadas[i]} activa={hay} onEncima={(si) => setEncima((e) => (si ? i : e === i ? null : e))} />
@@ -187,7 +201,8 @@ function CuerdaTendida({ jugador, linea, posicion, tendida }: { jugador: number;
 /** Uno de los huecos de una carta de cuerda: se puede soltar encima (arrastrando) o pulsar (con algo elegido). */
 function Ranura({ destino, jugada, activa, onEncima }: { destino: Destino & { tipo: "espacio" }; jugada: Jugada | null; activa: boolean; onEncima: (si: boolean) => void }) {
   const { jugar } = useJuego();
-  const { setNodeRef, isOver } = useDroppable({ id: `ranura:${destino.jugador}:${destino.linea}:${destino.posicion}:${destino.inicio}`, data: destino });
+  const soloVer = useSoloVer();
+  const { setNodeRef, isOver } = useDroppable({ disabled: soloVer, id: `${soloVer ? "vistazo:" : ""}ranura:${destino.jugador}:${destino.linea}:${destino.posicion}:${destino.inicio}`, data: destino });
   useEffect(() => onEncima(isOver), [isOver]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div
@@ -205,7 +220,8 @@ function Ranura({ destino, jugada, activa, onEncima }: { destino: Destino & { ti
 function Hueco({ jugador, linea, posicion }: { jugador: number; linea: number; posicion: number }) {
   const { jugar } = useJuego();
   const destino: Destino = { tipo: "hueco", jugador, linea };
-  const { setNodeRef, isOver } = useDroppable({ id: `hueco:${jugador}:${linea}`, data: destino });
+  const soloVer = useSoloVer();
+  const { setNodeRef, isOver } = useDroppable({ disabled: soloVer, id: `${soloVer ? "vistazo:" : ""}hueco:${jugador}:${linea}`, data: destino });
   const jugada = useJugadaEn(destino, posicion);
   return (
     <div
@@ -214,7 +230,7 @@ function Hueco({ jugador, linea, posicion }: { jugador: number; linea: number; p
       className={`mb-hueco me-hueco mj-hueco ${jugada ? "valido" : ""} ${jugada && isOver ? "resaltada" : ""}`}
       onClick={jugada ? () => jugar(jugada) : undefined}
     >
-      <span>cuerda</span>
+      <span>{t("mesa.huecoCuerda")}</span>
     </div>
   );
 }
@@ -225,12 +241,12 @@ function PorTender({ jugador }: { jugador: number }) {
   const pendientes = p.jugadores[jugador].pendientes;
   return (
     <div className="mb-portender" data-pila={`porTender-${jugador}`}>
-      <div className="mb-portender-titulo">Por tender</div>
+      <div className="mb-portender-titulo">{t("mesa.porTender")}</div>
       <div className="mb-portender-cartas">
         {pendientes.map((id) => (
           <Pendiente key={id} jugador={jugador} prenda={id} />
         ))}
-        {pendientes.length === 0 && <div className="mf-pila-vacia">Sin prendas: llegan en el reparto</div>}
+        {pendientes.length === 0 && <div className="mf-pila-vacia">{t("mesa.sinPrendas")}</div>}
       </div>
     </div>
   );
@@ -242,7 +258,8 @@ function Pendiente({ jugador, prenda }: { jugador: number; prenda: string }) {
   const a: Arrastre = { tipo: "prenda", jugador, prenda };
   const mia = jugador === yo;
   const jugable = mia && puedoJugar && sePuedeJugar(p, a);
-  const { setNodeRef, listeners, attributes, isDragging } = useDraggable({ id: `prenda:${prenda}`, data: a, disabled: !jugable });
+  const soloVer = useSoloVer();
+  const { setNodeRef, listeners, attributes, isDragging } = useDraggable({ id: `${soloVer ? "vistazo:" : ""}prenda:${prenda}`, data: a, disabled: !jugable || soloVer });
   const elegida = sel?.tipo === "prenda" && sel.prenda === prenda;
   return (
     <div ref={setNodeRef} {...(jugable ? listeners : {})} {...attributes} className={`mj-pendiente ${isDragging ? "arrastrando" : ""}`}>
@@ -347,46 +364,48 @@ export function PanelJugador({ jugador, perfil, turno, onVer }: { jugador: numbe
       className={`mf-panel mj-panel ${turno ? "turno" : ""} ${vista === jugador ? "viendo" : ""}`}
       style={{ "--jugador": perfil.color } as CSSProperties}
       data-panel={jugador}
+      data-marco={perfil.marco ?? "sencillo"}
       onClick={onVer}
       role="button"
-      title={jugador === yo ? "Ver tu tendedero" : `Ver el tendedero de ${perfil.nombre}`}
+      title={jugador === yo ? t("mesa.secas.verTuyas") : t("mesa.secas.ver", { nombre: nombreVisible(perfil.nombre) })}
     >
       <div className="mf-panel-cabeza">
         <Animal id={perfil.animal} className="mf-panel-animal" />
         <div className="mf-panel-nombre">
-          {perfil.nombre}
-          {jugador === yo && <small> (tú)</small>}
+          {nombreVisible(perfil.nombre)}
+          {jugador === yo && !esNombreTu(perfil.nombre) && <small> {t("mesa.tuMarca")}</small>}
+          {perfil.titulo && perfil.titulo !== "ninguno" && <CintaTitulo className="mf-panel-titulo" titulo={perfil.titulo} />}
         </div>
-        <div className="mf-panel-puntos" data-puntos={jugador} title="Puntos">
+        <div className="mf-panel-puntos" data-puntos={jugador} title={t("mesa.puntos")}>
           {d.puntos}
         </div>
       </div>
       <div className="mf-panel-datos">
-        <span className="mf-dato" data-pila={`secas-${jugador}`} title="Prendas secas">
+        <span className="mf-dato" data-pila={`secas-${jugador}`} title={t("mesa.prendasSecas")}>
           <i className="mf-icono mf-icono-seca" />
-          {d.seca.length} secas
+          {t("mesa.secas", { n: d.seca.length })}
         </span>
-        <span className="mf-dato" data-panel-portender={jugador} title="Prendas por tender">
+        <span className="mf-dato" data-panel-portender={jugador} title={t("mesa.prendasPorTender")}>
           <i className="mf-icono mf-icono-tender" />
-          {d.pendientes.length} por tender
+          {t("mesa.porTenderN", { n: d.pendientes.length })}
         </span>
-        <span className="mf-dato" title="Prendas colgadas">
+        <span className="mf-dato" title={t("mesa.prendasColgadas")}>
           <i className="mf-icono mf-icono-colgada" />
-          {colgadas} colgadas
+          {t("mesa.colgadas", { n: colgadas })}
         </span>
-        <span className="mf-dato" title="Cartas de cuerda tendidas">
+        <span className="mf-dato" title={t("mesa.cuerdasTendidas")}>
           <i className="mf-icono mf-icono-cuerda" />
-          {cuerdas}/{lineas * cartasPorLinea} cuerdas
+          {t("mesa.cuerdasN", { n: cuerdas, max: lineas * cartasPorLinea })}
         </span>
         {d.trofeos.length > 0 && (
-          <span className="mf-dato" title="Cuerdas viejas que le pusiste a un rival y se rompieron allí">
+          <span className="mf-dato" title={t("mesa.trofeosTitulo")}>
             <i className="mf-icono mj-icono-trofeo" />
-            {d.trofeos.length} trofeos
+            {t("mesa.trofeos", { n: d.trofeos.length })}
           </span>
         )}
       </div>
       {jugador !== yo && (
-        <div className="mf-panel-mano mj-panel-mano" data-mano-panel={jugador} title={`${d.mano.length} cartas en la mano`}>
+        <div className="mf-panel-mano mj-panel-mano" data-mano-panel={jugador} title={t("mesa.cartasEnMano", { n: d.mano.length })}>
           {d.mano.map((_, i) => (
             <div key={i} className="carta-p mb-accion tapada" style={{ "--i": i } as CSSProperties}>
               <div className="carta-giro">
@@ -395,7 +414,7 @@ export function PanelJugador({ jugador, perfil, turno, onVer }: { jugador: numbe
               </div>
             </div>
           ))}
-          <span>{d.mano.length} cartas</span>
+          <span>{t("mesa.cartas", { n: d.mano.length })}</span>
         </div>
       )}
       {turno && <div className="mf-turno">{turno}</div>}
@@ -405,43 +424,41 @@ export function PanelJugador({ jugador, perfil, turno, onVer }: { jugador: numbe
 
 // ---------- Registro ----------
 
-/** El motor escribe en tercera persona; si te llamas «Tú», tus líneas se pasan a segunda («Tú coge» → «Tú coges»). */
-function enSegunda(t: string): string {
-  return t.replace(/^Tú (\p{L}+)/u, (_, verbo: string) => `Tú ${verbo}s`).replace(/^(Tú \p{L}+ )su /u, "$1tu ");
-}
-
 export function Registro({ abierto, onAbrir }: { abierto: boolean; onAbrir: (si: boolean) => void }) {
   const { p, perfiles, yo } = useJuego();
-  const lineas = p.registro.slice(-80).reverse();
-  // Quién protagoniza cada línea: el primer jugador cuyo nombre la abre.
-  const quien = (t: string) => perfiles.findIndex((pf, i) => t.startsWith(`${p.jugadores[i]?.nombre ?? pf.nombre} `));
+  useT();
+  // El registro estructurado del motor, en el idioma elegido; tus líneas, en segunda persona.
+  const lineas = useMemo(
+    () => lineasRegistro({ p, yo, nombre: (j) => nombreVisible(perfiles[j]?.nombre ?? p.jugadores[j]?.nombre ?? "") }).slice(-80).reverse(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [p, yo, perfiles, t("menu.tu")],
+  );
   if (!abierto) {
     return (
-      <button className="mf-registro mj-registro-cerrado" onClick={() => onAbrir(true)} title="Abrir el registro">
-        <span>Lo que ha pasado</span>
+      <button className="mf-registro mj-registro-cerrado" onClick={() => onAbrir(true)} title={t("mesa.abrirRegistro")}>
+        <span>{t("mesa.loQueHaPasado")}</span>
       </button>
     );
   }
   return (
-    <aside className="mf-registro mj-registro" aria-label="Registro de la partida">
+    <aside className="mf-registro mj-registro" aria-label={t("mesa.registroPartida")}>
       <h2>
-        Lo que ha pasado
-        <button className="mj-plegar" onClick={() => onAbrir(false)} title="Plegar el registro" aria-label="Plegar el registro">
+        {t("mesa.loQueHaPasado")}
+        <button className="mj-plegar" onClick={() => onAbrir(false)} title={t("mesa.plegarRegistro")} aria-label={t("mesa.plegarRegistro")}>
           ›
         </button>
       </h2>
       <ol>
-        {lineas.map((t, i) => {
-          const j = quien(t);
-          const separador = t.startsWith("—");
+        {lineas.map((l, i) => {
+          const j = l.jugador ?? -1;
           return (
-            <li key={p.registro.length - i} className={separador ? "mj-separador" : ""} style={{ "--jugador": j >= 0 ? perfiles[j].color : "#8a7356" } as CSSProperties}>
-              {j >= 0 ? <Animal id={perfiles[j].animal} className="mf-registro-animal" /> : !separador && <span className="mf-registro-ronda">·</span>}
-              <p>{j === yo && p.jugadores[yo].nombre === "Tú" ? enSegunda(t) : t}</p>
+            <li key={p.registro.length - i} className={l.separador ? "mj-separador" : ""} style={{ "--jugador": j >= 0 && perfiles[j] ? perfiles[j].color : "#8a7356" } as CSSProperties}>
+              {j >= 0 && perfiles[j] ? <Animal id={perfiles[j].animal} className="mf-registro-animal" /> : !l.separador && <span className="mf-registro-ronda">·</span>}
+              <p>{l.texto}</p>
             </li>
           );
         })}
-        {lineas.length === 0 && <li className="mf-registro-vacio">Aún no ha pasado nada.</li>}
+        {lineas.length === 0 && <li className="mf-registro-vacio">{t("mesa.registroVacio")}</li>}
       </ol>
     </aside>
   );
@@ -455,13 +472,13 @@ export function Registro({ abierto, onAbrir }: { abierto: boolean; onAbrir: (si:
  */
 function Bolsa({ cuantas }: { cuantas: number }) {
   return (
-    <div className="mj-mazo-prendas" data-bolsa title={`Mazo de prendas: ${cuantas} cartas`}>
+    <div className="mj-mazo-prendas" data-bolsa title={t("mesa.mazoPrendas", { n: cuantas })}>
       {Array.from({ length: Math.min(3, Math.max(1, Math.ceil(cuantas / 12))) }, (_, i) => (
         <div key={i} className="mj-dorso-prenda" style={{ translate: `${-i * 2}px ${-i * 2}px` }}>
           <DorsoBosque clase="prendas" />
         </div>
       ))}
-      <span className="mb-pila-nombre">Prendas · {cuantas}</span>
+      <span className="mb-pila-nombre">{t("mesa.pilaPrendas", { n: cuantas })}</span>
     </div>
   );
 }
@@ -489,12 +506,12 @@ export function Reparto() {
   const marca = (o: Origen, id: string) => (resaltado && resaltado.origen === clave(o) ? (cumpleP(id, resaltado.patron) ? "destacada" : "apagada") : "");
   const quien = perfiles[p.turno.jugador];
   const aviso = !repartiendo
-    ? "A jugar: cartas, prendas y, al final, terminar el turno"
+    ? t("reparto.aJugar")
     : miTurno
       ? fase === "cesta"
-        ? "Te toca: abre una cesta y llévate todo un color o todo un tipo. Lo demás va al centro."
-        : "Te toca: llévate del centro todo un color o todo un tipo."
-      : `${quien?.nombre ?? "Alguien"} está cogiendo ${fase === "cesta" ? "de una cesta" : "del centro"}…`;
+        ? t("reparto.teTocaCesta")
+        : t("reparto.teTocaCentro")
+      : t(fase === "cesta" ? "reparto.cogiendoCesta" : "reparto.cogiendoCentro", { jugador: quien ? nombreVisible(quien.nombre) : t("reparto.alguien") });
 
   const monton = (o: Origen, titulo: string, prendas: string[], extra: Record<string, unknown>) => {
     const k = clave(o);
@@ -521,7 +538,7 @@ export function Reparto() {
             />
           ))}
         </div>
-        {prendas.length === 0 && <div className="me-cesta-vacia">{o === "centro" ? "vacío" : "vacía"}</div>}
+        {prendas.length === 0 && <div className="me-cesta-vacia">{o === "centro" ? t("reparto.centroVacio") : t("reparto.cestaVacia")}</div>}
         {abierto === k && elegible && (
           <div className="me-opciones">
             {opcionesReparto(p, o).map((op) => (
@@ -556,13 +573,13 @@ export function Reparto() {
     <div className="me-reparto">
       <div className={`me-reparto-aviso ${miTurno ? "tu-turno" : ""}`} style={{ "--jugador": repartiendo ? quien?.color : "#2b2019" } as CSSProperties}>
         {repartiendo && quien && <Animal id={quien.animal} className="me-reparto-animal" />}
-        <span className="me-ronda">Ronda {p.ronda}</span>
-        {p.ultimaRonda && <span className="me-ronda mj-ultima">Última ronda</span>}
+        <span className="me-ronda">{t("reparto.ronda", { n: p.ronda })}</span>
+        {p.ultimaRonda && <span className="me-ronda mj-ultima">{t("reparto.ultimaRonda")}</span>}
         <span>{aviso}</span>
       </div>
       <div className={`me-montones ${abierto !== null ? "hay-abierta" : ""}`}>
-        {p.cestas.map((c, i) => monton({ cesta: i }, `Cesta ${i + 1}`, c, { "data-cesta": i }))}
-        {monton("centro", "Centro", p.centro, { "data-centro": "" })}
+        {p.cestas.map((c, i) => monton({ cesta: i }, t("reparto.cesta", { n: i + 1 }), c, { "data-cesta": i }))}
+        {monton("centro", t("reparto.centro"), p.centro, { "data-centro": "" })}
         <Bolsa cuantas={p.bolsa.length} />
       </div>
     </div>
@@ -575,15 +592,15 @@ export function Mazos() {
   const descarte = p.descartes.acciones.at(-1);
   return (
     <div className="mb-mazos">
-      <div className="mb-pila mb-pila-cuerdas" data-pila="mazo-cuerdas" title={`Mazo de cuerdas: ${p.mazos.cuerdas.length} cartas`}>
+      <div className="mb-pila mb-pila-cuerdas" data-pila="mazo-cuerdas" title={t("mesa.mazoCuerdas", { n: p.mazos.cuerdas.length })}>
         {[0, 1, 2].map((i) => (
           <div key={i} className="mb-dorso-cuerda" style={{ translate: `${-i * 2}px ${-i * 2}px` }}>
             <DorsoBosque clase="cuerdas" />
           </div>
         ))}
-        <span className="mb-pila-nombre">Cuerdas · {p.mazos.cuerdas.length}</span>
+        <span className="mb-pila-nombre">{t("mesa.pilaCuerdas", { n: p.mazos.cuerdas.length })}</span>
       </div>
-      <div className="mb-pila" data-pila="mazo" title={`Mazo de acciones: ${p.mazos.acciones.length} cartas`}>
+      <div className="mb-pila" data-pila="mazo" title={t("mesa.mazoAcciones", { n: p.mazos.acciones.length })}>
         {[0, 1, 2].map((i) => (
           <div key={i} className="carta-p tapada" style={{ translate: `${-i * 2}px ${-i * 2}px` }}>
             <div className="carta-giro">
@@ -591,11 +608,11 @@ export function Mazos() {
             </div>
           </div>
         ))}
-        <span className="mb-pila-nombre">Acciones · {p.mazos.acciones.length}</span>
+        <span className="mb-pila-nombre">{t("mesa.pilaAcciones", { n: p.mazos.acciones.length })}</span>
       </div>
-      <div className="mb-pila" data-pila="descarte" title="Descarte">
-        {descarte ? <CartaAccion p={p} carta={descarte} data-lupa={`carta:${descarte}`} /> : <div className="pila-vacia">descarte</div>}
-        <span className="mb-pila-nombre">Descarte</span>
+      <div className="mb-pila" data-pila="descarte" title={t("mesa.descarte")}>
+        {descarte ? <CartaAccion p={p} carta={descarte} data-lupa={`carta:${descarte}`} /> : <div className="pila-vacia">{t("mesa.descarteVacio")}</div>}
+        <span className="mb-pila-nombre">{t("mesa.descarte")}</span>
       </div>
     </div>
   );

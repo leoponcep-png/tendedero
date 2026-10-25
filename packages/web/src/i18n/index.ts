@@ -130,6 +130,11 @@ export function tLibre(clave: string, vars?: Variables, id: Idioma = actual): st
   return texto === undefined ? clave : rellenar(texto, vars);
 }
 
+/** Como tLibre(), pero si la clave no existe en ningún idioma devuelve `espanol` (p. ej. el nombre de un catálogo). */
+export function tO(clave: string, espanol: string, vars?: Variables): string {
+  return hayTexto(clave) ? tLibre(clave, vars) : rellenar(espanol, vars);
+}
+
 /** Si una clave existe (en el idioma actual o en español). */
 export function hayTexto(clave: string): boolean {
   return buscar(actual, clave, undefined) !== undefined || buscar(IDIOMA_RESERVA, clave, undefined) !== undefined;
@@ -147,6 +152,18 @@ export function textoObjetivo(id: string, campo: "nombre" | "texto", espanol: st
 
 /** Si las cartas del idioma actual tienen su propia traducción (si no, se usa el texto en español tal cual). */
 export const cartaTraducida = (id: string, campo: "nombre" | "texto") => DICCIONARIOS[actual].cartas[id]?.[campo] !== undefined;
+
+/**
+ * El nombre por defecto del jugador («Tú», «You», «Du»…) en cualquier idioma: si alguien no se cambió el nombre,
+ * al cambiar de idioma se le enseña el del idioma nuevo.
+ */
+export function esNombreTu(nombre: string): boolean {
+  const n = nombre.trim().toLowerCase();
+  return Object.values(DICCIONARIOS).some((d) => d.ui["menu.tu"]?.toLowerCase() === n);
+}
+
+/** Cómo se enseña un nombre de jugador: el nombre por defecto, en el idioma actual. */
+export const nombreVisible = (nombre: string) => (esNombreTu(nombre) ? t("menu.tu") : nombre);
 
 /** Para fechas y números: el locale de Intl del idioma actual. */
 export const localeActual = () => datosIdioma(actual).locale;

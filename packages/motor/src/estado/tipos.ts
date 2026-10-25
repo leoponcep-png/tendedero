@@ -8,7 +8,13 @@ export interface Prenda {
   id: string;
   tipo: string;
   color: string;
+  /** Humedad total: la de su escala más extra. */
   humedad: number;
+  /**
+   * Humedad de más por cartas que mojan (se dejan junto a la prenda, una gota cada una). Al secarse se quitan
+   * primero estas y después baja la escala de la prenda. Sin el campo, 0.
+   */
+  extra?: number;
 }
 
 /** Prenda colgada en una carta de cuerda, desde el espacio `inicio` (0 = el de la izquierda). */

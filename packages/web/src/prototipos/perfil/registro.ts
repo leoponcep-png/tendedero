@@ -30,6 +30,8 @@ export interface ResumenPartida {
   animal?: string;
   /** Opcional: código de la sala si fue online. */
   codigoSala?: string;
+  /** Opcional: dificultad de la IA si fue contra la IA («facil», «normal» o «dificil»). */
+  dificultad?: "facil" | "normal" | "dificil";
 }
 
 export function leerPartidas(): ResumenPartida[] {

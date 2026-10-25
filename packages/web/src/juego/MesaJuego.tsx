@@ -7,31 +7,32 @@ import { DndContext, DragOverlay, PointerSensor, pointerWithin, useDroppable, us
 import {
   cartaDeReaccion,
   cierraLaRonda,
-  defCarta,
   efectoAccion,
   maxCuerdasRobadas,
-  motivoInvalida,
-  nombrePrenda,
+  porQueNoVale,
+  type Dificultad,
   type Jugada,
   type JugadaDe,
   type Partida,
 } from "@tendedero/motor";
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
 import { flushSync } from "react-dom";
+import { nombreVisible, t, useT } from "../i18n";
+import { nombreCarta, nombreObjetivoId, nombrePrendaT, textoMotivo } from "../i18n/juego";
+import { SelectorIdioma, tNodos } from "../i18n/react";
 import { admisible, jugadaDe, necesitaDestino, type Arrastre, type Destino } from "../mesa/contexto";
 import { Animal } from "../prototipos/Animales";
 import { DefsBosque } from "../prototipos/ArteBosque";
 import * as fx from "../prototipos/efectos";
 import { useAjustarMesa } from "../prototipos/ajustar";
 import type { Perfil } from "../prototipos/MenuPartida";
-import { ESTILOS } from "../prototipos/MesaBosque";
 import { AvisoLogros } from "../prototipos/perfil/AvisoLogros";
 import { registrarPartida } from "../prototipos/perfil/registro";
-import { VERSIONES } from "../prototipos/Prototipos";
 import { animarJugada, despuesDe, olvidarVuelta, restaurar, volverVista, type Escena } from "./animar";
 import { CartaAccion, CartaDeMano, CartaDiaJuego, CartaObjetivoJuego, CartaPrenda } from "./cartas";
 import { ContextoJuego, type Juego } from "./contexto";
 import { Lupa } from "./Lupa";
+import { Mosaico, VentanaSecas } from "./Vistazos";
 import { Mano, Mazos, Objetivos, PanelJugador, Registro, Reparto, Tapete } from "./piezas";
 import { sinObjetivo } from "./vista";
 import "../prototipos/prototipos.css";
@@ -62,6 +63,8 @@ export interface PropsMesaJuego {
   onOcupado?: (ocupado: boolean) => void;
   /** Online: el código de la sala, para apuntarlo en el perfil. */
   codigoSala?: string;
+  /** Contra la IA: su nivel, para apuntarlo en el perfil. */
+  dificultad?: Dificultad;
 }
 
 function leer(clave: string, porDefecto: string): string {
@@ -93,28 +96,28 @@ function recienLlegados(antes: Partida, despues: Partida): Set<string> {
 /** Qué pulsar para completar una acción de dos pasos. */
 function textoSegundoPaso(p: Partida, j: JugadaDe<"jugarAccion">): string {
   const o = j.objetivo!;
-  const cuerda = defCarta(p, p.jugadores[o.jugador].lineas[o.linea].cartas[o.posicion].carta).nombre;
+  const cuerda = nombreCarta(p, p.jugadores[o.jugador].lineas[o.linea].cartas[o.posicion].carta);
   switch (efectoAccion(p, j.carta)?.blanco) {
     case "cambiarPrendas":
-      return `Pulsa la prenda tuya con la que intercambiar la ${nombrePrenda(p, o.prenda!)}.`;
+      return t("mesa.paso.cambiarPrendas", { prenda: nombrePrendaT(p, o.prenda!) });
     case "cambiarCuerdas":
-      return `Pulsa otra carta de cuerda tuya para intercambiar lo colgado con ${cuerda}.`;
+      return t("mesa.paso.cambiarCuerdas", { cuerda });
     case "moverCuerda":
-      return `Pulsa otra carta de cuerda tuya para cambiarlas de sitio, o un hueco libre para llevar ${cuerda} al final de esa línea.`;
+      return t("mesa.paso.moverCuerda", { cuerda });
     default:
-      return `Pulsa el hueco al que mover la ${nombrePrenda(p, o.prenda!)}.`;
+      return t("mesa.paso.mover", { prenda: nombrePrendaT(p, o.prenda!) });
   }
 }
 
 /** «sobre tu calcetín rojo» o «sobre tu Cuerda básica», según a qué apunte el fastidio. */
 function textoObjetivoAtaque(p: Partida, j: Jugada): string {
-  if (j.tipo === "colocarCuerda") return " en tu tendedero";
+  if (j.tipo === "colocarCuerda") return t("mesa.ataqueEnTendedero");
   if (j.tipo !== "jugarAccion" || !j.objetivo) return "";
   const o = j.objetivo;
   const blanco = efectoAccion(p, j.carta)?.blanco ?? "";
-  if (o.prenda && /prenda|mover|cambiarPrendas/i.test(blanco)) return ` sobre tu ${nombrePrenda(p, o.prenda)}`;
-  const t = p.jugadores[o.jugador]?.lineas[o.linea]?.cartas[o.posicion];
-  return t ? ` sobre tu ${defCarta(p, t.carta).nombre}` : "";
+  if (o.prenda && /prenda|mover|cambiarPrendas/i.test(blanco)) return t("mesa.ataqueSobre", { cosa: nombrePrendaT(p, o.prenda) });
+  const tendida = p.jugadores[o.jugador]?.lineas[o.linea]?.cartas[o.posicion];
+  return tendida ? t("mesa.ataqueSobre", { cosa: nombreCarta(p, tendida.carta) }) : "";
 }
 
 /** Escala el tendedero para que quepa en su sitio y deja acercarlo (rueda o botones) sin perder nitidez. */
@@ -166,7 +169,7 @@ const colision: CollisionDetection = (args) => {
   return concretas.length ? concretas : todas;
 };
 
-export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJugada, onSalir, onNueva, conexion, avisoExterno, onOcupado, codigoSala }: PropsMesaJuego) {
+export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJugada, onSalir, onNueva, conexion, avisoExterno, onOcupado, codigoSala, dificultad }: PropsMesaJuego) {
   const [mostrada, setMostrada] = useState(partida);
   const mostradaRef = useRef(partida);
   const cola = useRef<{ partida: Partida; jugada?: Jugada }[]>([]);
@@ -180,6 +183,9 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
   const [arrastre, setArrastre] = useState<Arrastre | null>(null);
   const [movimiento, setMovimiento] = useState<JugadaDe<"jugarAccion"> | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
+  useT();
+  // Cómo se enseña cada jugador (el «Tú» por defecto, en el idioma elegido).
+  const nombreDe = (j: number) => nombreVisible(perfiles[j]?.nombre ?? mostrada.jugadores[j]?.nombre ?? "");
   const [robarCuerdas, setRobarCuerdas] = useState<number | null>(null);
   const [verFinal, setVerFinal] = useState(true);
 
@@ -197,10 +203,33 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
   const [conLupa, setConLupa] = useState(() => leer("tendedero-lupa", "si") === "si");
   const [animaciones, setAnimaciones] = useState(() => leer("tendedero-animaciones", "si") === "si");
   const [tamano, setTamano] = useState(() => Number(leer("tendedero-tamano", "1")) || 1);
-  const [estilo, setEstilo] = useState(() => leer("tendedero-estilo", "fusion"));
+  // El estilo de dibujo ya está decidido: siempre la fusión.
+  const estilo = "fusion";
   const [menu, setMenu] = useState(false);
   const [registroAbierto, setRegistroAbierto] = useState(() => leer("tendedero-registro", "si") === "si");
   const [zoom, setZoom] = useState(1);
+  // Ventana con las prendas secas de un jugador (al pulsar su ficha) y mosaico de todos los tendederos (mientras se mantiene).
+  const [secasDe, setSecasDe] = useState<number | null>(null);
+  const [vistazo, setVistazo] = useState(false);
+  useEffect(() => {
+    // Mantener Tab enseña todos los tendederos; al soltarla vuelve la vista normal.
+    const fuera = (e: KeyboardEvent) => e.target instanceof HTMLElement && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName);
+    const abajo = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" || fuera(e)) return;
+      e.preventDefault();
+      setVistazo(true);
+    };
+    const arriba = (e: KeyboardEvent) => e.key === "Tab" && setVistazo(false);
+    const soltar = () => setVistazo(false);
+    window.addEventListener("keydown", abajo);
+    window.addEventListener("keyup", arriba);
+    window.addEventListener("blur", soltar);
+    return () => {
+      window.removeEventListener("keydown", abajo);
+      window.removeEventListener("keyup", arriba);
+      window.removeEventListener("blur", soltar);
+    };
+  }, []);
 
   const raiz = useRef<HTMLDivElement>(null);
   const lienzo = useRef<HTMLDivElement | null>(null);
@@ -363,6 +392,7 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
       rivales: p.final.filter((r) => r.jugador !== yo).map((r) => perfiles[r.jugador]?.nombre ?? p.jugadores[r.jugador].nombre),
       animal: perfiles[yo]?.animal,
       codigoSala,
+      ...(modo === "ia" && { dificultad: dificultad ?? "normal" }),
     });
     setVerFinal(true);
   }, [p, yo, modo]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -446,12 +476,20 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
       if (admisible(p, j)) {
         setMovimiento(j);
         setSel(null);
-      } else setAviso(motivoInvalida(p, j));
+      } else setAviso(motivo(j));
       return;
     }
     setSel(null);
     setMovimiento(null);
-    setAviso(onJugada(j));
+    // El motivo que devuelve onJugada viene en castellano: se vuelve a sacar estructurado para enseñarlo traducido.
+    const r = onJugada(j);
+    setAviso(r && (motivo(j) ?? r));
+  }
+
+  /** Por qué no vale una jugada, en el idioma elegido. */
+  function motivo(j: Jugada): string | null {
+    const m = porQueNoVale(p, j);
+    return m ? textoMotivo(m, { p, yo, nombre: nombreDe }) : null;
   }
 
   function elegir(a: Arrastre | null) {
@@ -480,7 +518,7 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
     if (destino.tipo === "mesa") return;
     const j = jugadaDe(p, a, destino);
     if (j && admisible(p, j)) jugar(j);
-    else if (j) setAviso(motivoInvalida(p, j));
+    else if (j) setAviso(motivo(j));
   }
 
   const juego: Juego = {
@@ -503,12 +541,12 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
 
   function etiquetaTurno(j: number): string | null {
     if (p.terminada) return null;
-    if (p.reaccion) return p.reaccion.defensor === j ? (j === yo ? "¿Respondes?" : "Decidiendo…") : null;
-    if (eligiendoObjetivo) return p.jugadores[j].objetivosOfrecidos.length ? "Elige objetivo" : null;
+    if (p.reaccion) return p.reaccion.defensor === j ? (j === yo ? t("mesa.turno.respondes") : t("mesa.turno.decidiendo")) : null;
+    if (eligiendoObjetivo) return p.jugadores[j].objetivosOfrecidos.length ? t("mesa.turno.eligeObjetivo") : null;
     if (p.turno.jugador !== j) return null;
-    if (enReparto) return j === yo ? "Te toca coger" : "Cogiendo prendas";
-    if (fase === "descartar") return "Descartando";
-    return j === yo ? "Tu turno" : "Jugando…";
+    if (enReparto) return j === yo ? t("mesa.turno.teTocaCoger") : t("mesa.turno.cogiendo");
+    if (fase === "descartar") return t("mesa.turno.descartando");
+    return j === yo ? t("mesa.turno.tuTurno") : t("mesa.turno.jugando");
   }
 
   const maxCuerdas = maxCuerdasRobadas(p);
@@ -518,25 +556,25 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
 
   let ayuda: ReactNode;
   let extra: ReactNode = null;
-  if (p.terminada) ayuda = "La partida ha terminado";
+  if (p.terminada) ayuda = t("mesa.ayuda.terminada");
   else if (movimiento) ayuda = textoSegundoPaso(p, movimiento);
-  else if (descartando) ayuda = `Tienes ${p.jugadores[yo].mano.length} cartas: pulsa las que descartas hasta quedarte con ${ajustes.limiteMano}`;
-  else if (sel?.tipo === "prenda") ayuda = "Pulsa un hueco libre de tus cuerdas (se ilumina al pasar por encima). Esc para cancelar";
-  else if (sel?.tipo === "cuerda") ayuda = "Pulsa un hueco de una línea, o una cuerda básica o vieja tuya para mejorarla. Esc para cancelar";
+  else if (descartando) ayuda = t("mesa.ayuda.descartar", { n: p.jugadores[yo].mano.length, limite: ajustes.limiteMano });
+  else if (sel?.tipo === "prenda") ayuda = t("mesa.ayuda.prenda");
+  else if (sel?.tipo === "cuerda") ayuda = t("mesa.ayuda.cuerda");
   else if (sel?.tipo === "accion" && sinObjetivo(p, sel.carta)) {
-    ayuda = `${defCarta(p, sel.carta).nombre}: se juega sin objetivo`;
+    ayuda = t("mesa.ayuda.sinObjetivo", { carta: nombreCarta(p, sel.carta) });
     extra = (
       <button className="principal mj-jugar-ya" onClick={() => jugar({ tipo: "jugarAccion", jugador: yo, carta: sel.carta })}>
-        Jugarla
+        {t("mesa.jugarla")}
       </button>
     );
-  } else if (sel?.tipo === "accion") ayuda = "Pulsa su objetivo: cambia de tendedero con las pestañas. Esc para cancelar";
+  } else if (sel?.tipo === "accion") ayuda = t("mesa.ayuda.accion");
   else if (!libre) ayuda = "…";
-  else if (eligiendoObjetivo) ayuda = tengoQueElegir ? "Elige tu objetivo secreto" : "Esperando a que los demás elijan su objetivo secreto";
-  else if (p.reaccion) ayuda = tengoQueResponder ? "¿Anulas el fastidio?" : `Esperando a que ${perfiles[p.reaccion.defensor]?.nombre} decida si lo anula`;
-  else if (enReparto) ayuda = miTurno ? (fase === "centro" ? "Reparto: abre el centro y elige color o tipo" : "Reparto: abre una cesta de arriba y elige color o tipo") : `Reparto: le toca a ${perfiles[turno.jugador]?.nombre}`;
-  else if (miTurno) ayuda = "Arrastra (o pulsa) cartas y prendas; al acabar, termina el turno";
-  else ayuda = `Juega ${perfiles[turno.jugador]?.nombre}…`;
+  else if (eligiendoObjetivo) ayuda = tengoQueElegir ? t("mesa.ayuda.eligeObjetivo") : t("mesa.ayuda.esperandoObjetivos");
+  else if (p.reaccion) ayuda = tengoQueResponder ? t("mesa.ayuda.anulas") : t("mesa.ayuda.esperandoAnula", { jugador: nombreDe(p.reaccion.defensor) });
+  else if (enReparto) ayuda = miTurno ? (fase === "centro" ? t("mesa.ayuda.repartoCentro") : t("mesa.ayuda.repartoCesta")) : t("mesa.ayuda.repartoOtro", { jugador: nombreDe(turno.jugador) });
+  else if (miTurno) ayuda = t("mesa.ayuda.tuTurno");
+  else ayuda = t("mesa.ayuda.juegaOtro", { jugador: nombreDe(turno.jugador) });
 
   const arrastrada = arrastre ? (arrastre.tipo === "prenda" ? `prenda:${arrastre.prenda}` : `carta:${arrastre.carta}`) : null;
   const ataque = p.reaccion?.jugada;
@@ -548,17 +586,17 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
       {!p.terminada && !enReparto && (
         <div className="mj-robo-bloque">
           {puedoJugar && (
-            <div className="mj-robo" role="group" aria-label="Qué robas al terminar">
-              <span>Robar:</span>
+            <div className="mj-robo" role="group" aria-label={t("mesa.queRobas")}>
+              <span>{t("mesa.robar")}</span>
               {Array.from({ length: maxCuerdas + 1 }, (_, c) => (
-                <button key={c} className={c === cuerdasElegidas ? "activa" : ""} onClick={() => setRobarCuerdas(c)} title={`${c} de cuerda y ${totalRobo - c} de acción`}>
+                <button key={c} className={c === cuerdasElegidas ? "activa" : ""} onClick={() => setRobarCuerdas(c)} title={t("mesa.roboTitulo", { c, a: totalRobo - c })}>
                   {c}<i className="mj-ico cuerda" /> {totalRobo - c}<i className="mj-ico accion" />
                 </button>
               ))}
             </div>
           )}
-          <div className="mj-contadores" title="Lo que llevas jugado en este turno">
-            cuerdas {turno.cuerdasJugadas}/{ajustes.jugablesPorTurno.cuerdas + turno.cuerdasExtra} · acciones {turno.accionesJugadas}/{ajustes.jugablesPorTurno.acciones}
+          <div className="mj-contadores" title={t("mesa.contadoresTitulo")}>
+            {t("mesa.contadores", { c: turno.cuerdasJugadas, cmax: ajustes.jugablesPorTurno.cuerdas + turno.cuerdasExtra, a: turno.accionesJugadas, amax: ajustes.jugablesPorTurno.acciones })}
           </div>
         </div>
       )}
@@ -567,8 +605,8 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
         disabled={!puedoJugar}
         onClick={() => jugar({ tipo: "terminarTurno", jugador: yo, cuerdas: cuerdasElegidas })}
       >
-        <span>{puedoJugar && cierraLaRonda(p, yo) ? "Terminar turno y el día" : "Terminar turno"}</span>
-        <small>{puedoJugar ? `robas ${cuerdasElegidas} de cuerda y ${totalRobo - cuerdasElegidas} de acción` : p.terminada ? "partida terminada" : "no es tu turno"}</small>
+        <span>{puedoJugar && cierraLaRonda(p, yo) ? t("mesa.terminarTurnoDia") : t("mesa.terminarTurno")}</span>
+        <small>{puedoJugar ? t("mesa.robas", { c: cuerdasElegidas, a: totalRobo - cuerdasElegidas }) : p.terminada ? t("mesa.partidaTerminada") : t("mesa.noTuTurno")}</small>
       </button>
     </div>
   );
@@ -580,19 +618,20 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
           ref={raiz}
           className={`proto mb me mf mj con-estilos estilo-${estilo} ${sel || arrastre || movimiento ? "apuntando" : ""} ${!libre ? "ocupado" : ""}`}
           style={{ "--tamano": tamano } as CSSProperties}
+          data-fondo={perfiles[yo]?.fondo ?? "madera"}
         >
           <DefsBosque />
           <div className="mj-escala">
             <div className={`mf-juego mj-juego ${registroAbierto ? "" : "sin-registro"}`}>
-              <aside className="mf-jugadores mj-jugadores" aria-label="Jugadores">
+              <aside className="mf-jugadores mj-jugadores" aria-label={t("mesa.jugadores")}>
                 <div className="mj-arriba">
                   <button className="mj-boton-menu" onClick={() => setMenu((m) => !m)} aria-expanded={menu}>
-                    ☰ Menú
+                    {t("mesa.menu")}
                   </button>
                   {conexion}
                 </div>
                 {perfiles.map((pf, j) => (
-                  <PanelJugador key={j} jugador={j} perfil={pf} turno={etiquetaTurno(j)} onVer={() => verManual(j)} />
+                  <PanelJugador key={j} jugador={j} perfil={pf} turno={etiquetaTurno(j)} onVer={() => setSecasDe(j)} />
                 ))}
               </aside>
 
@@ -607,21 +646,42 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
               </section>
 
               <section className="mf-vista">
-                <nav className="mf-pestanas" aria-label="Tendederos">
+                <nav className="mf-pestanas" aria-label={t("mesa.tendederos")}>
                   {perfiles.map((pf, j) => (
                     <button key={j} className={`mf-pestana ${vista === j ? "activa" : ""}`} style={{ "--jugador": pf.color } as CSSProperties} onClick={() => verManual(j)}>
                       <Animal id={pf.animal} className="mf-pestana-animal" />
-                      {j === yo ? "Tu tendedero" : `Tendedero de ${pf.nombre}`}
+                      {j === yo ? t("mesa.tuTendedero") : t("mesa.tendederoDe", { nombre: nombreDe(j) })}
                     </button>
                   ))}
-                  <div className="mj-zoom" role="group" aria-label="Acercar el tendedero">
-                    <button onClick={() => setZoom((z) => Math.max(0.5, z / 1.2))} title="Alejar">
+                  <button
+                    className={`mj-vistazo ${vistazo ? "activa" : ""}`}
+                    title={t("mesa.vistazoTitulo")}
+                    onPointerDown={(e) => {
+                      try {
+                        // Así se suelta aunque el dedo o el ratón se salgan del botón.
+                        e.currentTarget.setPointerCapture(e.pointerId);
+                      } catch {
+                        // Sin captura también vale: se suelta con pointerup.
+                      }
+                      setVistazo(true);
+                    }}
+                    onPointerUp={() => setVistazo(false)}
+                    onPointerCancel={() => setVistazo(false)}
+                    onLostPointerCapture={() => setVistazo(false)}
+                    onKeyDown={(e) => e.key === " " && (e.preventDefault(), setVistazo(true))}
+                    onKeyUp={(e) => e.key === " " && setVistazo(false)}
+                    onContextMenu={(e) => e.preventDefault()}
+                  >
+                    {t("mesa.vistazo")}
+                  </button>
+                  <div className="mj-zoom" role="group" aria-label={t("mesa.acercarTendedero")}>
+                    <button onClick={() => setZoom((z) => Math.max(0.5, z / 1.2))} title={t("mesa.alejar")}>
                       −
                     </button>
-                    <button onClick={() => setZoom(1)} title="Ajustar al hueco">
-                      {Math.round(zoom * 100)} %
+                    <button onClick={() => setZoom(1)} title={t("mesa.ajustar")}>
+                      {t("comun.porcentaje", { n: Math.round(zoom * 100) })}
                     </button>
-                    <button onClick={() => setZoom((z) => Math.min(3, z * 1.2))} title="Acercar">
+                    <button onClick={() => setZoom((z) => Math.min(3, z * 1.2))} title={t("mesa.acercar")}>
                       +
                     </button>
                   </div>
@@ -635,13 +695,14 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
                     </div>
                   </div>
                 </LienzoSoltar>
+                {vistazo && <Mosaico perfiles={perfiles} yo={yo} />}
                 {(movimiento || p.ultimaRonda || aviso) && (
                   <div className="mj-bandas">
-                    {p.ultimaRonda && !p.terminada && <div className="mj-banda ultima">Última ronda: alguien ha llegado a {ajustes.umbralFinal} puntos</div>}
+                    {p.ultimaRonda && !p.terminada && <div className="mj-banda ultima">{t("mesa.ultimaRondaBanda", { n: ajustes.umbralFinal })}</div>}
                     {movimiento && (
                       <div className="mj-banda paso">
                         {textoSegundoPaso(p, movimiento)}
-                        <button onClick={() => setMovimiento(null)}>Cancelar</button>
+                        <button onClick={() => setMovimiento(null)}>{t("comun.cancelar")}</button>
                       </div>
                     )}
                     {aviso && <div className="mj-banda aviso">{aviso}</div>}
@@ -662,46 +723,31 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
 
           {menu && (
             <div className="mj-menu" onPointerDown={(e) => e.stopPropagation()}>
-              <h3>Opciones</h3>
+              <h3>{t("mesa.opciones")}</h3>
+              <div className="mj-menu-fila">
+                <SelectorIdioma />
+              </div>
               <label>
-                <input type="checkbox" checked={seguir} onChange={(e) => (setSeguir(e.target.checked), guardar("tendedero-seguir", e.target.checked ? "si" : "no"))} /> Ver las jugadas de los
-                rivales
+                <input type="checkbox" checked={seguir} onChange={(e) => (setSeguir(e.target.checked), guardar("tendedero-seguir", e.target.checked ? "si" : "no"))} /> {t("mesa.opVerJugadas")}
               </label>
               <label>
                 <input type="checkbox" checked={animaciones} onChange={(e) => (setAnimaciones(e.target.checked), guardar("tendedero-animaciones", e.target.checked ? "si" : "no"))} />{" "}
-                Animaciones (sin ellas la mesa cambia de golpe)
+                {t("mesa.opAnimaciones")}
               </label>
               <label>
-                <input type="checkbox" checked={conLupa} onChange={(e) => (setConLupa(e.target.checked), guardar("tendedero-lupa", e.target.checked ? "si" : "no"))} /> Lupa de carta al pasar
-                el ratón
+                <input type="checkbox" checked={conLupa} onChange={(e) => (setConLupa(e.target.checked), guardar("tendedero-lupa", e.target.checked ? "si" : "no"))} /> {t("mesa.opLupa")}
               </label>
               <div className="mj-menu-fila">
-                <span>Tamaño de la interfaz</span>
-                {TAMANOS.map((t) => (
-                  <button key={t} className={t === tamano ? "activa" : ""} onClick={() => (setTamano(t), guardar("tendedero-tamano", String(t)))}>
-                    {Math.round(t * 100)} %
+                <span>{t("mesa.opTamano")}</span>
+                {TAMANOS.map((tm) => (
+                  <button key={tm} className={tm === tamano ? "activa" : ""} onClick={() => (setTamano(tm), guardar("tendedero-tamano", String(tm)))}>
+                    {t("comun.porcentaje", { n: Math.round(tm * 100) })}
                   </button>
-                ))}
-              </div>
-              <div className="mj-menu-fila">
-                <span>Estilo de dibujo</span>
-                {ESTILOS.map((e) => (
-                  <button key={e.id} className={e.id === estilo ? "activa" : ""} onClick={() => (setEstilo(e.id), guardar("tendedero-estilo", e.id))}>
-                    {e.nombre}
-                  </button>
-                ))}
-              </div>
-              <div className="mj-menu-fila">
-                <span>Prototipos</span>
-                {VERSIONES.map((v) => (
-                  <a key={v.id} href={`#/prototipos/${v.id}`}>
-                    {v.id.toUpperCase()} · {v.nombre}
-                  </a>
                 ))}
               </div>
               <div className="mj-menu-botones">
-                <button onClick={() => setMenu(false)}>Cerrar</button>
-                <button onClick={onSalir}>{modo === "online" ? "Salir de la sala" : p.terminada ? "Volver al menú" : "Abandonar y volver al menú"}</button>
+                <button onClick={() => setMenu(false)}>{t("comun.cerrar")}</button>
+                <button onClick={onSalir}>{modo === "online" ? t("mesa.salirSala") : p.terminada ? t("mesa.volverMenu") : t("mesa.abandonar")}</button>
               </div>
             </div>
           )}
@@ -709,18 +755,18 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
           {tengoQueElegir && (
             <div className="fondo-modal mj-modal-fondo">
               <div className="mj-modal">
-                <h2>Elige tu objetivo secreto</h2>
-                <p>Te quedas uno; el otro vuelve a la caja. Al final da puntos según lo que hayas conseguido.</p>
+                <h2>{t("mesa.eligeObjetivoTitulo")}</h2>
+                <p>{t("mesa.eligeObjetivoTexto")}</p>
                 <div className="mj-elegir-objetivo">
                   {p.jugadores[yo].objetivosOfrecidos.map((id) => (
                     <button key={id} className="mj-opcion-objetivo" onClick={() => jugar({ tipo: "elegirObjetivo", jugador: yo, objetivo: id })}>
                       <CartaObjetivoJuego p={p} id={id} secreto className="grande" />
-                      <span className="principal">Quedármelo</span>
+                      <span className="principal">{t("mesa.quedarmelo")}</span>
                     </button>
                   ))}
                 </div>
                 <div className="mj-comunes">
-                  <h3>Objetivos comunes de esta partida</h3>
+                  <h3>{t("mesa.objetivosComunes")}</h3>
                   <Objetivos />
                 </div>
               </div>
@@ -730,7 +776,7 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
           {tengoQueResponder && ataque && (
             <div className="fondo-modal mj-modal-fondo">
               <div className="mj-modal mj-reaccion">
-                <h2>¡Te atacan!</h2>
+                <h2>{t("mesa.teAtacan")}</h2>
                 <div className="mj-reaccion-cartas">
                   <CartaAccion p={p} carta={ataque.carta} className="grande" />
                   <span className="mj-flecha">➜</span>
@@ -740,14 +786,18 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
                   })()}
                 </div>
                 <p>
-                  {perfiles[ataque.jugador]?.nombre} te juega <b>{defCarta(p, ataque.carta).nombre}</b>
-                  {textoObjetivoAtaque(p, ataque)}. ¿Lo anulas con tu
-                  «¡Ni hablar!»?
+                  {(() => {
+                    const objetivo = textoObjetivoAtaque(p, ataque);
+                    const carta = <b>{nombreCarta(p, ataque.carta)}</b>;
+                    return objetivo
+                      ? tNodos("mesa.teJuegaSobre", { jugador: nombreDe(ataque.jugador), carta, objetivo })
+                      : tNodos("mesa.teJuega", { jugador: nombreDe(ataque.jugador), carta });
+                  })()}
                 </p>
                 <div className="mj-menu-botones">
-                  <button onClick={() => jugar({ tipo: "responder", jugador: yo, anular: false })}>No, que pase</button>
+                  <button onClick={() => jugar({ tipo: "responder", jugador: yo, anular: false })}>{t("mesa.noQuePase")}</button>
                   <button className="principal" onClick={() => jugar({ tipo: "responder", jugador: yo, anular: true })}>
-                    ¡Ni hablar!
+                    {t("mesa.niHablar")}
                   </button>
                 </div>
               </div>
@@ -757,7 +807,7 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
           {p.terminada && p.final && verFinal && libre && <Final p={p} perfiles={perfiles} yo={yo} onCerrar={() => setVerFinal(false)} onNueva={onNueva} />}
           {p.terminada && !verFinal && (
             <button className="principal mj-ver-final" onClick={() => setVerFinal(true)}>
-              Ver la clasificación
+              {t("mesa.verClasificacion")}
             </button>
           )}
 
@@ -765,6 +815,7 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
             {muestra && <CartaDeMano p={p} carta={muestra} />}
           </div>
           <AvisoLogros color={perfiles[yo]?.color} />
+          {secasDe !== null && perfiles[secasDe] && <VentanaSecas p={p} jugador={secasDe} perfil={perfiles[secasDe]} yo={yo} onCerrar={() => setSecasDe(null)} />}
           <Lupa raiz={raiz} p={p} arrastrada={arrastrada} activa={conLupa} />
           <div className="capa-efectos" ref={fx.usarCapa} />
         </div>
@@ -783,30 +834,27 @@ function Final({ p, perfiles, yo, onCerrar, onNueva }: { p: Partida; perfiles: P
   const final = p.final!;
   const primero = p.primeroEnLlegar;
   const gano = final.find((r) => r.jugador === yo)?.puesto === 1;
+  const nombreDe = (j: number) => nombreVisible(perfiles[j]?.nombre ?? p.jugadores[j]?.nombre ?? "");
   return (
     <div className="fondo-modal mj-modal-fondo">
       <div className="mj-modal mj-final">
-        <h2>{gano ? "¡Has ganado!" : "Fin de la partida"}</h2>
-        <p className="nota">
-          {primero !== null
-            ? `${perfiles[primero]?.nombre} llegó primero a ${p.ajustes.umbralFinal} puntos; se terminó la ronda y se contaron los objetivos.`
-            : "Se acabó la ropa antes de que nadie llegara al final; se terminó la ronda y se contaron los objetivos."}
-        </p>
+        <h2>{gano ? t("final.ganaste") : t("final.fin")}</h2>
+        <p className="nota">{primero !== null ? t("final.llegoPrimero", { jugador: nombreDe(primero), n: p.ajustes.umbralFinal }) : t("final.sinRopa")}</p>
         <ol className="mj-clasificacion">
           {final.map((r) => {
             const pf = perfiles[r.jugador];
             return (
               <li key={r.jugador} className={`${r.puesto === 1 ? "ganador" : ""} ${r.jugador === yo ? "yo" : ""}`} style={{ "--jugador": pf?.color } as CSSProperties}>
-                <span className="mj-puesto">{r.puesto}.º</span>
+                <span className="mj-puesto">{t("comun.ordinal", { n: r.puesto })}</span>
                 <Animal id={pf?.animal ?? ""} className="mf-panel-animal" />
                 <div className="mj-final-nombre">
-                  <b>{pf?.nombre}</b>
-                  {r.jugador === primero && <small> llegó primero</small>}
+                  <b>{nombreDe(r.jugador)}</b>
+                  {r.jugador === primero && <small> {t("final.llegoPrimeroCorto")}</small>}
                   <div className="mj-desglose">
-                    <span>Ropa seca: {r.puntosPartida}</span>
+                    <span>{t("final.ropaSeca", { n: r.puntosPartida })}</span>
                     {r.objetivos.map((o) => (
                       <span key={o.objetivo}>
-                        {o.nombre}: {o.cantidad} → <b>+{o.puntos}</b>
+                        {nombreObjetivoId(p, o.objetivo)}: {o.cantidad} → <b>+{o.puntos}</b>
                       </span>
                     ))}
                   </div>
@@ -817,9 +865,9 @@ function Final({ p, perfiles, yo, onCerrar, onNueva }: { p: Partida; perfiles: P
           })}
         </ol>
         <div className="mj-menu-botones">
-          <button onClick={onCerrar}>Ver la mesa</button>
+          <button onClick={onCerrar}>{t("final.verMesa")}</button>
           <button className="principal" onClick={onNueva}>
-            Nueva partida
+            {t("final.nueva")}
           </button>
         </div>
       </div>

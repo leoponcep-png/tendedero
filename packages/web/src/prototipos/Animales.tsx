@@ -320,6 +320,62 @@ function Castor({ className }: { className?: string }) {
   );
 }
 
+function Oveja({ className }: { className?: string }) {
+  // Lana de la frente: varios círculos con trazo y, encima, los mismos sin trazo, para que solo quede el contorno.
+  const lana: [number, number, number][] = [
+    [19, 24, 8],
+    [32, 18, 9.5],
+    [45, 24, 8],
+    [13.5, 33, 6],
+    [50.5, 33, 6],
+    [25.5, 27, 7],
+    [38.5, 27, 7],
+  ];
+  return (
+    <svg viewBox="0 0 64 64" className={`ilu ${className ?? ""}`} aria-hidden>
+      <g filter="url(#tinta-bosque)" {...trazo}>
+        <ellipse cx="10" cy="40" rx="7.5" ry="3.8" fill="#d9b994" transform="rotate(18 10 40)" />
+        <ellipse cx="54" cy="40" rx="7.5" ry="3.8" fill="#d9b994" transform="rotate(-18 54 40)" />
+        <path d="M17 38 C17 28 23 23 32 23 C41 23 47 28 47 38 C47 50 40 58 32 58 C24 58 17 50 17 38 Z" fill="#ead2b6" />
+        <path d="M40 26 C45 29 47 33 47 38 C47 48 42 55 36 57.5 C41 50 43 37 40 26 Z" fill="#d9b994" stroke="none" />
+        <path d="M17 38 C17 28 23 23 32 23 C41 23 47 28 47 38 C47 50 40 58 32 58 C24 58 17 50 17 38 Z" fill="none" />
+        {lana.map(([x, y, r], i) => (
+          <circle key={`t${i}`} cx={x} cy={y} r={r} fill="#fbf6ec" />
+        ))}
+        {lana.map(([x, y, r], i) => (
+          <circle key={`r${i}`} cx={x} cy={y} r={r - 1.4} fill="#fbf6ec" stroke="none" />
+        ))}
+        <circle cx="26" cy="40" r="2.6" fill={TINTA} stroke="none" />
+        <circle cx="38" cy="40" r="2.6" fill={TINTA} stroke="none" />
+        <path d="M29.5 48 h5 l-2.5 2.4 z" fill="#c98274" strokeWidth="1.6" />
+        <path d="M32 50.4 q-2.5 3 -5 1 M32 50.4 q2.5 3 5 1" fill="none" strokeWidth="1.6" />
+        <circle cx="21.5" cy="46" r="2.8" fill="#f2a28f" stroke="none" opacity=".8" />
+        <circle cx="42.5" cy="46" r="2.8" fill="#f2a28f" stroke="none" opacity=".8" />
+      </g>
+    </svg>
+  );
+}
+
+function Gallina({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 64 64" className={`ilu ${className ?? ""}`} aria-hidden>
+      <g filter="url(#tinta-bosque)" {...trazo}>
+        <path d="M22 18 C19 9 26 6 28 12 C28 4 37 4 36 12 C39 6 46 9 42 18 Z" fill="#d9443a" />
+        <path d="M12 39 C12 25 21 16 32 16 C43 16 52 25 52 39 C52 51 43 58 32 58 C21 58 12 51 12 39 Z" fill="#f7f1e6" />
+        <path d="M42 19 C49 23 52 31 52 39 C52 49 46 56 38 57.5 C45 50 47 32 42 19 Z" fill="#e6dccb" stroke="none" />
+        <path d="M12 39 C12 25 21 16 32 16 C43 16 52 25 52 39 C52 51 43 58 32 58 C21 58 12 51 12 39 Z" fill="none" />
+        <circle cx="23.5" cy="34" r="2.6" fill={TINTA} stroke="none" />
+        <circle cx="40.5" cy="34" r="2.6" fill={TINTA} stroke="none" />
+        <path d="M30.5 46 C29 51 31 54.5 33 52.5 C34.5 51 34.5 48 33.5 46 Z" fill="#d9443a" strokeWidth="2" />
+        <path d="M26.5 39.5 L37.5 39.5 L32 47 Z" fill="#f2b43a" />
+        <path d="M27.5 43 H36.5" fill="none" strokeWidth="1.4" />
+        <circle cx="18" cy="42" r="3" fill="#f2a28f" stroke="none" opacity=".8" />
+        <circle cx="46" cy="42" r="3" fill="#f2a28f" stroke="none" opacity=".8" />
+      </g>
+    </svg>
+  );
+}
+
 /** Todos los personajes. Los que se ganan con logros están en perfil/logros.ts (sus recompensas). */
 export const ANIMALES = [
   { id: "raton", nombre: "Ratón", Dibujo: Raton },
@@ -338,6 +394,8 @@ export const ANIMALES = [
   { id: "pato", nombre: "Pato", Dibujo: Pato },
   { id: "ciervo", nombre: "Ciervo", Dibujo: Ciervo },
   { id: "castor", nombre: "Castor", Dibujo: Castor },
+  { id: "oveja", nombre: "Oveja", Dibujo: Oveja },
+  { id: "gallina", nombre: "Gallina", Dibujo: Gallina },
 ];
 
 export function Animal({ id, className }: { id: string; className?: string }) {

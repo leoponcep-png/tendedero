@@ -1,16 +1,12 @@
+import { fecha, localeActual, t, useT } from "../../i18n";
+import { lista } from "../../i18n/juego";
 import { Animal } from "../Animales";
 import type { Balance, Estadisticas } from "./estadisticas";
 import { IconoPerfil, type Icono } from "./Iconos";
 
 // Pestaña «Récords y estadísticas»: todo sale de las partidas guardadas con registrarPartida().
 
-const fechaCorta = (iso: string) => {
-  try {
-    return new Date(iso).toLocaleDateString("es-ES", { day: "numeric", month: "short" });
-  } catch {
-    return iso.slice(0, 10);
-  }
-};
+const fechaCorta = (iso: string) => fecha(iso, { day: "numeric", month: "short" });
 const pct = (b: Balance) => (b.partidas ? Math.round((b.ganadas / b.partidas) * 100) : 0);
 
 function Cifra({ icono, valor, texto, destacada }: { icono: Icono; valor: string | number; texto: string; destacada?: boolean }) {
@@ -27,81 +23,82 @@ function FilaBalance({ nombre, b }: { nombre: string; b: Balance }) {
   return (
     <div className="mp-balance">
       <span className="mp-balance-nombre">{nombre}</span>
-      <div className="mp-balance-barra" title={`${b.ganadas} de ${b.partidas}`}>
+      <div className="mp-balance-barra" title={t("records.ganadasDe", { ganadas: b.ganadas, partidas: b.partidas })}>
         <span style={{ width: `${pct(b)}%` }} />
       </div>
       <span className="mp-balance-num">
-        {b.ganadas}/{b.partidas} <small>{b.partidas ? `${pct(b)} %` : "—"}</small>
+        {b.ganadas}/{b.partidas} <small>{b.partidas ? t("comun.porcentaje", { n: pct(b) }) : "—"}</small>
       </span>
     </div>
   );
 }
 
 export function PanelRecords({ e }: { e: Estadisticas }) {
+  const t = useT();
   if (!e.partidas) {
     return (
       <div className="mp-vacio">
         <IconoPerfil icono="grafica" />
-        <h2>Aún no hay partidas</h2>
-        <p>Juega tu primera colada y aquí irán apareciendo tus récords, tus rachas y tus últimas partidas.</p>
+        <h2>{t("records.vacioTitulo")}</h2>
+        <p>{t("records.vacioTexto")}</p>
       </div>
     );
   }
   return (
     <div className="mp-records">
       <div className="mp-cifras">
-        <Cifra icono="cesta" valor={e.partidas} texto="Partidas jugadas" />
-        <Cifra icono="copa" valor={e.ganadas} texto="Ganadas" />
-        <Cifra icono="medalla" valor={`${e.porcentaje} %`} texto="De victorias" destacada />
-        <Cifra icono="diana" valor={e.mejorPuntuacion} texto="Mejor puntuación" destacada />
-        <Cifra icono="estrella" valor={e.puntosMedios} texto="Puntos de media" />
-        <Cifra icono="camiseta" valor={e.prendasSecas} texto="Prendas secadas" />
-        <Cifra icono="llama" valor={e.mejorRacha} texto={`Mejor racha (ahora ${e.rachaActual})`} />
-        <Cifra icono="secreto" valor={e.objetivosCumplidos} texto="Objetivos secretos" />
-        <Cifra icono="corona" valor={e.mayorVentaja} texto="Mayor ventaja al ganar" />
-        <Cifra icono="rayo" valor={`${e.fastidiosJugados} / ${e.fastidiosRecibidos}`} texto="Fastidios hechos / sufridos" />
+        <Cifra icono="cesta" valor={e.partidas} texto={t("records.jugadas")} />
+        <Cifra icono="copa" valor={e.ganadas} texto={t("records.ganadas")} />
+        <Cifra icono="medalla" valor={t("comun.porcentaje", { n: e.porcentaje })} texto={t("records.deVictorias")} destacada />
+        <Cifra icono="diana" valor={e.mejorPuntuacion} texto={t("records.mejorPuntuacion")} destacada />
+        <Cifra icono="estrella" valor={e.puntosMedios.toLocaleString(localeActual())} texto={t("records.puntosMedia")} />
+        <Cifra icono="camiseta" valor={e.prendasSecas} texto={t("records.prendasSecadas")} />
+        <Cifra icono="llama" valor={e.mejorRacha} texto={t("records.mejorRacha", { n: e.rachaActual })} />
+        <Cifra icono="secreto" valor={e.objetivosCumplidos} texto={t("records.objetivos")} />
+        <Cifra icono="corona" valor={e.mayorVentaja} texto={t("records.mayorVentaja")} />
+        <Cifra icono="rayo" valor={`${e.fastidiosJugados} / ${e.fastidiosRecibidos}`} texto={t("records.fastidios")} />
       </div>
 
       <div className="mp-dos-columnas">
         <section className="mp-bloque">
-          <h2>Por número de jugadores</h2>
-          <FilaBalance nombre="2 jugadores" b={e.porJugadores[2]} />
-          <FilaBalance nombre="3 jugadores" b={e.porJugadores[3]} />
-          <FilaBalance nombre="4 jugadores" b={e.porJugadores[4]} />
+          <h2>{t("records.porJugadores")}</h2>
+          <FilaBalance nombre={t("menu.jugadores", { n: 2 })} b={e.porJugadores[2]} />
+          <FilaBalance nombre={t("menu.jugadores", { n: 3 })} b={e.porJugadores[3]} />
+          <FilaBalance nombre={t("menu.jugadores", { n: 4 })} b={e.porJugadores[4]} />
         </section>
         <section className="mp-bloque">
-          <h2>Por modo de juego</h2>
-          <FilaBalance nombre="Contra la IA" b={e.contraIA} />
-          <FilaBalance nombre="Online" b={e.online} />
-          <FilaBalance nombre="En la misma mesa" b={e.local} />
+          <h2>{t("records.porModo")}</h2>
+          <FilaBalance nombre={t("records.modoIA")} b={e.contraIA} />
+          <FilaBalance nombre={t("records.modoOnline")} b={e.online} />
+          <FilaBalance nombre={t("records.modoMesa")} b={e.local} />
         </section>
       </div>
 
       <section className="mp-bloque">
-        <h2>Últimas partidas</h2>
+        <h2>{t("records.ultimas")}</h2>
         <ol className="mp-ultimas">
           {e.ultimas.map((p, i) => (
             <li key={`${p.fecha}-${i}`} className={p.puesto === 1 ? "ganada" : ""}>
-              <span className={`mp-puesto p${Math.min(p.puesto, 4)}`}>{p.puesto === 1 ? "1.º" : `${p.puesto}.º`}</span>
+              <span className={`mp-puesto p${Math.min(p.puesto, 4)}`}>{t("comun.ordinal", { n: p.puesto })}</span>
               {p.animal && (
                 <span className="mp-ultima-animal">
                   <Animal id={p.animal} />
                 </span>
               )}
               <span className="mp-ultima-modo">
-                <strong>{p.online ? "Online" : p.contraIA ? "Contra la IA" : "En la mesa"}</strong>
+                <strong>{p.online ? t("records.modoOnline") : p.contraIA ? t("records.modoIA") : t("records.modoMesaCorto")}</strong>
                 <small>
-                  {p.jugadores} jugadores · {fechaCorta(p.fecha)}
-                  {p.rivales?.length ? ` · con ${p.rivales.join(", ")}` : ""}
+                  {t("menu.jugadores", { n: p.jugadores })} · {fechaCorta(p.fecha)}
+                  {p.rivales?.length ? ` · ${t("records.con", { nombres: lista(p.rivales) })}` : ""}
                 </small>
               </span>
               <span className="mp-ultima-dato">
                 <strong>{p.puntos}</strong>
-                <small>puntos</small>
+                <small>{t("records.puntos")}</small>
               </span>
               <span className="mp-ultima-dato">
                 <strong>{p.prendasSecas}</strong>
-                <small>prendas</small>
+                <small>{t("records.prendas")}</small>
               </span>
             </li>
           ))}

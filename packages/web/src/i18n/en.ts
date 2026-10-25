@@ -57,11 +57,17 @@ export const en: Textos = {
     "perfil.personaje": "Character",
     "perfil.color": "Color",
     "perfil.tapete": "Playmat",
+    "perfil.marco": "Avatar frame",
+    "perfil.titulo": "Title",
+    "perfil.fondo": "Table background",
     "perfil.miraLogros": "Check the Achievements tab.",
     "perfil.seDesbloquea": "Unlocked with the “{logro}” achievement: {descripcion}",
     "recompensa.animal": "{nombre} character",
     "recompensa.tapete": "{nombre} playmat",
     "recompensa.color": "{nombre} color",
+    "recompensa.marco": "{nombre} frame",
+    "recompensa.titulo": "“{nombre}” title",
+    "recompensa.fondo": "{nombre} background",
 
     // ---------- Characters ----------
     "animal.raton": "Mouse",
@@ -80,6 +86,8 @@ export const en: Textos = {
     "animal.pato": "Duck",
     "animal.ciervo": "Deer",
     "animal.castor": "Beaver",
+    "animal.oveja": "Sheep",
+    "animal.gallina": "Hen",
 
     // ---------- Player colors ----------
     "color.pino": "Pine",
@@ -98,6 +106,11 @@ export const en: Textos = {
     "color.rosa": "Bubblegum",
     "color.lavanda": "Lavender",
     "color.esmeralda": "Emerald",
+    "color.menta": "Mint",
+    "color.cielo": "Sky",
+    "color.mandarina": "Tangerine",
+    "color.carbon": "Charcoal",
+    "color.uva": "Grape",
     "color.otro": "Color",
 
     // ---------- Playmats ----------
@@ -111,6 +124,41 @@ export const en: Textos = {
     "tapete.ondas": "Waves",
     "tapete.flores": "Flowers",
     "tapete.pinzas": "Pegs",
+    "tapete.escoces": "Tartan",
+    "tapete.espiga": "Herringbone",
+    "tapete.nubes": "Clouds",
+    "tapete.calcetines": "Socks",
+
+    // ---------- Avatar frames ----------
+    "marco.sencillo": "Simple",
+    "marco.madera": "Wood",
+    "marco.cuerda": "Clothesline",
+    "marco.laurel": "Laurel",
+    "marco.plata": "Silver",
+    "marco.oro": "Gold",
+    "marco.arcoiris": "Rainbow",
+
+    // ---------- Titles (under your name) ----------
+    "titulo.ninguno": "No title",
+    "titulo.aprendiz": "Laundry Apprentice",
+    "titulo.vecina-red": "Internet Star",
+    "titulo.terror": "Terror of the Block",
+    "titulo.impermeable": "Downpour-Proof",
+    "titulo.cerebro": "Laundry Mastermind",
+    "titulo.plusmarquista": "Record Breaker",
+    "titulo.campeona": "Backyard Champion",
+    "titulo.agente": "Secret Agent",
+    "titulo.rey-calcetin": "Sock King",
+    "titulo.leyenda": "Legend of the Line",
+    "titulo.gran-maestra": "Grandmaster of the Line",
+
+    // ---------- Table backgrounds ----------
+    "fondo.madera": "Oak",
+    "fondo.pino": "Light Pine",
+    "fondo.nogal": "Walnut",
+    "fondo.baldosas": "Patio Tiles",
+    "fondo.mantel": "Picnic Cloth",
+    "fondo.cesped": "Lawn",
 
     // ---------- Art styles ----------
     "estilo.fusion": "Fusion (your mix)",
@@ -206,6 +254,28 @@ export const en: Textos = {
     "logro.leyenda.desc": "Win 25 games.",
     "logro.secadero.nombre": "Master of Drying",
     "logro.secadero.desc": "Dry 250 garments in total.",
+    "logro.pinza-a-pinza.nombre": "Peg by Peg",
+    "logro.pinza-a-pinza.desc": "Dry 10 garments in total.",
+    "logro.tres-coladas.nombre": "Getting the Hang of It",
+    "logro.tres-coladas.desc": "Play 3 games.",
+    "logro.casa-con-jaleo.nombre": "Busy House",
+    "logro.casa-con-jaleo.desc": "Play a 3- or 4-player game.",
+    "logro.vecina-traviesa.nombre": "Cheeky Neighbor",
+    "logro.vecina-traviesa.desc": "Play 5 Nuisance cards.",
+    "logro.hola-vecinos.nombre": "Hello, Neighbors",
+    "logro.hola-vecinos.desc": "Play an online game.",
+    "logro.entrenamiento.nombre": "Backyard Training",
+    "logro.entrenamiento.desc": "Play 10 games against the AI.",
+    "logro.costumbre.nombre": "Local Habit",
+    "logro.costumbre.desc": "Play on 7 different days.",
+    "logro.tendedero-lleno.nombre": "Bursting Clothesline",
+    "logro.tendedero-lleno.desc": "Dry 14 garments in a single game.",
+    "logro.temporada.nombre": "A Whole Season",
+    "logro.temporada.desc": "Play on 30 different days.",
+    "logro.lavanderia.nombre": "Industrial Laundry",
+    "logro.lavanderia.desc": "Dry 1000 garments in total.",
+    "logro.gran-maestra.nombre": "Grandmaster of the Line",
+    "logro.gran-maestra.desc": "Win 50 games.",
 
     // ---------- Friends ----------
     "amigos.copiar": "Copy",
@@ -265,6 +335,7 @@ export const en: Textos = {
     "dorso.cuerdas": "Lines",
     "dorso.dias": "Days",
     "dorso.objetivos": "Goals",
+    "dorso.prendas": "Garments",
     "loseta.titulo": "Lines",
     "leyenda.basica.nombre": "Basic",
     "leyenda.basica.texto": "No ability.",
@@ -353,6 +424,17 @@ export const en: Textos = {
     "mesa.partidaTerminada": "game over",
     "mesa.noTuTurno": "not your turn",
     "mesa.jugarla": "Play it",
+    "mesa.vistazo": "Hold to see all",
+    "mesa.vistazoTitulo": "Press and hold (or the Tab key) to see every clothesline at once",
+    "mesa.secas.ver": "See {nombre}'s dry garments",
+    "mesa.secas.verTuyas": "See your dry garments",
+    "mesa.secas.titulo": "{nombre}'s dry garments",
+    "mesa.secas.tuyas": "Your dry garments",
+    "mesa.secas.total#one": "{n} garment",
+    "mesa.secas.total#other": "{n} garments",
+    "mesa.secas.ninguna": "No garments dried yet.",
+    "mesa.secas.porColor": "By color:",
+    "mesa.secas.objetivos": "How your goals are going",
 
     "mesa.turno.respondes": "Respond?",
     "mesa.turno.decidiendo": "Deciding…",
@@ -454,6 +536,9 @@ export const en: Textos = {
     "mesa.mazoAcciones": "Action deck: {n} cards",
     "mesa.pilaCuerdas": "Lines · {n}",
     "mesa.pilaAcciones": "Actions · {n}",
+    "mesa.mazoPrendas": "Garment deck: {n} cards",
+    "mesa.pilaPrendas": "Garments · {n}",
+    "mesa.mojadas": "{n} dampness from soaking cards",
     "mesa.descarte": "Discard pile",
     "mesa.descarteVacio": "discard",
 
@@ -495,6 +580,7 @@ export const en: Textos = {
     "anuncio.seRompe": "The line snaps!",
     "anuncio.cuerdaDe": "{jugador}'s {carta}",
     "anuncio.jugadorN": "Player {n}",
+    "anuncio.repartoRonda": "Draft: everyone takes from a basket",
 
     // ---------- Game log (written by the engine) ----------
     // ".yo": same line when you're the one doing it.
@@ -708,6 +794,7 @@ export const en: Textos = {
     "galeria.objetivos": "Goals (63 × 88 mm): a single deck, shared and secret are the same",
     "galeria.dorsos": "Card backs",
     "galeria.loseta": "Tile (100 × 132 mm)",
+    "galeria.prendas": "Garments (41 × 63 mm per slot; to review the art)",
   },
 
   cartas: {

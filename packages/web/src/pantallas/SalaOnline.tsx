@@ -1,5 +1,7 @@
 import type { Datos } from "@tendedero/motor";
 import { useEffect, useState } from "react";
+import { nombreVisible, t, useT } from "../i18n";
+import { textoMotivo } from "../i18n/juego";
 import { MesaJuego } from "../juego/MesaJuego";
 import { perfilesDe } from "../juego/vista";
 import type { Perfil } from "../prototipos/MenuPartida";
@@ -24,9 +26,9 @@ function Enlace({ codigo, ruta }: { codigo: string; ruta?: string }) {
   return (
     <div className="enlace-sala">
       <span>
-        Código <strong className="codigo">{codigo}</strong>
+        {t("sala.codigo")} <strong className="codigo">{codigo}</strong>
       </span>
-      <input readOnly value={enlace} onFocus={(e) => e.target.select()} aria-label="Enlace de la sala" />
+      <input readOnly value={enlace} onFocus={(e) => e.target.select()} aria-label={t("sala.enlace")} />
       <button
         onClick={() =>
           navigator.clipboard.writeText(enlace).then(
@@ -38,7 +40,7 @@ function Enlace({ codigo, ruta }: { codigo: string; ruta?: string }) {
           )
         }
       >
-        {copiado ? "¡Copiado!" : "Copiar enlace"}
+        {copiado ? t("sala.copiado") : t("sala.copiarEnlace")}
       </button>
     </div>
   );
@@ -55,17 +57,17 @@ function ListaAsientos({ asientos, plazas, yo, onQuitar }: { asientos: Asiento[]
             {a ? (
               <>
                 <strong>{a.nombre}</strong>
-                {i === yo && <span className="etiqueta-tu">tú</span>}
-                {i === 0 && <span className="etiqueta-primero">anfitrión</span>}
-                {!a.conectado && <span className="desconectado">desconectado</span>}
+                {i === yo && <span className="etiqueta-tu">{t("sala.tu")}</span>}
+                {i === 0 && <span className="etiqueta-primero">{t("sala.anfitrion")}</span>}
+                {!a.conectado && <span className="desconectado">{t("sala.desconectado")}</span>}
                 {onQuitar && i !== 0 && (
                   <button className="boton-carta" onClick={() => onQuitar(i)}>
-                    Quitar
+                    {t("sala.quitar")}
                   </button>
                 )}
               </>
             ) : (
-              <span className="vacia">Esperando a alguien…</span>
+              <span className="vacia">{t("sala.esperando")}</span>
             )}
           </li>
         );
@@ -77,6 +79,7 @@ function ListaAsientos({ asientos, plazas, yo, onQuitar }: { asientos: Asiento[]
 /** Sala vista por quien la creó: invita, espera, empieza y juega. */
 export function SalaAnfitrion({ inicial, datos, onSalir, nueva }: { inicial: SalaGuardada; datos: Datos; onSalir: () => void; nueva?: SalaNueva }) {
   const s = useAnfitrion(inicial, datos);
+  useT();
   const tuPerfil = nueva?.perfil;
   // En la mesa nueva, los demás te ven con tu animal y tu color.
   useEffect(() => {
@@ -86,7 +89,7 @@ export function SalaAnfitrion({ inicial, datos, onSalir, nueva }: { inicial: Sal
   const conectados = s.asientos.filter((a) => a.conectado).length;
   const estadoConexion = (
     <span className={`estado-conexion ${s.abierta ? "bien" : "mal"}`}>
-      Sala {s.sala.codigo} · {s.abierta ? `${conectados} conectado${conectados === 1 ? "" : "s"}` : (s.error ?? "abriendo…")}
+      {t("sala.estado", { codigo: s.sala.codigo, estado: s.abierta ? t("sala.conectados", { n: conectados }) : (s.error ?? t("sala.abriendo")) })}
     </span>
   );
 
@@ -103,7 +106,7 @@ export function SalaAnfitrion({ inicial, datos, onSalir, nueva }: { inicial: Sal
         conexion={estadoConexion}
         onJugada={s.jugar}
         onSalir={() => {
-          if (confirm("¿Salir? La partida queda guardada en este navegador y se reanuda al volver a esta sala.")) onSalir();
+          if (confirm(t("sala.confirmarSalirAnfitrion"))) onSalir();
         }}
         onNueva={s.volverASala}
       />
@@ -132,26 +135,26 @@ export function SalaAnfitrion({ inicial, datos, onSalir, nueva }: { inicial: Sal
   return (
     <main className="sala">
       <Portada />
-      <h1>Sala online</h1>
+      <h1>{t("sala.titulo")}</h1>
       {estadoConexion}
       {s.error && !s.abierta && <p className="error">{s.error}</p>}
-      <p>Pasa este enlace a tus amigos. Cuando estén dentro, empieza la partida.</p>
+      <p>{t("sala.pasaEnlace")}</p>
       <Enlace codigo={s.sala.codigo} ruta={nueva?.ruta} />
       <label className="campo">
-        <span>Tu nombre</span>
+        <span>{t("sala.tuNombre")}</span>
         <input value={nombre} maxLength={24} onChange={(e) => s.cambiarNombre(e.target.value)} />
       </label>
       <h2>
-        Jugadores ({s.asientos.length} de {s.sala.ajustes.jugadores})
+        {t("sala.jugadores", { n: s.asientos.length, max: s.sala.ajustes.jugadores })}
       </h2>
       <ListaAsientos asientos={s.asientos} plazas={s.sala.ajustes.jugadores} yo={0} onQuitar={s.quitar} />
       <div className="acciones-barra">
-        <button onClick={onSalir}>Cerrar sala</button>
+        <button onClick={onSalir}>{t("sala.cerrar")}</button>
         <button className="principal" disabled={s.asientos.length < 2 || !nombre.trim()} onClick={s.empezar}>
-          Empezar con {s.asientos.length} jugador{s.asientos.length === 1 ? "" : "es"}
+          {t("sala.empezarCon", { n: s.asientos.length })}
         </button>
       </div>
-      {s.asientos.length < 2 && <p className="nota">Hacen falta al menos 2 jugadores.</p>}
+      {s.asientos.length < 2 && <p className="nota">{t("sala.faltan")}</p>}
     </main>
   );
 }
@@ -181,6 +184,12 @@ export function SalaInvitado({ codigo, onSalir, nueva }: { codigo: string; onSal
   const [nombre, setNombre] = useState<string | null>(() => nombreDentro(codigo));
   const perfil = nueva ? { animal: nueva.perfil.animal, color: nueva.perfil.color, tapete: nueva.perfil.tapete } : undefined;
   const s = useInvitado(codigo, nombre, perfil);
+  useT();
+  // El motivo de una jugada rechazada llega estructurado del anfitrión: se enseña en tu idioma.
+  const aviso =
+    s.aviso?.detalle && s.partida && s.sala
+      ? textoMotivo(s.aviso.detalle, { p: s.partida, yo: s.sala.tuAsiento, nombre: (j) => nombreVisible(s.partida?.jugadores[j]?.nombre ?? "") })
+      : (s.aviso?.texto ?? null);
   // Al salir a propósito, recargar ya no te mete de nuevo.
   const salir = () => {
     try {
@@ -195,7 +204,7 @@ export function SalaInvitado({ codigo, onSalir, nueva }: { codigo: string; onSal
     return (
       <main className="sala">
         <Portada />
-        <h1>Unirse a la sala {codigo}</h1>
+        <h1>{t("sala.unirseA", { codigo })}</h1>
         <form
           className="unirse"
           onSubmit={(e) => {
@@ -211,19 +220,19 @@ export function SalaInvitado({ codigo, onSalir, nueva }: { codigo: string; onSal
             setNombre(n);
           }}
         >
-          <input autoFocus value={borrador} maxLength={24} onChange={(e) => setBorrador(e.target.value)} placeholder="Tu nombre" aria-label="Tu nombre" />
+          <input autoFocus value={borrador} maxLength={24} onChange={(e) => setBorrador(e.target.value)} placeholder={t("sala.tuNombre")} aria-label={t("sala.tuNombre")} />
           <button className="principal" disabled={!borrador.trim()}>
-            Entrar
+            {t("sala.entrar")}
           </button>
         </form>
-        <button onClick={onSalir}>Volver</button>
+        <button onClick={onSalir}>{t("sala.volver")}</button>
       </main>
     );
   }
 
   const estadoConexion = (
     <span className={`estado-conexion ${s.fase === "dentro" ? "bien" : "mal"}`}>
-      Sala {codigo} · {s.fase === "dentro" ? "conectado" : s.fase === "rechazado" ? "fuera" : "reconectando…"}
+      {t("sala.estado", { codigo, estado: s.fase === "dentro" ? t("sala.conectado") : s.fase === "rechazado" ? t("sala.fuera") : t("sala.reconectando") })}
     </span>
   );
 
@@ -238,10 +247,10 @@ export function SalaInvitado({ codigo, onSalir, nueva }: { codigo: string; onSal
         modo="online"
         codigoSala={codigo}
         conexion={estadoConexion}
-        avisoExterno={s.aviso?.texto ?? null}
+        avisoExterno={aviso}
         onJugada={s.jugar}
         onSalir={() => {
-          if (confirm("¿Salir de la partida? Puedes volver con el mismo enlace.")) salir();
+          if (confirm(t("sala.confirmarSalirInvitado"))) salir();
         }}
         onNueva={salir}
       />
@@ -270,18 +279,22 @@ export function SalaInvitado({ codigo, onSalir, nueva }: { codigo: string; onSal
   return (
     <main className="sala">
       <Portada />
-      <h1>Sala {codigo}</h1>
+      <h1>{t("sala.salaN", { codigo })}</h1>
       {estadoConexion}
       {s.fase === "rechazado" && <p className="error">{s.error}</p>}
-      {s.fase === "conectando" && <p>Conectando con la sala…</p>}
-      {s.fase === "reconectando" && <p className="aviso">{s.error ?? "Se ha cortado la conexión."} Reintentando…</p>}
+      {s.fase === "conectando" && <p>{t("sala.conectando")}</p>}
+      {s.fase === "reconectando" && (
+        <p className="aviso">
+          {s.error ?? t("sala.cortada")} {t("sala.reintentando")}
+        </p>
+      )}
       {s.sala && s.fase === "dentro" && (
         <>
-          <p>Estás dentro. La partida empieza cuando el anfitrión lo diga.</p>
+          <p>{t("sala.dentro")}</p>
           <ListaAsientos asientos={s.asientos} plazas={s.sala.plazas} yo={s.sala.tuAsiento} />
         </>
       )}
-      <button onClick={salir}>Salir</button>
+      <button onClick={salir}>{t("sala.salir")}</button>
     </main>
   );
 }

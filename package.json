@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "npm run dev -w @tendedero/web",
     "test": "npm test -w @tendedero/motor",
-    "typecheck": "npm run typecheck -w @tendedero/motor && npm run typecheck -w @tendedero/web"
+    "typecheck": "npm run typecheck -w @tendedero/motor && npm run typecheck -w @tendedero/web",
+    "escritorio": "npm run web -w @tendedero/escritorio && npm start -w @tendedero/escritorio",
+    "escritorio:instalador": "npm run instalador -w @tendedero/escritorio"
   }
 }

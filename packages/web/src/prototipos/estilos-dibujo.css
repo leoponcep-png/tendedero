@@ -7,8 +7,8 @@
 /* ---------- Base (Bosque, el estilo de partida) ---------- */
 
 .mb {
-  --fuente-titulo: "Alegreya SC", Georgia, serif;
-  --fuente-texto: "Alegreya Sans", "Nunito", sans-serif;
+  --fuente-titulo: "Alegreya SC", Georgia, var(--fuente-respaldo), serif;
+  --fuente-texto: "Alegreya Sans", "Nunito", var(--fuente-respaldo), sans-serif;
   --p-blanco: #efe5cf;
   --p-azul: #4f7fa6;
   --p-rojo: #c2553a;
@@ -48,7 +48,7 @@
   background: #1d140ecc;
   backdrop-filter: blur(4px);
   color: #f2e6cc;
-  font: 700 13px "Nunito", sans-serif;
+  font: 700 13px "Nunito", var(--fuente-respaldo), sans-serif;
 }
 .mb-estilos span {
   white-space: nowrap;
@@ -76,8 +76,8 @@
 /* ---------- Minimalista ---------- */
 
 .mb.estilo-minimal {
-  --fuente-titulo: "Quicksand", sans-serif;
-  --fuente-texto: "Quicksand", sans-serif;
+  --fuente-titulo: "Quicksand", var(--fuente-respaldo), sans-serif;
+  --fuente-texto: "Quicksand", var(--fuente-respaldo), sans-serif;
   --tinta: #3c3c3c;
   --crema: #fbfaf7;
   --fastidio: #e0806b;
@@ -156,7 +156,7 @@
 /* ---------- Detallado ---------- */
 
 .mb.estilo-detallado {
-  --fuente-titulo: "Cormorant Garamond", Georgia, serif;
+  --fuente-titulo: "Cormorant Garamond", Georgia, var(--fuente-respaldo), serif;
   --p-blanco: #f1ebdd;
   --p-azul: #3d6f9e;
   --p-rojo: #b8432f;
@@ -237,7 +237,7 @@
 /* ---------- Impresionista ---------- */
 
 .mb.estilo-impresionista {
-  --fuente-titulo: "Playfair Display", Georgia, serif;
+  --fuente-titulo: "Playfair Display", Georgia, var(--fuente-respaldo), serif;
   --tinta: #3b3150;
   --crema: #f7eedb;
   --p-blanco: #f7efd9;
@@ -290,8 +290,8 @@
 /* ---------- Anime ---------- */
 
 .mb.estilo-anime {
-  --fuente-titulo: "M PLUS Rounded 1c", "Nunito", sans-serif;
-  --fuente-texto: "M PLUS Rounded 1c", "Nunito", sans-serif;
+  --fuente-titulo: "M PLUS Rounded 1c", "Nunito", var(--fuente-respaldo), sans-serif;
+  --fuente-texto: "M PLUS Rounded 1c", "Nunito", var(--fuente-respaldo), sans-serif;
   --tinta: #1d1838;
   --crema: #ffffff;
   --p-blanco: #ffffff;
@@ -353,8 +353,8 @@
 /* ---------- Cozy ---------- */
 
 .mb.estilo-cozy {
-  --fuente-titulo: "Gaegu", "Nunito", sans-serif;
-  --fuente-texto: "Nunito", sans-serif;
+  --fuente-titulo: "Gaegu", "Nunito", var(--fuente-respaldo), sans-serif;
+  --fuente-texto: "Nunito", var(--fuente-respaldo), sans-serif;
   --tinta: #6b4f3f;
   --crema: #fdf5e6;
   --p-blanco: #fbf3e4;
@@ -431,7 +431,7 @@
 /* ---------- Acuarela ---------- */
 
 .mb.estilo-acuarela {
-  --fuente-titulo: "Caveat", cursive;
+  --fuente-titulo: "Caveat", var(--fuente-respaldo), cursive;
   --tinta: #5d5246;
   --crema: #fffaf1;
   --p-blanco: #fbf7ef;
@@ -490,8 +490,8 @@
 /* ---------- Pixel art ---------- */
 
 .mb.estilo-pixel {
-  --fuente-titulo: "Silkscreen", monospace;
-  --fuente-texto: "Silkscreen", monospace;
+  --fuente-titulo: "Silkscreen", var(--fuente-respaldo), monospace;
+  --fuente-texto: "Silkscreen", var(--fuente-respaldo), monospace;
   --tinta: #111;
   --crema: #f4f0e6;
   --p-blanco: #f4f4f4;
@@ -573,8 +573,8 @@
 /* ---------- Grabado (linóleo) ---------- */
 
 .mb.estilo-grabado {
-  --fuente-titulo: "IM Fell English SC", Georgia, serif;
-  --fuente-texto: "IM Fell English", Georgia, serif;
+  --fuente-titulo: "IM Fell English SC", Georgia, var(--fuente-respaldo), serif;
+  --fuente-texto: "IM Fell English", Georgia, var(--fuente-respaldo), serif;
   --tinta: #1d1b1a;
   --crema: #f3ead7;
   --p-blanco: #f3ead7;
@@ -622,8 +622,8 @@
 /* ---------- Papel recortado ---------- */
 
 .mb.estilo-recortable {
-  --fuente-titulo: "Baloo 2", "Nunito", sans-serif;
-  --fuente-texto: "Baloo 2", "Nunito", sans-serif;
+  --fuente-titulo: "Baloo 2", "Nunito", var(--fuente-respaldo), sans-serif;
+  --fuente-texto: "Baloo 2", "Nunito", var(--fuente-respaldo), sans-serif;
   --crema: #fffdf6;
   --p-blanco: #fffdf6;
   --p-azul: #5a8fd8;
@@ -668,8 +668,8 @@
 /* ---------- Retro (risografía) ---------- */
 
 .mb.estilo-retro {
-  --fuente-titulo: "Rammetto One", "Fredoka", sans-serif;
-  --fuente-texto: "Nunito", sans-serif;
+  --fuente-titulo: "Rammetto One", "Fredoka", var(--fuente-respaldo), sans-serif;
+  --fuente-texto: "Nunito", var(--fuente-respaldo), sans-serif;
   --tinta: #1d1b3a;
   --crema: #fff7ea;
   --p-blanco: #fff7ea;
@@ -729,8 +729,8 @@
  * ===================================================================== */
 
 .mb.estilo-fusion {
-  --fuente-titulo: "Baloo 2", "Fredoka", sans-serif;
-  --fuente-texto: "Nunito", sans-serif;
+  --fuente-titulo: "Baloo 2", "Fredoka", var(--fuente-respaldo), sans-serif;
+  --fuente-texto: "Nunito", var(--fuente-respaldo), sans-serif;
   --tinta: #2a1d2e;
   --crema: #fff6e6;
   --p-blanco: #fffaf0;

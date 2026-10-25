@@ -1,7 +1,7 @@
 import { protegidaDe, secarPrenda } from "../estado/secado";
 import { anotar } from "../estado/registro";
 import type { CartaTendida, Partida } from "../estado/tipos";
-import { caer, numero, texto, tipoDe } from "../estado/utilidades";
+import { caer, mojarPrenda, numero, quitarHumedad, texto, tipoDe } from "../estado/utilidades";
 import type { Etiqueta, EfectoEvento } from ".";
 
 /** Todas las prendas colgadas de todos los jugadores, con su carta de cuerda. */
@@ -26,7 +26,7 @@ function caeUnaPorJugador(p: Partida, orden: (prenda: string) => number) {
 
 function sumarHumedad(p: Partida, h: number, filtro: (prenda: string, tendida: CartaTendida) => boolean) {
   for (const { prenda, tendida } of colgadas(p)) {
-    if (filtro(prenda, tendida)) p.prendas[prenda].humedad += h;
+    if (filtro(prenda, tendida)) mojarPrenda(p, prenda, h);
   }
 }
 
@@ -48,8 +48,7 @@ export const efectosEvento: Record<string, EfectoEvento> = {
       const h = numero(params, "humedad", 1);
       anotar(p, "olaDeCalor", { h }, `Todas las prendas colgadas pierden ${h} de humedad.`);
       for (const { prenda } of colgadas(p)) {
-        p.prendas[prenda].humedad = Math.max(0, p.prendas[prenda].humedad - h);
-        if (p.prendas[prenda].humedad === 0) secarPrenda(p, prenda);
+        if (quitarHumedad(p, prenda, h)) secarPrenda(p, prenda);
       }
     },
   },

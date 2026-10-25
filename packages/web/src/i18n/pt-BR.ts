@@ -60,11 +60,17 @@ export const ptBR: Textos = {
     "perfil.personaje": "Personagem",
     "perfil.color": "Cor",
     "perfil.tapete": "Tapete",
+    "perfil.marco": "Moldura do avatar",
+    "perfil.titulo": "Título",
+    "perfil.fondo": "Fundo da mesa",
     "perfil.miraLogros": "Veja na aba Conquistas.",
     "perfil.seDesbloquea": "Desbloqueado com a conquista “{logro}”: {descripcion}",
     "recompensa.animal": "personagem {nombre}",
     "recompensa.tapete": "tapete {nombre}",
     "recompensa.color": "cor {nombre}",
+    "recompensa.marco": "moldura {nombre}",
+    "recompensa.titulo": "título “{nombre}”",
+    "recompensa.fondo": "fundo {nombre}",
 
     // ---------- Personajes ----------
     "animal.raton": "Rato",
@@ -83,6 +89,8 @@ export const ptBR: Textos = {
     "animal.pato": "Pato",
     "animal.ciervo": "Cervo",
     "animal.castor": "Castor",
+    "animal.oveja": "Ovelha",
+    "animal.gallina": "Galinha",
 
     // ---------- Colores de jugador ----------
     "color.pino": "Pinho",
@@ -101,6 +109,11 @@ export const ptBR: Textos = {
     "color.rosa": "Rosa-chiclete",
     "color.lavanda": "Lavanda",
     "color.esmeralda": "Esmeralda",
+    "color.menta": "Menta",
+    "color.cielo": "Céu",
+    "color.mandarina": "Tangerina",
+    "color.carbon": "Carvão",
+    "color.uva": "Uva",
     "color.otro": "Cor",
 
     // ---------- Tapetes ----------
@@ -114,6 +127,41 @@ export const ptBR: Textos = {
     "tapete.ondas": "Ondas",
     "tapete.flores": "Flores",
     "tapete.pinzas": "Prendedores",
+    "tapete.escoces": "Escocês",
+    "tapete.espiga": "Espinha de peixe",
+    "tapete.nubes": "Nuvens",
+    "tapete.calcetines": "Meias",
+
+    // ---------- Marcos del avatar ----------
+    "marco.sencillo": "Simples",
+    "marco.madera": "Madeira",
+    "marco.cuerda": "Corda de varal",
+    "marco.laurel": "Louros",
+    "marco.plata": "Prata",
+    "marco.oro": "Ouro",
+    "marco.arcoiris": "Arco-íris",
+
+    // ---------- Títulos ----------
+    "titulo.ninguno": "Sem título",
+    "titulo.aprendiz": "Aprendiz do varal",
+    "titulo.vecina-red": "Estrela da internet",
+    "titulo.terror": "Terror da vizinhança",
+    "titulo.impermeable": "À prova de pé-d'água",
+    "titulo.cerebro": "Cérebro da lavanderia",
+    "titulo.plusmarquista": "Recordista",
+    "titulo.campeona": "Campeã do quintal",
+    "titulo.agente": "Agente secreta",
+    "titulo.rey-calcetin": "Rei da meia",
+    "titulo.leyenda": "Lenda do varal",
+    "titulo.gran-maestra": "Grã-mestra do varal",
+
+    // ---------- Fondos de mesa ----------
+    "fondo.madera": "Carvalho",
+    "fondo.pino": "Pinho claro",
+    "fondo.nogal": "Nogueira",
+    "fondo.baldosas": "Ladrilhos do quintal",
+    "fondo.mantel": "Toalha de piquenique",
+    "fondo.cesped": "Grama",
 
     // ---------- Estilos de dibujo ----------
     "estilo.fusion": "Fusão (sua mistura)",
@@ -209,6 +257,28 @@ export const ptBR: Textos = {
     "logro.leyenda.desc": "Vença 25 partidas.",
     "logro.secadero.nombre": "Mestra da secagem",
     "logro.secadero.desc": "Seque 250 peças no total.",
+    "logro.pinza-a-pinza.nombre": "Prendedor a prendedor",
+    "logro.pinza-a-pinza.desc": "Seque 10 peças no total.",
+    "logro.tres-coladas.nombre": "Pegando o jeito",
+    "logro.tres-coladas.desc": "Jogue 3 partidas.",
+    "logro.casa-con-jaleo.nombre": "Casa em festa",
+    "logro.casa-con-jaleo.desc": "Jogue uma partida de 3 ou 4 jogadores.",
+    "logro.vecina-traviesa.nombre": "Vizinha levada",
+    "logro.vecina-traviesa.desc": "Jogue 5 cartas de pirraça.",
+    "logro.hola-vecinos.nombre": "Oi, vizinhos!",
+    "logro.hola-vecinos.desc": "Jogue uma partida online.",
+    "logro.entrenamiento.nombre": "Treino no quintal",
+    "logro.entrenamiento.desc": "Jogue 10 partidas contra a IA.",
+    "logro.costumbre.nombre": "Já é de casa",
+    "logro.costumbre.desc": "Jogue em 7 dias diferentes.",
+    "logro.tendedero-lleno.nombre": "Varal lotado",
+    "logro.tendedero-lleno.desc": "Seque 14 peças em uma só partida.",
+    "logro.temporada.nombre": "Uma temporada inteira",
+    "logro.temporada.desc": "Jogue em 30 dias diferentes.",
+    "logro.lavanderia.nombre": "Lavanderia industrial",
+    "logro.lavanderia.desc": "Seque 1000 peças no total.",
+    "logro.gran-maestra.nombre": "Grã-mestra do varal",
+    "logro.gran-maestra.desc": "Vença 50 partidas.",
 
     // ---------- Amigos ----------
     "amigos.copiar": "Copiar",
@@ -272,6 +342,7 @@ export const ptBR: Textos = {
     "dorso.cuerdas": "Cordas",
     "dorso.dias": "Dias",
     "dorso.objetivos": "Objetivos",
+    "dorso.prendas": "Peças",
     "loseta.titulo": "Cordas",
     "leyenda.basica.nombre": "Simples",
     "leyenda.basica.texto": "Sem habilidade.",
@@ -367,6 +438,18 @@ export const ptBR: Textos = {
     "mesa.partidaTerminada": "partida encerrada",
     "mesa.noTuTurno": "não é sua vez",
     "mesa.jugarla": "Jogar",
+    "mesa.vistazo": "Segure para ver todos",
+    "mesa.vistazoTitulo": "Segure (ou aperte Tab) para ver todos os varais de uma vez",
+    "mesa.secas.ver": "Ver as peças secas de {nombre}",
+    "mesa.secas.verTuyas": "Ver suas peças secas",
+    "mesa.secas.titulo": "Peças secas de {nombre}",
+    "mesa.secas.tuyas": "Suas peças secas",
+    "mesa.secas.total#one": "{n} peça",
+    "mesa.secas.total#many": "{n} peças",
+    "mesa.secas.total#other": "{n} peças",
+    "mesa.secas.ninguna": "Nenhuma peça seca ainda.",
+    "mesa.secas.porColor": "Por cor:",
+    "mesa.secas.objetivos": "Como vão seus objetivos",
 
     "mesa.turno.respondes": "Vai responder?",
     "mesa.turno.decidiendo": "Decidindo…",
@@ -474,6 +557,9 @@ export const ptBR: Textos = {
     "mesa.mazoAcciones": "Baralho de ações: {n} cartas",
     "mesa.pilaCuerdas": "Cordas · {n}",
     "mesa.pilaAcciones": "Ações · {n}",
+    "mesa.mazoPrendas": "Baralho de peças: {n} cartas",
+    "mesa.pilaPrendas": "Peças · {n}",
+    "mesa.mojadas": "{n} de umidade por cartas que molham",
     "mesa.descarte": "Descarte",
     "mesa.descarteVacio": "descarte",
 
@@ -515,6 +601,7 @@ export const ptBR: Textos = {
     "anuncio.seRompe": "A corda arrebentou!",
     "anuncio.cuerdaDe": "{carta} de {jugador}",
     "anuncio.jugadorN": "Jogador {n}",
+    "anuncio.repartoRonda": "Distribuição: cada um pega de um cesto",
 
     // ---------- Registro de la partida ----------
     "registro.partidaCreada": "Partida criada para {n} jogadores.",
@@ -739,6 +826,7 @@ export const ptBR: Textos = {
     "galeria.objetivos": "Objetivos (63 × 88 mm): um só baralho, comuns e secretos são iguais",
     "galeria.dorsos": "Versos",
     "galeria.loseta": "Placa (100 × 132 mm)",
+    "galeria.prendas": "Peças (41 × 63 mm por espaço; para revisar o desenho)",
   },
 
   cartas: {

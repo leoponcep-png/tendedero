@@ -3,10 +3,11 @@ import { tono } from "../arte/color";
 import { colorEstilo, COLOR, CREMA, GotaBosque, ICONOS_BOSQUE, IconoBosque, MiniPrenda, nombreColor, PinzaBosque, PrendaBosque, Soga, TINTA } from "./ArteBosque";
 import { EMBLEMAS, IconoDia, IlustraObjetivo } from "./IconosJuego";
 import { LIENZO, MM } from "./medidas";
+import { cartaTraducida, t, textoCarta, textoObjetivo, tLibre, useIdioma } from "../i18n";
 import cuerdasJson from "../../../../data/cuerdas.json";
 import diaJson from "../../../../data/dia.json";
 import objetivosJson from "../../../../data/objetivos.json";
-import { ACCIONES, CUERDAS, TIPOS, type Prenda } from "./Prototipos";
+import { ACCIONES, TIPOS, type Prenda } from "./Prototipos";
 import "./CartasJuego.css";
 
 export { EscenaDia, IconoDia, IlustraObjetivo, Emblema } from "./IconosJuego";
@@ -52,14 +53,36 @@ export const LEYENDA: { id: string; nombre: string; texto: string }[] = [
 ];
 
 /** Longitud de un título: corto, medio o largo (el CSS elige la letra). */
-const largo = (texto: string, cortos: number, medios: number) => (texto.length <= cortos ? "corto" : texto.length <= medios ? "medio" : "largo");
+/**
+ * Longitud «a ojo» de un texto, en letras latinas: un ideograma chino o japonés o una sílaba coreana ocupa casi
+ * el doble de ancho que una letra, así que cuenta por 1,8. Sirve para que los textos traducidos quepan igual.
+ */
+const ancho = (texto: string) => {
+  let n = 0;
+  for (const c of texto) n += /[ᄀ-ᇿ⺀-鿿가-힯豈-﫿＀-￯]/.test(c) ? 1.8 : 1;
+  return n;
+};
+const largo = (texto: string, cortos: number, medios: number) => {
+  const n = ancho(texto);
+  return n <= cortos ? "corto" : n <= medios ? "medio" : "largo";
+};
+
+/**
+ * Para un <text> de SVG de una sola línea: si a este tamaño no cabe en `hueco` unidades, se comprime a lo ancho
+ * (textLength) en vez de salirse de la carta. Los nombres traducidos (alemán, ruso…) pueden ser largos.
+ */
+const ajustarTexto = (texto: string, tam: number, hueco: number) =>
+  ancho(texto) * tam * 0.56 > hueco ? { textLength: hueco, lengthAdjust: "spacingAndGlyphs" as const } : {};
+
+/** Id de /data/cuerdas.json de cada clase de cuerda (las de pinzas de color van por su color). */
+const ID_CUERDA: Record<string, string> = { basica: "basica", tejadillo: "tejadillo", resistente: "resistente", "secado-rapido": "secado-rapido", fragil: "vieja" };
 
 /**
  * Tamaño de letra (en cqw) para que un texto llene su caja sin salirse: la caja mide `area` cqw² y cada letra
  * ocupa más o menos 0,62 × 1,14 de su tamaño. Se limita entre `min` y `max` para que no quede ni enorme ni ilegible.
  */
 const tamTexto = (texto: string, area: number, max: number, min = 3.4) =>
-  ({ "--tam-texto": `${Math.max(min, Math.min(max, Math.sqrt((0.7 * area) / (0.62 * 1.14 * texto.length)))).toFixed(2)}cqw` }) as CSSProperties;
+  ({ "--tam-texto": `${Math.max(min, Math.min(max, Math.sqrt((0.7 * area) / (0.62 * 1.14 * ancho(texto))))).toFixed(2)}cqw` }) as CSSProperties;
 
 /** Fila de festones (medios círculos) de un borde: `abajo` cuelgan hacia abajo, si no, hacia arriba. */
 function festones(x0: number, x1: number, y: number, n: number, abajo = true) {
@@ -81,11 +104,14 @@ export function CartaCuerdaBosque({
   const clave = efecto ?? "basica";
   const color = clave === "modificador-puntuacion" ? (pinzas ? nombreColor(pinzas) : undefined) ?? "rojo" : undefined;
   const [banda, nombreBase] = BANDA[clave] ?? BANDA.basica;
-  const nombre = color ? `Pinzas ${PINZAS_PLURAL[color]}` : nombreBase;
+  useIdioma();
+  const idCarta = color ? `pinzas-${PINZAS_PLURAL[color]}` : (ID_CUERDA[clave] ?? "basica");
+  const nombre = textoCarta(idCarta, "nombre", color ? `Pinzas ${PINZAS_PLURAL[color]}` : nombreBase);
   const colorBanda = clave === "modificador-puntuacion" && pinzas ? colorEstilo(pinzas) : banda;
-  const textoCarta = color
+  const textoEs = color
     ? (cuerdasJson.cartas.find((c) => (c.parametros as { color?: string } | undefined)?.color === color)?.texto ?? TEXTOS[clave])
     : TEXTOS[clave];
+  const textoCuerda = textoCarta(idCarta, "texto", textoEs);
   const gruesa = clave === "resistente";
   const vieja = clave === "fragil";
   const W = CUERDA_W;
@@ -98,7 +124,7 @@ export function CartaCuerdaBosque({
   const bandaF = { style: { fill: colorBanda } };
   const estilo = { "--banda": colorBanda, "--pinza-color": pinzas ? colorEstilo(pinzas) : undefined, ...style } as CSSProperties;
   return (
-    <div {...resto} className={`ccb ccb-${clave} ${className ?? ""}`} style={estilo} title={CUERDAS[clave]?.nombre}>
+    <div {...resto} className={`ccb ccb-${clave} ${className ?? ""}`} style={estilo} title={nombre}>
       <svg viewBox={`0 0 ${W} ${H}`} className="ilu marco-carta" preserveAspectRatio="none" aria-hidden>
         <rect x="1.5" y="1.5" width={W - 3} height={H - 3} rx="8" fill={vieja ? "#eadcbd" : CREMA} />
         {/* Tinte suave del tipo de cuerda y papel con trama */}
@@ -205,7 +231,7 @@ export function CartaCuerdaBosque({
             <circle cx="19" cy="16" r="12.5" fill={CREMA} stroke={TINTA} strokeWidth="2.2" />
             <circle cx="19" cy="16" r="10.2" fill="none" style={{ stroke: colorBanda }} strokeWidth="1.5" opacity=".85" />
             <g transform="translate(10.7 7.7) scale(.26)">{ICONOS_BOSQUE[clave]}</g>
-            <text x="37" y="20.6" className="ccb-nombre" style={{ fontFamily: "var(--fuente-titulo)" }} fontWeight="800" fontSize="14.5" fill="#ffffff" stroke={TINTA} strokeWidth="3.2" strokeLinejoin="round" paintOrder="stroke">
+            <text x="37" y="20.6" className="ccb-nombre" style={{ fontFamily: "var(--fuente-titulo)" }} fontWeight="800" fontSize="14.5" fill="#ffffff" stroke={TINTA} strokeWidth="3.2" strokeLinejoin="round" paintOrder="stroke" {...ajustarTexto(nombre, 14.5, W - 37 - 8)}>
               {nombre}
             </text>
           </g>
@@ -216,7 +242,7 @@ export function CartaCuerdaBosque({
             <path d={festones(1.5, W - 1.5, 104, 30, false)} {...bandaF} stroke={TINTA} strokeWidth="1.4" strokeLinejoin="round" />
             <circle cx="17" cy="115" r="11.5" fill={CREMA} stroke={TINTA} strokeWidth="2.2" />
             <g transform="translate(8.7 106.7) scale(.26)">{ICONOS_BOSQUE[clave]}</g>
-            <text x="33" y="120" className="ccb-nombre" style={{ fontFamily: "var(--fuente-titulo)" }} fontWeight="800" fontSize="13.5" fill="#ffffff" stroke={TINTA} strokeWidth="3" strokeLinejoin="round" paintOrder="stroke">
+            <text x="33" y="120" className="ccb-nombre" style={{ fontFamily: "var(--fuente-titulo)" }} fontWeight="800" fontSize="13.5" fill="#ffffff" stroke={TINTA} strokeWidth="3" strokeLinejoin="round" paintOrder="stroke" {...ajustarTexto(nombre, 13.5, W - 33 - 8)}>
               {nombre}
             </text>
           </g>
@@ -232,8 +258,8 @@ export function CartaCuerdaBosque({
         <rect x="1.5" y="1.5" width={W - 3} height={H - 3} rx="8" fill="none" stroke={TINTA} strokeWidth="3" />
       </svg>
       {borde && (
-        <div className="ccb-texto" style={tamTexto(textoCarta, 79 * 24.7, 6.6)}>
-          {textoCarta}
+        <div className="ccb-texto" style={tamTexto(textoCuerda, 79 * 24.7, 6.6)}>
+          {textoCuerda}
         </div>
       )}
     </div>
@@ -242,16 +268,17 @@ export function CartaCuerdaBosque({
 
 /** Loseta de cartón al principio del tendedero: hace de poste y lleva la leyenda de las cuerdas. */
 export function LosetaBosque({ lineas }: { lineas: number }) {
+  useIdioma();
   return (
     <div className="loseta" style={{ "--lineas": lineas } as CSSProperties}>
       <div className="loseta-leyenda">
-        <div className="loseta-titulo">Cuerdas</div>
+        <div className="loseta-titulo">{t("loseta.titulo")}</div>
         {LEYENDA.map((l) => (
           <div key={l.id} className="loseta-fila">
             <IconoBosque id={l.id} className="loseta-icono" />
             <div>
-              <b>{l.nombre}</b>
-              <span>{l.texto}</span>
+              <b>{tLibre(`leyenda.${l.id}.nombre`)}</b>
+              <span>{tLibre(`leyenda.${l.id}.texto`)}</span>
             </div>
           </div>
         ))}
@@ -271,7 +298,7 @@ export function LosetaBosque({ lineas }: { lineas: number }) {
 
 function GotasPrenda({ humedad }: { humedad: number }) {
   return (
-    <svg className="pb-gotas" viewBox={`0 0 ${Math.max(1, humedad) * 12} 16`} style={{ width: `${Math.max(1, humedad) * 0.95}em` }} aria-label={`${humedad} de humedad`}>
+    <svg className="pb-gotas" viewBox={`0 0 ${Math.max(1, humedad) * 12} 16`} style={{ width: `${Math.max(1, humedad) * 0.95}em` }} aria-label={t("carta.humedad", { n: humedad })}>
       <g className="gotas">
         {Array.from({ length: humedad }, (_, i) => (
           <GotaBosque key={i} x={6 + i * 12} y={9} r={0.95} />
@@ -294,7 +321,7 @@ export function CartaPrendaBosque({ p, pinzas, colorPinzas, className, ...resto 
         </div>
         <div className="pb-pie">
           <span className="pb-puntos">{TIPOS[p.tipo].puntos}</span>
-          {p.humedad > 0 ? <GotasPrenda humedad={p.humedad} /> : <span className="pb-seca">seca</span>}
+          {p.humedad > 0 ? <GotasPrenda humedad={p.humedad} /> : <span className="pb-seca">{t("carta.seca")}</span>}
         </div>
       </div>
       {pinzas && (
@@ -479,8 +506,11 @@ function MarcoVertical({ t, emblema, capa }: { t: Tono; emblema: string; capa: C
 
 /** Carta de acción: cinta con el nombre, ilustración en su ventana, emblema del grupo, texto y tipo. */
 export function CaraAccionBosque({ id }: { id: string }) {
+  useIdioma();
   const def = ACCIONES[id];
   const grupo = def.grupo === "fastidio" ? "fastidio" : "tactica";
+  const nombre = textoCarta(id, "nombre", def.nombre);
+  const texto = textoCarta(id, "texto", def.texto);
   return (
     <div className={`cb cb-${grupo}`} data-accion={id}>
       <MarcoVertical t={grupo} emblema={grupo} capa="fondo" />
@@ -488,13 +518,13 @@ export function CaraAccionBosque({ id }: { id: string }) {
         <IconoBosque id={def.efecto} className="cb-icono" />
       </div>
       <MarcoVertical t={grupo} emblema={grupo} capa="frente" />
-      <div className="cb-nombre" data-largo={largo(def.nombre, 14, 22)}>
-        <span>{def.nombre}</span>
+      <div className="cb-nombre" data-largo={largo(nombre, 14, 22)}>
+        <span>{nombre}</span>
       </div>
-      <div className="cb-texto" style={tamTexto(def.texto, 79 * 43.6, 7.4)}>
-        <span>{def.texto}</span>
+      <div className="cb-texto" style={tamTexto(texto, 79 * 43.6, 7.4)}>
+        <span>{texto}</span>
       </div>
-      <div className="cb-tipo">{grupo === "fastidio" ? "Fastidio" : "Táctica"}</div>
+      <div className="cb-tipo">{grupo === "fastidio" ? t("carta.fastidio") : t("carta.tactica")}</div>
     </div>
   );
 }
@@ -510,8 +540,11 @@ const OBJETIVOS: Record<string, Objetivo> = Object.fromEntries((objetivosJson.ob
  * `secreto` solo queda marcado en el HTML (data-secreto) por si la mesa quiere señalarlo; no cambia el dibujo.
  */
 export function CartaObjetivoBosque({ id, secreto = false, className, ...resto }: { id: string; secreto?: boolean } & HTMLAttributes<HTMLDivElement>) {
+  useIdioma();
   const o = OBJETIVOS[id];
   if (!o) return null;
+  const nombre = textoObjetivo(id, "nombre", o.nombre);
+  const texto = textoObjetivo(id, "texto", o.texto);
   return (
     <div {...resto} className={`cb co ${className ?? ""}`} data-objetivo={id} data-secreto={secreto || undefined}>
       <MarcoVertical t="objetivo" emblema="objetivo" capa="fondo" />
@@ -519,23 +552,23 @@ export function CartaObjetivoBosque({ id, secreto = false, className, ...resto }
         <IlustraObjetivo id={o.id} tipo={o.parametros?.tipo} color={o.parametros?.color} className="co-arte" />
       </div>
       <MarcoVertical t="objetivo" emblema="objetivo" capa="frente" />
-      <div className="cb-nombre" data-largo={largo(o.nombre, 14, 22)}>
-        <span>{o.nombre}</span>
+      <div className="cb-nombre" data-largo={largo(nombre, 14, 22)}>
+        <span>{nombre}</span>
       </div>
-      <div className="co-puntos" aria-label={`Cada ${o.cada}: ${o.puntos} puntos`}>
+      <div className="co-puntos" aria-label={t("carta.cadaAria", { cada: o.cada, puntos: o.puntos })}>
         <span className="co-cada">
-          cada <b>{o.cada}</b>
+          {t("carta.cada")} <b>{o.cada}</b>
         </span>
         <span className="co-flecha" aria-hidden>
           ➜
         </span>
         <span className="co-moneda">{o.puntos}</span>
-        <span className="co-pts">{o.puntos === 1 ? "punto" : "puntos"}</span>
+        <span className="co-pts">{t("carta.puntos", { n: o.puntos })}</span>
       </div>
-      <div className="cb-texto co-texto" style={tamTexto(o.texto, 79 * 28.2, 7)}>
-        <span>{o.texto}</span>
+      <div className="cb-texto co-texto" style={tamTexto(texto, 79 * 28.2, 7)}>
+        <span>{texto}</span>
       </div>
-      <div className="cb-tipo">Objetivo</div>
+      <div className="cb-tipo">{t("carta.objetivo")}</div>
     </div>
   );
 }
@@ -605,12 +638,14 @@ function MarcoDia({ suceso, capa }: { suceso: boolean; capa: Capa }) {
  * dura y su texto; sin `id`, es «Soleado».
  */
 export function CartaDiaBosque({ id, className, ...resto }: { id?: string } & HTMLAttributes<HTMLDivElement> = {}) {
+  useIdioma();
   const d = DIAS[id ?? "soleado"] ?? DIAS.soleado;
   const suceso = d.grupo === "sucesos";
   const dias = d.parametros?.dias ?? 1;
-  // El texto empieza por «1 día:» o «2 días:»: la duración ya va en el sello.
+  const nombre = textoCarta(d.id, "nombre", d.nombre);
+  // El texto en español empieza por «1 día:» o «2 días:»: la duración ya va en el sello. Las traducciones vienen sin ella.
   const sinDuracion = d.texto.replace(/^\d+ días?:\s*/, "");
-  const texto = sinDuracion.charAt(0).toUpperCase() + sinDuracion.slice(1);
+  const texto = cartaTraducida(d.id, "texto") ? textoCarta(d.id, "texto", "") : sinDuracion.charAt(0).toUpperCase() + sinDuracion.slice(1);
   return (
     <div {...resto} className={`dia-bosque dia-carta ${suceso ? "dia-suceso" : "dia-tiempo"} ${className ?? ""}`} data-dia={d.id}>
       <MarcoDia suceso={suceso} capa="fondo" />
@@ -618,17 +653,17 @@ export function CartaDiaBosque({ id, className, ...resto }: { id?: string } & HT
         <IconoDia id={d.id} efecto={d.efecto} className="dia-icono-arte" />
       </div>
       <MarcoDia suceso={suceso} capa="frente" />
-      <div className="dia-bosque-nombre" data-largo={largo(d.nombre, 14, 19)}>
-        <span>{d.nombre}</span>
+      <div className="dia-bosque-nombre" data-largo={largo(nombre, 14, 19)}>
+        <span>{nombre}</span>
       </div>
-      <div className="dia-dias" aria-label={`${dias} ${dias === 1 ? "día" : "días"}`}>
+      <div className="dia-dias" aria-label={`${dias} ${t("carta.dias", { n: dias })}`}>
         <b>{dias}</b>
-        <span>{dias === 1 ? "día" : "días"}</span>
+        <span>{t("carta.dias", { n: dias })}</span>
       </div>
       <div className="dia-bosque-texto" style={tamTexto(texto, 46.6 * 35, 6.2, 3.6)}>
         <span>{texto}</span>
       </div>
-      <div className="dia-pie">{suceso ? "Suceso" : "Tiempo"}</div>
+      <div className="dia-pie">{suceso ? t("carta.suceso") : t("carta.tiempo")}</div>
     </div>
   );
 }
@@ -688,7 +723,9 @@ function CentroDorso({ clase }: { clase: ClaseDorso }) {
 }
 
 export function DorsoBosque({ clase = "acciones" }: { clase?: ClaseDorso }) {
+  useIdioma();
   const d = DORSO[clase];
+  const titulo = tLibre(`dorso.${clase}`);
   const horizontal = d.medida === "cuerda";
   const mini = d.medida === "prenda";
   const W = MM[d.medida].ancho;
@@ -733,8 +770,8 @@ export function DorsoBosque({ clase = "acciones" }: { clase?: ClaseDorso }) {
         <g transform={`translate(${cx} ${cy + 17.5 * k}) scale(${k})`}>
           <path className="d-cinta" d="M-21 -4.4 H21 L18.6 0 L21 4.4 H-21 L-18.6 0 Z" stroke={TINTA} strokeWidth=".55" strokeLinejoin="round" />
           <path d="M-21 -4.4 H21 L20 -2.6 H-20 Z" fill="#ffffff" opacity=".25" />
-          <text y="2.3" textAnchor="middle" className="d-titulo" fontSize="6.2" fontWeight="800" fill="#ffffff" stroke={TINTA} strokeWidth="1.3" strokeLinejoin="round" paintOrder="stroke" style={{ fontFamily: "var(--fuente-titulo)" }}>
-            {d.nombre}
+          <text y="2.3" textAnchor="middle" className="d-titulo" fontSize="6.2" fontWeight="800" fill="#ffffff" stroke={TINTA} strokeWidth="1.3" strokeLinejoin="round" paintOrder="stroke" style={{ fontFamily: "var(--fuente-titulo)" }} {...ajustarTexto(titulo, 6.2, 36)}>
+            {titulo}
           </text>
         </g>
         <g transform={`translate(${cx} ${horizontal ? H - 7.4 : mini ? H - 8.4 : H - 9})`}>

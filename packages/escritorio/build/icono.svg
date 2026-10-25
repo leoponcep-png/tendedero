@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- Icono de Tendedero: una camisa tendida en una cuerda con dos pinzas de madera. -->
+  <defs>
+    <linearGradient id="cielo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe3ad"/>
+      <stop offset="1" stop-color="#f2c25a"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#cielo)" stroke="#2b2019" stroke-width="8"/>
+  <circle cx="196" cy="62" r="20" fill="#fffaf0" opacity="0.75"/>
+  <!-- cuerda -->
+  <path d="M12 72 Q128 112 244 72" fill="none" stroke="#8c6a46" stroke-width="9" stroke-linecap="round"/>
+  <!-- camisa -->
+  <g stroke="#2b2019" stroke-width="7" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M100 88 L72 100 L44 132 L64 150 L80 136 V212 H176 V136 L192 150 L212 132 L184 100 L156 88 C150 104 140 110 128 110 C116 110 106 104 100 88 Z" fill="#4a7fd0"/>
+    <path d="M128 112 V206" fill="none" stroke-width="4"/>
+    <circle cx="128" cy="138" r="3.5" fill="#2b2019" stroke="none"/>
+    <circle cx="128" cy="162" r="3.5" fill="#2b2019" stroke="none"/>
+    <circle cx="128" cy="186" r="3.5" fill="#2b2019" stroke="none"/>
+  </g>
+  <!-- pinzas -->
+  <g stroke="#2b2019" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <g transform="rotate(-8 98 92)">
+      <rect x="88" y="62" width="20" height="56" rx="5" fill="#c99a62"/>
+      <line x1="98" y1="66" x2="98" y2="114" stroke-width="3"/>
+      <rect x="84" y="82" width="28" height="11" rx="3" fill="#9aa3a8" stroke-width="4"/>
+    </g>
+    <g transform="rotate(8 158 92)">
+      <rect x="148" y="62" width="20" height="56" rx="5" fill="#c99a62"/>
+      <line x1="158" y1="66" x2="158" y2="114" stroke-width="3"/>
+      <rect x="144" y="82" width="28" height="11" rx="3" fill="#9aa3a8" stroke-width="4"/>
+    </g>
+  </g>
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="none" stroke="#2b2019" stroke-width="8"/>
+</svg>

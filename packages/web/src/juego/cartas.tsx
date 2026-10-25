@@ -3,6 +3,7 @@
 
 import { diasRestantes, OCULTA, puntuarObjetivo, type Partida } from "@tendedero/motor";
 import type { CSSProperties, HTMLAttributes, Ref } from "react";
+import { t } from "../i18n";
 import { CaraAccionBosque, CartaCuerdaBosque, CartaDiaBosque, CartaObjetivoBosque, DorsoBosque } from "../prototipos/CartasBosque";
 import { ACCIONES } from "../prototipos/Prototipos";
 import { CartaPrendaHumeda } from "../prototipos/HumedadTaller";
@@ -67,8 +68,8 @@ export function CartaObjetivoJuego({
     <div {...resto} className={`mj-objetivo ${secreto ? "secreto" : ""} ${className ?? ""}`} data-lupa={`objetivo:${id}${secreto ? ":secreto" : ""}`}>
       <CartaObjetivoBosque id={id} secreto={secreto} />
       {progreso && (
-        <div className="mj-objetivo-progreso" title="Lo que llevas y lo que te daría ahora">
-          llevas {progreso.cantidad} · {progreso.puntos} pts
+        <div className="mj-objetivo-progreso" title={t("mesa.objetivoProgresoTitulo")}>
+          {t("mesa.objetivoProgreso", { cantidad: progreso.cantidad, puntos: progreso.puntos })}
         </div>
       )}
     </div>
@@ -80,8 +81,8 @@ export function CartaDiaJuego({ p, carta: id, className, ...resto }: { p: Partid
   if (!id) {
     return (
       <div {...resto} className={`mj-dia vacia ${className ?? ""}`}>
-        <b>Día tranquilo</b>
-        <span>Sin tiempo ni suceso en juego.</span>
+        <b>{t("mesa.diaTranquilo")}</b>
+        <span>{t("mesa.sinDia")}</span>
       </div>
     );
   }
@@ -89,7 +90,7 @@ export function CartaDiaJuego({ p, carta: id, className, ...resto }: { p: Partid
   return (
     <div {...resto} className={`mj-dia ${className ?? ""}`} data-lupa={`dia:${id}`}>
       <CartaDiaBosque id={p.cartas[id]} />
-      {quedan !== null && <div className="mj-dia-quedan">{quedan <= 1 ? "último día" : `quedan ${quedan} días`}</div>}
+      {quedan !== null && <div className="mj-dia-quedan">{quedan <= 1 ? t("mesa.ultimoDia") : t("mesa.quedanDias", { n: quedan })}</div>}
     </div>
   );
 }

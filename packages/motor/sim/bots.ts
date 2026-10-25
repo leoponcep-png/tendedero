@@ -19,6 +19,7 @@ import {
   mejorDraft,
   mejorJugada,
   type DatosCrudos,
+  type Dificultad,
   type Jugada,
   type OpcionesIA,
   type Partida,
@@ -69,6 +70,8 @@ export interface Config {
   efectos?: Record<string, string>;
   /** Con quién se comparan los bots: el rival que va mejor (por defecto) o la media de los rivales. */
   rivales?: "mejor" | "media";
+  /** Nivel de todos los bots (src/ia.ts); por defecto, «normal». */
+  dificultad?: Dificultad;
 }
 
 interface Stats {
@@ -121,7 +124,7 @@ function contarColgadas(p: Partida): number {
 
 function jugarPartida(c: Config, semilla: string): Stats {
   const datosConfig = datosDe(c);
-  ia = { azar, rivales: c.rivales ?? "mejor" };
+  ia = { azar, rivales: c.rivales, dificultad: c.dificultad };
   const base = ajustesIniciales(datosConfig);
   const ajustes = {
     ...base,
@@ -217,7 +220,7 @@ function jugarPartida(c: Config, semilla: string): Stats {
     }
     if (p.terminada || p.reaccion) continue;
 
-    const cuerdas = c.robo?.cuerdasFijas ?? cuerdasARobar(p, i);
+    const cuerdas = c.robo?.cuerdasFijas ?? cuerdasARobar(p, i, ia);
     s.robo[cuerdas] = (s.robo[cuerdas] ?? 0) + 1;
     s.tiempo.turnos++;
     // Al cerrar la ronda se baja la humedad de cada prenda colgada: es el mantenimiento que hacen las personas.

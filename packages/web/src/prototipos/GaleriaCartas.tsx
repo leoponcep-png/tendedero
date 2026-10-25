@@ -1,5 +1,7 @@
 import { createContext, StrictMode, useContext, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { tLibre, useT } from "../i18n";
+import { SelectorIdioma } from "../i18n/react";
 import { DefsBosque } from "./ArteBosque";
 import { CaraAccionBosque, CartaCuerdaBosque, CartaDiaBosque, CartaPrendaBosque, CartaObjetivoBosque, CATALOGO_CARTAS, DorsoBosque, LosetaBosque } from "./CartasBosque";
 import { MM } from "./medidas";
@@ -56,8 +58,8 @@ function useValoraciones(estilo: string) {
         // Sin almacenamiento solo queda la copia del servidor.
       }
       fetch("/api/valoraciones", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(datos) })
-        .then((r) => setAviso(r.ok ? "Guardado para Claude" : "Guardado solo en este navegador"))
-        .catch(() => setAviso("Guardado solo en este navegador"));
+        .then((r) => setAviso(r.ok ? "galeria.guardadoClaude" : "galeria.guardadoLocal"))
+        .catch(() => setAviso("galeria.guardadoLocal"));
     }, 600);
     return () => clearTimeout(t);
   }, [datos]);
@@ -72,24 +74,25 @@ function useValoraciones(estilo: string) {
 /** Una carta con su valoración debajo. */
 function Valorar({ clave, carta, children }: { clave: string; carta: string; children: ReactNode }) {
   const ctx = useContext(ContextoValorar)!;
+  const t = useT();
   const v = ctx.datos[clave];
   return (
     <div className="valorar">
       {children}
       <div className="valorar-panel">
-        <div className="valorar-estrellas" role="radiogroup" aria-label={`Valoración de ${carta}`}>
+        <div className="valorar-estrellas" role="radiogroup" aria-label={t("galeria.valoracionDe", { carta })}>
           {[1, 2, 3, 4, 5].map((n) => (
             <button
               key={n}
               className={(v?.estrellas ?? 0) >= n ? "llena" : ""}
-              aria-label={`${n} estrellas`}
+              aria-label={t("galeria.estrellas", { n })}
               onClick={() => ctx.poner(clave, { carta, estrellas: v?.estrellas === n ? 0 : n })}
             >
               ★
             </button>
           ))}
         </div>
-        <textarea placeholder="¿Qué cambiarías?" value={v?.nota ?? ""} onChange={(e) => ctx.poner(clave, { carta, nota: e.target.value })} rows={2} />
+        <textarea placeholder={t("galeria.queCambiarias")} value={v?.nota ?? ""} onChange={(e) => ctx.poner(clave, { carta, nota: e.target.value })} rows={2} />
       </div>
     </div>
   );
@@ -109,6 +112,7 @@ function Seccion({ titulo, children }: { titulo: string; children: ReactNode }) 
 }
 
 function Galeria() {
+  const t = useT();
   const [estilo, setEstilo] = useState("fusion");
   const [mm, setMm] = useState(3);
   const [mesaFinal, setMesaFinal] = useState(true);
@@ -121,35 +125,37 @@ function Galeria() {
     <div className={`mb ${mesaFinal ? "me" : ""} estilo-${estilo}`} style={{ minHeight: "100vh", padding: "16px 24px 60px", "--carta-w": `${MM.accion.ancho * mm}px`, "--celda": `${(MM.cuerda.ancho * mm) / 3}px`, "--celda-base": `${(MM.cuerda.ancho * mm) / 3}px` } as CSSProperties}>
       <DefsBosque />
       <nav className="mb-estilos" style={{ position: "sticky", top: 0, marginBottom: 20, borderRadius: 12 }}>
-        <span>Estilo:</span>
+        <SelectorIdioma compacto />
+        <span>{t("galeria.estilo")}</span>
         {ESTILOS.map((e) => (
           <button key={e.id} className={estilo === e.id ? "activa" : ""} onClick={() => setEstilo(e.id)}>
-            {e.nombre}
+            {tLibre(`estilo.${e.id}`)}
           </button>
         ))}
-        <span style={{ marginLeft: 12 }}>Escala:</span>
+        <span style={{ marginLeft: 12 }}>{t("galeria.escala")}</span>
         {[1.6, 2.2, 3, 5, 8].map((v) => (
           <button key={v} className={mm === v ? "activa" : ""} onClick={() => setMm(v)}>
             {v} px/mm
           </button>
         ))}
         <button className={mesaFinal ? "activa" : ""} onClick={() => setMesaFinal(!mesaFinal)}>
-          Acabados de la mesa final
+          {t("galeria.acabados")}
         </button>
         <span className="valorar-contador">
-          {valoradas} cartas valoradas{valorar.aviso && ` · ${valorar.aviso}`}
+          {t("galeria.valoradas", { n: valoradas })}
+          {valorar.aviso && ` · ${tLibre(valorar.aviso)}`}
         </span>
       </nav>
       <div className="valorar-general">
-        <b>Valora carta por carta:</b> pulsa las estrellas y escribe qué cambiarías. Se guarda solo; cuando acabes, dile a Claude «mira las valoraciones».
+        <b>{t("galeria.valoraTitulo")}</b> {t("galeria.valoraTexto")}
         <textarea
-          placeholder="Comentario general sobre todas las cartas (opcional)"
+          placeholder={t("galeria.comentarioGeneral")}
           value={valorar.datos.general?.nota ?? ""}
           onChange={(e) => valorar.poner("general", { carta: "Comentario general", nota: e.target.value })}
           rows={2}
         />
       </div>
-      <Seccion titulo="Acciones (63 × 88 mm)">
+      <Seccion titulo={t("galeria.acciones")}>
         {CATALOGO_CARTAS.acciones.map((id) => (
           <Valorar key={id} clave={`accion:${id}`} carta={`${ACCIONES[id]?.nombre ?? id} (acción)`}>
             <div style={vertical}>
@@ -160,7 +166,7 @@ function Galeria() {
           </Valorar>
         ))}
       </Seccion>
-      <Seccion titulo="Cuerdas (88 × 63 mm)">
+      <Seccion titulo={t("galeria.cuerdas")}>
         {CATALOGO_CARTAS.cuerdas.map((id) => (
           <Valorar key={id} clave={`cuerda:${id}`} carta={`${nombreCuerda(id)} (cuerda)`}>
             <CartaCuerdaBosque efecto={id === "basica" ? null : id} modo="borde" style={apaisada} />
@@ -172,7 +178,7 @@ function Galeria() {
           </Valorar>
         ))}
       </Seccion>
-      <Seccion titulo="Días: tiempo y sucesos (88 × 63 mm)">
+      <Seccion titulo={t("galeria.dias")}>
         {CATALOGO_CARTAS.dias.map((id) => (
           <Valorar key={id} clave={`dia:${id}`} carta={`${nombreDia(id)} (día)`}>
             <CartaDiaBosque id={id} style={{ width: MM.dia.ancho * mm, rotate: "0deg" }} />
@@ -180,14 +186,14 @@ function Galeria() {
         ))}
         <CartaDiaBosque style={{ width: MM.dia.ancho * mm, rotate: "0deg" }} />
       </Seccion>
-      <Seccion titulo="Objetivos (63 × 88 mm): un solo mazo, comunes y secretos son iguales">
+      <Seccion titulo={t("galeria.objetivos")}>
         {CATALOGO_CARTAS.objetivos.map((id) => (
           <Valorar key={id} clave={`objetivo:${id}`} carta={`${nombreObjetivo(id)} (objetivo)`}>
             <CartaObjetivoBosque id={id} style={vertical} />
           </Valorar>
         ))}
       </Seccion>
-      <Seccion titulo="Dorsos">
+      <Seccion titulo={t("galeria.dorsos")}>
         {(["acciones", "objetivos"] as const).map((c) => (
           <Valorar key={c} clave={`dorso:${c}`} carta={`Dorso de ${c}`}>
             <div style={vertical}>
@@ -214,7 +220,7 @@ function Galeria() {
           </div>
         </Valorar>
       </Seccion>
-      <Seccion titulo="Prendas (41 × 63 mm por hueco; para revisar el dibujo)">
+      <Seccion titulo={t("galeria.prendas")}>
         {(["calcetin", "camiseta", "toalla"] as const).flatMap((tipo) =>
           PINZAS.map((color) => (
             <CartaPrendaBosque
@@ -225,7 +231,7 @@ function Galeria() {
           )),
         )}
       </Seccion>
-      <Seccion titulo="Loseta (100 × 132 mm)">
+      <Seccion titulo={t("galeria.loseta")}>
         <Valorar clave="loseta" carta="Loseta de cartón">
           <div style={{ "--alto-cuerda": `${MM.cuerda.alto * mm}px`, "--hueco-linea": `${6 * mm}px` } as CSSProperties}>
             <LosetaBosque lineas={2} />

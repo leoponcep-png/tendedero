@@ -36,6 +36,9 @@ export {
   respuestaDeBot,
   siguienteJugadaIA,
   valoracion,
+  DIFICULTADES,
   type AzarIA,
+  type Dificultad,
   type OpcionesIA,
 } from "./ia";
+export { rondasRestantes } from "./iaDificil";

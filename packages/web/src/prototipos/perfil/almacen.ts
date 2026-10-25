@@ -9,6 +9,7 @@ export const CLAVES = {
   logrosPendientes: "tendedero-logros-pendientes",
   amigos: "tendedero-amigos",
   codigoAmigo: "tendedero-mi-codigo-amigo",
+  heredados: "tendedero-desbloqueos-heredados",
 } as const;
 
 export function leerJSON<T>(clave: string, siNo: T): T {
