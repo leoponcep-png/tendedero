@@ -839,7 +839,11 @@ function Final({ p, perfiles, yo, onCerrar, onNueva }: { p: Partida; perfiles: P
     <div className="fondo-modal mj-modal-fondo">
       <div className="mj-modal mj-final">
         <h2>{gano ? t("final.ganaste") : t("final.fin")}</h2>
-        <p className="nota">{primero !== null ? t("final.llegoPrimero", { jugador: nombreDe(primero), n: p.ajustes.umbralFinal }) : t("final.sinRopa")}</p>
+        <p className="nota">{primero === null
+            ? t("final.sinRopa")
+            : primero === yo
+              ? t("final.llegastePrimero", { n: p.ajustes.umbralFinal })
+              : t("final.llegoPrimero", { jugador: nombreDe(primero), n: p.ajustes.umbralFinal })}</p>
         <ol className="mj-clasificacion">
           {final.map((r) => {
             const pf = perfiles[r.jugador];
@@ -849,7 +853,7 @@ function Final({ p, perfiles, yo, onCerrar, onNueva }: { p: Partida; perfiles: P
                 <Animal id={pf?.animal ?? ""} className="mf-panel-animal" />
                 <div className="mj-final-nombre">
                   <b>{nombreDe(r.jugador)}</b>
-                  {r.jugador === primero && <small> {t("final.llegoPrimeroCorto")}</small>}
+                  {r.jugador === primero && <small> {t(r.jugador === yo ? "final.llegastePrimeroCorto" : "final.llegoPrimeroCorto")}</small>}
                   <div className="mj-desglose">
                     <span>{t("final.ropaSeca", { n: r.puntosPartida })}</span>
                     {r.objetivos.map((o) => (

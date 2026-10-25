@@ -169,8 +169,16 @@ async function animarCuerda(e: Escena, p: Partida, j: Extract<Jugada, { tipo: "c
   const volver = await e.mirar(en);
   const destino =
     j.tipo === "colocarCuerda" ? rectDe(e, `[data-hueco="${en}:${j.linea}"]`) : rectDe(e, `[data-tendida="${en}:${j.linea}:${j.posicion}"]`);
+  // Si la juegas tú, en segunda persona («mejoras…»); si te la ponen a ti, «te la pone a ti».
+  const tuya = j.jugador === e.yo;
   const detalle =
-    j.tipo === "mejorarCuerda" ? t("anuncio.mejora") : en !== j.jugador ? t("anuncio.seLaPone", { nombre: nombre(e, en) }) : t("anuncio.tiende", { n: j.linea + 1 });
+    j.tipo === "mejorarCuerda"
+      ? t(tuya ? "anuncio.mejora.yo" : "anuncio.mejora")
+      : en !== j.jugador
+        ? en === e.yo
+          ? t("anuncio.teLaPone")
+          : t(tuya ? "anuncio.seLaPone.yo" : "anuncio.seLaPone", { nombre: nombre(e, en) })
+        : t(tuya ? "anuncio.tiende.yo" : "anuncio.tiende", { n: j.linea + 1 });
   fx.anunciar(nombreCarta(p, j.carta), `${nombre(e, j.jugador)} · ${detalle}`, en !== j.jugador ? "fastidio" : "cuerda");
   const c = await cartaJugada(e, j.jugador, j.carta);
   if (c && destino) {
@@ -279,7 +287,7 @@ async function animarAccion(e: Escena, p: Partida, j: Extract<Jugada, { tipo: "j
   const fastidio = efectoAccion(p, j.carta)?.etiquetas.includes("fastidio") ?? false;
   const o = j.objetivo;
   const volver = o ? await e.mirar(o.jugador) : async () => {};
-  const detalle = !o || o.jugador === j.jugador ? `${nombre(e, j.jugador)} · ${t("anuncio.enSuTendedero")}` : `${nombre(e, j.jugador)}  ➜  ${nombre(e, o.jugador)}`;
+  const detalle = !o || o.jugador === j.jugador ? `${nombre(e, j.jugador)} · ${t(j.jugador === e.yo ? "anuncio.enTuTendedero" : "anuncio.enSuTendedero")}` : `${nombre(e, j.jugador)}  ➜  ${nombre(e, o.jugador)}`;
   fx.anunciar(nombreCarta(p, j.carta), o ? detalle : nombre(e, j.jugador), fastidio ? "fastidio" : "tactica");
   const c = await cartaJugada(e, j.jugador, j.carta);
   const destino = o
@@ -375,7 +383,7 @@ async function animarFinTurno(e: Escena, p: Partida, j: Extract<Jugada, { tipo: 
         if (sigue) return;
         const el = buscar(e, `[data-tendida="${k}:${li}:${pos}"]`);
         if (!el) return;
-        fx.anunciar(tr("anuncio.seRompe"), tr("anuncio.cuerdaDe", { carta: nombreCarta(p, t.carta), jugador: nombre(e, k) }), "fastidio");
+        fx.anunciar(tr("anuncio.seRompe"), k === e.yo ? tr("anuncio.cuerdaDe.yo", { carta: nombreCarta(p, t.carta) }) : tr("anuncio.cuerdaDe", { carta: nombreCarta(p, t.carta), jugador: nombre(e, k) }), "fastidio");
         void fx.temblar(el, 10).then(() => el.animate([{ translate: "0 0", opacity: 1 }, { translate: "0 60px", opacity: 0 }], { duration: 500, fill: "forwards" }));
       }),
     );

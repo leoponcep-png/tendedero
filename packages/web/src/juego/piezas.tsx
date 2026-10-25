@@ -78,14 +78,14 @@ export function Tapete({ jugador, perfil }: { jugador: number; perfil: Perfil })
 }
 
 /** Lo que conviene saber de una carta tendida: si se va a romper, si está protegida, si la cubre un tejadillo. */
-function avisos(p: Partida, jugador: number, linea: number, posicion: number, t: CartaTendida): string[] {
+function avisos(p: Partida, jugador: number, linea: number, posicion: number, t: CartaTendida, yo: number): string[] {
   const lista: string[] = [];
   const quedan = rondasHastaRomperse(p, t);
   if (quedan !== null) lista.push(quedan <= 1 ? tr("mesa.nota.rompeYa") : tr("mesa.nota.rompeEn", { n: quedan }));
   if (t.protegida) lista.push(tr("mesa.nota.protegida"));
   const arriba = p.jugadores[jugador].lineas[linea - 1]?.cartas[posicion];
   if (arriba && efectoDeCuerda(p, arriba.carta)?.efecto.cubreAbajo?.length) lista.push(tr("mesa.nota.bajoTecho"));
-  if (t.colocadaPor !== undefined && t.colocadaPor !== jugador) lista.push(tr("mesa.nota.laPuso", { nombre: nombreVisible(p.jugadores[t.colocadaPor].nombre) }));
+  if (t.colocadaPor !== undefined && t.colocadaPor !== jugador) lista.push(t.colocadaPor === yo ? tr("mesa.nota.laPusiste") : tr("mesa.nota.laPuso", { nombre: nombreVisible(p.jugadores[t.colocadaPor].nombre) }));
   return lista;
 }
 
@@ -95,7 +95,7 @@ function CuerdaTendida({ jugador, linea, posicion, tendida }: { jugador: number;
   const def = defCarta(p, tendida.carta);
   const [encima, setEncima] = useState<number | null>(null);
   const libres = huecosLibres(p, jugador, linea, posicion);
-  const notas = avisos(p, jugador, linea, posicion, tendida);
+  const notas = avisos(p, jugador, linea, posicion, tendida, juego.yo);
   const rompe = rondasHastaRomperse(p, tendida) !== null;
   const o = movimiento?.objetivo;
   const moviendoCarta = o && !o.prenda && o.jugador === jugador && o.linea === linea && o.posicion === posicion;
@@ -511,7 +511,9 @@ export function Reparto() {
       ? fase === "cesta"
         ? t("reparto.teTocaCesta")
         : t("reparto.teTocaCentro")
-      : t(fase === "cesta" ? "reparto.cogiendoCesta" : "reparto.cogiendoCentro", { jugador: quien ? nombreVisible(quien.nombre) : t("reparto.alguien") });
+      : p.turno.jugador === yo
+        ? t(fase === "cesta" ? "reparto.teTocaCesta" : "reparto.teTocaCentro")
+        : t(fase === "cesta" ? "reparto.cogiendoCesta" : "reparto.cogiendoCentro", { jugador: quien ? nombreVisible(quien.nombre) : t("reparto.alguien") });
 
   const monton = (o: Origen, titulo: string, prendas: string[], extra: Record<string, unknown>) => {
     const k = clave(o);
