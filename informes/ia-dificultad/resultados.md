@@ -22,16 +22,39 @@ Se han enfrentado los tres niveles en **2400 partidas**: 400 por duelo, con las 
   - **Límite de mano:** al pasarse, suelta la carta que menos falta le hace.
   - No mira la mano ni el objetivo secreto de nadie.
 
+## La última ronda
+
+La partida acaba al terminar la ronda en la que alguien llega a 30. Antes, la IA calculaba cuántas rondas quedaban solo con el ritmo de puntos del que va primero.
+
+Ahora la normal y la difícil miran también con cuántos puntos puede acabar esta ronda cada jugador, ellas incluidas:
+- lo colgado que se seca en el secado de hoy, con el tiempo del día;
+- lo que aún pueda tender ya casi seco, si todavía le toca jugar.
+
+Si alguien llega así a 30, juegan como si fuera la última ronda:
+- solo vale lo que se seca hoy;
+- cuelgan primero los calcetines y lo que tiene poca humedad;
+- usan Secar prenda o Mover prenda para hacer sitio o llevar a una cuerda de secado rápido lo que así se seca a tiempo;
+- frenan al rival que va a cerrar la partida (p. ej. con Retrasar secado);
+- cuentan los puntos de objetivo que suman esas prendas (parejas, colores…).
+
+Los tests de `packages/motor/test/ia-dificultad.test.ts` (apartado «ronda final») prueban una situación así. El rival tiene 15 puntos, pero con lo que se le seca hoy llega a 30. El asiento de la IA tiene 20 puntos, cuerdas ocupadas por toallas empapadas y calcetines por tender.
+
+| Situación | Fácil | Normal y difícil |
+|---|---|---|
+| Sitio libre para 3 calcetines | Cuelga una toalla que no se seca: acaba con 20 | Cuelga 3 calcetines: acaba con 30 (secado + pareja + objetivo) |
+| Toalla a medio secar y una cuerda de secado rápido vacía, con Mover prenda | No hace nada: 20 | Mueve la toalla que así se seca hoy: 26 (antes de este cambio movía la otra y se quedaba en 20) |
+| Con Secar prenda y Retrasar secado | También las juega, pero cuelga un calcetín menos: 38 y la partida dura una ronda más | Seca una toalla para hacer sitio, cuelga 4 calcetines y retrasa la toalla del rival: gana 46 a 24 |
+
 ## Porcentaje de victorias
 
 | Duelo | Jugadores | Lo justo | Resultado (% de victorias) | Puntos de media |
 |---|---|---|---|---|
-| Difícil contra normal | 2 | 50 % | **Difícil 77 %** · Normal 23 % | 57 · 44 |
-| Normal contra fácil | 2 | 50 % | **Normal 73 %** · Fácil 27 % | 51 · 39 |
-| Difícil contra fácil | 2 | 50 % | **Difícil 85 %** · Fácil 15 % | 59 · 37 |
-| Los tres juntos | 3 | 33 % | **Difícil 74 %** · Normal 19 % · Fácil 7 % | 58 · 44 · 34 |
-| Una difícil contra tres normales | 4 | 25 % | **La difícil gana el 52 %** | 56 · 44 |
-| Una normal contra tres fáciles | 4 | 25 % | **La normal gana el 60 %** | 53 · 40 |
+| Difícil contra normal | 2 | 50 % | **Difícil 71 %** · Normal 29 % | 59 · 48 |
+| Normal contra fácil | 2 | 50 % | **Normal 78 %** · Fácil 22 % | 53 · 39 |
+| Difícil contra fácil | 2 | 50 % | **Difícil 88 %** · Fácil 12 % | 60 · 37 |
+| Los tres juntos | 3 | 33 % | **Difícil 71 %** · Normal 24 % · Fácil 5 % | 60 · 47 · 34 |
+| Una difícil contra tres normales | 4 | 25 % | **La difícil gana el 53 %** | 58 · 47 |
+| Una normal contra tres fáciles | 4 | 25 % | **La normal gana el 65 %** | 53 · 39 |
 
 El orden queda claro en todos los duelos: Difícil > Normal > Fácil. Las partidas duran unas 5 rondas en todos los niveles.
 
@@ -41,12 +64,12 @@ Media por jugador y partida, sumando todos los duelos:
 
 | Nivel | Prendas secas | Calcetines | Camisetas | Toallas | Colgadas al acabar | Por tender al acabar | Por tender antes del último reparto |
 |---|---|---|---|---|---|---|---|
-| Fácil | 7,2 | 1,5 (21 %) | 2,3 (32 %) | **3,4 (47 %)** | 2,4 (1,9 toallas) | **10,7** | 9,3 |
-| Normal | 11,1 | 5,1 (46 %) | 3,2 (28 %) | 2,9 (26 %) | 1,7 (0,8 toallas) | 5,3 | 7,0 |
-| Difícil | 13,3 | 7,2 (54 %) | 3,7 (27 %) | 2,5 (19 %) | 1,2 (0,5 toallas) | 4,7 | 6,5 |
+| Fácil | 7,1 | 1,5 (22 %) | 2,2 (31 %) | **3,3 (47 %)** | 2,6 (2,0 toallas) | **11,1** | 9,3 |
+| Normal | 11,7 | 5,3 (45 %) | 3,5 (30 %) | 3,0 (25 %) | 1,2 (0,6 toallas) | 4,9 | 7,0 |
+| Difícil | 13,7 | 7,5 (55 %) | 3,7 (27 %) | 2,5 (18 %) | 1,1 (0,4 toallas) | 4,2 | 6,6 |
 
 - **Toallas:** la fácil seca casi la mitad de su ropa en toallas y acaba con 2 toallas a medio secar. La normal y la difícil secan sobre todo calcetines y camisetas, y secan bastante más prendas en total.
-- **Ropa por tender:** la fácil acaba con unas 11 prendas sin tender; la normal y la difícil, con unas 5.
+- **Ropa por tender:** la fácil acaba con unas 11 prendas sin tender; la normal y la difícil, con 4 o 5.
 - **Por qué no baja a cero:** casi todo lo que les queda viene del reparto de la última ronda, que ya no da tiempo a tender. Además, en el reparto se coge todo un color o todo un tipo de una cesta, así que no siempre se puede coger justo lo que cabe.
 
 ## Lo que tarda cada jugada
@@ -57,7 +80,7 @@ Medido con 10 partidas en paralelo en el mismo ordenador (con el ordenador libre
 |---|---|---|
 | Fácil | 8 ms | 0,1–0,26 s |
 | Normal | 9 ms | 0,1–0,37 s (algún pico por la carga del ordenador) |
-| Difícil | 10 ms | 0,19 s (tiene un tope de 150 ms para pensar: si se le acaba, juega lo mejor que ha visto) |
+| Difícil | 9 ms | 0,18 s (tiene un tope de 150 ms para pensar: si se le acaba, juega lo mejor que ha visto) |
 
 ## Cómo repetirlo
 

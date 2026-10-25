@@ -65,7 +65,136 @@ function partidaEntre(niveles: Dificultad[], semilla: string) {
   return { p, maximo };
 }
 
+/** Saca de la bolsa una prenda de ese tipo y color, con la humedad pedida. */
+function sacarPrenda(p: Partida, tipo: string, color: string, humedad: number): string {
+  const id = p.bolsa.find((x) => p.prendas[x].tipo === tipo && p.prendas[x].color === color)!;
+  p.bolsa = p.bolsa.filter((x) => x !== id);
+  p.prendas[id].humedad = humedad;
+  p.prendas[id].extra = 0;
+  return id;
+}
+
+/** Saca del mazo una carta de cuerda (básica si no se dice otra). */
+function sacarBasica(p: Partida, def = "basica"): string {
+  const id = p.mazos.cuerdas.find((x) => p.cartas[x] === def)!;
+  p.mazos.cuerdas = p.mazos.cuerdas.filter((x) => x !== id);
+  return id;
+}
+
+/**
+ * Ronda 5, le toca al asiento 0. El rival (22 puntos) tiene colgadas una toalla y una camiseta que se secan esta
+ * ronda: llegará a 31 y la partida acaba al terminarla. El asiento 0 (20 puntos) tiene su primera línea llena de
+ * toallas empapadas (no se secarán a tiempo), la segunda vacía, una cuerda básica en la mano y por tender 4
+ * calcetines secos casi del todo (dos parejas) y una toalla. Lo bueno es poner la cuerda y colgar 3 calcetines.
+ */
+function rondaFinal(acciones: string[] = [], rapida = false): Partida {
+  let p = nueva(2, "ronda-final");
+  p.jugadores.forEach((j, i) => {
+    p = jugar(p, { tipo: "elegirObjetivo", jugador: i, objetivo: j.objetivosOfrecidos[0] });
+  });
+  p = structuredClone(p);
+  // Sin reparto ni carta del día: se juega directamente.
+  p.bolsa.push(...p.cestas.flat(), ...p.centro);
+  p.cestas = p.cestas.map(() => []);
+  p.centro = [];
+  p.dia = null;
+  p.diaDesde = null;
+  p.ronda = 5;
+  p.turno = { ...p.turno, jugador: 0, fase: "jugar", cuerdasJugadas: 0, cuerdasExtra: 0, accionesJugadas: 0 };
+  p.objetivosComunes = ["parejas", "monton-de-ropa"];
+  const [yo, rival] = p.jugadores;
+  for (const j of p.jugadores) {
+    p.descartes.cuerdas.push(...j.mano.filter((c) => p.catalogo.cartas[p.cartas[c]].mazo === "cuerdas"));
+    p.descartes.acciones.push(...j.mano.filter((c) => p.catalogo.cartas[p.cartas[c]].mazo === "acciones"));
+    j.mano = [];
+  }
+  yo.puntos = 20;
+  yo.lineas = [
+    { cartas: [0, 1, 2].map(() => ({ carta: sacarBasica(p), colgadas: [{ prenda: sacarPrenda(p, "toalla", "blanco", 3), inicio: 0 }], colocadaEn: 1 })) },
+    { cartas: [{ carta: sacarBasica(p), colgadas: [], colocadaEn: 4 }] },
+  ];
+  yo.pendientes = [
+    sacarPrenda(p, "calcetin", "rojo", 1),
+    sacarPrenda(p, "calcetin", "rojo", 1),
+    sacarPrenda(p, "calcetin", "azul", 1),
+    sacarPrenda(p, "calcetin", "azul", 1),
+    sacarPrenda(p, "toalla", "amarillo", 3),
+  ];
+  if (rapida) {
+    // Otra variante: sin calcetines; una toalla a medio secar en una básica y una cuerda de secado rápido vacía.
+    yo.pendientes = [];
+    yo.lineas[1].cartas = [
+      { carta: sacarBasica(p), colgadas: [{ prenda: sacarPrenda(p, "toalla", "rojo", 2), inicio: 0 }], colocadaEn: 3 },
+      { carta: sacarBasica(p, "secado-rapido"), colgadas: [], colocadaEn: 3 },
+    ];
+  }
+  for (const id of acciones) {
+    const carta = p.mazos.acciones.find((x) => p.cartas[x] === id)!;
+    p.mazos.acciones = p.mazos.acciones.filter((x) => x !== carta);
+    yo.mano.push(carta);
+  }
+  rival.puntos = 15;
+  rival.lineas = [
+    {
+      cartas: [
+        { carta: sacarBasica(p), colgadas: [{ prenda: sacarPrenda(p, "toalla", "rojo", 1), inicio: 0 }], colocadaEn: 1 },
+        { carta: sacarBasica(p), colgadas: [{ prenda: sacarPrenda(p, "toalla", "azul", 1), inicio: 0 }], colocadaEn: 1 },
+        { carta: sacarBasica(p), colgadas: [{ prenda: sacarPrenda(p, "camiseta", "azul", 1), inicio: 0 }], colocadaEn: 1 },
+      ],
+    },
+    { cartas: [] },
+  ];
+  rival.pendientes = [];
+  return p;
+}
+
+/** Juega la ronda final con el asiento 0 al nivel dado: puntos con los que acaba y calcetines que cuelga. */
+function jugarRondaFinal(nivel: Dificultad, acciones: string[] = [], rapida = false) {
+  let p = rondaFinal(acciones, rapida);
+
+  const azar = azarCon(7);
+  let calcetines = 0;
+  for (let pasos = 0; !p.terminada; pasos++) {
+    if (pasos > 500) throw new Error("La partida no acaba.");
+    const i = quienJuega(p);
+    const j = siguienteJugadaIA(p, i, { azar, dificultad: i === 0 ? nivel : "normal" })!;
+    if (j.tipo === "colgarPrenda" && i === 0 && p.prendas[j.prenda].tipo === "calcetin") calcetines++;
+    p = jugar(p, j);
+  }
+  const rival = p.final!.find((r) => r.jugador === 1)!.total;
+  return { total: p.final!.find((r) => r.jugador === 0)!.total, rival, calcetines };
+}
+
 describe("IA: niveles de dificultad", () => {
+  describe("ronda final: el rival llega a 30 con el secado de hoy", () => {
+    it("se ve venir aunque por el ritmo de puntos parezca que quedan rondas", () => {
+      expect(rondasRestantes(rondaFinal())).toBe(1);
+    });
+
+    it("la normal y la difícil cuelgan los calcetines que se secan a tiempo (y hacen pareja); la fácil, no", () => {
+      const facil = jugarRondaFinal("facil");
+      for (const nivel of ["normal", "dificil"] as const) {
+        const r = jugarRondaFinal(nivel);
+        expect(r.calcetines).toBe(3);
+        expect(r.total).toBeGreaterThan(facil.total);
+      }
+    });
+
+    it("la difícil lleva a la cuerda de secado rápido la toalla que así se seca hoy (antes movía la que no)", () => {
+      const r = jugarRondaFinal("dificil", ["mover-prenda-propia"], true);
+      // 20 puntos + la toalla (6).
+      expect(r.total).toBeGreaterThanOrEqual(26);
+      expect(r.total).toBeGreaterThan(jugarRondaFinal("facil", ["mover-prenda-propia"], true).total);
+    });
+
+    it("con Secar prenda y Retrasar secado, la difícil hace sitio, cuelga los 4 calcetines y frena al rival", () => {
+      const r = jugarRondaFinal("dificil", ["retrasar-secado", "secar-prenda"]);
+      expect(r.calcetines).toBe(4);
+      expect(r.rival).toBeLessThan(30);
+      expect(r.total).toBeGreaterThan(jugarRondaFinal("facil", ["retrasar-secado", "secar-prenda"]).total);
+    });
+  });
+
   it("sin dificultad juega igual que la normal", () => {
     let p = nueva(2, "compatible");
     const a = azarCon(42);

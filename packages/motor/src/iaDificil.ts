@@ -17,13 +17,15 @@ import { esValida } from "./jugadas";
 import { efectoAccion } from "./jugadas/jugarAccion";
 import type { Jugada } from "./jugadas/tipos";
 import { aplicada, candidatas, cuerdasARobarBase, type AzarIA } from "./ia";
-import { ropaPorTender } from "./iaRopa";
+import { puntosAlAcabarLaRonda, ropaPorTender } from "./iaRopa";
 
 // ---------- Cuánto queda de partida ----------
 
 /** Rondas que quedan contando la actual (su secado incluido); en la última ronda, 1. */
 export function rondasRestantes(p: Partida): number {
   if (p.ultimaRonda) return 1;
+  // Si alguien (ella misma incluida) puede llegar al final con el secado de hoy, esta es la última ronda.
+  if (p.jugadores.some((_, i) => puntosAlAcabarLaRonda(p, i) >= p.ajustes.umbralFinal)) return 1;
   const lider = Math.max(...p.jugadores.map((j) => j.puntos));
   const falta = p.ajustes.umbralFinal - lider;
   if (falta <= 0) return 1;
