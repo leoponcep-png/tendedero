@@ -1,4 +1,4 @@
-import { DIFICULTADES, type Dificultad } from "@tendedero/motor";
+import { DIFICULTADES, MODOS_JUEGO, type Dificultad, type ModoJuego } from "@tendedero/motor";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { esNombreTu, nombreVisible, t, useT, type Clave } from "../i18n";
 import { Animal, ANIMALES } from "./Animales";
@@ -25,8 +25,12 @@ import "./tapetes.css";
  * título bajo el nombre y fondo de la mesa de quien juega). Ids en perfil/catalogo.ts.
  */
 export type Perfil = { nombre: string; animal: string; color: string; tapete?: string; marco?: string; titulo?: string; fondo?: string };
-/** `dificultad`: nivel de la IA de los rivales (sin ella, «normal»). */
-export type ConfigPartida = { jugadores: Perfil[]; dificultad?: Dificultad };
+/** `dificultad`: nivel de la IA de los rivales (sin ella, «normal»). `modo`: modo de juego (sin él, «normal»). */
+export type ConfigPartida = { jugadores: Perfil[]; dificultad?: Dificultad; modo?: ModoJuego };
+
+/** El modo de juego de una configuración guardada; si no tiene o ya no existe, el normal. */
+export const modoDe = (c: { modo?: string } | null | undefined): ModoJuego =>
+  c?.modo && (MODOS_JUEGO as readonly string[]).includes(c.modo) ? (c.modo as ModoJuego) : "normal";
 
 export const COLORES_JUGADOR = COLORES.map((c) => c.valor);
 const NOMBRES_RIVALES = ["Lu", "Bruno", "Marta", "Nico"];
@@ -117,7 +121,7 @@ function ElegirColor({ valor, ocupados, disponibles, onCambio }: { valor: string
   );
 }
 
-type Pestana = "partida" | "perfil" | "records" | "logros" | "amigos";
+export type Pestana = "partida" | "perfil" | "records" | "logros" | "amigos";
 const PESTANAS: { id: Pestana; nombre: Clave; icono: Icono }[] = [
   { id: "partida", nombre: "menu.pestana.partida", icono: "cesta" },
   { id: "perfil", nombre: "menu.pestana.perfil", icono: "perfil" },
@@ -128,11 +132,22 @@ const PESTANAS: { id: Pestana; nombre: Clave; icono: Icono }[] = [
 
 /**
  * `onAbrirSala` (opcional): si se pasa, las invitaciones de la pestaña Amigos muestran «Abrir la sala» con el
- * código creado (el enlace que se comparte es #/sala/código).
+ * código creado. `pestanaInicial`: con qué pestaña se abre (desde la portada, «Perfil y logros» abre el perfil).
  */
-export function MenuPartida({ onEmpezar, onAbrirSala }: { onEmpezar: (c: ConfigPartida) => void; onAbrirSala?: (codigo: string) => void }) {
+export function MenuPartida({
+  onEmpezar,
+  onAbrirSala,
+  onAprender,
+  pestanaInicial = "partida",
+}: {
+  onEmpezar: (c: ConfigPartida) => void;
+  onAbrirSala?: (codigo: string) => void;
+  /** Abre la partida tutorial «Aprender a jugar» (sin ella, no sale el botón). */
+  onAprender?: () => void;
+  pestanaInicial?: Pestana;
+}) {
   const t = useT();
-  const [pestana, setPestana] = useState<Pestana>("partida");
+  const [pestana, setPestana] = useState<Pestana>(pestanaInicial);
   // Al abrir el menú se ponen al día los logros con las partidas guardadas (los nuevos salen en el aviso).
   const [partidas, setPartidas] = useState(() => {
     const lista = leerPartidas();
@@ -167,6 +182,7 @@ export function MenuPartida({ onEmpezar, onAbrirSala }: { onEmpezar: (c: ConfigP
     guardarConfig(nueva);
   };
   const dificultad: Dificultad = config.dificultad && DIFICULTADES.includes(config.dificultad) ? config.dificultad : "normal";
+  const modo = modoDe(config);
   const cambiarYo = (cambio: Partial<Perfil>) => {
     const nuevo = { ...yo, ...cambio };
     // Si tu animal o color nuevo lo tenía un rival, a ese rival se le da otro.
@@ -177,7 +193,7 @@ export function MenuPartida({ onEmpezar, onAbrirSala }: { onEmpezar: (c: ConfigP
   const cuantos = (n: number) => cambiarConfig({ jugadores: [yo, ...rivales(yo, n - 1, otros, animalesLibres, coloresLibres)] });
 
   const empezar = () => {
-    const limpio = { jugadores: [yo, ...otros].map((p, i) => ({ ...p, nombre: p.nombre.trim() || (i === 0 ? t("menu.tu") : NOMBRES_RIVALES[i - 1]) })), dificultad };
+    const limpio = { jugadores: [yo, ...otros].map((p, i) => ({ ...p, nombre: p.nombre.trim() || (i === 0 ? t("menu.tu") : NOMBRES_RIVALES[i - 1]) })), dificultad, modo };
     guardarConfig(limpio);
     onEmpezar(limpio);
   };
@@ -211,6 +227,11 @@ export function MenuPartida({ onEmpezar, onAbrirSala }: { onEmpezar: (c: ConfigP
         <button className="principal menu-empezar" onClick={empezar}>
           {t("menu.empezar")}
         </button>
+        {onAprender && (
+          <button className="menu-aprender" onClick={onAprender}>
+            {t("portada.aprender")}
+          </button>
+        )}
       </aside>
 
       <section className="menu-tarjeta mp-contenido">
@@ -244,6 +265,15 @@ export function MenuPartida({ onEmpezar, onAbrirSala }: { onEmpezar: (c: ConfigP
                 ))}
               </div>
               <p className="menu-ayuda-dificultad">{t(`menu.ayudaDificultad.${dificultad}`)}</p>
+              <h2>{t("menu.modoJuego")}</h2>
+              <div className="menu-cuantos menu-modo-juego" role="group" aria-label={t("menu.modoJuego")}>
+                {MODOS_JUEGO.map((m) => (
+                  <button key={m} className={modo === m ? "activa" : ""} aria-pressed={modo === m} onClick={() => cambiarConfig({ jugadores: config.jugadores, modo: m })}>
+                    {t(`menu.modoJuego.${m}`)}
+                  </button>
+                ))}
+              </div>
+              <p className="menu-ayuda-dificultad">{t(`menu.ayudaModoJuego.${modo}`)}</p>
               <h2>{t("menu.rivales")}</h2>
               <div className="menu-rivales">
                 {otros.map((o, i) => {

@@ -1,4 +1,4 @@
-import { enJuego, type Ajustes } from "../ajustes";
+import { ajustesConModo, enJuego, objetivoConModo, type Ajustes } from "../ajustes";
 import { barajar, semillaNueva, sembrar } from "../azar";
 import type { Datos } from "../datos/esquemas";
 import { anotar } from "./registro";
@@ -9,7 +9,8 @@ import { pilaDe, robar } from "./utilidades";
 
 export function crearPartida(datos: Datos, ajustesElegidos: Ajustes): Partida {
   const semilla = ajustesElegidos.semilla.trim() || semillaNueva();
-  const ajustes = structuredClone({ ...ajustesElegidos, semilla });
+  // La partida guarda los ajustes con lo que cambia su modo ya aplicado (puntos de las prendas, umbral…).
+  const ajustes = structuredClone(ajustesConModo({ ...ajustesElegidos, semilla }, datos));
 
   const p: Partida = {
     version: 1,
@@ -70,7 +71,7 @@ export function crearPartida(datos: Datos, ajustesElegidos: Ajustes): Partida {
   barajar(p, p.mazos.acciones);
   barajar(p, p.mazos.dia);
 
-  const objetivos = datos.objetivos.filter((o) => enJuego(o, ajustes));
+  const objetivos = datos.objetivos.filter((o) => enJuego(o, ajustes)).map((o) => objetivoConModo(o, datos, ajustes.modo));
   for (const o of objetivos) p.catalogo.objetivos[o.id] = o;
   // Un solo montón: los primeros son los comunes y del resto se reparten los secretos.
   const secretos = objetivos.map((o) => o.id);

@@ -1,4 +1,12 @@
-import type { Datos, DefCarta, DefObjetivo } from "./datos/esquemas";
+import type { Datos, DefCarta, DefModo, DefObjetivo } from "./datos/esquemas";
+
+/**
+ * Modos de juego. «normal»: las reglas de siempre. «larga»: más rondas, para que dé tiempo a llenar el tendedero
+ * y mejorar cuerdas; las prendas puntúan menos y el final está más lejos (lo que cambia está en
+ * data/ajustes-por-defecto.json, en `modos`).
+ */
+export type ModoJuego = "normal" | "larga";
+export const MODOS_JUEGO: readonly ModoJuego[] = ["normal", "larga"];
 
 /** Parámetros de una partida. Se fijan en la pestaña de ajustes y no cambian durante la partida. */
 export interface Ajustes {
@@ -21,6 +29,11 @@ export interface Ajustes {
   incluidas: Record<string, boolean>;
   /** Vacía = se genera una al empezar. */
   semilla: string;
+  /**
+   * Modo de juego (sin él, «normal»). Al crear la partida se aplica lo que cambia el modo sobre estos ajustes
+   * (ver `ajustesConModo`), así que la partida ya lleva los puntos y el umbral del modo.
+   */
+  modo?: ModoJuego;
 }
 
 export function cestasPorDefecto(datos: Datos, jugadores: number): number {
@@ -45,7 +58,42 @@ export function ajustesIniciales(datos: Datos): Ajustes {
     ),
     incluidas: Object.fromEntries([...datos.cartas, ...datos.objetivos].map((c) => [c.id, true])),
     semilla: "",
+    modo: "normal",
   };
+}
+
+/** Lo que cambia el modo de unos ajustes; nada si es el normal o no existe en los datos. */
+export function defModo(datos: Datos, modo: string | undefined): DefModo | null {
+  if (!modo || modo === "normal") return null;
+  return datos.porDefecto.modos?.[modo] ?? null;
+}
+
+/**
+ * Los ajustes con lo que cambia su modo aplicado encima (puntos de las prendas, umbral de final, cartas por turno…).
+ * En el modo normal devuelve los mismos ajustes, sin tocar nada.
+ */
+export function ajustesConModo(a: Ajustes, datos: Datos): Ajustes {
+  const m = defModo(datos, a.modo);
+  if (!m) return a;
+  const prendas = structuredClone(a.prendas);
+  for (const [tipo, cambio] of Object.entries(m.prendas ?? {})) {
+    if (prendas[tipo]) prendas[tipo].puntos = cambio.puntos;
+  }
+  return {
+    ...a,
+    umbralFinal: m.umbralFinal ?? a.umbralFinal,
+    manoInicial: m.manoInicial ?? a.manoInicial,
+    roboPorTurno: m.roboPorTurno ?? a.roboPorTurno,
+    jugablesPorTurno: m.jugablesPorTurno ?? a.jugablesPorTurno,
+    limiteMano: m.limiteMano ?? a.limiteMano,
+    prendas,
+  };
+}
+
+/** Un objetivo con el ritmo (cada, puntos) que le da el modo, si le da otro. */
+export function objetivoConModo(o: DefObjetivo, datos: Datos, modo: string | undefined): DefObjetivo {
+  const cambio = defModo(datos, modo)?.objetivos?.[o.id];
+  return cambio ? { ...o, cada: cambio.cada, puntos: cambio.puntos } : o;
 }
 
 /**
@@ -110,6 +158,10 @@ export function revisarAjustes(a: Ajustes, datos: Datos): Revision {
   const pedidos = a.objetivos.comunes + a.objetivos.secretosRepartidos * a.jugadores;
   if (objetivos < pedidos) {
     avisos.push(`Se sacan ${a.objetivos.comunes} comunes y ${a.objetivos.secretosRepartidos} secretos por jugador (${pedidos}) y solo hay ${objetivos} objetivos.`);
+  }
+
+  if (a.modo && a.modo !== "normal" && !datos.porDefecto.modos?.[a.modo]) {
+    avisos.push(`El modo «${a.modo}» no está en los datos: se juega con las reglas normales.`);
   }
 
   const pendientes = [...datos.cartas, ...datos.objetivos].filter((c) => c.estado === "pendiente").length;

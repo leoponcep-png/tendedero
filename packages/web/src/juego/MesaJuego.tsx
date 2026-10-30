@@ -7,6 +7,7 @@ import { DndContext, DragOverlay, PointerSensor, pointerWithin, useDroppable, us
 import {
   cartaDeReaccion,
   cierraLaRonda,
+  defCarta,
   efectoAccion,
   maxCuerdasRobadas,
   porQueNoVale,
@@ -17,6 +18,7 @@ import {
 } from "@tendedero/motor";
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
 import { flushSync } from "react-dom";
+import { ambiente, climaDeCarta, musica, reproducir } from "../audio";
 import { nombreVisible, t, useT } from "../i18n";
 import { nombreCarta, nombreObjetivoId, nombrePrendaT, textoMotivo } from "../i18n/juego";
 import { SelectorIdioma, tNodos } from "../i18n/react";
@@ -28,12 +30,12 @@ import { useAjustarMesa } from "../prototipos/ajustar";
 import type { Perfil } from "../prototipos/MenuPartida";
 import { AvisoLogros } from "../prototipos/perfil/AvisoLogros";
 import { registrarPartida } from "../prototipos/perfil/registro";
-import { animarJugada, despuesDe, olvidarVuelta, restaurar, volverVista, type Escena } from "./animar";
+import { acabaElDia, animarJugada, despuesDe, olvidarVuelta, restaurar, volverVista, type Escena } from "./animar";
 import { CartaAccion, CartaDeMano, CartaDiaJuego, CartaObjetivoJuego, CartaPrenda } from "./cartas";
 import { ContextoJuego, type Juego } from "./contexto";
 import { Lupa } from "./Lupa";
 import { Mosaico, VentanaSecas } from "./Vistazos";
-import { Mano, Mazos, Objetivos, PanelJugador, Registro, Reparto, Tapete } from "./piezas";
+import { Mano, Mazos, MOJADAS_VISIBLES, Objetivos, PanelJugador, Registro, Reparto, Tapete } from "./piezas";
 import { sinObjetivo } from "./vista";
 import "../prototipos/prototipos.css";
 import "../prototipos/mesa-bosque.css";
@@ -44,6 +46,9 @@ import "../prototipos/menu-partida.css";
 import "../prototipos/mesa-hud.css";
 import "./juego.css";
 import "../prototipos/tapetes.css";
+import { Ambiente } from "./Ambiente";
+import "./ambiente.css";
+import { usePresenciaPartida } from "../plataforma";
 
 export interface PropsMesaJuego {
   /** La partida tal como la ve quien mira (online y contra la IA, ya pasada por vistaPara). */
@@ -65,6 +70,12 @@ export interface PropsMesaJuego {
   codigoSala?: string;
   /** Contra la IA: su nivel, para apuntarlo en el perfil. */
   dificultad?: Dificultad;
+  /** Tutorial: solo se pueden hacer las jugadas que pasen este filtro (las demás ni se iluminan). */
+  permitida?: (j: Jugada) => boolean;
+  /** Tutorial: lo que se avisa al intentar una jugada que el filtro no deja. */
+  avisoNoPermitida?: string;
+  /** Tutorial: lo que se pinta por encima de la mesa (el foco y el bocadillo del guía). */
+  encima?: ReactNode;
 }
 
 function leer(clave: string, porDefecto: string): string {
@@ -90,6 +101,12 @@ function recienLlegados(antes: Partida, despues: Partida): Set<string> {
   for (const j of antes.jugadores) for (const l of j.lineas) for (const t of l.cartas) [t.carta, ...t.colgadas.map((c) => c.prenda)].forEach((x) => habia.add(x));
   const nuevos = new Set<string>();
   for (const j of despues.jugadores) for (const l of j.lineas) for (const t of l.cartas) [t.carta, ...t.colgadas.map((c) => c.prenda)].forEach((x) => !habia.has(x) && nuevos.add(x));
+  // Cartas de mojar que se acaban de meter bajo una prenda (entran deslizándose por debajo).
+  for (const [id, pr] of Object.entries(despues.prendas)) {
+    const ahora = Math.min(pr.extra ?? 0, pr.humedad);
+    const era = antes.prendas[id] ? Math.min(antes.prendas[id].extra ?? 0, antes.prendas[id].humedad) : 0;
+    for (let k = era; k < Math.min(ahora, MOJADAS_VISIBLES); k++) nuevos.add(`moja:${id}:${k}`);
+  }
   return nuevos;
 }
 
@@ -169,7 +186,7 @@ const colision: CollisionDetection = (args) => {
   return concretas.length ? concretas : todas;
 };
 
-export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJugada, onSalir, onNueva, conexion, avisoExterno, onOcupado, codigoSala, dificultad }: PropsMesaJuego) {
+export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJugada, onSalir, onNueva, conexion, avisoExterno, onOcupado, codigoSala, dificultad, permitida, avisoNoPermitida, encima }: PropsMesaJuego) {
   const [mostrada, setMostrada] = useState(partida);
   const mostradaRef = useRef(partida);
   const cola = useRef<{ partida: Partida; jugada?: Jugada }[]>([]);
@@ -178,6 +195,8 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
   const [animando, setAnimando] = useState(false);
   const [recien, setRecien] = useState<Set<string>>(new Set());
   const [muestra, setMuestra] = useState<string | null>(null);
+  // Lo que ven tus amigos de Steam: «Jugando, ronda N» (sin Steam no hace nada).
+  usePresenciaPartida(partida.ronda, modo === "online", partida.terminada);
 
   const [sel, setSel] = useState<Arrastre | null>(null);
   const [arrastre, setArrastre] = useState<Arrastre | null>(null);
@@ -244,6 +263,8 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
   useAjustarMesa(zonaComun, comun, 1.15);
 
   const p = mostrada;
+  // El clima de la carta del día, para el ambiente de la mesa.
+  const efectoDia = p.dia ? defCarta(p, p.dia)?.efecto : null;
   const sensores = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   // ---------- Cola de jugadas: se anima cada una sobre lo que se ve y luego se enseña la partida nueva ----------
@@ -267,6 +288,21 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
         // elegido otra pestaña, no se toca.
         if (manual.current || claveTurnoRef.current !== turno) return;
         flushSync(() => setVista(vistaDelTurno.current));
+        await fx.esperar(250);
+      };
+    },
+    async ensenar(jugador) {
+      const nada = async () => {};
+      if (!seguirRef.current || !animaciones || jugador === vistaRef.current) return nada;
+      const antes = vistaRef.current;
+      const turno = claveTurnoRef.current;
+      flushSync(() => setVista(jugador));
+      vistaRef.current = jugador;
+      await fx.esperar(420);
+      return async () => {
+        if (claveTurnoRef.current !== turno) return;
+        flushSync(() => setVista(antes));
+        vistaRef.current = antes;
         await fx.esperar(250);
       };
     },
@@ -296,7 +332,9 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
           setMovimiento(null);
           actor.current = item.jugada.jugador;
           contarFastidio(antes, item.jugada);
-          await aTiempo(animarJugada(e, antes, item.jugada, item.partida));
+          // El fin del día cuenta el secado prenda a prenda: puede durar bastante más que una jugada normal.
+          const largo = acabaElDia(antes, item.partida);
+          await aTiempo(animarJugada(e, antes, item.jugada, item.partida), largo ? 45000 : 9000);
         }
         const nuevos = recienLlegados(antes, item.partida);
         flushSync(() => {
@@ -306,7 +344,9 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
         });
         restaurar();
         if (item.jugada && raiz.current) {
-          await aTiempo(despuesDe(e, antes, item.partida).then(volverVista));
+          // El recuento de objetivos y la carta del día nueva también llevan su tiempo.
+          const largo = item.partida.terminada !== antes.terminada || item.partida.dia !== antes.dia || item.partida.ultimaRonda !== antes.ultimaRonda;
+          await aTiempo(despuesDe(e, antes, item.partida).then(volverVista), largo ? 60000 : 9000);
         }
         actor.current = null;
       }
@@ -323,10 +363,10 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
    * Una animación nunca puede dejar la mesa parada: si falla o tarda demasiado (p. ej. con la pestaña en segundo
    * plano el navegador no pinta y las animaciones no avanzan), se sigue y se limpia lo que quedara volando.
    */
-  async function aTiempo(animacion: Promise<void>) {
+  async function aTiempo(animacion: Promise<void>, limite = 9000) {
     let tarde = false;
     try {
-      await Promise.race([animacion, fx.esperar(9000).then(() => void (tarde = true))]);
+      await Promise.race([animacion, fx.esperar(limite).then(() => void (tarde = true))]);
     } catch (err) {
       console.error(err);
       tarde = true;
@@ -371,7 +411,8 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
 
   // Al acabar la partida se apunta en el perfil (una sola vez).
   useEffect(() => {
-    if (!p.terminada || !p.final || registrado.current) return;
+    // Se apunta (y salen los logros) cuando acaba el recuento animado, no encima de él.
+    if (!p.terminada || !p.final || registrado.current || animando || mostrada !== partida) return;
     registrado.current = true;
     const mio = p.final.find((r) => r.jugador === yo);
     const secreto = p.jugadores[yo].objetivoSecreto;
@@ -394,8 +435,9 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
       codigoSala,
       ...(modo === "ia" && { dificultad: dificultad ?? "normal" }),
     });
+    reproducir(mio?.puesto === 1 ? "victoria" : "derrota");
     setVerFinal(true);
-  }, [p, yo, modo]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [p, yo, modo, animando, partida]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Al empezar cada turno (o cada parte del reparto) la vista se fija en el tendedero de quien juega, y no se
   // mueve entre jugada y jugada; en tu turno vuelve al tuyo. Con «ver las jugadas» quitado solo vuelve al tuyo.
@@ -407,10 +449,22 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
     manual.current = false;
     olvidarVuelta();
     const quien = p.turno.jugador;
+    if (quien === yo) reproducir("turno");
     vistaDelTurno.current = quien === yo || !seguirRef.current ? yo : quien;
     if (quien === yo || seguirRef.current) setVista(vistaDelTurno.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [claveTurno]);
+
+  // Música de la partida y, de fondo, el clima de la carta del día. Al salir vuelve la del menú.
+  const climaDia = p.terminada ? null : climaDeCarta(p.dia ? defCarta(p, p.dia)?.efecto : null);
+  useEffect(() => {
+    musica("partida");
+    return () => {
+      musica("menu");
+      ambiente(null);
+    };
+  }, []);
+  useEffect(() => ambiente(climaDia), [climaDia]);
 
   // Esc cancela lo elegido o el segundo paso de una acción.
   useEffect(() => {
@@ -471,6 +525,7 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
 
   function jugar(j: Jugada) {
     if (!libre) return;
+    if (permitida && !permitida(j)) return setAviso(avisoNoPermitida ?? null);
     // Las acciones de mover e intercambiar piden el destino en un segundo paso.
     if (necesitaDestino(p, j)) {
       if (admisible(p, j)) {
@@ -535,6 +590,7 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
     elegir,
     vista,
     verTendedero: verManual,
+    permitida,
   };
 
   // ---------- Textos ----------
@@ -602,7 +658,7 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
       )}
       <button
         className="principal mf-acabar mj-acabar"
-        disabled={!puedoJugar}
+        disabled={!puedoJugar || (permitida && !permitida({ tipo: "terminarTurno", jugador: yo, cuerdas: cuerdasElegidas }))}
         onClick={() => jugar({ tipo: "terminarTurno", jugador: yo, cuerdas: cuerdasElegidas })}
       >
         <span>{puedoJugar && cierraLaRonda(p, yo) ? t("mesa.terminarTurnoDia") : t("mesa.terminarTurno")}</span>
@@ -616,13 +672,14 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
       <DndContext sensors={sensores} collisionDetection={colision} onDragStart={alEmpezar} onDragEnd={alSoltar} onDragCancel={() => setArrastre(null)}>
         <div
           ref={raiz}
-          className={`proto mb me mf mj con-estilos estilo-${estilo} ${sel || arrastre || movimiento ? "apuntando" : ""} ${!libre ? "ocupado" : ""}`}
+          className={`proto mb me mf mj con-estilos estilo-${estilo} ${sel || arrastre || movimiento ? "apuntando" : ""} ${!libre ? "ocupado" : ""} ${animaciones ? "" : "sin-animaciones"}`}
           style={{ "--tamano": tamano } as CSSProperties}
           data-fondo={perfiles[yo]?.fondo ?? "madera"}
         >
           <DefsBosque />
           <div className="mj-escala">
             <div className={`mf-juego mj-juego ${registroAbierto ? "" : "sin-registro"}`}>
+              <Ambiente efecto={efectoDia} animar={animaciones} capa="fondo" />
               <aside className="mf-jugadores mj-jugadores" aria-label={t("mesa.jugadores")}>
                 <div className="mj-arriba">
                   <button className="mj-boton-menu" onClick={() => setMenu((m) => !m)} aria-expanded={menu}>
@@ -795,7 +852,9 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
                   })()}
                 </p>
                 <div className="mj-menu-botones">
-                  <button onClick={() => jugar({ tipo: "responder", jugador: yo, anular: false })}>{t("mesa.noQuePase")}</button>
+                  <button disabled={permitida && !permitida({ tipo: "responder", jugador: yo, anular: false })} onClick={() => jugar({ tipo: "responder", jugador: yo, anular: false })}>
+                    {t("mesa.noQuePase")}
+                  </button>
                   <button className="principal" onClick={() => jugar({ tipo: "responder", jugador: yo, anular: true })}>
                     {t("mesa.niHablar")}
                   </button>
@@ -815,8 +874,10 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
             {muestra && <CartaDeMano p={p} carta={muestra} />}
           </div>
           <AvisoLogros color={perfiles[yo]?.color} />
+          {encima}
           {secasDe !== null && perfiles[secasDe] && <VentanaSecas p={p} jugador={secasDe} perfil={perfiles[secasDe]} yo={yo} onCerrar={() => setSecasDe(null)} />}
           <Lupa raiz={raiz} p={p} arrastrada={arrastrada} activa={conLupa} />
+          <Ambiente efecto={efectoDia} animar={animaciones} capa="luz" />
           <div className="capa-efectos" ref={fx.usarCapa} />
         </div>
 

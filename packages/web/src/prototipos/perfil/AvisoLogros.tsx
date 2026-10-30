@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { reproducir } from "../../audio";
 import { useT } from "../../i18n";
 import { DibujoRecompensa, nombreRecompensa } from "./Comunes";
 import { IconoPerfil } from "./Iconos";
@@ -25,6 +26,7 @@ export function AvisoLogros({ color = "#2f7a63", duracion = 6500 }: { color?: st
   const actual = cola[0];
   useEffect(() => {
     if (!actual) return;
+    reproducir("logro");
     const t = window.setTimeout(() => setCola((c) => c.slice(1)), duracion);
     return () => window.clearTimeout(t);
   }, [actual, duracion]);

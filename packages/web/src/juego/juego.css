@@ -1005,40 +1005,68 @@
   inset: 0;
 }
 
-/* Cartas de mojar junto a la prenda: una por gota de más. Se quitan antes que la escala de la prenda. */
+/*
+ * Cartas de mojar metidas por debajo de la prenda: de cada una asoma solo su pie, con el recuadro de la gota.
+ * Van por detrás de todas las prendas (así la de un calcetín nunca tapa al de al lado) y empiezan en el borde
+ * de abajo de su prenda, que baja con la humedad de su escala (--h).
+ */
 .mj-mojadas {
+  --asoma: calc(var(--celda) * 0.32);
   position: absolute;
-  z-index: calc(12 + var(--orden));
-  left: calc(var(--celda) * var(--x) + var(--ancho-prenda) - var(--celda) * 0.22);
-  top: calc(var(--alto-cuerda) + 3px);
-  display: flex;
-  flex-direction: column;
+  z-index: 0;
+  left: calc(var(--celda) * var(--x) + var(--ancho-prenda) * 0.06);
+  width: calc(var(--ancho-prenda) * 0.88);
+  top: calc(var(--alto-cuerda) + var(--h) * var(--paso) + var(--celda) * 1.5);
+  height: 0;
   pointer-events: none;
+  transition: top 0.7s cubic-bezier(0.4, 1.35, 0.5, 1);
 }
-.mj-ficha-moja {
-  display: grid;
-  place-items: center;
-  width: calc(var(--celda) * 0.42);
-  aspect-ratio: 41 / 63;
-  margin-top: calc(var(--celda) * -0.32 * min(var(--k), 1));
-  border-radius: 4px;
-  background: linear-gradient(160deg, #e3f1fa, #9fcbe8);
+.mj-moja {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* Cada carta mide dos «asomas»: la mitad de arriba queda bajo la prenda o bajo la carta anterior. */
+  top: calc(var(--asoma) * (var(--k) - 1));
+  height: calc(var(--asoma) * 2);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: calc(var(--asoma) * 0.12);
+  border-radius: 0 0 6px 6px;
+  background:
+    repeating-linear-gradient(135deg, #ffffff1f 0 2px, transparent 2px 5px),
+    var(--fastidio, #b5523b);
   box-shadow:
     0 0 0 1.5px var(--tinta),
     0 3px 5px #0006;
-  rotate: calc(6deg - var(--k) * 5deg);
-  animation: mj-moja-llega 0.55s cubic-bezier(0.3, 1.5, 0.5, 1) both;
 }
-.mj-ficha-moja svg {
-  width: 90%;
-  height: auto;
+.mj-moja.entra {
+  animation: mj-moja-entra 0.6s cubic-bezier(0.3, 1.25, 0.5, 1) both;
+  animation-delay: calc(var(--k) * 0.08s);
 }
-@keyframes mj-moja-llega {
+@keyframes mj-moja-entra {
   from {
-    opacity: 0;
-    translate: 0 -24px;
-    scale: 0.4;
+    translate: 0 calc(var(--asoma) * -1 * (var(--k) + 1));
   }
+}
+.mj-moja-caja {
+  display: flex;
+  align-items: center;
+  gap: 0.12em;
+  height: calc(var(--asoma) * 0.74);
+  padding: 0 0.35em;
+  border-radius: 4px;
+  background: #e6f3fb;
+  box-shadow:
+    0 0 0 1.2px var(--tinta),
+    inset 0 0 0 2px #e6f3fb,
+    inset 0 0 0 2.6px #8fc3e3;
+  font: 800 calc(var(--asoma) * 0.5) / 1 var(--fuente-titulo);
+  color: #1f5e86;
+}
+.mj-moja-caja svg {
+  height: 78%;
+  width: auto;
 }
 
 /* Ficha de jugador: se pulsa para ver sus prendas secas (cursor y una pequeña cesta en la esquina) */
@@ -1229,4 +1257,215 @@
   top: 50%;
   width: max-content;
   transform-origin: 50% 50%;
+}
+
+/* ---------- Carta del día en grande, carteles grandes y recuento de puntos (capa de efectos) ---------- */
+
+.capa-efectos > .velo-efecto {
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(ellipse 70% 60% at 50% 46%, #1d0f0640, #1d0f06a8);
+}
+.capa-efectos > .clon {
+  z-index: 3;
+}
+.leyenda-efecto {
+  z-index: 4;
+  left: 50%;
+  bottom: 7vh;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  max-width: min(640px, 86vw);
+  padding: 10px 22px 12px;
+  border-radius: 14px;
+  background: #fffaf0;
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    0 10px 24px #0008;
+  color: #3d3026;
+  text-align: center;
+  transform: translateX(-50%);
+}
+.leyenda-efecto b {
+  font: 800 13px var(--fuente-titulo);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a6a44;
+}
+.leyenda-efecto span {
+  font: 700 17px/1.25 var(--fuente-texto);
+}
+
+.cartel-grande {
+  z-index: 8;
+  left: 50%;
+  top: 44%;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 22px 46px 24px;
+  border-radius: 22px;
+  background: var(--grano, none), #fffaf0;
+  box-shadow:
+    0 0 0 3px var(--tinta),
+    0 0 0 9px #c2553a,
+    0 0 0 12px var(--tinta),
+    0 24px 50px #000a;
+  text-align: center;
+  transform: translate(-50%, -50%);
+}
+.cartel-grande-titulo {
+  font: 800 clamp(40px, 7vw, 84px) / 1 var(--fuente-titulo);
+  color: #c2553a;
+  text-shadow: 0 3px 0 #2b201933;
+}
+.cartel-grande-detalle {
+  max-width: 34em;
+  font: 700 clamp(15px, 1.6vw, 20px) / 1.3 var(--fuente-texto);
+  color: #3d3026;
+}
+.cartel-fin {
+  box-shadow:
+    0 0 0 3px var(--tinta),
+    0 0 0 9px #e8b04a,
+    0 0 0 12px var(--tinta),
+    0 24px 50px #000a;
+}
+.cartel-fin .cartel-grande-titulo {
+  color: #8a5a1a;
+}
+
+/* «+N» que vuela al marcador: con el color del jugador alrededor */
+.cartelito.puntos.vuela {
+  z-index: 6;
+  box-shadow:
+    0 0 0 2px var(--tinta),
+    0 0 0 5px var(--jugador, #ffc93c),
+    0 6px 14px #0006;
+  font: 800 30px var(--fuente-titulo);
+}
+
+/* Tabla del recuento final de objetivos de un jugador */
+.recuento-efecto {
+  z-index: 5;
+  left: 50%;
+  top: 46%;
+  display: grid;
+  gap: 6px;
+  min-width: min(420px, 86vw);
+  max-width: 90vw;
+  padding: 14px 18px 16px;
+  border-radius: 16px;
+  background: var(--grano, none), #fffaf0;
+  box-shadow:
+    0 0 0 2.5px var(--tinta),
+    0 0 0 8px var(--jugador),
+    0 0 0 10.5px var(--tinta),
+    0 22px 46px #000a;
+  color: #3d3026;
+  transform: translate(-50%, -50%);
+}
+.recuento-nombre {
+  font: 800 26px var(--fuente-titulo);
+  text-align: center;
+  color: var(--tinta);
+}
+.recuento-fila {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 10px;
+  border-radius: 9px;
+  background: #f3e6cc;
+  font: 700 17px var(--fuente-texto);
+}
+.recuento-fila.base {
+  display: block;
+  background: none;
+  text-align: center;
+  font-size: 15px;
+  color: #6b5640;
+}
+.recuento-fila small {
+  font: 800 14px var(--fuente-titulo);
+  color: #6b5640;
+}
+.recuento-fila b {
+  min-width: 2.4em;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #ffc93c;
+  box-shadow: 0 0 0 1.5px var(--tinta);
+  font: 800 18px var(--fuente-titulo);
+  text-align: center;
+  color: #5c3d1f;
+}
+.recuento-fila.cero {
+  opacity: 0.6;
+}
+.recuento-fila.cero b {
+  background: #e6dccb;
+}
+.recuento-total {
+  margin-top: 4px;
+  font: 800 24px var(--fuente-titulo);
+  text-align: center;
+  color: #8a5a1a;
+}
+/* El jugador que se está recontando, iluminado en su panel */
+.mj .mj-panel.recontando {
+  box-shadow:
+    0 0 0 3px var(--jugador),
+    0 0 22px var(--jugador);
+}
+.mj .mf-panel-puntos {
+  transform-origin: 50% 50%;
+}
+
+/* Marca de la última ronda en la barra de arriba: roja, con un latido suave mientras dura */
+.mj .me-ronda.mj-ultima {
+  background: #c2553a;
+  color: #fff6e6;
+  box-shadow:
+    0 0 0 2px #fff6e6,
+    0 0 0 3.5px #c2553a;
+  animation: mj-ultima-late 1.6s ease-in-out infinite;
+}
+.mj .me-ronda.mj-ultima::before {
+  content: "⏳ ";
+}
+@keyframes mj-ultima-late {
+  50% {
+    box-shadow:
+      0 0 0 2px #fff6e6,
+      0 0 0 3.5px #c2553a,
+      0 0 14px 4px #ff7a5a99;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mj .me-ronda.mj-ultima {
+    animation: none;
+  }
+}
+.mj.sin-animaciones .me-ronda.mj-ultima {
+  animation: none;
+}
+/* Sitio bajo cada línea para que asomen las cartas de mojar sin meterse bajo la línea de abajo */
+.mb.me.mj {
+  --colgante: calc(var(--filas, 3) * var(--paso) + var(--celda) * 2.05);
+}
+/* La carta del día en grande va por encima de los anuncios; su sello de días ya lo lleva la carta */
+.capa-efectos > .velo-efecto {
+  z-index: 6;
+}
+.capa-efectos > .clon.dia-en-grande {
+  z-index: 7;
+}
+.capa-efectos > .leyenda-efecto {
+  z-index: 8;
+}
+.clon.dia-en-grande .mj-dia-quedan {
+  display: none;
 }

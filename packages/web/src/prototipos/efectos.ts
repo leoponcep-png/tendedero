@@ -48,6 +48,15 @@ export function clonar(el: HTMLElement): HTMLElement {
   c.removeAttribute("data-uid");
   c.removeAttribute("data-prenda");
   c.style.setProperty("--carta-w", `${ancho}px`);
+  // Las medidas de la mesa (celda, paso de las gotas, alto de la cuerda…) dependen de dónde está la pieza; la copia
+  // vive en la capa de efectos, así que se las lleva puestas para dibujarse igual que el original.
+  const estilo = getComputedStyle(el);
+  for (const v of VARIABLES_MESA) {
+    const valor = estilo.getPropertyValue(v).trim();
+    if (valor) c.style.setProperty(v, valor);
+  }
+  // Y sale con el tamaño con que se ve (el tendedero va escalado para caber en su sitio).
+  const escala = escalaDe(el);
   Object.assign(c.style, {
     position: "fixed",
     left: `${r.left + r.width / 2 - ancho / 2}px`,
@@ -55,14 +64,28 @@ export function clonar(el: HTMLElement): HTMLElement {
     width: `${ancho}px`,
     height: `${alto}px`,
     margin: "0",
-    transform: "none",
     rotate: "0deg",
     animation: "none",
     visibility: "visible",
   });
   capa().appendChild(c);
-  poses.set(c, { x: 0, y: 0, giro: 0, escala: 1 });
+  const pose = { x: 0, y: 0, giro: 0, escala };
+  c.style.transform = transformar(pose);
+  poses.set(c, pose);
   return c;
+}
+
+/** Variables de medida y color que usan las cartas de la mesa (se copian a los clones). */
+const VARIABLES_MESA = ["--celda", "--celda-base", "--paso", "--filas", "--alto-cuerda", "--ancho-prenda", "--colgante", "--hueco-linea", "--c", "--jugador", "--fastidio", "--tactica", "--tinta", "--crema"];
+
+/** Escala con que se ve un elemento por las escalas (propiedad `scale`) de sus contenedores. */
+export function escalaDe(el: Element): number {
+  let k = 1;
+  for (let a: Element | null = el.parentElement; a; a = a.parentElement) {
+    const s = getComputedStyle(a).scale;
+    if (s && s !== "none") k *= parseFloat(s) || 1;
+  }
+  return k;
 }
 
 function transformar(p: Pose): string {
@@ -78,6 +101,9 @@ export async function volar(
   destino: Punto,
   { arco = 120, giro = 0, escala = 1, duracion = 700, voltear = false }: { arco?: number; giro?: number; escala?: number; duracion?: number; voltear?: boolean } = {},
 ) {
+  // Una escala imposible (un ancho medido a 0) dejaría la carta invisible mientras la mesa espera: se vuela a tamaño normal.
+  if (!Number.isFinite(escala) || escala <= 0) escala = 1;
+  if (!Number.isFinite(destino.x) || !Number.isFinite(destino.y)) return;
   const p0 = poses.get(c) ?? { x: 0, y: 0, giro: 0, escala: 1 };
   const o = centro(c.getBoundingClientRect());
   const p1: Pose = { x: p0.x + destino.x - o.x, y: p0.y + destino.y - o.y, giro, escala };
@@ -354,4 +380,143 @@ export async function traerDesde(el: HTMLElement, desde: DOMRect, voltear = fals
   const giro = el.querySelector<HTMLElement>(".carta-giro");
   if (voltear && giro) giro.animate([{ transform: "rotateY(180deg)" }, { transform: "rotateY(0)" }], { duration: 500, delay: 100, easing: "ease-in-out", fill: "backwards" });
   await anim.finished;
+}
+
+// ---------- Recuento de puntos, carta del día y carteles grandes ----------
+
+/** Brillo dorado de una pieza (la prenda que se seca, el objetivo que puntúa). */
+export async function brillo(el: HTMLElement, duracion = 420) {
+  await el
+    .animate(
+      [
+        { filter: "none", scale: "1" },
+        { filter: "drop-shadow(0 0 6px #ffe08a) drop-shadow(0 0 14px #ffc93c) brightness(1.15)", scale: "1.06", offset: 0.45 },
+        { filter: "none", scale: "1" },
+      ],
+      { duration: duracion, easing: "ease-in-out" },
+    )
+    .finished.catch(() => undefined);
+}
+
+/** «+N» que salta desde un punto y vuela en arco hasta el marcador de un jugador. */
+export async function puntosVolando(desde: Punto, hasta: DOMRect, texto: string, color: string) {
+  const el = crear("div", "cartelito puntos vuela", { left: `${desde.x}px`, top: `${desde.y}px` });
+  el.textContent = texto;
+  el.style.setProperty("--jugador", color);
+  const fin = centro(hasta);
+  const dx = fin.x - desde.x;
+  const dy = fin.y - desde.y;
+  const pasos = 12;
+  const fotogramas: Keyframe[] = [
+    { offset: 0, transform: "translate(-50%, -50%) scale(.3)", opacity: 0 },
+    { offset: 0.18, transform: "translate(-50%, calc(-50% - 26px)) scale(1.35)", opacity: 1 },
+    { offset: 0.32, transform: "translate(-50%, calc(-50% - 30px)) scale(1.2)", opacity: 1 },
+  ];
+  for (let i = 1; i <= pasos; i++) {
+    const t = i / pasos;
+    const x = dx * t;
+    const y = -30 + (dy + 30) * t * t - Math.sin(Math.PI * t) * 50;
+    fotogramas.push({ offset: 0.32 + 0.68 * t, transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${1.2 - 0.55 * t})`, opacity: t > 0.92 ? 0.4 : 1 });
+  }
+  await el.animate(fotogramas, { duration: 1050, easing: "linear", fill: "both" }).finished.catch(() => undefined);
+  el.remove();
+}
+
+/**
+ * Sube el número de un marcador contando de uno en uno. Cambia el texto que ya pinta React (el mismo nodo), así que
+ * al enseñar la partida nueva React solo lo deja en el valor que ya tiene.
+ */
+export async function contar(marcador: HTMLElement, cuanto: number) {
+  const texto = marcador.firstChild;
+  if (!(texto instanceof Text) || !cuanto) return;
+  const inicio = Number(texto.nodeValue) || 0;
+  const pasos = Math.min(Math.abs(cuanto), 12);
+  for (let i = 1; i <= pasos; i++) {
+    texto.nodeValue = String(Math.round(inicio + (cuanto * i) / pasos));
+    marcador.animate([{ scale: "1" }, { scale: "1.3" }, { scale: "1" }], { duration: 160, easing: "ease-out" });
+    await esperar(Math.max(45, 300 / pasos));
+  }
+  salpicar(centro(marcador.getBoundingClientRect()), "#ffc93c", 8);
+}
+
+/** Oscurece un poco toda la mesa para destacar lo que sale en el centro. Devuelve cómo quitarlo (se puede llamar varias veces). */
+export function velo(): () => Promise<void> {
+  const el = crear("div", "velo-efecto");
+  el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 350, fill: "both" });
+  let quitado: Promise<void> | null = null;
+  return () => (quitado ??= desvanecer(el, 400));
+}
+
+/** Rótulo bajo la carta que sale en grande (título y texto). Devuelve cómo quitarlo. */
+export function leyenda(titulo: string, texto: string): () => void {
+  const el = crear("div", "leyenda-efecto");
+  const h = document.createElement("b");
+  h.textContent = titulo;
+  const p = document.createElement("span");
+  p.textContent = texto;
+  el.append(h, p);
+  el.animate([{ opacity: 0, transform: "translate(-50%, 12px)" }, { opacity: 1, transform: "translate(-50%, 0)" }], { duration: 400, delay: 450, fill: "both", easing: curva() });
+  return () => void desvanecer(el, 300);
+}
+
+/** Cartel grande en el centro («¡Última ronda!», «Fin de la partida»); espera a que se lea y se va. */
+export async function cartelGrande(titulo: string, detalle: string, clase: string, duracion = 2300) {
+  const quitarVelo = velo();
+  const el = crear("div", `cartel-grande cartel-${clase}`);
+  const h = document.createElement("div");
+  h.className = "cartel-grande-titulo";
+  h.textContent = titulo;
+  const p = document.createElement("div");
+  p.className = "cartel-grande-detalle";
+  p.textContent = detalle;
+  el.append(h, p);
+  await el
+    .animate([{ opacity: 0, transform: "translate(-50%, -50%) scale(.6) rotate(-4deg)" }, { opacity: 1, transform: "translate(-50%, -50%) scale(1.06) rotate(1deg)", offset: 0.7 }, { opacity: 1, transform: "translate(-50%, -50%) scale(1) rotate(0)" }], {
+      duration: 550,
+      easing: "cubic-bezier(.3,1.4,.5,1)",
+      fill: "both",
+    })
+    .finished.catch(() => undefined);
+  await esperar(duracion);
+  void quitarVelo();
+  await el.animate([{ opacity: 1 }, { opacity: 0, transform: "translate(-50%, -50%) scale(.9)" }], { duration: 350, fill: "forwards" }).finished.catch(() => undefined);
+  el.remove();
+}
+
+/** Tabla del recuento de objetivos de un jugador: se le van añadiendo filas y al final el total. */
+export function tablaRecuento(nombre: string, color: string, base: string) {
+  const el = crear("div", "recuento-efecto");
+  el.style.setProperty("--jugador", color);
+  const h = document.createElement("div");
+  h.className = "recuento-nombre";
+  h.textContent = nombre;
+  const b = document.createElement("div");
+  b.className = "recuento-fila base";
+  b.textContent = base;
+  el.append(h, b);
+  el.animate([{ opacity: 0, transform: "translate(-50%, -40%) scale(.85)" }, { opacity: 1, transform: "translate(-50%, -50%) scale(1)" }], { duration: 380, easing: curva(), fill: "both" });
+  return {
+    fila(objetivo: string, cantidad: string, puntos: number): HTMLElement {
+      const f = document.createElement("div");
+      f.className = `recuento-fila ${puntos ? "" : "cero"}`;
+      const n = document.createElement("span");
+      n.textContent = objetivo;
+      const c = document.createElement("small");
+      c.textContent = cantidad;
+      const pt = document.createElement("b");
+      pt.textContent = `+${puntos}`;
+      f.append(n, c, pt);
+      el.appendChild(f);
+      f.animate([{ opacity: 0, transform: "translateX(-14px)" }, { opacity: 1, transform: "none" }], { duration: 300, easing: "ease-out" });
+      return pt;
+    },
+    total(texto: string) {
+      const f = document.createElement("div");
+      f.className = "recuento-total";
+      f.textContent = texto;
+      el.appendChild(f);
+      f.animate([{ opacity: 0, transform: "scale(.6)" }, { opacity: 1, transform: "scale(1.15)", offset: 0.6 }, { opacity: 1, transform: "none" }], { duration: 450, easing: "ease-out" });
+    },
+    quitar: () => desvanecer(el, 350),
+  };
 }

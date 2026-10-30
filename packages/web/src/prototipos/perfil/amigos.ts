@@ -77,9 +77,27 @@ export function partidasCon(amigo: Amigo, partidas: ResumenPartida[]): ResumenPa
   return partidas.filter((p) => p.rivales?.some((r) => r.trim().toLowerCase() === nombre));
 }
 
-/** Enlace de invitado a una sala online (#/sala/código, el mismo formato que usa App.tsx). */
-export function enlaceSala(codigo: string): string {
-  return `${location.origin}${location.pathname}#/sala/${codigo}`;
+/** Lo que sabemos de un amigo por las partidas jugadas juntos en este equipo. */
+export interface Juntos {
+  partidas: number;
+  /** Las que ganaste tú. */
+  tuyas: number;
+  /** Las que ganó él (tuvo la puntuación más alta). */
+  suyas: number;
+  ultima?: string;
+}
+
+export function juntosCon(amigo: Amigo, partidas: ResumenPartida[]): Juntos {
+  const nombre = amigo.nombre.trim().toLowerCase();
+  const lista = partidasCon(amigo, partidas);
+  let suyas = 0;
+  for (const p of lista) {
+    const i = p.rivales?.findIndex((r) => r.trim().toLowerCase() === nombre) ?? -1;
+    const suyos = i >= 0 ? p.puntosRivales?.[i] : undefined;
+    if (suyos === undefined || p.puesto === 1) continue;
+    if (suyos >= Math.max(...(p.puntosRivales ?? [0]))) suyas++;
+  }
+  return { partidas: lista.length, tuyas: lista.filter((p) => p.puesto === 1).length, suyas, ultima: lista.map((p) => p.fecha).sort().at(-1) };
 }
 
 export function nuevaInvitacion(): string {

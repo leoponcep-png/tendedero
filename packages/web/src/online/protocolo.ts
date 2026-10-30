@@ -1,4 +1,4 @@
-import type { Entrada, Jugada, Partida } from "@tendedero/motor";
+import type { Dificultad, Entrada, Jugada, Partida } from "@tendedero/motor";
 
 // Modo online: el navegador de quien crea la sala (el anfitrión) guarda la partida de verdad y aplica las
 // jugadas; los demás se conectan directamente a él (WebRTC, con PeerJS) y reciben solo lo que pueden ver.
@@ -10,6 +10,14 @@ export const PREFIJO = "tendedero-v1-";
 export function nuevoCodigo(): string {
   const letras = "abcdefghijkmnpqrstuvwxyz23456789";
   return Array.from(crypto.getRandomValues(new Uint8Array(6)), (n) => letras[n % letras.length]).join("");
+}
+
+/** Un código tal como lo escribe o lo pega alguien («AB3 K9Q», « ab3k9q ») en la forma de la sala. */
+export function limpiarCodigo(texto: string): string {
+  return texto
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+    .slice(0, 12);
 }
 
 /** Cómo se ve cada jugador en la mesa nueva (animal, color y tapete); la mesa antigua no lo usa. */
@@ -24,12 +32,18 @@ export interface Asiento {
   nombre: string;
   conectado: boolean;
   perfil?: PerfilOnline;
+  /** Si ya está listo para empezar (el anfitrión y la IA siempre lo están). */
+  listo?: boolean;
+  /** Si es un rival de la IA que juega el anfitrión, con su nivel. */
+  ia?: Dificultad;
 }
 
 export type MensajeInvitado =
   /** Al conectarse. `token` identifica al invitado para que pueda volver a su asiento si se le corta. */
   | { t: "hola"; nombre: string; token: string; perfil?: PerfilOnline }
-  | { t: "jugada"; jugada: Jugada };
+  | { t: "jugada"; jugada: Jugada }
+  /** En la sala de espera: «estoy listo» (o ya no). */
+  | { t: "listo"; listo: boolean };
 
 export type MensajeAnfitrion =
   | { t: "sala"; asientos: Asiento[]; plazas: number; tuAsiento: number; empezada: boolean }
@@ -57,11 +71,6 @@ export function miToken(): string {
   } catch {
     return crypto.randomUUID();
   }
-}
-
-/** `ruta`: dónde se abre la sala (la mesa nueva vive en #/prototipos/e/sala/…). */
-export function enlaceDeSala(codigo: string, ruta = "/sala"): string {
-  return `${location.origin}${location.pathname}#${ruta}/${codigo}`;
 }
 
 /** Errores de PeerJS en castellano. */

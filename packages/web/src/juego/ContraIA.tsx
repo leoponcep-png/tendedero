@@ -1,7 +1,7 @@
 // Partida contra la IA: tú juegas en el asiento 0 y los demás asientos los juega el motor (src/ia.ts) paso a
 // paso, con una pausa entre jugada y jugada y esperando a que la mesa acabe de animar la anterior.
 
-import { ajustesIniciales, aplicar, cestasPorDefecto, crearPartida, siguienteJugadaIA, vistaPara, type Datos, type Dificultad, type Jugada, type Partida } from "@tendedero/motor";
+import { ajustesIniciales, aplicar, cestasPorDefecto, crearPartida, siguienteJugadaIA, vistaPara, type Datos, type Dificultad, type Jugada, type ModoJuego, type Partida } from "@tendedero/motor";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { t } from "../i18n";
 import type { Perfil } from "../prototipos/MenuPartida";
@@ -12,10 +12,11 @@ interface Estado {
   ultima: { jugada: Jugada; n: number } | null;
 }
 
-function nuevaPartida(datos: Datos, perfiles: Perfil[]): Estado {
+/** `modo`: modo de juego (normal o partida larga); la partida lleva sus puntos y su umbral. */
+function nuevaPartida(datos: Datos, perfiles: Perfil[], modo: ModoJuego = "normal"): Estado {
   const base = ajustesIniciales(datos);
   const n = perfiles.length;
-  const partida = crearPartida(datos, { ...base, jugadores: n, cestas: { ...base.cestas, numero: cestasPorDefecto(datos, n) } });
+  const partida = crearPartida(datos, { ...base, jugadores: n, cestas: { ...base.cestas, numero: cestasPorDefecto(datos, n) }, modo });
   perfiles.forEach((pf, i) => (partida.jugadores[i].nombre = pf.nombre));
   return { partida, ultima: null };
 }
@@ -41,9 +42,23 @@ function guardarPartida(perfiles: Perfil[], partida: Partida | null, dificultad?
   }
 }
 
+/** Solo en desarrollo: con «tendedero-autojugar» en sessionStorage la IA también juega por ti (para probar la mesa). */
+function autojugar(): boolean {
+  try {
+    return import.meta.env.DEV && sessionStorage.getItem("tendedero-autojugar") === "si";
+  } catch {
+    return false;
+  }
+}
+
 /** El asiento de la IA que tiene que hacer algo ahora, si hay alguno (tú eres el 0). */
 function quienJuegaIA(p: Partida): number | null {
   if (p.terminada) return null;
+  if (autojugar()) {
+    const eligiendo = p.jugadores.findIndex((j) => j.objetivosOfrecidos.length > 0);
+    if (eligiendo >= 0) return eligiendo;
+    return p.reaccion ? p.reaccion.defensor : p.turno.jugador;
+  }
   const sinObjetivo = p.jugadores.findIndex((j, i) => i !== 0 && j.objetivosOfrecidos.length > 0);
   if (sinObjetivo >= 0) return sinObjetivo;
   // Hasta que no elijas tu objetivo no empieza nadie.
@@ -59,11 +74,12 @@ function pausa(p: Partida): number {
   return 800;
 }
 
-/** `dificultad`: nivel de la IA de los rivales (sin ella, «normal»). */
-export function PartidaContraIA({ datos, perfiles, dificultad, onSalir }: { datos: Datos; perfiles: Perfil[]; dificultad?: Dificultad; onSalir: () => void }) {
+/** `dificultad`: nivel de la IA de los rivales (sin ella, «normal»). `modo`: modo de juego (sin él, «normal»). */
+export function PartidaContraIA({ datos, perfiles, dificultad, modo = "normal", onSalir }: { datos: Datos; perfiles: Perfil[]; dificultad?: Dificultad; modo?: ModoJuego; onSalir: () => void }) {
   const [estado, setEstado] = useState<Estado>(() => {
     const g = partidaGuardada();
-    return g && g.partida.jugadores.length === perfiles.length ? { partida: g.partida, ultima: null } : nuevaPartida(datos, perfiles);
+    const mismoModo = (g?.partida.ajustes.modo ?? "normal") === modo;
+    return g && g.partida.jugadores.length === perfiles.length && mismoModo ? { partida: g.partida, ultima: null } : nuevaPartida(datos, perfiles, modo);
   });
   const actual = useRef(estado);
   actual.current = estado;
@@ -123,7 +139,7 @@ export function PartidaContraIA({ datos, perfiles, dificultad, onSalir }: { dato
         }
       }}
       onNueva={() => {
-        const nuevo = nuevaPartida(datos, perfiles);
+        const nuevo = nuevaPartida(datos, perfiles, modo);
         actual.current = nuevo;
         setEstado(nuevo);
         setOcupada(false);

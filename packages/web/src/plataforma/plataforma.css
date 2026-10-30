@@ -1,0 +1,292 @@
+/*
+ * Piezas de plataforma que salen en cualquier pantalla: el aviso de invitación, las ventanas de «Invitar amigos» y
+ * «Partida rápida» y el «Buscando jugadores…» de la sala. No dependen de la mesa: llevan sus colores de reserva.
+ */
+
+.pf-aviso-capa,
+.pf-capa,
+.pf-buscando {
+  --pf-tinta: var(--tinta, #2b2722);
+  --pf-crema: var(--crema, #fbf5e6);
+  --pf-linea: color-mix(in srgb, var(--pf-tinta) 16%, transparent);
+  --pf-acento: var(--tactica, #2f7a63);
+  --pf-titulo: var(--fuente-titulo, Georgia, serif);
+  color: var(--pf-tinta);
+}
+
+.pf-boton {
+  padding: 8px 14px;
+  border: 2px solid var(--pf-tinta);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--pf-tinta);
+  font: 800 15px var(--pf-titulo);
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--pf-tinta);
+}
+.pf-boton:active:not(:disabled) {
+  translate: 0 2px;
+  box-shadow: 0 1px 0 var(--pf-tinta);
+}
+.pf-boton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.pf-principal {
+  background: var(--pf-acento);
+  color: #fff;
+}
+.pf-error {
+  color: var(--fastidio, #b5523b);
+  font-weight: 800;
+}
+.pf-bien {
+  color: var(--pf-acento);
+  font-weight: 800;
+}
+
+/* ---------- Aviso de invitación (arriba a la derecha, encima de todo) ---------- */
+
+.pf-aviso-capa {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  max-width: min(460px, calc(100vw - 32px));
+}
+.pf-aviso {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 2.5px solid var(--pf-tinta);
+  border-radius: 18px;
+  background: var(--pf-crema);
+  box-shadow: 0 5px 0 var(--pf-tinta), 0 14px 30px #0004;
+  animation: pf-entra 0.5s cubic-bezier(0.2, 1.5, 0.4, 1) both;
+}
+@keyframes pf-entra {
+  from {
+    opacity: 0;
+    translate: 0 -24px;
+    scale: 0.9;
+  }
+}
+.pf-aviso-sobre {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f2c25a;
+  box-shadow: 0 0 0 2px var(--pf-tinta);
+  font-size: 22px;
+}
+.pf-aviso-texto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.pf-aviso-texto strong {
+  font: 800 18px var(--pf-titulo);
+}
+.pf-aviso-texto small {
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.75;
+}
+.pf-aviso-texto small.pf-error {
+  opacity: 1;
+}
+.pf-aviso-botones {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pf-aviso-mas {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--pf-tinta);
+  color: var(--pf-crema);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* ---------- Ventanas (Invitar amigos, Partida rápida) ---------- */
+
+.pf-capa {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: #2b27228c;
+}
+.pf-ventana {
+  width: min(560px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  padding: 18px 20px 20px;
+  border: 2.5px solid var(--pf-tinta);
+  border-radius: 20px;
+  background: var(--pf-crema);
+  box-shadow: 0 6px 0 var(--pf-tinta);
+  animation: pf-entra 0.4s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+.pf-ventana h2 {
+  margin: 0 0 10px;
+  font: 800 22px var(--pf-titulo);
+}
+.pf-ventana h3 {
+  margin: 16px 0 6px;
+  font: 800 16px var(--pf-titulo);
+}
+.pf-ventana-cabeza {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.pf-hueco {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 6px 0 12px;
+  padding: 12px 14px;
+  border: 2px dashed var(--pf-linea);
+  border-radius: 14px;
+  background: repeating-linear-gradient(-45deg, transparent 0 10px, color-mix(in srgb, var(--pf-tinta) 5%, transparent) 10px 20px);
+}
+.pf-hueco p {
+  margin: 0;
+  font-weight: 700;
+}
+.pf-hueco .mp-sello-steam,
+.pf-ventana .mp-sello-steam {
+  display: inline-flex;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #1b2838;
+  color: #e6eef5;
+  font: 800 12px sans-serif;
+}
+.pf-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.pf-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pf-lista li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pf-lista strong {
+  flex: 1;
+  font: 800 16px var(--pf-titulo);
+}
+.pf-rapida {
+  text-align: center;
+}
+.pf-rapida .pf-hueco {
+  align-items: center;
+  text-align: center;
+}
+.pf-rapida .pf-botones {
+  justify-content: center;
+}
+
+/* Tres pinzas que saltan mientras se busca. */
+.pf-pinzas {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+.pf-pinzas span {
+  width: 12px;
+  height: 30px;
+  border-radius: 4px;
+  background: var(--pf-acento);
+  box-shadow: 0 0 0 2px var(--pf-tinta);
+  animation: pf-pinza 0.9s ease-in-out infinite;
+}
+.pf-pinzas span:nth-child(2) {
+  animation-delay: 0.15s;
+  background: #f2c25a;
+}
+.pf-pinzas span:nth-child(3) {
+  animation-delay: 0.3s;
+  background: #e07a5f;
+}
+.pf-pinzas.pequeno {
+  margin: 0;
+  gap: 5px;
+}
+.pf-pinzas.pequeno span {
+  width: 7px;
+  height: 18px;
+}
+@keyframes pf-pinza {
+  50% {
+    translate: 0 -8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pf-pinzas span,
+  .pf-aviso,
+  .pf-ventana {
+    animation: none;
+  }
+}
+
+/* ---------- «Buscando jugadores…» en la sala de una partida rápida ---------- */
+
+.pf-buscando {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0;
+  padding: 10px 14px;
+  border: 2px solid var(--pf-tinta);
+  border-radius: 14px;
+  background: var(--pf-crema);
+  box-shadow: 0 3px 0 var(--pf-tinta);
+}
+.pf-buscando-texto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+.pf-buscando-texto strong {
+  font: 800 17px var(--pf-titulo);
+}
+.pf-buscando-texto small,
+.pf-buscando-ia small {
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.75;
+}
+.pf-buscando-ia {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

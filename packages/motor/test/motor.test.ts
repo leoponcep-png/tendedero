@@ -466,7 +466,7 @@ describe("mazo del día", () => {
     const sinPreparar = crearPartida(datos, { ...ajustesIniciales(datos), semilla: "r" });
     // Al empezar sale la primera; el resto se queda en el mazo.
     expect(sinPreparar.dia).not.toBeNull();
-    expect(sinPreparar.mazos.dia).toHaveLength(21);
+    expect(sinPreparar.mazos.dia).toHaveLength(19);
 
     let p = partida();
     proximaCarta(p, "ola-de-calor");

@@ -246,8 +246,8 @@ function Galeria() {
 // Al recargar en caliente se reutiliza la raíz de React en vez de crear otra.
 const contenedor = document.getElementById("raiz") as HTMLElement & { raizReact?: Root };
 contenedor.raizReact ??= createRoot(contenedor);
-contenedor.raizReact.render(
-  <StrictMode>
-    <Galeria />
-  </StrictMode>,
-);
+// Con ?plantilla=1 se pintan las plantillas vacías de cada tipo de carta (para dibujar las ilustraciones).
+const plantilla = new URLSearchParams(location.search).has("plantilla");
+// Se carga aparte para que sus estilos no lleguen a la galería normal.
+if (plantilla) import("./PlantillasCartas").then(({ PlantillasCartas }) => contenedor.raizReact!.render(<StrictMode><PlantillasCartas /></StrictMode>));
+else contenedor.raizReact.render(<StrictMode><Galeria /></StrictMode>);

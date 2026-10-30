@@ -191,7 +191,8 @@ describe("IA: niveles de dificultad", () => {
       const r = jugarRondaFinal("dificil", ["retrasar-secado", "secar-prenda"]);
       expect(r.calcetines).toBe(4);
       expect(r.rival).toBeLessThan(30);
-      expect(r.total).toBeGreaterThan(jugarRondaFinal("facil", ["retrasar-secado", "secar-prenda"]).total);
+      // Con las parejas a 2 puntos, colgar calcetines ya no le da ventaja de puntos aquí: lo que cuenta es que frena al rival.
+      expect(r.total).toBeGreaterThanOrEqual(jugarRondaFinal("facil", ["retrasar-secado", "secar-prenda"]).total);
     });
   });
 

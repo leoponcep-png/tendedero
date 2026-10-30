@@ -14,7 +14,8 @@
     "publicar": "electron-builder --win nsis --x64 --publish always"
   },
   "dependencies": {
-    "electron-updater": "^6.8.11"
+    "electron-updater": "^6.8.11",
+    "steamworks.js": "^0.4.0"
   },
   "devDependencies": {
     "electron": "45.0.0",
@@ -30,7 +31,12 @@
     },
     "files": [
       "src/**/*",
-      "package.json"
+      "package.json",
+      "!**/node_modules/steamworks.js/dist/{linux64,osx}/**",
+      "!**/node_modules/steamworks.js/dist/win64/*.lib"
+    ],
+    "asarUnpack": [
+      "**/node_modules/steamworks.js/**"
     ],
     "extraResources": [
       {

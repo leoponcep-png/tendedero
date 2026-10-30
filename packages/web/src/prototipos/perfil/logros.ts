@@ -42,6 +42,7 @@ const multi = (e: Estadisticas) => e.porJugadores[3].partidas + e.porJugadores[4
 // Ordenados por cuándo suelen caer: unos cuantos en las primeras partidas y otros para mucho más adelante.
 export const LOGROS: Logro[] = [
   // --- Primeras partidas ---
+  { id: "aprendiz", steam: "ACH_TUTORIAL", nombre: "Aprendiz de la colada", descripcion: "Termina la partida tutorial «Aprender a jugar».", icono: "pinza", meta: 1, valor: () => (leerJSON<string | null>(CLAVES.tutorial, null) ? 1 : 0) },
   { id: "primera-colada", steam: "ACH_PRIMERA_COLADA", nombre: "Primera colada", descripcion: "Juega tu primera partida.", icono: "cesta", meta: 1, valor: (e) => e.partidas, recompensas: [tapete("rayas"), color("#5cbf9b")] },
   { id: "todo-seco", steam: "ACH_PRIMERA_VICTORIA", nombre: "¡Todo seco!", descripcion: "Gana tu primera partida.", icono: "copa", meta: 1, valor: (e) => e.ganadas, recompensas: [animal("buho"), marco("madera")] },
   { id: "pinza-a-pinza", steam: "ACH_10_PRENDAS", nombre: "Pinza a pinza", descripcion: "Seca 10 prendas en total.", icono: "pinza", meta: 10, valor: (e) => e.prendasSecas, recompensas: [animal("rana"), color("#c2457a")] },
@@ -113,6 +114,8 @@ export function actualizarLogros(partidas: ResumenPartida[]): Logro[] {
   const nuevos = LOGROS.filter((l) => !hechos[l.id] && l.valor(e) >= l.meta);
   const p = plataforma();
   for (const l of LOGROS) p.progresoLogro?.(l.steam, Math.min(l.valor(e), l.meta), l.meta);
+  // En Steam, tus números se ven en tu perfil (los nombres tienen que existir como estadísticas en Steamworks).
+  p.publicarEstadisticas?.({ partidas: e.partidas, ganadas: e.ganadas, prendas_secas: e.prendasSecas, mejor_racha: e.mejorRacha, mejor_puntuacion: e.mejorPuntuacion });
   if (!nuevos.length) return [];
   const ahora = new Date().toISOString();
   for (const l of nuevos) {

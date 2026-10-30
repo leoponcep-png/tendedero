@@ -1,0 +1,6 @@
+{
+  "A · Viento 1 copia (2 días)": { "viento": { "copias": 1 } },
+  "B · Viento 1 día": { "viento": { "dias": 1 } },
+  "C · Viento 1 día y Viento traicionero 1 copia": { "viento": { "dias": 1 }, "viento-traicionero": { "copias": 1 } },
+  "D · Viento 1 copia y Viento traicionero 1 copia": { "viento": { "copias": 1 }, "viento-traicionero": { "copias": 1 } }
+}

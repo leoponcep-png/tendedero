@@ -9,6 +9,7 @@ import {
   OCULTA,
   prendasDe,
   tipoDe,
+  type Jugada,
   type Origen,
   type Partida,
   type Patron,
@@ -25,7 +26,14 @@ import type { Prenda as PrendaDibujo, TIPOS } from "../prototipos/Prototipos";
  */
 export function prendaDibujo(p: Partida, id: string): PrendaDibujo {
   const pr = p.prendas[id];
-  return { id, tipo: pr.tipo as keyof typeof TIPOS, color: p.catalogo.colores[pr.color]?.hex ?? "#ccc", humedad: pr.humedad - humedadExtra(p, id) };
+  return {
+    id,
+    tipo: pr.tipo as keyof typeof TIPOS,
+    color: p.catalogo.colores[pr.color]?.hex ?? "#ccc",
+    humedad: pr.humedad - humedadExtra(p, id),
+    // Los puntos de la partida: dependen del modo de juego.
+    puntos: p.catalogo.tipos[pr.tipo]?.puntos,
+  };
 }
 
 /** Cartas de mojar que tiene al lado una prenda (una gota cada una). */
@@ -84,12 +92,19 @@ export function destinos(p: Partida): Destino[] {
   return lista;
 }
 
-/** Si lo elegido se puede jugar en algún sitio (o sin objetivo, en las acciones que no lo piden). */
-export function sePuedeJugar(p: Partida, a: Arrastre): boolean {
-  if (a.tipo === "accion" && efectoAccion(p, a.carta)?.blanco === "ninguno") return esValida(p, { tipo: "jugarAccion", jugador: a.jugador, carta: a.carta });
+/**
+ * Si lo elegido se puede jugar en algún sitio (o sin objetivo, en las acciones que no lo piden). `permitida`: en el
+ * tutorial, el filtro de las jugadas que se dejan hacer en cada paso.
+ */
+export function sePuedeJugar(p: Partida, a: Arrastre, permitida?: (j: Jugada) => boolean): boolean {
+  const vale = (j: Jugada) => !permitida || permitida(j);
+  if (a.tipo === "accion" && efectoAccion(p, a.carta)?.blanco === "ninguno") {
+    const j: Jugada = { tipo: "jugarAccion", jugador: a.jugador, carta: a.carta };
+    return esValida(p, j) && vale(j);
+  }
   return destinos(p).some((d) => {
     const j = jugadaDe(p, a, d);
-    return j !== null && admisible(p, j);
+    return j !== null && admisible(p, j) && vale(j);
   });
 }
 

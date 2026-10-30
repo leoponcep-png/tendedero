@@ -24,7 +24,12 @@ export interface Juego {
   elegir: (a: Arrastre | null) => void;
   vista: number;
   verTendedero: (j: number) => void;
+  /** Tutorial: solo valen (y se iluminan) las jugadas que pasen este filtro. */
+  permitida?: (j: Jugada) => boolean;
 }
+
+/** Si una jugada válida también la deja hacer el tutorial (sin tutorial, siempre). */
+export const permite = (j: Pick<Juego, "permitida">, jugada: Jugada): boolean => !j.permitida || j.permitida(jugada);
 
 export const ContextoJuego = createContext<Juego | null>(null);
 

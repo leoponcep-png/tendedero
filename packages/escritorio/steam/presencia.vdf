@@ -1,0 +1,10 @@
+"lang"
+{
+	"Language"	"spanish"
+	"Tokens"
+	{
+		"#EnMenu"	"En el menú"
+		"#EnSala"	"En una sala, esperando jugadores"
+		"#Jugando"	"Jugando, ronda %ronda%"
+	}
+}

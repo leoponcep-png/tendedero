@@ -66,7 +66,7 @@ export function CartaObjetivoJuego({
   const progreso = jugador === undefined ? null : puntuarObjetivo(p, jugador, o);
   return (
     <div {...resto} className={`mj-objetivo ${secreto ? "secreto" : ""} ${className ?? ""}`} data-lupa={`objetivo:${id}${secreto ? ":secreto" : ""}`}>
-      <CartaObjetivoBosque id={id} secreto={secreto} />
+      <CartaObjetivoBosque id={id} secreto={secreto} ritmo={{ cada: o.cada, puntos: o.puntos }} />
       {progreso && (
         <div className="mj-objetivo-progreso" title={t("mesa.objetivoProgresoTitulo")}>
           {t("mesa.objetivoProgreso", { cantidad: progreso.cantidad, puntos: progreso.puntos })}

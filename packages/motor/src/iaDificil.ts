@@ -30,13 +30,23 @@ export function rondasRestantes(p: Partida): number {
   const falta = p.ajustes.umbralFinal - lider;
   if (falta <= 0) return 1;
   // Ritmo de puntos por ronda del que va primero: lo visto hasta ahora, o una estimación al principio.
-  const ritmo = p.ronda > 1 ? Math.max(4, lider / (p.ronda - 1)) : 6;
+  // La estimación va con lo que dan las prendas en esta partida (depende del modo): con las de siempre
+  // (1,5 puntos por pinza de media) empieza en 6 y no baja de 4.
+  const porPinza = puntosPorPinza(p);
+  const ritmo = p.ronda > 1 ? Math.max((porPinza * 8) / 3, lider / (p.ronda - 1)) : 4 * porPinza;
   let r = Math.max(1, Math.ceil(falta / ritmo));
   // Si casi no queda ropa, la partida acaba antes.
   const ropa = p.bolsa.length + p.centro.length + p.cestas.flat().length;
   const porRonda = p.ajustes.cestas.numero * p.ajustes.cestas.prendasPorCesta;
   if (porRonda > 0) r = Math.min(r, 1 + Math.ceil(ropa / porRonda));
   return r;
+}
+
+/** Puntos por pinza de las prendas de la partida, de media entre los tipos (salen del modo de juego). */
+function puntosPorPinza(p: Partida): number {
+  const tipos = Object.values(p.catalogo.tipos);
+  if (tipos.length === 0) return 1.5;
+  return tipos.reduce((s, t) => s + t.puntos / Math.max(1, t.espacios), 0) / tipos.length;
 }
 
 /** Probabilidad de que la partida siga viva hasta el secado de la ronda `k` (1 = la actual). */

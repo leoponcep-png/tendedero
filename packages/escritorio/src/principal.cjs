@@ -1,8 +1,9 @@
 // Proceso principal de la aplicación de escritorio de Tendedero.
 // Abre una ventana con la web del juego ya construida (packages/web/dist) y busca actualizaciones.
-const { app, BrowserWindow, Menu, dialog, net, protocol, shell } = require("electron");
+const { app, BrowserWindow, Menu, dialog, ipcMain, net, protocol, shell } = require("electron");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
+const { argumentosSegundaCopia, conectarVentana, iniciarSteam, steamActivo } = require("./steam.cjs");
 
 // La web se sirve con un protocolo propio (tendedero://juego/...) en vez de file://:
 // así tiene un origen fijo y seguro, que necesitan PeerJS (WebRTC y su servidor) y el localStorage.
@@ -23,7 +24,10 @@ protocol.registerSchemesAsPrivileged([
 if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
-  app.on("second-instance", () => {
+  // Steam (solo si hay App ID y Steam está abierto; si no, no hace nada). Va antes de que la app esté lista.
+  iniciarSteam();
+  app.on("second-instance", (_evento, argv) => {
+    argumentosSegundaCopia(argv);
     const ventana = BrowserWindow.getAllWindows()[0];
     if (!ventana) return;
     if (ventana.isMinimized()) ventana.restore();
@@ -42,8 +46,19 @@ function arrancar() {
   });
 
   Menu.setApplicationMenu(null);
-  crearVentana();
-  buscarActualizaciones();
+
+  // Lo que pide la web por el preload: salir del juego y poner o quitar la pantalla completa.
+  ipcMain.on("tendedero:salir", () => app.quit());
+  ipcMain.handle("tendedero:pantalla-completa", (evento, si) => {
+    const ventana = BrowserWindow.fromWebContents(evento.sender);
+    if (!ventana) return false;
+    if (typeof si === "boolean") ventana.setFullScreen(si);
+    return typeof si === "boolean" ? si : ventana.isFullScreen();
+  });
+
+  conectarVentana(crearVentana());
+  // En Steam las actualizaciones las pone Steam; fuera de Steam, las de GitHub Releases.
+  if (!steamActivo()) buscarActualizaciones();
 
   app.on("window-all-closed", () => app.quit());
 }
@@ -65,12 +80,16 @@ function crearVentana() {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
+      preload: path.join(__dirname, "preload.cjs"),
     },
   });
 
   // El título de la ventana es siempre «Tendedero», aunque la página cambie el suyo.
   ventana.on("page-title-updated", (evento) => evento.preventDefault());
   ventana.once("ready-to-show", () => ventana.show());
+  // La web se entera de cuándo entra o sale de pantalla completa (también con F11), para su ajuste.
+  ventana.on("enter-full-screen", () => ventana.webContents.send("tendedero:pantalla-completa", true));
+  ventana.on("leave-full-screen", () => ventana.webContents.send("tendedero:pantalla-completa", false));
 
   // F11: pantalla completa. Ctrl+Mayús+I abre las herramientas de desarrollo solo fuera del instalador.
   ventana.webContents.on("before-input-event", (evento, tecla) => {

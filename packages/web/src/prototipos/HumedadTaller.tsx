@@ -79,7 +79,7 @@ function CartaHumeda({ c, variante }: { c: Colgada; variante: Variante }) {
         <PrendaBosque tipo={c.prenda.tipo} color={c.prenda.color} espacios={esp} className="hp-arte" />
       </div>
       <div className="hp-pie">
-        <span className="pb-puntos">{TIPOS[c.prenda.tipo].puntos}</span>
+        <span className="pb-puntos">{c.prenda.puntos ?? TIPOS[c.prenda.tipo].puntos}</span>
         {seca && <span className="hp-sello">¡Seca!</span>}
       </div>
     </div>
@@ -97,7 +97,7 @@ export function CartaPrendaHumeda({ p, variante = "columna", className, style, .
         <PrendaBosque tipo={p.tipo} color={p.color} espacios={esp} className="hp-arte" />
       </div>
       <div className="hp-pie">
-        <span className="pb-puntos">{TIPOS[p.tipo].puntos}</span>
+        <span className="pb-puntos">{p.puntos ?? TIPOS[p.tipo].puntos}</span>
         <span className="hp-coste" title={t("carta.gastaPinzas", { n: esp })}>
           {Array.from({ length: esp }, (_, i) => (
             <i key={i} />

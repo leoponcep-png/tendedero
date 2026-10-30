@@ -1,0 +1,214 @@
+/*
+ * Modo «plantilla» de la galería (/galeria-cartas.html?plantilla=1, PlantillasCartas.tsx).
+ * Todo va bajo .plantillas: esconde ilustraciones, textos, números e iconos de las cartas y deja el marco vacío.
+ * El juego no usa esta clase, así que no le afecta.
+ */
+
+.mb.me.plantillas,
+.mb.me.estilo-fusion.plantillas {
+  min-height: 100vh;
+  padding: 16px 24px 60px;
+  background: none;
+  font-family: var(--fuente-texto);
+}
+.plantillas h2 {
+  margin: 18px 0 12px;
+  font: 800 20px var(--fuente-titulo);
+  color: #3b2f2a;
+}
+.plantillas-fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  align-items: flex-start;
+}
+.plantilla-carta,
+.plantilla-sangrado {
+  flex: none;
+}
+.plantilla-sangrado {
+  border-radius: 0;
+}
+
+/* Sin sombras por fuera de la carta: la imagen es justo el corte */
+.plantillas .cb,
+.plantillas .db,
+.plantillas .hp,
+.plantillas .dia-bosque {
+  box-shadow:
+    inset 0 0 0 3px var(--crema),
+    inset 0 0 0 4.5px var(--dorado, transparent);
+}
+.plantillas .ccb > svg {
+  filter: none;
+}
+
+/* ---------- Lo que se esconde ---------- */
+
+/* Acción y objetivo: dibujo, nombre, texto, puntos y pie */
+.plantillas .cb-ilustra,
+.plantillas .co-ilustra,
+.plantillas .cb-nombre,
+.plantillas .cb-texto,
+.plantillas .cb-tipo,
+.plantillas .co-puntos,
+/* Día: icono, nombre, días, texto y pie */
+.plantillas .dia-icono,
+.plantillas .dia-bosque-nombre,
+.plantillas .dia-dias,
+.plantillas .dia-bosque-texto,
+.plantillas .dia-pie,
+/* Emblema dentro de los medallones (el medallón se queda) */
+.plantillas .marco-carta .m-medallon-aro + g,
+.plantillas .recuadro-gota,
+/* Cuerda: icono del medallón, nombre, texto y adornos del tipo */
+.plantillas .ccb svg g > circle + circle + g,
+.plantillas .ccb-nombre,
+.plantillas .ccb-texto,
+.plantillas .ccb .deco,
+/* Dorsos: dibujo del centro, nombre del mazo, emblemas del pie, pinzas de las esquinas y la soga */
+.plantillas .db .d-aro ~ g,
+.plantillas .db .d-titulo,
+.plantillas .db svg > g:last-child,
+.plantillas .db svg > g[transform*="rotate("],
+.plantillas .db svg > g[fill="none"],
+/* Prenda: gotas de la escala, dibujo, número de puntos y pinzas que gasta */
+.plantillas .hp-escala svg,
+.plantillas .hp-arte,
+.plantillas .hp-coste,
+.plantillas .hp-sello {
+  display: none;
+}
+.plantillas .pb-puntos {
+  color: transparent;
+}
+
+/* La prenda, del tamaño de su carta (en la mesa se coloca colgando de la cuerda) */
+.plantilla-prenda {
+  --paso: calc(var(--celda) * 0.24);
+  --filas: 3;
+  --h: 3;
+}
+.plantillas .plantilla-prenda > .hp {
+  position: absolute;
+  inset: 0;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  transition: none;
+}
+
+/* ---------- Guías ---------- */
+
+.plantilla-guia {
+  position: relative;
+  flex: none;
+  background: #fff;
+}
+.plantilla-guia-capa {
+  position: absolute;
+  z-index: 10;
+  inset: 0;
+  overflow: visible;
+}
+.plantilla-guia-capa text {
+  font-family: "Nunito", sans-serif;
+  fill: #2b2019;
+}
+.plantilla-guia-capa .g-titulo {
+  font-size: 5px;
+  font-weight: 800;
+}
+.plantilla-guia-capa .g-sub {
+  font-size: 2.3px;
+  font-weight: 600;
+  fill: #5a4a40;
+}
+.g-sangrado {
+  fill: none;
+  stroke: #e0245e;
+  stroke-width: 0.3;
+  stroke-dasharray: 1.2 0.8;
+}
+.g-corte {
+  fill: none;
+  stroke: #000;
+  stroke-width: 0.3;
+}
+.g-seguro {
+  fill: none;
+  stroke: #1677ff;
+  stroke-width: 0.3;
+  stroke-dasharray: 1 0.7;
+}
+.g-ilu {
+  fill: #ff00c855;
+  stroke: #c800a0;
+  stroke-width: 0.45;
+}
+.g-forma {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 0.45;
+  stroke-dasharray: 1 0.6;
+}
+.g-emblema {
+  fill: #00b45a55;
+  stroke: #00894a;
+  stroke-width: 0.3;
+}
+.g-nota {
+  fill: #ffffff66;
+  stroke: #6b6b6b;
+  stroke-width: 0.25;
+  stroke-dasharray: 0.6 0.5;
+}
+.plantilla-guia-capa .g-nota-texto {
+  font-size: 2.1px;
+  font-weight: 700;
+  fill: #555;
+  text-anchor: middle;
+}
+.plantilla-guia-capa .g-ilu-texto,
+.plantilla-guia-capa .g-ilu-medida {
+  text-anchor: middle;
+  font-weight: 800;
+  fill: #fff;
+  stroke: #8a006e;
+  stroke-width: 0.5;
+  paint-order: stroke;
+  stroke-linejoin: round;
+}
+.plantilla-guia-capa .g-ilu-medida {
+  font-weight: 700;
+}
+.g-cota,
+.g-cota-fina {
+  fill: none;
+  stroke: #2b2019;
+  stroke-width: 0.25;
+}
+.g-cota-fina {
+  stroke: #c800a0;
+  stroke-dasharray: 0.5 0.4;
+}
+.plantilla-guia-capa .g-cota-texto {
+  font-size: 2.4px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+.plantilla-guia-capa .g-cota-texto-peq {
+  font-size: 1.9px;
+  font-weight: 700;
+  text-anchor: middle;
+  fill: #8a006e;
+}
+.plantilla-guia-capa .g-leyenda text {
+  font-size: 2.3px;
+  font-weight: 600;
+}
+.plantilla-guia-capa .g-leyenda .g-leyenda-sub {
+  font-size: 2px;
+  fill: #5a4a40;
+}

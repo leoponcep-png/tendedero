@@ -1,0 +1,389 @@
+/*
+ * Ambiente de la mesa según la carta del día (Ambiente.tsx). La capa «fondo» va sobre la madera y por debajo de
+ * paneles y cartas (las partículas no pasan por encima de nada que se juegue); la capa «luz» solo tiñe muy poco
+ * toda la pantalla. Nada recibe clics y todo es tenue: se nota el clima sin distraer.
+ */
+
+.mj .mf-juego {
+  isolation: isolate;
+}
+.mj-ambiente {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  animation: amb-entra 1.6s ease both;
+}
+.mj-ambiente-luz {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  animation: amb-entra 1.6s ease both;
+}
+.mj-ambiente.quieto,
+.mj-ambiente-luz.quieto {
+  animation: none;
+}
+@keyframes amb-entra {
+  from {
+    opacity: 0;
+  }
+}
+.amb-luz {
+  position: absolute;
+  inset: 0;
+}
+.amb-particulas {
+  position: absolute;
+  inset: 0;
+}
+.amb-particulas i {
+  position: absolute;
+  left: calc(var(--x) * 100%);
+  top: calc(var(--y) * 100%);
+  display: block;
+}
+@media (prefers-reduced-motion: reduce) {
+  .amb-particulas {
+    display: none;
+  }
+  .mj-ambiente,
+  .mj-ambiente-luz {
+    animation: none;
+  }
+}
+
+/* Tinte de encima de todo: muy suave en todos los climas */
+.mj-ambiente-luz.amb-lluvia {
+  background: #1d3557;
+  mix-blend-mode: multiply;
+  opacity: 0.06;
+}
+.mj-ambiente-luz.amb-tormenta {
+  background: #1d3557;
+  mix-blend-mode: multiply;
+  opacity: 0.09;
+}
+.mj-ambiente-luz.amb-sol {
+  background: radial-gradient(ellipse 70% 60% at 88% 0%, #ffd77a, #ffd77a00 70%);
+  mix-blend-mode: soft-light;
+  opacity: 0.3;
+}
+.mj-ambiente-luz.amb-calor {
+  background: radial-gradient(ellipse 80% 70% at 85% 0%, #ffb85c, #ffb85c00 75%);
+  mix-blend-mode: soft-light;
+  opacity: 0.35;
+}
+.mj-ambiente-luz.amb-viento,
+.mj-ambiente-luz.amb-rafagas,
+.mj-ambiente-luz.amb-polvo,
+.mj-ambiente-luz.amb-pinzas,
+.mj-ambiente-luz.amb-enganche {
+  display: none;
+}
+
+/* ---------- Lluvia y tormenta: luz fría y algo más oscura, gotas que caen ---------- */
+
+.amb-lluvia .amb-luz,
+.amb-tormenta .amb-luz {
+  background:
+    linear-gradient(180deg, #1d3557 0%, #2d4a6b 100%);
+  mix-blend-mode: multiply;
+  opacity: 0.14;
+}
+.amb-tormenta .amb-luz {
+  opacity: 0.2;
+}
+/* Tormenta: sin destellos; la penumbra respira muy despacio */
+.amb-tormenta .amb-luz {
+  animation: amb-penumbra 9s ease-in-out infinite alternate;
+}
+.mj-ambiente.quieto .amb-luz {
+  animation: none;
+}
+@keyframes amb-penumbra {
+  to {
+    opacity: 0.12;
+  }
+}
+.amb-lluvia .amb-particulas i,
+.amb-tormenta .amb-particulas i {
+  top: -12vh;
+  width: 1px;
+  height: calc(8px + var(--r) * 9px);
+  border-radius: 1px;
+  background: linear-gradient(180deg, #d8ecff00, #d8ecffaa);
+  opacity: 0.35;
+  rotate: 12deg;
+  animation: amb-cae calc(var(--t) * 1.15s) linear infinite var(--d);
+}
+.amb-tormenta .amb-particulas i {
+  rotate: 18deg;
+  opacity: 0.4;
+  animation-duration: calc(var(--t) * 0.85s);
+}
+@keyframes amb-cae {
+  to {
+    translate: -24vh 125vh;
+  }
+}
+
+/* ---------- Sol: luz cálida desde una esquina y algún brillo ---------- */
+
+.amb-sol .amb-luz {
+  background:
+    radial-gradient(ellipse 60% 55% at 88% 0%, #ffd77a 0%, #ffd77a00 70%),
+    linear-gradient(180deg, #ffe7b0, #ffe7b000 60%);
+  mix-blend-mode: soft-light;
+  opacity: 0.5;
+}
+.amb-sol .amb-luz::after,
+.amb-calor .amb-luz::after {
+  content: "";
+  position: absolute;
+  right: -30vmax;
+  top: -30vmax;
+  width: 70vmax;
+  height: 70vmax;
+  border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, #fff3c855 0deg 6deg, #fff3c800 6deg 20deg);
+  mask: radial-gradient(circle, #000 0%, #0000 70%);
+  opacity: 0.2;
+  animation: amb-gira 90s linear infinite;
+}
+.mj-ambiente.quieto .amb-luz::after {
+  animation: none;
+}
+@keyframes amb-gira {
+  to {
+    rotate: 360deg;
+  }
+}
+.amb-sol .amb-particulas i,
+.amb-calor .amb-particulas i {
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle, #fffbe8 0 14%, #ffe9a000 15%), conic-gradient(from 45deg, #fff6d0 0 4%, transparent 4% 25%, #fff6d0 25% 29%, transparent 29% 50%, #fff6d0 50% 54%, transparent 54% 75%, #fff6d0 75% 79%, transparent 79%);
+  border-radius: 50%;
+  opacity: 0;
+  animation: amb-brilla calc(var(--t) * 6s) ease-in-out infinite var(--d);
+}
+@keyframes amb-brilla {
+  0%,
+  70%,
+  100% {
+    opacity: 0;
+    scale: 0.3;
+  }
+  80% {
+    opacity: 0.4;
+    scale: 1;
+    rotate: 45deg;
+  }
+}
+
+/* ---------- Ola de calor: más naranja, con el aire que tiembla hacia arriba ---------- */
+
+.amb-calor .amb-luz {
+  background:
+    radial-gradient(ellipse 70% 60% at 85% 0%, #ffb85c 0%, #ffb85c00 75%),
+    linear-gradient(0deg, #ff9a4a, #ffcf7a00 55%);
+  mix-blend-mode: soft-light;
+  opacity: 0.55;
+}
+.amb-calor .amb-particulas i:nth-child(odd) {
+  top: auto;
+  bottom: -20vh;
+  width: calc(20vw + var(--r) * 20vw);
+  height: 16vh;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, #ffe2b022, #ffe2b000 70%);
+  filter: blur(6px);
+  opacity: 0;
+  animation: amb-sube calc(var(--t) * 9s) ease-in-out infinite var(--d);
+}
+@keyframes amb-sube {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+    scale: 1 0.6;
+  }
+  40% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    translate: 3vw -110vh;
+    scale: 1.3 1;
+  }
+}
+
+/* ---------- Viento y viento traicionero: hojas y ráfagas que cruzan ---------- */
+
+.amb-viento .amb-luz,
+.amb-rafagas .amb-luz {
+  background: linear-gradient(100deg, #dfe9ee, #dfe9ee00 70%);
+  mix-blend-mode: soft-light;
+  opacity: 0.3;
+}
+.amb-viento .amb-particulas i,
+.amb-rafagas .amb-particulas i {
+  left: -6vw;
+  width: 10px;
+  height: 6px;
+  border-radius: 0 100% 0 100%;
+  background: linear-gradient(135deg, #9bb35a, #6f8a3a);
+  box-shadow: inset 0 0 0 1px #3d4d2066;
+  opacity: 0.5;
+  animation: amb-hoja calc(var(--t) * 11s) linear infinite var(--d);
+}
+.amb-viento .amb-particulas i:nth-child(3n),
+.amb-rafagas .amb-particulas i:nth-child(3n) {
+  background: linear-gradient(135deg, #e0a24a, #b8692c);
+}
+/* Las ráfagas: rayas finas que pasan */
+.amb-viento .amb-particulas i:nth-child(4n),
+.amb-rafagas .amb-particulas i:nth-child(even) {
+  width: calc(12vw + var(--r) * 14vw);
+  height: 2px;
+  border-radius: 2px;
+  height: 1.5px;
+  background: linear-gradient(90deg, #fff0, #ffffff88 40%, #fff0);
+  box-shadow: none;
+  opacity: 0.3;
+  animation-name: amb-rafaga;
+}
+.amb-rafagas .amb-particulas i {
+  animation-duration: calc(var(--t) * 6.5s);
+}
+@keyframes amb-hoja {
+  0% {
+    translate: 0 0;
+    rotate: 0deg;
+  }
+  25% {
+    translate: 30vw -6vh;
+    rotate: 160deg;
+  }
+  50% {
+    translate: 58vw 4vh;
+    rotate: 300deg;
+  }
+  75% {
+    translate: 86vw -3vh;
+    rotate: 470deg;
+  }
+  100% {
+    translate: 116vw 6vh;
+    rotate: 640deg;
+  }
+}
+@keyframes amb-rafaga {
+  0% {
+    translate: 0 0;
+    opacity: 0;
+  }
+  15%,
+  60% {
+    opacity: 0.3;
+  }
+  100% {
+    translate: 125vw -2vh;
+    opacity: 0;
+  }
+}
+
+/* ---------- La vecina sacude la alfombra: polvo que cae despacio ---------- */
+
+.amb-polvo .amb-luz {
+  background: linear-gradient(180deg, #e8dcc2, #e8dcc200 65%);
+  mix-blend-mode: soft-light;
+  opacity: 0.35;
+}
+.amb-polvo .amb-particulas i {
+  top: -4vh;
+  width: calc(2px + var(--r) * 2.5px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #efe3c8;
+  filter: blur(0.6px);
+  opacity: 0.3;
+  animation: amb-polvo calc(var(--t) * 14s) linear infinite var(--d);
+}
+@keyframes amb-polvo {
+  0% {
+    translate: 0 0;
+  }
+  33% {
+    translate: 2vw 36vh;
+  }
+  66% {
+    translate: -2vw 72vh;
+  }
+  100% {
+    translate: 1vw 108vh;
+  }
+}
+
+/* ---------- Pinzas viejas: de vez en cuando cae una pinza ---------- */
+
+.amb-pinzas .amb-luz {
+  background: linear-gradient(180deg, #d7c3a3, #d7c3a300 60%);
+  mix-blend-mode: soft-light;
+  opacity: 0.4;
+}
+.amb-pinzas .amb-particulas i {
+  top: -6vh;
+  width: 5px;
+  height: 16px;
+  border-radius: 3px 3px 2px 2px;
+  background: linear-gradient(90deg, #c99a62 0 45%, #7a5530 45% 55%, #c99a62 55%);
+  box-shadow: 0 0 0 1px #3d2a1888;
+  opacity: 0.45;
+  animation: amb-pinza calc(var(--t) * 13s) ease-in infinite var(--d);
+}
+@keyframes amb-pinza {
+  0%,
+  70% {
+    translate: 0 0;
+    rotate: 0deg;
+    opacity: 0;
+  }
+  72% {
+    opacity: 0.45;
+  }
+  100% {
+    translate: 3vw 112vh;
+    rotate: 540deg;
+    opacity: 0.45;
+  }
+}
+
+/* ---------- La ropa se engancha: hilos sueltos que flotan ---------- */
+
+.amb-enganche .amb-luz {
+  background: radial-gradient(ellipse 80% 70% at 50% 50%, #0000, #3b2a4a 100%);
+  mix-blend-mode: multiply;
+  opacity: 0.1;
+}
+.amb-enganche .amb-particulas i {
+  width: 18px;
+  height: 8px;
+  border: 1px solid #f4ead8;
+  border-color: #f4ead8 transparent transparent transparent;
+  border-radius: 50%;
+  opacity: 0.28;
+  animation: amb-hilo calc(var(--t) * 16s) ease-in-out infinite alternate var(--d);
+}
+@keyframes amb-hilo {
+  from {
+    translate: -3vw 2vh;
+    rotate: -20deg;
+  }
+  to {
+    translate: 4vw -4vh;
+    rotate: 35deg;
+  }
+}

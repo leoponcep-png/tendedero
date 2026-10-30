@@ -1,4 +1,4 @@
-import { aplicar, crearPartida, porQueNoVale, vistaPara, type Ajustes, type Datos, type Jugada, type Partida } from "@tendedero/motor";
+import { aplicar, cestasPorDefecto, crearPartida, porQueNoVale, siguienteJugadaIA, vistaPara, type Ajustes, type Datos, type Dificultad, type Jugada, type Partida } from "@tendedero/motor";
 import Peer, { type DataConnection } from "peerjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LINEAS_DE_REGISTRO, PREFIJO, textoError, type Asiento, type MensajeAnfitrion, type MensajeInvitado, type PerfilOnline } from "./protocolo";
@@ -8,6 +8,28 @@ interface Participante {
   nombre: string;
   token: string;
   perfil?: PerfilOnline;
+  /** Invitado que ha dicho que está listo para empezar. */
+  listo?: boolean;
+  /** Rival de la IA: lo juega el navegador del anfitrión, con este nivel. */
+  ia?: Dificultad;
+}
+
+/** El asiento de la IA que tiene que hacer algo ahora, si hay alguno. */
+function turnoDeIA(p: Partida, esIA: (asiento: number) => boolean): number | null {
+  if (p.terminada) return null;
+  const sinObjetivo = p.jugadores.findIndex((j, i) => esIA(i) && j.objetivosOfrecidos.length > 0);
+  if (sinObjetivo >= 0) return sinObjetivo;
+  // Hasta que las personas no eligen su objetivo no empieza nadie.
+  if (p.jugadores.some((j, i) => !esIA(i) && j.objetivosOfrecidos.length > 0)) return null;
+  if (p.reaccion) return esIA(p.reaccion.defensor) ? p.reaccion.defensor : null;
+  return esIA(p.turno.jugador) ? p.turno.jugador : null;
+}
+
+/** Pausa antes de cada jugada de la IA, para que se pueda seguir lo que hace (como contra la IA). */
+function pausaIA(p: Partida): number {
+  if (p.reaccion) return 900;
+  if (p.turno.fase === "cesta" || p.turno.fase === "centro") return 650;
+  return 800;
 }
 
 /** Lo que el anfitrión guarda en su navegador: si recarga la página, la sala sigue donde estaba. */
@@ -50,6 +72,21 @@ function vistaRecortada(p: Partida, asiento: number): Partida {
   // El registro estructurado (para traducirlo) se recorta igual: van a la par contando desde el final.
   if (v.entradas) v.entradas = v.entradas.slice(-LINEAS_DE_REGISTRO);
   return v;
+}
+
+/** Los asientos tal como los ven todos: el anfitrión y la IA siempre están conectados y listos. */
+function asientosDe(sala: SalaGuardada, conectados: string[]): Asiento[] {
+  return sala.participantes.map((p) => {
+    const fijo = p.token === TOKEN_ANFITRION || !!p.ia;
+    return {
+      asiento: p.asiento,
+      nombre: p.nombre,
+      conectado: fijo || conectados.includes(p.token),
+      perfil: p.perfil,
+      listo: fijo || !!p.listo,
+      ia: p.ia,
+    };
+  });
 }
 
 /**
@@ -104,7 +141,7 @@ export function useAnfitrion(inicial: SalaGuardada, datos: Datos) {
         // siempre que ese asiento esté desconectado.
         if (!conocido) {
           const mismoNombre = (p: Participante) => p.nombre.trim().toLowerCase() === m.nombre.trim().toLowerCase();
-          const libre = s.participantes.find((p) => p.token !== TOKEN_ANFITRION && mismoNombre(p) && !conexiones.current.get(p.token)?.open);
+          const libre = s.participantes.find((p) => p.token !== TOKEN_ANFITRION && !p.ia && mismoNombre(p) && !conexiones.current.get(p.token)?.open);
           if (libre) {
             conexiones.current.delete(libre.token);
             actualizar((x) => ({ ...x, participantes: x.participantes.map((p) => (p === libre || p.asiento === libre.asiento ? { ...p, token: m.token } : p)) }));
@@ -131,9 +168,15 @@ export function useAnfitrion(inicial: SalaGuardada, datos: Datos) {
           if (s.participantes.some((p) => p.token === m.token)) {
             return { ...s, participantes: s.participantes.map((p) => (p.token === m.token ? { ...p, nombre, perfil: m.perfil ?? p.perfil } : p)) };
           }
-          return { ...s, participantes: [...s.participantes, { asiento: s.participantes.length, nombre, token: m.token, perfil: m.perfil }] };
+          return { ...s, participantes: [...s.participantes, { asiento: s.participantes.length, nombre, token: m.token, perfil: m.perfil, listo: false }] };
         });
         setConectados([...conexiones.current.keys()]);
+        return;
+      }
+      if (m.t === "listo") {
+        const token = tokenDe.current.get(conn);
+        if (!token || salaRef.current.partida) return;
+        actualizar((s) => ({ ...s, participantes: s.participantes.map((p) => (p.token === token ? { ...p, listo: !!m.listo } : p)) }));
         return;
       }
       if (m.t === "jugada") {
@@ -177,6 +220,8 @@ export function useAnfitrion(inicial: SalaGuardada, datos: Datos) {
           espera = setTimeout(abrir, 3000);
           return;
         }
+        // «peer-unavailable» en el anfitrión es un invitado que se fue a mitad de conexión: la sala sigue abierta.
+        if (e.type === "peer-unavailable") return;
         setAbierta(false);
         setError(textoError(e.type));
       });
@@ -193,12 +238,7 @@ export function useAnfitrion(inicial: SalaGuardada, datos: Datos) {
 
   // Cada vez que cambia la sala o la partida, cada invitado recibe lo que le toca ver.
   useEffect(() => {
-    const asientos: Asiento[] = sala.participantes.map((p) => ({
-      asiento: p.asiento,
-      nombre: p.nombre,
-      conectado: p.token === TOKEN_ANFITRION || conectados.includes(p.token),
-      perfil: p.perfil,
-    }));
+    const asientos = asientosDe(sala, conectados);
     for (const p of sala.participantes) {
       const conn = conexiones.current.get(p.token);
       if (!conn) continue;
@@ -207,12 +247,34 @@ export function useAnfitrion(inicial: SalaGuardada, datos: Datos) {
     }
   }, [sala, conectados]);
 
-  const asientos: Asiento[] = sala.participantes.map((p) => ({
-    asiento: p.asiento,
-    nombre: p.nombre,
-    conectado: p.token === TOKEN_ANFITRION || conectados.includes(p.token),
-    perfil: p.perfil,
-  }));
+  // Los rivales de la IA juegan cuando la mesa del anfitrión está quieta y les toca; sus jugadas se reparten
+  // a todos como las de cualquiera.
+  const [ocupado, setOcupado] = useState(false);
+  useEffect(() => {
+    const p = sala.partida;
+    if (!p || ocupado) return;
+    const niveles = new Map(sala.participantes.filter((x) => x.ia).map((x) => [x.asiento, x.ia as Dificultad]));
+    if (!niveles.size) return;
+    const quien = turnoDeIA(p, (i) => niveles.has(i));
+    if (quien === null) return;
+    const espera = setTimeout(() => {
+      const actual = salaRef.current.partida;
+      if (!actual) return;
+      let j: Jugada | null = null;
+      try {
+        j = siguienteJugadaIA(actual, quien, { dificultad: niveles.get(quien) });
+      } catch (e) {
+        console.error(e);
+      }
+      // Si algo falla, que al menos pase el turno para que la partida no se quede parada.
+      if (!j || jugarComo(quien, j)) {
+        if (actual.turno.jugador === quien && actual.turno.fase === "jugar") jugarComo(quien, { tipo: "terminarTurno", jugador: quien, cuerdas: 0 });
+      }
+    }, pausaIA(p));
+    return () => clearTimeout(espera);
+  }, [sala, ocupado, jugarComo]);
+
+  const asientos = asientosDe(sala, conectados);
   // Memorizada: la mesa nueva compara la partida que recibe para saber si ha cambiado.
   const vista = useMemo(() => (sala.partida ? vistaRecortada(sala.partida, 0) : null), [sala.partida]);
 
@@ -243,12 +305,33 @@ export function useAnfitrion(inicial: SalaGuardada, datos: Datos) {
     },
     empezar: () =>
       actualizar((s) => {
-        const ajustes = { ...s.ajustes, jugadores: s.participantes.length };
+        const n = s.participantes.length;
+        const ajustes = { ...s.ajustes, jugadores: n, cestas: { ...s.ajustes.cestas, numero: cestasPorDefecto(datos, n) } };
         const partida = crearPartida(datos, ajustes);
         s.participantes.forEach((p) => (partida.jugadores[p.asiento].nombre = p.nombre));
         return { ...s, partida, ultima: null };
       }),
-    volverASala: () => actualizar((s) => ({ ...s, partida: null, ultima: null })),
+    /** Al acabar, todos vuelven a la sala de espera y tienen que decir otra vez que están listos. */
+    volverASala: () => actualizar((s) => ({ ...s, partida: null, ultima: null, participantes: s.participantes.map((p) => ({ ...p, listo: false })) })),
+    /** Plazas de la sala (de 2 a 4); nunca menos que los que ya están dentro. */
+    cambiarPlazas: (plazas: number) =>
+      actualizar((s) => {
+        if (s.partida) return s;
+        const n = Math.max(2, Math.min(4, plazas), s.participantes.length);
+        return { ...s, ajustes: { ...s.ajustes, jugadores: n, cestas: { ...s.ajustes.cestas, numero: cestasPorDefecto(datos, n) } } };
+      }),
+    /** Sienta a un rival de la IA en la primera plaza libre. */
+    anadirIA: (nombre: string, perfil: PerfilOnline, dificultad: Dificultad) =>
+      actualizar((s) => {
+        if (s.partida || s.participantes.length >= s.ajustes.jugadores) return s;
+        const token = `ia-${crypto.randomUUID()}`;
+        return { ...s, participantes: [...s.participantes, { asiento: s.participantes.length, nombre, token, perfil, ia: dificultad, listo: true }] };
+      }),
+    /** Cambia el nivel de un rival de la IA (también a mitad de partida). */
+    cambiarNivelIA: (asiento: number, dificultad: Dificultad) =>
+      actualizar((s) => ({ ...s, participantes: s.participantes.map((p) => (p.asiento === asiento && p.ia ? { ...p, ia: dificultad } : p)) })),
+    /** La mesa del anfitrión avisa de cuándo está animando: la IA espera a que acabe para jugar. */
+    setOcupado,
     /** Tu animal, color y tapete para la mesa nueva. */
     cambiarPerfil: (perfil: PerfilOnline) =>
       actualizar((s) => ({ ...s, participantes: s.participantes.map((p) => (p.asiento === 0 ? { ...p, perfil } : p)) })),

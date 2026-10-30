@@ -10,6 +10,8 @@ export const CLAVES = {
   amigos: "tendedero-amigos",
   codigoAmigo: "tendedero-mi-codigo-amigo",
   heredados: "tendedero-desbloqueos-heredados",
+  /** Fecha (ISO) en que se acabó el tutorial «Aprender a jugar». */
+  tutorial: "tendedero-tutorial-hecho",
 } as const;
 
 export function leerJSON<T>(clave: string, siNo: T): T {

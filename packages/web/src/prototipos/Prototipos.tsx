@@ -37,7 +37,8 @@ export const JUGADORES = [
 export const MAZO_TU = ["rafaga-de-viento", "retrasar-secado", "mojar-cuerda-rival", "secar-prenda", "reducir-humedad"];
 export const MAZO_RIVAL = ["rafaga-de-viento", "retrasar-secado", "mojar-cuerda-rival"];
 
-export type Prenda = { id: string; tipo: keyof typeof TIPOS; color: string; humedad: number };
+/** `puntos`: los que da al secarse en la partida (cambian con el modo de juego); sin ellos, los de TIPOS. */
+export type Prenda = { id: string; tipo: keyof typeof TIPOS; color: string; humedad: number; puntos?: number };
 export type Cuerda = { id: string; efecto: string | null; pinzas?: string; colgadas: { prenda: Prenda; inicio: number }[] };
 export type Jugador = { lineas: Cuerda[][]; porTender: Prenda[]; secas: Prenda[]; puntos: number };
 export type CartaMano = { uid: string; id: string };

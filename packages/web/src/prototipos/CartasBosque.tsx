@@ -320,7 +320,7 @@ export function CartaPrendaBosque({ p, pinzas, colorPinzas, className, ...resto 
           <PrendaBosque tipo={p.tipo} color={p.color} espacios={esp} className="pb-arte" />
         </div>
         <div className="pb-pie">
-          <span className="pb-puntos">{TIPOS[p.tipo].puntos}</span>
+          <span className="pb-puntos">{p.puntos ?? TIPOS[p.tipo].puntos}</span>
           {p.humedad > 0 ? <GotasPrenda humedad={p.humedad} /> : <span className="pb-seca">{t("carta.seca")}</span>}
         </div>
       </div>
@@ -434,6 +434,26 @@ function Medallon({ x, y, r, emblema }: { x: number; y: number; r: number; emble
   );
 }
 
+/**
+ * Cartas de fastidio que mojan una prenda rival: su humedad se queda aparte, con la carta metida por debajo de la
+ * prenda. Llevan en el pie un recuadro con la gota (lo único que asoma bajo la prenda).
+ */
+export const CARTAS_MOJAN = new Set(["mojar-cuerda-rival", "retrasar-secado"]);
+
+/** Recuadro con la gota y el +1 del pie de las cartas que mojan, centrado en (x, y), en mm de la carta. */
+export function RecuadroGota({ x, y }: { x: number; y: number }) {
+  return (
+    <g className="recuadro-gota">
+      <rect x={x - 8} y={y - 3.7} width="16" height="7.4" rx="1.8" fill="#e6f3fb" stroke={TINTA} strokeWidth=".55" />
+      <rect x={x - 7.1} y={y - 2.8} width="14.2" height="5.6" rx="1.2" fill="none" stroke="#8fc3e3" strokeWidth=".35" strokeDasharray=".9 .6" />
+      <GotaBosque x={x - 3.4} y={y + 0.3} r={0.5} />
+      <text x={x + 2.6} y={y + 1.7} textAnchor="middle" fontSize="4.6" fontWeight="800" fill="#1f5e86" style={{ fontFamily: "var(--fuente-titulo)" }}>
+        +1
+      </text>
+    </g>
+  );
+}
+
 /** Rombos del pie, a los lados del nombre del mazo. */
 function RombosPie({ xs, y }: { xs: number[]; y: number }) {
   return (
@@ -446,7 +466,7 @@ function RombosPie({ xs, y }: { xs: number[]; y: number }) {
 }
 
 /** Marco dibujado de una carta vertical, en su capa de fondo o de frente. */
-function MarcoVertical({ t, emblema, capa }: { t: Tono; emblema: string; capa: Capa }) {
+function MarcoVertical({ t, emblema, capa, moja = false }: { t: Tono; emblema: string; capa: Capa; moja?: boolean }) {
   const id = useId().replace(/:/g, "");
   const ventana = VENTANA[t];
   const objetivo = t === "objetivo";
@@ -459,6 +479,7 @@ function MarcoVertical({ t, emblema, capa }: { t: Tono; emblema: string; capa: C
         {objetivo ? <Medallon x={31.5} y={45.6} r={4.3} emblema={emblema} /> : <Medallon x={31.5} y={46.6} r={4.7} emblema={emblema} />}
         <Cinta t={t} />
         <RombosPie xs={[9, 54]} y={84.7} />
+        {moja && <RecuadroGota x={31.5} y={84.1} />}
       </svg>
     );
   return (
@@ -509,15 +530,16 @@ export function CaraAccionBosque({ id }: { id: string }) {
   useIdioma();
   const def = ACCIONES[id];
   const grupo = def.grupo === "fastidio" ? "fastidio" : "tactica";
+  const moja = CARTAS_MOJAN.has(def.efecto);
   const nombre = textoCarta(id, "nombre", def.nombre);
   const texto = textoCarta(id, "texto", def.texto);
   return (
-    <div className={`cb cb-${grupo}`} data-accion={id}>
+    <div className={`cb cb-${grupo} ${moja ? "cb-moja" : ""}`} data-accion={id}>
       <MarcoVertical t={grupo} emblema={grupo} capa="fondo" />
       <div className="cb-ilustra">
         <IconoBosque id={def.efecto} className="cb-icono" />
       </div>
-      <MarcoVertical t={grupo} emblema={grupo} capa="frente" />
+      <MarcoVertical t={grupo} emblema={grupo} capa="frente" moja={moja} />
       <div className="cb-nombre" data-largo={largo(nombre, 14, 22)}>
         <span>{nombre}</span>
       </div>
@@ -538,10 +560,17 @@ const OBJETIVOS: Record<string, Objetivo> = Object.fromEntries((objetivosJson.ob
  * Carta de objetivo (data/objetivos.json): nombre, dibujo, «cada X → Y puntos» y texto. Todos los objetivos son
  * del mismo mazo y tienen el mismo aspecto: al empezar se roban 2 como comunes y 2 para cada jugador como secretos.
  * `secreto` solo queda marcado en el HTML (data-secreto) por si la mesa quiere señalarlo; no cambia el dibujo.
+ * `ritmo`: el «cada X → Y puntos» de la partida, si no es el de los datos (cambia con el modo de juego).
  */
-export function CartaObjetivoBosque({ id, secreto = false, className, ...resto }: { id: string; secreto?: boolean } & HTMLAttributes<HTMLDivElement>) {
+export function CartaObjetivoBosque({
+  id,
+  secreto = false,
+  ritmo,
+  className,
+  ...resto
+}: { id: string; secreto?: boolean; ritmo?: { cada: number; puntos: number } } & HTMLAttributes<HTMLDivElement>) {
   useIdioma();
-  const o = OBJETIVOS[id];
+  const o = OBJETIVOS[id] && { ...OBJETIVOS[id], ...(ritmo && { cada: ritmo.cada, puntos: ritmo.puntos }) };
   if (!o) return null;
   const nombre = textoObjetivo(id, "nombre", o.nombre);
   const texto = textoObjetivo(id, "texto", o.texto);

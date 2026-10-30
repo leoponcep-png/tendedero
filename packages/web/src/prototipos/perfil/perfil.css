@@ -1265,3 +1265,164 @@
     min-width: 0;
   }
 }
+
+/* ---------- Amigos: estado, Steam y trayectoria (ver src/plataforma) ---------- */
+
+.mp-bloque-steam p {
+  margin: 4px 0 10px;
+}
+/* Lo que solo existe en Steam: se ve el hueco, rayado y apagado, con su sello. */
+.mp-hueco-steam {
+  background: repeating-linear-gradient(-45deg, transparent 0 10px, var(--mp-hueco, #0000000f) 10px 20px);
+}
+.mp-sello-steam {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #1b2838;
+  color: #e6eef5;
+  font: 800 12px var(--fuente-texto, sans-serif);
+  white-space: nowrap;
+}
+.mp-sello-steam.pequeno {
+  margin-left: 8px;
+  padding: 0 7px;
+  font-size: 10px;
+  vertical-align: middle;
+}
+.mp-seccion-titulo > .mp-sello-steam {
+  background: #1b2838;
+}
+.mp-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px 0 6px;
+  border-radius: 999px;
+  background: var(--mp-hueco, #0000000f);
+  font-size: 11px;
+  font-weight: 800;
+  opacity: 1;
+}
+.mp-estado-punto {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #a7a29a;
+  box-shadow: 0 0 0 1.5px var(--tinta);
+}
+.mp-estado-conectado .mp-estado-punto {
+  background: #57b4e8;
+}
+.mp-estado-jugando .mp-estado-punto {
+  background: #8bc34a;
+}
+.mp-estado-ausente .mp-estado-punto {
+  background: #f2c25a;
+}
+.mp-estado-desconocido {
+  opacity: 0.7;
+}
+.mp-estado-desconocido .mp-estado-punto {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--tinta);
+}
+.mp .mp-amigo-pulsar {
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  box-shadow: none;
+  cursor: pointer;
+}
+.mp-amigo-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.mp-amigo-nombre {
+  cursor: pointer;
+}
+.mp-amigo-datos small {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.mp-amigo.abierto {
+  box-shadow:
+    inset 0 0 0 2.5px var(--tinta),
+    0 3px 0 var(--tinta);
+}
+.mp-trayectoria {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 2px dashed var(--mp-linea);
+}
+.mp-trayectoria-cabeza {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mp-trayectoria-cabeza > div {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.mp-trayectoria h3 {
+  width: 100%;
+  margin: 0;
+  font: 800 18px var(--fuente-titulo);
+}
+.mp-trayectoria h4 {
+  margin: 14px 0 6px;
+  font: 800 14px var(--fuente-titulo);
+  opacity: 0.8;
+}
+.mp-cifras-amigo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+  padding: 6px;
+  border-radius: 12px;
+}
+.mp-cifra-amigo {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #fff9;
+  box-shadow: inset 0 0 0 2px var(--mp-linea);
+}
+.mp-cifra-amigo strong {
+  font: 800 22px var(--fuente-titulo);
+}
+.mp-cifra-amigo span {
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.75;
+}
+.mp-hueco-steam .mp-cifra-amigo strong {
+  opacity: 0.4;
+}
+.mp-nota {
+  margin: 6px 0;
+  font-weight: 700;
+  opacity: 0.75;
+}
+.mp-nota-steam {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  opacity: 1;
+}
+.mp-presencia {
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.7;
+}

@@ -338,10 +338,17 @@ export function cuerdasARobar(p: Partida, i: number, opciones: OpcionesIA = {}):
   return cuerdasARobarBase(p, i);
 }
 
-/** Lo que hace la IA normal: tantas como le caben en el tendedero. */
+/**
+ * Lo que hace la IA normal: tantas como le caben en el tendedero. Con el tendedero lleno (pasa en la partida
+ * larga), las que podría usar para mejorar sus cuerdas básicas, descontando las de habilidad que ya tiene en la mano.
+ */
 export function cuerdasARobarBase(p: Partida, i: number): number {
-  const enMano = p.jugadores[i].mano.filter((x) => defCarta(p, x).mazo === "cuerdas").length;
-  return Math.max(0, Math.min(maxCuerdasRobadas(p), huecosLibres(p, i) - enMano));
+  const mano = p.jugadores[i].mano.filter((x) => defCarta(p, x).mazo === "cuerdas");
+  const huecos = huecosLibres(p, i);
+  if (huecos > 0) return Math.max(0, Math.min(maxCuerdasRobadas(p), huecos - mano.length));
+  const basicas = p.jugadores[i].lineas.reduce((s, l) => s + l.cartas.filter((t) => defCarta(p, t.carta).efecto === null).length, 0);
+  const paraMejorar = mano.filter((x) => defCarta(p, x).efecto !== null && !efectoDeCuerda(p, x)?.efecto.seRompeTras).length;
+  return Math.max(0, Math.min(maxCuerdasRobadas(p), basicas - paraMejorar));
 }
 
 /** Si el atacado anula el fastidio: solo cuando le perjudica (lo que pierde pesa más que gastar la carta). */

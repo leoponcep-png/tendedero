@@ -1,0 +1,195 @@
+/* Tutorial «Aprender a jugar»: el foco (oscurece la mesa menos lo que se explica) y el bocadillo del guía, con los
+   paneles crema y el borde de tinta del juego. Va dentro de la mesa (.mj), así que usa sus colores y sus letras. */
+
+.tu-capa {
+  position: fixed;
+  inset: 0;
+  z-index: 58; /* por encima de la mesa y por debajo de la lupa (60) y de las ventanas (65) */
+  pointer-events: none;
+}
+.tu-foco {
+  position: absolute;
+  inset: 0;
+}
+.tu-sombra {
+  fill: #1d140e;
+  opacity: 0.52;
+  transition: opacity 0.25s;
+}
+.tu-anillo {
+  fill: none;
+  stroke: var(--dorado, #e8b04a);
+  stroke-width: 3;
+  stroke-dasharray: 9 6;
+  animation: tu-anillo 1.6s linear infinite;
+}
+@keyframes tu-anillo {
+  to {
+    stroke-dashoffset: -30;
+  }
+}
+
+.tu-bocadillo {
+  position: fixed;
+  z-index: 75; /* también por encima de las ventanas de la partida (la de «¡Ni hablar!») */
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: min(400px, calc(100vw - 28px));
+  padding: 12px 16px 12px 12px;
+  border-radius: 18px;
+  background: var(--grano), var(--crema, #f2e6cc);
+  box-shadow:
+    0 0 0 2.5px var(--tinta),
+    inset 0 0 0 3px var(--crema, #f2e6cc),
+    inset 0 0 0 4.5px var(--dorado, #e8b04a),
+    0 14px 30px #0008;
+  color: var(--tinta);
+  font-family: var(--fuente-texto);
+  pointer-events: auto;
+  transition:
+    left 0.3s ease,
+    top 0.3s ease;
+  animation: tu-entra 0.25s ease-out;
+}
+.tu-bocadillo.centrado {
+  width: min(460px, calc(100vw - 28px));
+}
+@keyframes tu-entra {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+}
+.tu-guia {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fffaf0;
+  box-shadow:
+    0 0 0 2.5px var(--tinta),
+    0 3px 0 var(--tinta);
+  overflow: hidden;
+}
+.tu-guia-animal {
+  width: 100%;
+  height: 100%;
+}
+.tu-cuerpo {
+  flex: 1;
+  min-width: 0;
+}
+.tu-bocadillo h2 {
+  margin: 2px 0 4px;
+  font: 800 19px/1.15 var(--fuente-titulo);
+}
+.tu-bocadillo p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.38;
+  white-space: pre-line;
+}
+.tu-pie {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.tu-hueco {
+  flex: 1;
+}
+.tu-cuenta {
+  font-size: 12px;
+  opacity: 0.65;
+}
+.tu-saltar {
+  padding: 2px 4px;
+  border: none;
+  background: none;
+  color: var(--tinta);
+  font: 600 12.5px var(--fuente-texto);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  opacity: 0.75;
+  cursor: pointer;
+}
+.tu-saltar:hover {
+  opacity: 1;
+}
+.tu-boton {
+  padding: 6px 16px;
+  border: 2.5px solid var(--tinta);
+  border-radius: 999px;
+  background: #fffaf0;
+  box-shadow: 0 3px 0 var(--tinta);
+  color: var(--tinta);
+  font: 800 15px var(--fuente-titulo);
+  cursor: pointer;
+}
+.tu-boton.principal {
+  background: var(--tactica, #69ad94);
+  color: #fff;
+}
+.tu-boton:hover {
+  translate: 0 -1px;
+}
+.tu-boton:active {
+  translate: 0 2px;
+  box-shadow: 0 1px 0 var(--tinta);
+}
+.tu-pista {
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: #e8b04a33;
+  box-shadow: inset 0 0 0 1.5px #c9a46a;
+  font: italic 700 13px var(--fuente-texto);
+}
+.tu-esperando::after {
+  content: "";
+  display: inline-block;
+  width: 1.2em;
+  text-align: left;
+  animation: tu-puntos 1.2s steps(4) infinite;
+}
+@keyframes tu-puntos {
+  0% {
+    content: "";
+  }
+  25% {
+    content: ".";
+  }
+  50% {
+    content: "..";
+  }
+  75% {
+    content: "...";
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tu-anillo,
+  .tu-bocadillo,
+  .tu-esperando::after {
+    animation: none;
+  }
+}
+
+/* ---------- Oferta de la portada (la primera vez que se abre el juego) ---------- */
+
+.tu-oferta-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: #1d140e88;
+}
+.tu-oferta {
+  position: relative;
+  animation: tu-entra 0.25s ease-out;
+}
+.tu-oferta .tu-bocadillo {
+  position: static;
+}

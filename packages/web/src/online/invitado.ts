@@ -26,7 +26,7 @@ export function useInvitado(codigo: string, nombre: string | null, perfil?: Perf
     let cancelado = false;
     let rechazado = false;
     let espera: ReturnType<typeof setTimeout> | undefined;
-    const peer = new Peer();
+    let peer: Peer;
 
     const reintentar = () => {
       if (cancelado || rechazado) return;
@@ -36,8 +36,14 @@ export function useInvitado(codigo: string, nombre: string | null, perfil?: Perf
     };
 
     const conectar = () => {
-      if (cancelado || rechazado || peer.destroyed) return;
-      if (peer.disconnected) peer.reconnect();
+      if (cancelado || rechazado) return;
+      // Sin servidor de salas: si la conexión con él se rompió del todo se abre otra; si solo se cortó, se
+      // recupera, y al volver («open») se llama otra vez a conectar.
+      if (peer.destroyed) return crearPeer();
+      if (peer.disconnected) {
+        peer.reconnect();
+        return;
+      }
       const conn = peer.connect(PREFIJO + codigo, { reliable: true });
       conexion.current = conn;
       conn.on("open", () => {
@@ -66,13 +72,17 @@ export function useInvitado(codigo: string, nombre: string | null, perfil?: Perf
       });
     };
 
-    peer.on("open", conectar);
-    peer.on("error", (e) => {
-      if (cancelado) return;
-      setError(textoError(e.type));
-      // Si no se encuentra la sala puede ser que el anfitrión esté recargando: se sigue intentando.
-      reintentar();
-    });
+    function crearPeer() {
+      peer = new Peer();
+      peer.on("open", conectar);
+      peer.on("error", (e) => {
+        if (cancelado) return;
+        setError(textoError(e.type));
+        // Si no se encuentra la sala puede ser que el anfitrión esté recargando: se sigue intentando.
+        reintentar();
+      });
+    }
+    crearPeer();
 
     return () => {
       cancelado = true;
@@ -95,6 +105,11 @@ export function useInvitado(codigo: string, nombre: string | null, perfil?: Perf
       if (!conn?.open) return "Sin conexión con la sala: espera a que se recupere.";
       conn.send({ t: "jugada", jugada } satisfies MensajeInvitado);
       return null;
+    },
+    /** En la sala de espera: avisa al anfitrión de que estás listo (o de que ya no). */
+    marcarListo: (listo: boolean) => {
+      const conn = conexion.current;
+      if (conn?.open) conn.send({ t: "listo", listo } satisfies MensajeInvitado);
     },
   };
 }
