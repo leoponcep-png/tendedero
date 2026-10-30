@@ -72,6 +72,7 @@ export const esquemaModo = z.object({
   roboPorTurno: z.object({ cartas: entero(), maxCuerdas: entero() }).optional(),
   jugablesPorTurno: parCartas.optional(),
   limiteMano: entero(1).optional(),
+  humedadMaxima: entero(1).optional(),
 });
 
 export const esquemaAjustesPorDefecto = z.object({
@@ -82,6 +83,8 @@ export const esquemaAjustesPorDefecto = z.object({
   jugablesPorTurno: parCartas,
   limiteMano: entero(1),
   umbralFinal: entero(1),
+  /** Tope de humedad de una prenda (filas de gotas de su carta): lo que se moje de más se pierde. Sin él, 4. */
+  humedadMaxima: entero(1).optional(),
   cestas: z.object({
     porJugadores: z.object({ "2": entero(1), "3": entero(1), "4": entero(1) }),
     prendasPorCesta: entero(1),

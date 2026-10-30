@@ -402,6 +402,8 @@ export const ja: Textos = {
     "dorso.objetivos": "目標",
     "dorso.prendas": "洗濯物",
     "loseta.titulo": "ロープ",
+    "loseta.humedad.nombre": "湿り気",
+    "loseta.humedad.texto": "しずくは最大{n}つ。",
     "leyenda.basica.nombre": "ふつう",
     "leyenda.basica.texto": "能力なし。",
     "leyenda.tejadillo.nombre": "小屋根",
@@ -590,7 +592,7 @@ export const ja: Textos = {
     "mesa.pilaAcciones": "アクション・{n}",
     "mesa.mazoPrendas": "洗濯物の山札：{n}枚",
     "mesa.pilaPrendas": "洗濯物・{n}",
-    "mesa.mojadas": "濡らすカードによる湿り気{n}",
+    "mesa.humedadAlTope": "最大{n}！",
     "mesa.descarte": "捨て札",
     "mesa.descarteVacio": "捨て札",
 
@@ -669,6 +671,7 @@ export const ja: Textos = {
     "registro.mojaCuerda": "{jugador}のそのロープの洗濯物は湿り気+{h}。",
     "registro.mojaCuerda.yo": "あなたのそのロープの洗濯物は湿り気+{h}。",
     "registro.ganaHumedad": "{prenda}の湿り気+{h}。",
+    "registro.humedadAlTope": "{prenda}の湿り気はもう最大（{max}）なので増えません。",
     "registro.cuerdasExtra#other": "この手番、ロープをあと{n}枚出せます。",
     "registro.pierdeHumedad": "{prenda}の湿り気−{h}。",
     "registro.intercambianPrendas": "{prenda}と{otraPrenda}を入れ替えました。",
@@ -955,7 +958,7 @@ export const ja: Textos = {
     "tutorial.calcetin.titulo": "靴下もね",
     "tutorial.calcetin.texto": "靴下を空いている洗濯ばさみにドラッグしてね。",
     "tutorial.humedad.titulo": "しずく",
-    "tutorial.humedad.texto": "しずくは洗濯物の湿り気です。1日の終わり、みんなが手番を終えると、洗濯物はしずくを1つ失います。0になったら乾いて点になります：靴下 {calcetin}、Tシャツ {camiseta}、タオル {toalla}。",
+    "tutorial.humedad.texto": "しずくは洗濯物の湿り気です。1日の終わり、みんなが手番を終えると、洗濯物はしずくを1つ失います。0になったら乾いて点になります：靴下 {calcetin}、Tシャツ {camiseta}、タオル {toalla}。洗濯物のしずくは最大{max}つまで。それ以上濡れても増えません。",
     "tutorial.dia.titulo": "今日のカード",
     "tutorial.dia.texto": "天気や、ひと騒動起こす出来事を運んできます。今日は「{carta}」。晴れなら乾くときにしずくが1つ多く減り、雨なら1つ少なくなります。",
     "tutorial.loseta.titulo": "特別なロープ",
@@ -986,10 +989,10 @@ export const ja: Textos = {
 
   cartas: {
     // ---------- Acciones ----------
-    "mojar-cuerda-rival": { nombre: "ロープを濡らす", texto: "相手のロープ1枚の洗濯物すべてに湿り気+1。" },
+    "mojar-cuerda-rival": { nombre: "ロープを濡らす", texto: "相手のロープ1枚の洗濯物すべてに湿り気+1（最大4）。" },
     "rafaga-de-viento": { nombre: "突風", texto: "相手の洗濯物1枚が落ちる。湿り気を最初に戻して、干す前の洗濯物へ。" },
     "pinza-rota": { nombre: "壊れた洗濯ばさみ", texto: "ロープ1枚の能力を無効にする。" },
-    "retrasar-secado": { nombre: "生乾き", texto: "相手の洗濯物1枚に湿り気+1。" },
+    "retrasar-secado": { nombre: "生乾き", texto: "相手の洗濯物1枚に湿り気+1（最大4）。" },
     "mover-prenda-rival": { nombre: "洗濯物ずらし", texto: "相手の洗濯物1枚を、その物干しの空いている枠へ移す。" },
     "colocar-cuerda-extra": { nombre: "ロープ追加", texto: "この手番、ロープをもう1枚出せる。" },
     "secar-prenda": { nombre: "すぐ乾かす", texto: "自分の洗濯物1枚がすぐに乾いて得点。" },

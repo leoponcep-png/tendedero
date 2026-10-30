@@ -402,6 +402,8 @@ export const zhHans: Textos = {
     "dorso.objetivos": "目标",
     "dorso.prendas": "衣物",
     "loseta.titulo": "晾衣绳",
+    "loseta.humedad.nombre": "湿度",
+    "loseta.humedad.texto": "最多 {n} 滴。",
     "leyenda.basica.nombre": "普通晾衣绳",
     "leyenda.basica.texto": "无能力。",
     "leyenda.tejadillo.nombre": "小屋檐",
@@ -590,7 +592,7 @@ export const zhHans: Textos = {
     "mesa.pilaAcciones": "行动 · {n}",
     "mesa.mazoPrendas": "衣物牌堆：{n} 张",
     "mesa.pilaPrendas": "衣物 · {n}",
-    "mesa.mojadas": "淋湿类卡牌带来的湿度 {n}",
+    "mesa.humedadAlTope": "最多 {n}！",
     "mesa.descarte": "弃牌堆",
     "mesa.descarteVacio": "弃牌堆",
 
@@ -669,6 +671,7 @@ export const zhHans: Textos = {
     "registro.mojaCuerda": "{jugador}那根晾衣绳上的衣物湿度 +{h}。",
     "registro.mojaCuerda.yo": "你那根晾衣绳上的衣物湿度 +{h}。",
     "registro.ganaHumedad": "{prenda}湿度 +{h}。",
+    "registro.humedadAlTope": "{prenda}的湿度已是最大值（{max}），不再增加。",
     "registro.cuerdasExtra#other": "本回合可以多打 {n} 张晾衣绳牌。",
     "registro.pierdeHumedad": "{prenda}湿度 −{h}。",
     "registro.intercambianPrendas": "{prenda}和{otraPrenda}互换了位置。",
@@ -955,7 +958,7 @@ export const zhHans: Textos = {
     "tutorial.calcetin.titulo": "再晾一只袜子",
     "tutorial.calcetin.texto": "把一只袜子拖到剩下的空衣夹上。",
     "tutorial.humedad.titulo": "水滴",
-    "tutorial.humedad.texto": "水滴就是每件衣物的湿度。一天结束时，大家都走完自己的回合后，每件衣物会少一滴。没有水滴了就晾干，并给你加分：袜子 {calcetin} 分，T恤 {camiseta} 分，毛巾 {toalla} 分。",
+    "tutorial.humedad.texto": "水滴就是每件衣物的湿度。一天结束时，大家都走完自己的回合后，每件衣物会少一滴。没有水滴了就晾干，并给你加分：袜子 {calcetin} 分，T恤 {camiseta} 分，毛巾 {toalla} 分。每件衣物最多 {max} 滴水，多出来的会被浪费。",
     "tutorial.dia.titulo": "今日牌",
     "tutorial.dia.texto": "它带来天气，或者打乱一切的事件。今天是「{carta}」：出太阳时衣物晾干时多少一滴；下雨时少减一滴。",
     "tutorial.loseta.titulo": "特殊晾衣绳",
@@ -986,10 +989,10 @@ export const zhHans: Textos = {
 
   cartas: {
     // ---------- Acciones ----------
-    "mojar-cuerda-rival": { nombre: "淋湿晾衣绳", texto: "对手一张晾衣绳牌上的所有衣物湿度 +1。" },
+    "mojar-cuerda-rival": { nombre: "淋湿晾衣绳", texto: "对手一张晾衣绳牌上的所有衣物湿度 +1（最多 4）。" },
     "rafaga-de-viento": { nombre: "一阵狂风", texto: "对手的一件衣物掉落：回到其待晾衣物中，恢复初始湿度。" },
     "pinza-rota": { nombre: "衣夹坏了", texto: "让一根晾衣绳的能力失效。" },
-    "retrasar-secado": { nombre: "拖慢晾干", texto: "对手的一件衣物湿度 +1。" },
+    "retrasar-secado": { nombre: "拖慢晾干", texto: "对手的一件衣物湿度 +1（最多 4）。" },
     "mover-prenda-rival": { nombre: "挪动对手衣物", texto: "把对手的一件衣物挪到其晾衣架上的另一个空位。" },
     "colocar-cuerda-extra": { nombre: "加拉晾衣绳", texto: "本回合可以多打 1 张晾衣绳牌。" },
     "secar-prenda": { nombre: "立刻晾干", texto: "你的一件衣物马上晾干并得分。" },

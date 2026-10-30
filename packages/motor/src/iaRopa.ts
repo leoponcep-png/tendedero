@@ -2,8 +2,8 @@
 // difícil).
 //
 // El tendedero se mide en «pinzas × rondas»: una carta de 3 espacios durante 4 rondas da 12. Cada prenda colgada
-// gasta sus espacios durante las rondas que tarda en secarse (su humedad, con la `extra` de Mojar, entre lo que seca
-// su cuerda), y lo que sobra es para la ropa por tender. Esta se reparte empezando por la que más puntos da por
+// gasta sus espacios durante las rondas que tarda en secarse (su humedad, que nunca pasa del tope, entre lo que
+// seca su cuerda), y lo que sobra es para la ropa por tender. Esta se reparte empezando por la que más puntos da por
 // pinza y por ronda (calcetín 1/1, camiseta 3/4, toalla 6/9), y solo cuenta la que cabe y se seca a tiempo; el
 // resto no vale nada (y un poco menos que nada, para no llevarse en el reparto ropa que no se podrá tender).
 

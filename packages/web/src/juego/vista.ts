@@ -17,12 +17,13 @@ import {
 import { hayTexto, tLibre } from "../i18n";
 import { admisible, jugadaDe, type Arrastre, type Destino } from "../mesa/contexto";
 import { ANIMALES } from "../prototipos/Animales";
+import { MAXIMO } from "../prototipos/HumedadTaller";
 import { COLORES_JUGADOR, type Perfil } from "../prototipos/MenuPartida";
 import type { Prenda as PrendaDibujo, TIPOS } from "../prototipos/Prototipos";
 
 /**
- * Una prenda del motor en el formato de las cartas dibujadas (el color va en hexadecimal). La humedad es la de
- * su escala: la que viene de cartas que mojan se dibuja aparte, como cartitas junto a la prenda (`humedadExtra`).
+ * Una prenda del motor en el formato de las cartas dibujadas (el color va en hexadecimal). La humedad, toda en su
+ * escala (como mucho las filas de la carta).
  */
 export function prendaDibujo(p: Partida, id: string): PrendaDibujo {
   const pr = p.prendas[id];
@@ -30,15 +31,15 @@ export function prendaDibujo(p: Partida, id: string): PrendaDibujo {
     id,
     tipo: pr.tipo as keyof typeof TIPOS,
     color: p.catalogo.colores[pr.color]?.hex ?? "#ccc",
-    humedad: pr.humedad - humedadExtra(p, id),
+    humedad: humedadEscala(p, id),
     // Los puntos de la partida: dependen del modo de juego.
     puntos: p.catalogo.tipos[pr.tipo]?.puntos,
   };
 }
 
-/** Cartas de mojar que tiene al lado una prenda (una gota cada una). */
-export function humedadExtra(p: Partida, id: string): number {
-  return Math.min(p.prendas[id]?.extra ?? 0, p.prendas[id]?.humedad ?? 0);
+/** La humedad que marca la escala de la carta de prenda: la de la prenda, sin pasar de las filas que tiene. */
+export function humedadEscala(p: Partida, id: string): number {
+  return Math.min(MAXIMO, p.prendas[id]?.humedad ?? 0);
 }
 
 /** Cómo se dibuja una carta de cuerda: su efecto y, en las de pinzas de color, el color de las pinzas. */

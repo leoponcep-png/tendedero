@@ -409,6 +409,8 @@ export const de: Textos = {
     "dorso.objetivos": "Ziele",
     "dorso.prendas": "Wäsche",
     "loseta.titulo": "Leinen",
+    "loseta.humedad.nombre": "Nässe",
+    "loseta.humedad.texto": "Höchstens {n} Tropfen.",
     "leyenda.basica.nombre": "Einfach",
     "leyenda.basica.texto": "Keine Fähigkeit.",
     "leyenda.tejadillo.nombre": "Vordach",
@@ -611,7 +613,7 @@ export const de: Textos = {
     "mesa.pilaAcciones": "Aktionen · {n}",
     "mesa.mazoPrendas": "Wäschestapel: {n} Karten",
     "mesa.pilaPrendas": "Wäsche · {n}",
-    "mesa.mojadas": "{n} Nässe durch nässende Karten",
+    "mesa.humedadAlTope": "Max. {n}!",
     "mesa.descarte": "Ablage",
     "mesa.descarteVacio": "Ablage",
 
@@ -690,6 +692,7 @@ export const de: Textos = {
     "registro.mojaCuerda": "Die Wäsche auf dieser Leine von {jugador} bekommt {h} Nässe.",
     "registro.mojaCuerda.yo": "Die Wäsche auf dieser Leine von dir bekommt {h} Nässe.",
     "registro.ganaHumedad": "Nässe +{h}: {prenda}.",
+    "registro.humedadAlTope": "{prenda} hat schon die höchste Nässe ({max}): mehr geht nicht.",
     "registro.cuerdasExtra#one": "In diesem Zug darf {n} Leine mehr gespielt werden.",
     "registro.cuerdasExtra#other": "In diesem Zug dürfen {n} Leinen mehr gespielt werden.",
     "registro.pierdeHumedad": "Nässe −{h}: {prenda}.",
@@ -988,7 +991,7 @@ export const de: Textos = {
     "tutorial.calcetin.titulo": "Und eine Socke",
     "tutorial.calcetin.texto": "Zieh eine Socke auf die Klammer, die noch frei ist.",
     "tutorial.humedad.titulo": "Die Tropfen",
-    "tutorial.humedad.texto": "Die Tropfen sind die Nässe jedes Wäschestücks. Am Ende des Tages, wenn alle ihren Zug gemacht haben, verliert jedes Wäschestück einen Tropfen. Ohne Tropfen ist es trocken und bringt seine Punkte: Socke {calcetin}, T-Shirt {camiseta}, Handtuch {toalla}.",
+    "tutorial.humedad.texto": "Die Tropfen sind die Nässe jedes Wäschestücks. Am Ende des Tages, wenn alle ihren Zug gemacht haben, verliert jedes Wäschestück einen Tropfen. Ohne Tropfen ist es trocken und bringt seine Punkte: Socke {calcetin}, T-Shirt {camiseta}, Handtuch {toalla}. Ein Wäschestück hat nie mehr als {max} Tropfen: Was darüber hinausgeht, verfällt.",
     "tutorial.dia.titulo": "Die Tageskarte",
     "tutorial.dia.texto": "Sie bringt das Wetter oder ein Ereignis, das alles durcheinanderbringt. Heute gilt „{carta}“: Bei Sonne verliert die Wäsche beim Trocknen einen Tropfen mehr, bei Regen einen weniger.",
     "tutorial.loseta.titulo": "Besondere Leinen",
@@ -1019,10 +1022,10 @@ export const de: Textos = {
 
   cartas: {
     // ---------- Acciones ----------
-    "mojar-cuerda-rival": { nombre: "Leine nässen", texto: "+1 Nässe für alle Wäschestücke auf einer gegnerischen Leinenkarte." },
+    "mojar-cuerda-rival": { nombre: "Leine nässen", texto: "+1 Nässe für alle Wäschestücke auf einer gegnerischen Leinenkarte (max. 4)." },
     "rafaga-de-viento": { nombre: "Windstoß", texto: "Ein gegnerisches Wäschestück fällt: zurück zum Aufhängen, mit Anfangsnässe." },
     "pinza-rota": { nombre: "Kaputte Klammer", texto: "Hebt die Fähigkeit einer Leine auf." },
-    "retrasar-secado": { nombre: "Trocknen bremsen", texto: "+1 Nässe für ein gegnerisches Wäschestück." },
+    "retrasar-secado": { nombre: "Trocknen bremsen", texto: "+1 Nässe für ein gegnerisches Wäschestück (max. 4)." },
     "mover-prenda-rival": { nombre: "Fremdes umhängen", texto: "Häng ein gegnerisches Wäschestück auf einen anderen freien Platz seiner Wäscheleine." },
     "colocar-cuerda-extra": { nombre: "Extra-Leine", texto: "In diesem Zug darfst du 1 Leine mehr spielen." },
     "secar-prenda": { nombre: "Sofort trocken", texto: "Ein Wäschestück von dir trocknet sofort und punktet." },

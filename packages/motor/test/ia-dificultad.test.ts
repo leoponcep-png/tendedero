@@ -70,7 +70,6 @@ function sacarPrenda(p: Partida, tipo: string, color: string, humedad: number): 
   const id = p.bolsa.find((x) => p.prendas[x].tipo === tipo && p.prendas[x].color === color)!;
   p.bolsa = p.bolsa.filter((x) => x !== id);
   p.prendas[id].humedad = humedad;
-  p.prendas[id].extra = 0;
   return id;
 }
 

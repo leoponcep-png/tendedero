@@ -423,6 +423,8 @@ export const ru: Textos = {
     "dorso.objetivos": "Цели",
     "dorso.prendas": "Вещи",
     "loseta.titulo": "Верёвки",
+    "loseta.humedad.nombre": "Влажность",
+    "loseta.humedad.texto": "Не больше {n} капель.",
     "leyenda.basica.nombre": "Простая",
     "leyenda.basica.texto": "Без свойства.",
     "leyenda.tejadillo.nombre": "Навес",
@@ -653,7 +655,7 @@ export const ru: Textos = {
     "mesa.pilaAcciones": "Действия · {n}",
     "mesa.mazoPrendas": "Колода вещей, карт: {n}",
     "mesa.pilaPrendas": "Вещи · {n}",
-    "mesa.mojadas": "+{n} влажности от мокрых карт",
+    "mesa.humedadAlTope": "Макс. {n}!",
     "mesa.descarte": "Сброс",
     "mesa.descarteVacio": "сброс",
 
@@ -732,6 +734,7 @@ export const ru: Textos = {
     "registro.mojaCuerda": "Вещи на этой верёвке ({jugador}): +{h} влажности.",
     "registro.mojaCuerda.yo": "Вещи на этой твоей верёвке: +{h} влажности.",
     "registro.ganaHumedad": "{prenda}: +{h} влажности.",
+    "registro.humedadAlTope": "{prenda}: влажность уже максимальная ({max}), больше не прибавляется.",
     "registro.cuerdasExtra#one": "В этот ход можно сыграть ещё {n} верёвку.",
     "registro.cuerdasExtra#few": "В этот ход можно сыграть ещё {n} верёвки.",
     "registro.cuerdasExtra#many": "В этот ход можно сыграть ещё {n} верёвок.",
@@ -1054,7 +1057,7 @@ export const ru: Textos = {
     "tutorial.calcetin.titulo": "И носок",
     "tutorial.calcetin.texto": "Перетащи носок на оставшуюся свободную прищепку.",
     "tutorial.humedad.titulo": "Капли",
-    "tutorial.humedad.texto": "Капли — это влажность каждой вещи. В конце дня, когда все сделали свой ход, каждая вещь теряет одну каплю. Когда капель не остаётся, вещь сухая и приносит очки: носок {calcetin}, футболка {camiseta}, полотенце {toalla}.",
+    "tutorial.humedad.texto": "Капли — это влажность каждой вещи. В конце дня, когда все сделали свой ход, каждая вещь теряет одну каплю. Когда капель не остаётся, вещь сухая и приносит очки: носок {calcetin}, футболка {camiseta}, полотенце {toalla}. У вещи никогда не бывает больше {max} капель: лишнее пропадает.",
     "tutorial.dia.titulo": "Карта дня",
     "tutorial.dia.texto": "Она приносит погоду или событие, которое всё переворачивает. Сегодня «{carta}»: на солнце бельё теряет при сушке на одну каплю больше, в дождь — на одну меньше.",
     "tutorial.loseta.titulo": "Особые верёвки",
@@ -1085,10 +1088,10 @@ export const ru: Textos = {
 
   cartas: {
     // ---------- Acciones ----------
-    "mojar-cuerda-rival": { nombre: "Намочить верёвку", texto: "+1 влажности всем вещам на карте верёвки соперника." },
+    "mojar-cuerda-rival": { nombre: "Намочить верёвку", texto: "+1 влажности всем вещам на карте верёвки соперника (макс. 4)." },
     "rafaga-de-viento": { nombre: "Порыв ветра", texto: "Вещь соперника падает и снова ждёт сушки с начальной влажностью." },
     "pinza-rota": { nombre: "Сломанная прищепка", texto: "Отменяет свойство верёвки." },
-    "retrasar-secado": { nombre: "Задержать сушку", texto: "+1 влажности вещи соперника." },
+    "retrasar-secado": { nombre: "Задержать сушку", texto: "+1 влажности вещи соперника (макс. 4)." },
     "mover-prenda-rival": { nombre: "Перевесить чужую", texto: "Перевесь вещь соперника на другое свободное место его сушилки." },
     "colocar-cuerda-extra": { nombre: "Лишняя верёвка", texto: "В этот ход можешь сыграть ещё 1 верёвку." },
     "secar-prenda": { nombre: "Мигом высушить", texto: "Твоя вещь сразу высыхает и приносит очки." },

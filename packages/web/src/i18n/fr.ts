@@ -416,6 +416,8 @@ export const fr: Textos = {
     "dorso.objetivos": "Objectifs",
     "dorso.prendas": "Vêtements",
     "loseta.titulo": "Cordes",
+    "loseta.humedad.nombre": "Humidité",
+    "loseta.humedad.texto": "{n} gouttes au maximum.",
     "leyenda.basica.nombre": "Simple",
     "leyenda.basica.texto": "Sans pouvoir.",
     "leyenda.tejadillo.nombre": "Petit toit",
@@ -632,7 +634,7 @@ export const fr: Textos = {
     "mesa.pilaAcciones": "Actions · {n}",
     "mesa.mazoPrendas": "Pioche de vêtements : {n} cartes",
     "mesa.pilaPrendas": "Vêtements · {n}",
-    "mesa.mojadas": "{n} d'humidité due aux cartes qui mouillent",
+    "mesa.humedadAlTope": "Max {n} !",
     "mesa.descarte": "Défausse",
     "mesa.descarteVacio": "défausse",
 
@@ -711,6 +713,7 @@ export const fr: Textos = {
     "registro.mojaCuerda": "Chez {jugador}, les vêtements de cette corde gagnent {h} d'humidité.",
     "registro.mojaCuerda.yo": "Les vêtements de ta corde gagnent {h} d'humidité.",
     "registro.ganaHumedad": "Humidité +{h} : {prenda}.",
+    "registro.humedadAlTope": "{prenda} a déjà l'humidité maximale ({max}) : il n'en gagne pas plus.",
     "registro.cuerdasExtra#one": "Ce tour-ci, on peut jouer {n} corde de plus.",
     "registro.cuerdasExtra#many": "Ce tour-ci, on peut jouer {n} cordes de plus.",
     "registro.cuerdasExtra#other": "Ce tour-ci, on peut jouer {n} cordes de plus.",
@@ -1021,7 +1024,7 @@ export const fr: Textos = {
     "tutorial.calcetin.titulo": "Et une chaussette",
     "tutorial.calcetin.texto": "Fais glisser une chaussette sur la pince encore libre.",
     "tutorial.humedad.titulo": "Les gouttes",
-    "tutorial.humedad.texto": "Les gouttes, c'est l'humidité de chaque vêtement. À la fin du jour, quand tout le monde a joué son tour, chaque vêtement perd une goutte. Quand il n'en a plus, il est sec et te rapporte ses points : chaussette {calcetin}, t-shirt {camiseta}, serviette {toalla}.",
+    "tutorial.humedad.texto": "Les gouttes, c'est l'humidité de chaque vêtement. À la fin du jour, quand tout le monde a joué son tour, chaque vêtement perd une goutte. Quand il n'en a plus, il est sec et te rapporte ses points : chaussette {calcetin}, t-shirt {camiseta}, serviette {toalla}. Un vêtement n'a jamais plus de {max} gouttes : le surplus est perdu.",
     "tutorial.dia.titulo": "La carte du jour",
     "tutorial.dia.texto": "Elle apporte la météo, ou un événement qui chamboule tout. Aujourd'hui, c'est « {carta} » : avec du soleil, le linge perd une goutte de plus en séchant ; avec de la pluie, une de moins.",
     "tutorial.loseta.titulo": "Cordes spéciales",
@@ -1052,10 +1055,10 @@ export const fr: Textos = {
 
   cartas: {
     // ---------- Acciones ----------
-    "mojar-cuerda-rival": { nombre: "Arroser une corde", texto: "+1 d'humidité à tous les vêtements d'une corde rivale." },
+    "mojar-cuerda-rival": { nombre: "Arroser une corde", texto: "+1 d'humidité à tous les vêtements d'une corde rivale (max 4)." },
     "rafaga-de-viento": { nombre: "Coup de vent", texto: "Un vêtement rival tombe et retourne à étendre, avec son humidité de départ." },
     "pinza-rota": { nombre: "Pince cassée", texto: "Annule le pouvoir d'une corde." },
-    "retrasar-secado": { nombre: "Séchage retardé", texto: "+1 d'humidité à un vêtement rival." },
+    "retrasar-secado": { nombre: "Séchage retardé", texto: "+1 d'humidité à un vêtement rival (max 4)." },
     "mover-prenda-rival": { nombre: "Vêtement déplacé", texto: "Déplace un vêtement rival vers un autre emplacement libre de son étendoir." },
     "colocar-cuerda-extra": { nombre: "Corde en plus", texto: "Ce tour-ci, tu peux jouer 1 corde de plus." },
     "secar-prenda": { nombre: "Séchage express", texto: "Un de tes vêtements sèche et marque aussitôt." },

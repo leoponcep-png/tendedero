@@ -5,6 +5,7 @@
   "jugablesPorTurno": { "cuerdas": 1, "acciones": 2 },
   "limiteMano": 6,
   "umbralFinal": 30,
+  "humedadMaxima": 4,
   "cestas": {
     "porJugadores": { "2": 4, "3": 4, "4": 4 },
     "prendasPorCesta": 4
@@ -14,6 +15,7 @@
   "modos": {
     "larga": {
       "umbralFinal": 70,
+      "humedadMaxima": 4,
       "jugablesPorTurno": { "cuerdas": 2, "acciones": 2 },
       "prendas": { "calcetin": { "puntos": 1 }, "camiseta": { "puntos": 2 }, "toalla": { "puntos": 3 } },
       "objetivos": {

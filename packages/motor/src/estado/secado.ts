@@ -59,7 +59,7 @@ export function secarPrenda(p: Partida, prenda: string): void {
 
   descolgar(u);
   p.prendas[prenda].humedad = 0;
-  p.prendas[prenda].extra = 0;
+  delete p.prendas[prenda].extra;
   jugador.seca.push(prenda);
   // Para objetivos como «Bajo techo»: su cuerda y, si la cubre, el tejadillo de arriba.
   const arriba = cartaDeArriba(p, u.tendida);

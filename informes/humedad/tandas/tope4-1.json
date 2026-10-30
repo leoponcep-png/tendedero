@@ -1,0 +1,8 @@
+{"partidas":30,"desde":30,"duelos":[
+ {"id":"dificil-normal","niveles":["dificil","normal"],"modo":"normal"},
+ {"id":"normal-facil","niveles":["normal","facil"],"modo":"normal"},
+ {"id":"dificil-facil","niveles":["dificil","facil"],"modo":"normal"},
+ {"id":"tres-niveles","niveles":["dificil","normal","facil"],"modo":"normal"},
+ {"id":"larga-dificil-normal","niveles":["dificil","normal"],"modo":"larga"},
+ {"id":"larga-tres-niveles","niveles":["dificil","normal","facil"],"modo":"larga"}
+]}

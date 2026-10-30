@@ -409,6 +409,8 @@ export const en: Textos = {
     "dorso.objetivos": "Goals",
     "dorso.prendas": "Garments",
     "loseta.titulo": "Lines",
+    "loseta.humedad.nombre": "Dampness",
+    "loseta.humedad.texto": "{n} drops at most.",
     "leyenda.basica.nombre": "Basic",
     "leyenda.basica.texto": "No ability.",
     "leyenda.tejadillo.nombre": "Little Roof",
@@ -611,7 +613,7 @@ export const en: Textos = {
     "mesa.pilaAcciones": "Actions · {n}",
     "mesa.mazoPrendas": "Garment deck: {n} cards",
     "mesa.pilaPrendas": "Garments · {n}",
-    "mesa.mojadas": "{n} dampness from soaking cards",
+    "mesa.humedadAlTope": "Max {n}!",
     "mesa.descarte": "Discard pile",
     "mesa.descarteVacio": "discard",
 
@@ -691,6 +693,7 @@ export const en: Textos = {
     "registro.mojaCuerda": "Garments on that line card of {jugador}'s gain {h} dampness.",
     "registro.mojaCuerda.yo": "Garments on that line card of yours gain {h} dampness.",
     "registro.ganaHumedad": "{prenda} gains {h} dampness.",
+    "registro.humedadAlTope": "{prenda} is already at maximum dampness ({max}): no more is added.",
     "registro.cuerdasExtra#one": "This turn {n} more line card can be played.",
     "registro.cuerdasExtra#other": "This turn {n} more line cards can be played.",
     "registro.pierdeHumedad": "{prenda} loses {h} dampness.",
@@ -989,7 +992,7 @@ export const en: Textos = {
     "tutorial.calcetin.titulo": "And a sock",
     "tutorial.calcetin.texto": "Drag a sock to the peg that's still free.",
     "tutorial.humedad.titulo": "The drops",
-    "tutorial.humedad.texto": "The drops are each garment's dampness. At the end of the day, once everyone has played their turn, each garment loses one drop. With none left, it's dry and scores its points: sock {calcetin}, T-shirt {camiseta}, towel {toalla}.",
+    "tutorial.humedad.texto": "The drops are each garment's dampness. At the end of the day, once everyone has played their turn, each garment loses one drop. With none left, it's dry and scores its points: sock {calcetin}, T-shirt {camiseta}, towel {toalla}. A garment never has more than {max} drops: any extra is lost.",
     "tutorial.dia.titulo": "The day card",
     "tutorial.dia.texto": "It brings the weather, or some event that turns everything upside down. Today it's “{carta}”: with sun, laundry loses one extra drop when drying; with rain, one fewer.",
     "tutorial.loseta.titulo": "Special line cards",
@@ -1020,10 +1023,10 @@ export const en: Textos = {
 
   cartas: {
     // ---------- Actions ----------
-    "mojar-cuerda-rival": { nombre: "Soak a Rival Line", texto: "+1 dampness to every garment on a rival line card." },
+    "mojar-cuerda-rival": { nombre: "Soak a Rival Line", texto: "+1 dampness to every garment on a rival line card (max 4)." },
     "rafaga-de-viento": { nombre: "Gust of Wind", texto: "A rival garment falls: back to their garments to hang with starting dampness." },
     "pinza-rota": { nombre: "Broken Peg", texto: "Cancels a line card's ability." },
-    "retrasar-secado": { nombre: "Slow Drying", texto: "+1 dampness to a rival garment." },
+    "retrasar-secado": { nombre: "Slow Drying", texto: "+1 dampness to a rival garment (max 4)." },
     "mover-prenda-rival": { nombre: "Move Rival Garment", texto: "Move a rival garment to another free slot on their clothesline." },
     "colocar-cuerda-extra": { nombre: "Extra Line", texto: "This turn you can play 1 more line card." },
     "secar-prenda": { nombre: "Instant Dry", texto: "One of your garments dries right now and scores." },

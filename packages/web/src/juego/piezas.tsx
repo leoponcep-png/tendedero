@@ -19,16 +19,13 @@ import { lineasRegistro } from "../i18n/juego";
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { admisible, jugadaDe, movidaHacia, type Arrastre, type Destino } from "../mesa/contexto";
 import { Animal } from "../prototipos/Animales";
-import { colorEstilo, GotaBosque, PrendaBosque } from "../prototipos/ArteBosque";
+import { colorEstilo, PrendaBosque } from "../prototipos/ArteBosque";
 import { DorsoBosque, LosetaBosque } from "../prototipos/CartasBosque";
 import type { Perfil } from "../prototipos/MenuPartida";
 import { CintaTitulo } from "../prototipos/perfil/Comunes";
 import { CartaAccion, CartaCuerda, CartaDeMano, CartaObjetivoJuego, CartaPrenda } from "./cartas";
 import { activo, permite, useJuego, useSoloVer } from "./contexto";
-import { cuerdaDibujo, huecosLibres, humedadExtra, opcionesReparto, sePuedeJugar } from "./vista";
-
-/** Cartas de mojar que asoman como mucho bajo una prenda (la última dice cuántas quedan). */
-export const MOJADAS_VISIBLES = 2;
+import { cuerdaDibujo, huecosLibres, humedadEscala, opcionesReparto, sePuedeJugar } from "./vista";
 
 /** Ancho de la carta de prenda colgada, en huecos (las cartas de cuerda miden 3). */
 const ANCHO_PRENDA = 1.45;
@@ -162,31 +159,7 @@ function CuerdaTendida({ jugador, linea, posicion, tendida }: { jugador: number;
       {tendida.colgadas.map((c, i) => {
         const esp = tipoDe(p, c.prenda).espacios;
         const x = c.inicio + esp / 2 - ANCHO_PRENDA / 2;
-        const mojadas = humedadExtra(p, c.prenda);
-        return [
-          // Las cartas que la han mojado, metidas por debajo de la prenda: de cada una asoma su recuadro con la gota
-          // (se apilan, una gota más abajo cada una). Se quitan antes que la humedad de su escala.
-          mojadas > 0 && (
-            <div
-              key={`${c.prenda}-mojada`}
-              className="mj-mojadas"
-              data-mojadas={c.prenda}
-              style={{ "--x": x, "--h": p.prendas[c.prenda].humedad - mojadas } as CSSProperties}
-              title={t("mesa.mojadas", { n: mojadas })}
-            >
-              {/* Asoman como mucho dos: si hay más, la segunda lleva el resto («+3») y así siempre caben bajo la línea. */}
-              {Array.from({ length: Math.min(mojadas, MOJADAS_VISIBLES) }, (_, k) => (
-                <span key={k} data-k={k} className={`mj-moja ${recien.has(`moja:${c.prenda}:${k}`) ? "entra" : ""}`} style={{ "--k": k } as CSSProperties}>
-                  <span className="mj-moja-caja">
-                    <svg viewBox="-6 -8 12 14" aria-hidden>
-                      <GotaBosque />
-                    </svg>
-                    <b>+{k === MOJADAS_VISIBLES - 1 ? mojadas - k : 1}</b>
-                  </span>
-                </span>
-              ))}
-            </div>
-          ),
+        return (
           <CartaPrenda
             key={c.prenda}
             p={p}
@@ -201,11 +174,11 @@ function CuerdaTendida({ jugador, linea, posicion, tendida }: { jugador: number;
               o?.prenda === c.prenda ? "moviendo" : "",
             ].join(" ")}
             style={{ "--x": x, "--orden": i } as CSSProperties}
-          />,
-        ];
+          />
+        );
       })}
       {actual?.tipo === "fantasma" && (
-        <div className="mj-fantasma" style={{ "--x": actual.x, "--h": p.prendas[actual.prenda].humedad - humedadExtra(p, actual.prenda), "--colgada-pinzas": colorEstilo(dib.pinzas ?? "#c99a62") } as CSSProperties} />
+        <div className="mj-fantasma" style={{ "--x": actual.x, "--h": humedadEscala(p, actual.prenda), "--colgada-pinzas": colorEstilo(dib.pinzas ?? "#c99a62") } as CSSProperties} />
       )}
       {destinos.map((d, i) => (
         <Ranura key={i} destino={d as Destino & { tipo: "espacio" }} jugada={jugadas[i]} activa={hay} onEncima={(si) => setEncima((e) => (si ? i : e === i ? null : e))} />

@@ -35,7 +35,7 @@ import { CartaAccion, CartaDeMano, CartaDiaJuego, CartaObjetivoJuego, CartaPrend
 import { ContextoJuego, type Juego } from "./contexto";
 import { Lupa } from "./Lupa";
 import { Mosaico, VentanaSecas } from "./Vistazos";
-import { Mano, Mazos, MOJADAS_VISIBLES, Objetivos, PanelJugador, Registro, Reparto, Tapete } from "./piezas";
+import { Mano, Mazos, Objetivos, PanelJugador, Registro, Reparto, Tapete } from "./piezas";
 import { sinObjetivo } from "./vista";
 import "../prototipos/prototipos.css";
 import "../prototipos/mesa-bosque.css";
@@ -101,12 +101,6 @@ function recienLlegados(antes: Partida, despues: Partida): Set<string> {
   for (const j of antes.jugadores) for (const l of j.lineas) for (const t of l.cartas) [t.carta, ...t.colgadas.map((c) => c.prenda)].forEach((x) => habia.add(x));
   const nuevos = new Set<string>();
   for (const j of despues.jugadores) for (const l of j.lineas) for (const t of l.cartas) [t.carta, ...t.colgadas.map((c) => c.prenda)].forEach((x) => !habia.has(x) && nuevos.add(x));
-  // Cartas de mojar que se acaban de meter bajo una prenda (entran deslizándose por debajo).
-  for (const [id, pr] of Object.entries(despues.prendas)) {
-    const ahora = Math.min(pr.extra ?? 0, pr.humedad);
-    const era = antes.prendas[id] ? Math.min(antes.prendas[id].extra ?? 0, antes.prendas[id].humedad) : 0;
-    for (let k = era; k < Math.min(ahora, MOJADAS_VISIBLES); k++) nuevos.add(`moja:${id}:${k}`);
-  }
   return nuevos;
 }
 

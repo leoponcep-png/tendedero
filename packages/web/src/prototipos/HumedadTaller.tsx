@@ -9,10 +9,10 @@ import { COLORES, TIPOS, type Prenda } from "./Prototipos";
 // gota. Tres diseños de escala para comparar, con botones para secar y mojar.
 
 /**
- * Filas de la escala: la humedad inicial más alta (la de la toalla). Lo que se moje de más no sube por la escala:
- * se marca con cartas de mojar junto a la prenda. Va a la par con --filas del CSS.
+ * Filas de la escala: la humedad máxima de una prenda (`humedadMaxima` de los ajustes). Al mojarla la carta baja
+ * una fila y asoma una gota más; al secarse sube. Va a la par con --filas del CSS.
  */
-export const MAXIMO = 3;
+export const MAXIMO = 4;
 
 export type Variante = "columna" | "regla" | "filas";
 

@@ -60,7 +60,6 @@
 .plantillas .dia-pie,
 /* Emblema dentro de los medallones (el medallón se queda) */
 .plantillas .marco-carta .m-medallon-aro + g,
-.plantillas .recuadro-gota,
 /* Cuerda: icono del medallón, nombre, texto y adornos del tipo */
 .plantillas .ccb svg g > circle + circle + g,
 .plantillas .ccb-nombre,
@@ -85,9 +84,9 @@
 
 /* La prenda, del tamaño de su carta (en la mesa se coloca colgando de la cuerda) */
 .plantilla-prenda {
-  --paso: calc(var(--celda) * 0.24);
-  --filas: 3;
-  --h: 3;
+  --paso: calc(var(--celda) * 0.2);
+  --filas: 4;
+  --h: 4;
 }
 .plantillas .plantilla-prenda > .hp {
   position: absolute;

@@ -209,10 +209,6 @@
   text-shadow: 0 0.35cqw 0 var(--g-oscuro);
   white-space: nowrap;
 }
-/* Cartas que mojan: el pie lo ocupa el recuadro de la gota (lo que asoma bajo la prenda mojada) */
-.cb-moja .cb-tipo {
-  visibility: hidden;
-}
 .cb-tipo i {
   font-style: normal;
   letter-spacing: 0.06em;

@@ -5,7 +5,7 @@
 // Los pasos de espera (`hasta`) dejan jugar a la IA hasta que se cumple lo que dicen.
 // Lo que sale en la partida (qué cesta, qué cartas) lo fija la semilla de escenario.ts.
 
-import { cumple, defCarta, type Jugada, type Partida } from "@tendedero/motor";
+import { cumple, defCarta, humedadMaxima, type Jugada, type Partida } from "@tendedero/motor";
 import { tLibre, type Variables } from "../../i18n";
 import { nombreCarta, nombrePrendaT } from "../../i18n/juego";
 import { textoPatron } from "../vista";
@@ -103,7 +103,12 @@ export const PASOS: Paso[] = [
   // ---------- Humedad, secado y carta del día ----------
   {
     id: "humedad",
-    datos: (p) => ({ calcetin: p.catalogo.tipos.calcetin?.puntos ?? 1, camiseta: p.catalogo.tipos.camiseta?.puntos ?? 3, toalla: p.catalogo.tipos.toalla?.puntos ?? 6 }),
+    datos: (p) => ({
+      calcetin: p.catalogo.tipos.calcetin?.puntos ?? 1,
+      camiseta: p.catalogo.tipos.camiseta?.puntos ?? 3,
+      toalla: p.catalogo.tipos.toalla?.puntos ?? 6,
+      max: humedadMaxima(p),
+    }),
     foco: () => [...tendida(0, 0)],
   },
   { id: "dia", datos: (p) => ({ carta: nombre(p, p.dia) }), foco: () => [".mf-comun .mj-dia"] },

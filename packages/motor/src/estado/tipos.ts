@@ -8,12 +8,9 @@ export interface Prenda {
   id: string;
   tipo: string;
   color: string;
-  /** Humedad total: la de su escala más extra. */
+  /** Humedad: sube al mojarla (sin pasar de `ajustes.humedadMaxima`) y baja al secarse. */
   humedad: number;
-  /**
-   * Humedad de más por cartas que mojan (se dejan junto a la prenda, una gota cada una). Al secarse se quitan
-   * primero estas y después baja la escala de la prenda. Sin el campo, 0.
-   */
+  /** Obsoleto: lo traen partidas guardadas de versiones anteriores. No tiene efecto; el motor lo borra al tocar la humedad. */
   extra?: number;
 }
 

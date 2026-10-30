@@ -1,9 +1,9 @@
 {
   "cartas": [
-    { "id": "mojar-cuerda-rival", "nombre": "Mojar cuerda rival", "copias": 4, "estado": "definida", "grupo": "fastidio", "efecto": "mojar-cuerda-rival", "parametros": { "humedad": 1 }, "texto": "+1 de humedad a todas las prendas de una carta de cuerda rival." },
+    { "id": "mojar-cuerda-rival", "nombre": "Mojar cuerda rival", "copias": 4, "estado": "definida", "grupo": "fastidio", "efecto": "mojar-cuerda-rival", "parametros": { "humedad": 1 }, "texto": "+1 de humedad a todas las prendas de una carta de cuerda rival (máximo 4)." },
     { "id": "rafaga-de-viento", "nombre": "Ráfaga de viento", "copias": 3, "estado": "definida", "grupo": "fastidio", "efecto": "rafaga-de-viento", "texto": "Una prenda rival se cae: vuelve a sus prendas por tender con la humedad inicial." },
     { "id": "pinza-rota", "nombre": "Pinza rota", "copias": 3, "estado": "pendiente", "grupo": "fastidio", "efecto": "pinza-rota", "texto": "Anula la habilidad de una cuerda." },
-    { "id": "retrasar-secado", "nombre": "Retrasar secado", "copias": 3, "estado": "definida", "grupo": "fastidio", "efecto": "retrasar-secado", "parametros": { "humedad": 1 }, "texto": "+1 de humedad a una prenda rival." },
+    { "id": "retrasar-secado", "nombre": "Retrasar secado", "copias": 3, "estado": "definida", "grupo": "fastidio", "efecto": "retrasar-secado", "parametros": { "humedad": 1 }, "texto": "+1 de humedad a una prenda rival (máximo 4)." },
     { "id": "mover-prenda-rival", "nombre": "Mover una prenda rival", "copias": 3, "estado": "definida", "grupo": "fastidio", "efecto": "mover-prenda-rival", "texto": "Mueve una prenda rival a otro hueco libre de su tendedero." },
     { "id": "colocar-cuerda-extra", "nombre": "Colocar cuerda extra", "copias": 2, "estado": "definida", "grupo": "tácticas", "efecto": "colocar-cuerda-extra", "parametros": { "cuerdas": 1 }, "texto": "Este turno puedes jugar 1 cuerda más." },
     { "id": "secar-prenda", "nombre": "Secar prenda inmediatamente", "copias": 2, "estado": "definida", "grupo": "tácticas", "efecto": "secar-prenda", "texto": "Una prenda tuya se seca ya y puntúa." },

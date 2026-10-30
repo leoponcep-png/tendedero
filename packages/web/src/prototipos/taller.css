@@ -238,7 +238,7 @@
 .hum-mesa {
   --paso: calc(var(--celda) * 0.3);
   place-items: start center;
-  min-height: calc(var(--alto-cuerda) + var(--filas, 3) * var(--paso) + var(--celda) * 1.7);
+  min-height: calc(var(--alto-cuerda) + var(--filas, 4) * var(--paso) + var(--celda) * 1.7);
 }
 .hum-linea {
   display: flex;
@@ -275,9 +275,9 @@
   z-index: 1;
   left: calc(var(--celda) * (var(--inicio) + 5 / 60));
   width: calc(var(--celda) * (var(--espacios) - 10 / 60));
-  /* Solo las filas de la humedad inicial más alta (--filas, la de la toalla); lo demás son cartas de mojar al lado. */
-  height: calc(var(--filas, 3) * var(--paso) + var(--celda) * 1.5);
-  top: calc(var(--alto-cuerda) - (var(--filas, 3) - var(--h)) * var(--paso));
+  /* Tantas filas como la humedad máxima (--filas, 4): al mojarla baja una fila y al secarse sube. */
+  height: calc(var(--filas, 4) * var(--paso) + var(--celda) * 1.42);
+  top: calc(var(--alto-cuerda) - (var(--filas, 4) - var(--h)) * var(--paso));
   display: flex;
   flex-direction: column;
   border-radius: 6px;
@@ -297,7 +297,7 @@
 .hp-escala {
   flex: none;
   display: grid;
-  grid-template-rows: repeat(var(--filas, 3), var(--paso));
+  grid-template-rows: repeat(var(--filas, 4), var(--paso));
   background: repeating-linear-gradient(180deg, #d6ecf7 0 calc(var(--paso) - 1px), #2b201933 calc(var(--paso) - 1px) var(--paso));
   border-bottom: 2px solid var(--tinta);
 }

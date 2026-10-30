@@ -17,6 +17,8 @@ export interface Ajustes {
   jugablesPorTurno: { cuerdas: number; acciones: number };
   limiteMano: number;
   umbralFinal: number;
+  /** Tope de humedad de una prenda: mojarla no la sube de aquí (lo que sobra se pierde). */
+  humedadMaxima: number;
   /** `renovarTodas`: al acabar la ronda se vacían y rellenan todas, no solo las que se cogieron (sistema anterior). */
   cestas: { numero: number; prendasPorCesta: number; renovarTodas?: boolean };
   /** Si en el reparto coge primero quien juega el último (para compensar el orden de turno). */
@@ -50,6 +52,7 @@ export function ajustesIniciales(datos: Datos): Ajustes {
     jugablesPorTurno: d.jugablesPorTurno,
     limiteMano: d.limiteMano,
     umbralFinal: d.umbralFinal,
+    humedadMaxima: d.humedadMaxima ?? 4,
     cestas: { numero: cestasPorDefecto(datos, d.jugadores), prendasPorCesta: d.cestas.prendasPorCesta },
     tendedero: d.tendedero,
     objetivos: d.objetivos,
@@ -86,6 +89,7 @@ export function ajustesConModo(a: Ajustes, datos: Datos): Ajustes {
     roboPorTurno: m.roboPorTurno ?? a.roboPorTurno,
     jugablesPorTurno: m.jugablesPorTurno ?? a.jugablesPorTurno,
     limiteMano: m.limiteMano ?? a.limiteMano,
+    humedadMaxima: m.humedadMaxima ?? a.humedadMaxima,
     prendas,
   };
 }
@@ -148,6 +152,11 @@ export function revisarAjustes(a: Ajustes, datos: Datos): Revision {
       if (a.prendas[t.id].espacios > maxEspacios) {
         avisos.push(`${t.nombre}: ocupa ${a.prendas[t.id].espacios} espacios y ninguna cuerda en juego tiene tantos.`);
       }
+    }
+  }
+  for (const t of datos.tipos) {
+    if (a.prendas[t.id].humedad > a.humedadMaxima) {
+      avisos.push(`${t.nombre}: empieza con ${a.prendas[t.id].humedad} de humedad y el tope es ${a.humedadMaxima}; se queda en ${a.humedadMaxima}.`);
     }
   }
   if (a.manoInicial.cuerdas * a.jugadores > copiasCuerdas) {

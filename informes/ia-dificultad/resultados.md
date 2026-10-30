@@ -7,7 +7,7 @@ Se han enfrentado los tres niveles en **2400 partidas**: 400 por duelo, con las 
 - **Fácil:** es la IA «Normal» de antes, tal cual. Prueba cada jugada y se queda con la que mejor deja la mesa en ese momento. Valora la ropa sin mirar cuánto tarda en secarse ni cuántas rondas quedan. Por eso cuelga sobre todo toallas, que ocupan una cuerda entera y tardan 3 rondas. Además se lleva en el reparto más ropa de la que puede tender.
 - **Normal:** hace la misma búsqueda que la fácil, pero optimiza su ropa (`packages/motor/src/iaRopa.ts`).
   - Mide el tendedero en «pinzas × rondas» hasta el final de la partida. Calcula cuántas rondas quedan según lo cerca que está el líder del final y la ropa que queda.
-  - Cada prenda colgada gasta sus pinzas durante las rondas que tarda en secarse: su humedad, contando la `extra` de las cartas de Mojar, entre lo que seca su cuerda.
+  - Cada prenda colgada gasta sus pinzas durante las rondas que tarda en secarse: su humedad (como mucho 4) entre lo que seca su cuerda.
   - La ropa por tender se reparte empezando por la que más puntos da por pinza y por ronda: calcetín 1, camiseta 0,75, toalla 0,67. Solo cuenta la que cabe y se seca a tiempo.
   - La ropa que no cabe resta un poco. Así no se la lleva en el reparto si puede elegir.
   - Las cuerdas valen por el sitio que dan y por lo que aceleran el secado.

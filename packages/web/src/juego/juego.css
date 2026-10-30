@@ -278,7 +278,7 @@
   z-index: 25;
   left: calc(var(--celda) * var(--x));
   width: var(--ancho-prenda);
-  top: calc(var(--alto-cuerda) - (var(--filas, 3) - var(--h)) * var(--paso));
+  top: calc(var(--alto-cuerda) - (var(--filas, 4) - var(--h)) * var(--paso));
   height: var(--alto-prenda);
   border-radius: 6px;
   border: 3px dashed #ffd34d;
@@ -390,12 +390,12 @@
 }
 .mj-arrastrada-prenda {
   --celda: 44px;
-  --paso: calc(var(--celda) * 0.24);
+  --paso: calc(var(--celda) * 0.2);
   position: relative !important;
   left: auto !important;
   top: auto !important;
   width: calc(var(--celda) * 1.45);
-  height: calc(var(--filas, 3) * var(--paso) + var(--celda) * 1.5);
+  height: calc(var(--filas, 4) * var(--paso) + var(--celda) * 1.42);
   rotate: 5deg;
   filter: drop-shadow(0 16px 20px #0008);
 }
@@ -792,12 +792,12 @@
 }
 .mj-lupa .mj-lupa-prenda {
   --celda: 150px;
-  --paso: calc(var(--celda) * 0.24);
+  --paso: calc(var(--celda) * 0.2);
   position: relative;
   left: auto;
   top: auto;
   width: calc(var(--celda) * 1.45);
-  height: calc(var(--filas, 3) * var(--paso) + var(--celda) * 1.5);
+  height: calc(var(--filas, 4) * var(--paso) + var(--celda) * 1.42);
   font-size: calc(var(--celda) * 0.19);
 }
 .mj-lupa .mj-lupa-objetivo {
@@ -1005,70 +1005,6 @@
   inset: 0;
 }
 
-/*
- * Cartas de mojar metidas por debajo de la prenda: de cada una asoma solo su pie, con el recuadro de la gota.
- * Van por detrás de todas las prendas (así la de un calcetín nunca tapa al de al lado) y empiezan en el borde
- * de abajo de su prenda, que baja con la humedad de su escala (--h).
- */
-.mj-mojadas {
-  --asoma: calc(var(--celda) * 0.32);
-  position: absolute;
-  z-index: 0;
-  left: calc(var(--celda) * var(--x) + var(--ancho-prenda) * 0.06);
-  width: calc(var(--ancho-prenda) * 0.88);
-  top: calc(var(--alto-cuerda) + var(--h) * var(--paso) + var(--celda) * 1.5);
-  height: 0;
-  pointer-events: none;
-  transition: top 0.7s cubic-bezier(0.4, 1.35, 0.5, 1);
-}
-.mj-moja {
-  position: absolute;
-  left: 0;
-  right: 0;
-  /* Cada carta mide dos «asomas»: la mitad de arriba queda bajo la prenda o bajo la carta anterior. */
-  top: calc(var(--asoma) * (var(--k) - 1));
-  height: calc(var(--asoma) * 2);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: calc(var(--asoma) * 0.12);
-  border-radius: 0 0 6px 6px;
-  background:
-    repeating-linear-gradient(135deg, #ffffff1f 0 2px, transparent 2px 5px),
-    var(--fastidio, #b5523b);
-  box-shadow:
-    0 0 0 1.5px var(--tinta),
-    0 3px 5px #0006;
-}
-.mj-moja.entra {
-  animation: mj-moja-entra 0.6s cubic-bezier(0.3, 1.25, 0.5, 1) both;
-  animation-delay: calc(var(--k) * 0.08s);
-}
-@keyframes mj-moja-entra {
-  from {
-    translate: 0 calc(var(--asoma) * -1 * (var(--k) + 1));
-  }
-}
-.mj-moja-caja {
-  display: flex;
-  align-items: center;
-  gap: 0.12em;
-  height: calc(var(--asoma) * 0.74);
-  padding: 0 0.35em;
-  border-radius: 4px;
-  background: #e6f3fb;
-  box-shadow:
-    0 0 0 1.2px var(--tinta),
-    inset 0 0 0 2px #e6f3fb,
-    inset 0 0 0 2.6px #8fc3e3;
-  font: 800 calc(var(--asoma) * 0.5) / 1 var(--fuente-titulo);
-  color: #1f5e86;
-}
-.mj-moja-caja svg {
-  height: 78%;
-  width: auto;
-}
-
 /* Ficha de jugador: se pulsa para ver sus prendas secas (cursor y una pequeña cesta en la esquina) */
 .mj .mj-panel {
   cursor: pointer;
@@ -1142,12 +1078,12 @@
 }
 .mj .mj-seca-mini {
   --celda: 34px;
-  --paso: calc(var(--celda) * 0.24);
+  --paso: calc(var(--celda) * 0.2);
   position: relative;
   left: auto;
   top: auto;
   width: calc(var(--celda) * 1.45);
-  height: calc(var(--filas, 3) * var(--paso) + var(--celda) * 1.5);
+  height: calc(var(--filas, 4) * var(--paso) + var(--celda) * 1.42);
   font-size: calc(var(--celda) * 0.19);
 }
 .mj-secas-colores {
@@ -1451,10 +1387,6 @@
 }
 .mj.sin-animaciones .me-ronda.mj-ultima {
   animation: none;
-}
-/* Sitio bajo cada línea para que asomen las cartas de mojar sin meterse bajo la línea de abajo */
-.mb.me.mj {
-  --colgante: calc(var(--filas, 3) * var(--paso) + var(--celda) * 2.05);
 }
 /* La carta del día en grande va por encima de los anuncios; su sello de días ya lo lleva la carta */
 .capa-efectos > .velo-efecto {

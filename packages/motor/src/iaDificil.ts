@@ -12,7 +12,7 @@ import { puntuarObjetivo } from "./estado/final";
 import { rondasHastaRomperse } from "./estado/rotura";
 import { efectoClima, efectoCuerda, protegidaDe } from "./estado/secado";
 import type { CartaTendida, Partida } from "./estado/tipos";
-import { defCarta, tipoDe } from "./estado/utilidades";
+import { defCarta, humedadMaxima, tipoDe } from "./estado/utilidades";
 import { esValida } from "./jugadas";
 import { efectoAccion } from "./jugadas/jugarAccion";
 import type { Jugada } from "./jugadas/tipos";
@@ -91,10 +91,13 @@ function puntosAlSecar(p: Partida, t: CartaTendida, prenda: string): number {
   return Math.max(0, cuerda?.efecto.puntosAlSecar?.(p, prenda, cuerda.params, base) ?? base);
 }
 
-/** Riesgo por ronda de que un fastidio rival retrase o tire la prenda; menor si la cuerda la protege. */
+/**
+ * Riesgo por ronda de que un fastidio rival retrase o tire la prenda; menor si la cuerda la protege o si ya tiene la
+ * humedad máxima (mojarla no le hace nada).
+ */
 function riesgo(p: Partida, t: CartaTendida, prenda: string): number {
   let r = 0.07;
-  if (protegidaDe(p, t, "moja")) r -= 0.025;
+  if (protegidaDe(p, t, "moja") || p.prendas[prenda].humedad >= humedadMaxima(p)) r -= 0.025;
   if (protegidaDe(p, t, "tira")) r -= 0.02;
   // Una toalla tirada pierde mucho más que un calcetín: la atacarán antes.
   r += 0.01 * (tipoDe(p, prenda).espacios - 1);

@@ -5,7 +5,7 @@ import { anotar } from "./registro";
 import { empezarReparto, renovarCestas } from "./reparto";
 import { inicioDeRonda } from "./ronda";
 import type { Partida } from "./tipos";
-import { pilaDe, robar } from "./utilidades";
+import { humedadMaxima, pilaDe, robar } from "./utilidades";
 
 export function crearPartida(datos: Datos, ajustesElegidos: Ajustes): Partida {
   const semilla = ajustesElegidos.semilla.trim() || semillaNueva();
@@ -51,7 +51,7 @@ export function crearPartida(datos: Datos, ajustesElegidos: Ajustes): Partida {
     for (const color of datos.colores) {
       for (let i = 1; i <= tipo.porColor; i++) {
         const id = `${tipo.id}-${color.id}-${i}`;
-        p.prendas[id] = { id, tipo: tipo.id, color: color.id, humedad: p.catalogo.tipos[tipo.id].humedad };
+        p.prendas[id] = { id, tipo: tipo.id, color: color.id, humedad: Math.min(humedadMaxima(p), p.catalogo.tipos[tipo.id].humedad) };
         p.bolsa.push(id);
       }
     }

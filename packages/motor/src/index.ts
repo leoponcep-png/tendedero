@@ -6,7 +6,7 @@ export { crearPartida } from "./estado/preparar";
 export { cierraLaRonda, jugadorInicial, ordenDeRonda, diasRestantes } from "./estado/ronda";
 export { maxCuerdasRobadas } from "./jugadas/terminarTurno";
 export { puntuarObjetivo } from "./estado/final";
-export { defCarta, localizar, nombrePrenda, prendaEn, tipoDe } from "./estado/utilidades";
+export { defCarta, humedadMaxima, HUMEDAD_MAXIMA_POR_DEFECTO, localizar, nombrePrenda, prendaEn, tipoDe } from "./estado/utilidades";
 export { efectoDeCuerda } from "./estado/secado";
 export * from "./jugadas/tipos";
 export { aplicar, esValida, motivoInvalida, porQueNoVale, type Resultado } from "./jugadas";

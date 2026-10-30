@@ -90,6 +90,7 @@ export function PantallaAjustes({
           />
           <Numero etiqueta="Umbral de final (puntos)" valor={ajustes.umbralFinal} min={1} onCambio={(n) => cambiar((a) => void (a.umbralFinal = n))} />
           <Numero etiqueta="Límite de mano" valor={ajustes.limiteMano} min={1} onCambio={(n) => cambiar((a) => void (a.limiteMano = n))} />
+          <Numero etiqueta="Humedad máxima de una prenda" valor={ajustes.humedadMaxima} min={1} onCambio={(n) => cambiar((a) => void (a.humedadMaxima = n))} />
           <label className="campo">
             <span>Semilla</span>
             <input

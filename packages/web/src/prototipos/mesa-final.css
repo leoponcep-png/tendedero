@@ -5,14 +5,14 @@
 
 .mb.me {
   --celda-base: clamp(26px, 3.3vh, 50px);
-  --paso: calc(var(--celda) * 0.24);
+  --paso: calc(var(--celda) * 0.2);
   --ancho-prenda: calc(var(--celda) * 1.45);
   /* Sitio bajo cada línea: hasta 4 gotas visibles más el dibujo de la prenda */
-  --colgante: calc(var(--filas, 3) * var(--paso) + var(--celda) * 1.55);
+  --colgante: calc(var(--filas, 4) * var(--paso) + var(--celda) * 1.47);
   --alto-linea: calc(var(--alto-cuerda) + var(--colgante));
 }
 .me .hp {
-  height: calc(var(--filas, 3) * var(--paso) + var(--celda) * 1.5);
+  height: calc(var(--filas, 4) * var(--paso) + var(--celda) * 1.42);
   font-size: calc(var(--celda) * 0.19);
 }
 
@@ -109,7 +109,7 @@
   top: auto;
   flex: none;
   width: var(--ancho-prenda);
-  height: calc(var(--filas, 3) * var(--paso) + var(--celda) * 1.5);
+  height: calc(var(--filas, 4) * var(--paso) + var(--celda) * 1.42);
   margin: 0 -6px;
   transition: transform 0.25s var(--curva);
 }
@@ -166,10 +166,10 @@
 
 .me .mb-tapete,
 .me .me-monton {
-  --paso: calc(var(--celda) * 0.24);
+  --paso: calc(var(--celda) * 0.2);
   --ancho-prenda: calc(var(--celda) * 1.45);
-  --alto-prenda: calc(var(--filas, 3) * var(--paso) + var(--celda) * 1.5);
-  --colgante: calc(var(--filas, 3) * var(--paso) + var(--celda) * 1.55);
+  --alto-prenda: calc(var(--filas, 4) * var(--paso) + var(--celda) * 1.42);
+  --colgante: calc(var(--filas, 4) * var(--paso) + var(--celda) * 1.47);
   --alto-linea: calc(var(--alto-cuerda) + var(--colgante));
 }
 

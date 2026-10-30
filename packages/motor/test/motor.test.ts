@@ -18,6 +18,7 @@ import {
   type Jugada,
   type Partida,
 } from "../src";
+import { candidatas } from "../src/ia";
 
 function crudos(): DatosCrudos {
   return Object.fromEntries(
@@ -890,53 +891,90 @@ describe("motivos estructurados", () => {
     expect(porQueNoVale(p, { tipo: "terminarTurno", jugador: otro, cuerdas: 0 })?.texto).toBe(motivoInvalida(p, { tipo: "terminarTurno", jugador: otro, cuerdas: 0 }));
   });
 });
-describe("humedad de las cartas que mojan", () => {
-  it("las cartas que mojan se dejan junto a la prenda: suman a `extra`, no a su escala", () => {
+describe("tope de humedad", () => {
+  it("la humedad máxima viene de los ajustes por defecto (4), también en la partida larga", () => {
+    expect(ajustesIniciales(datos).humedadMaxima).toBe(4);
+    expect(partida().ajustes.humedadMaxima).toBe(4);
+    expect(partida("prueba", (a) => void (a.modo = "larga")).ajustes.humedadMaxima).toBe(4);
+    // La humedad inicial de cada prenda cabe en la escala de su carta.
+    for (const t of datos.tipos) expect(t.humedad).toBeLessThanOrEqual(4);
+  });
+
+  it("mojar suma a la humedad de la prenda, sin campo aparte", () => {
     let p = partida();
     tender(p, 1, "basica", [["camiseta-rojo-1", 0]]);
     const retrasar = darAccion(p, 0, "retrasar-secado");
     p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: retrasar, objetivo: { jugador: 1, linea: 0, posicion: 0, prenda: "camiseta-rojo-1" } });
-    expect(p.prendas["camiseta-rojo-1"]).toMatchObject({ humedad: 3, extra: 1 });
+    expect(p.prendas["camiseta-rojo-1"].humedad).toBe(3);
+    expect(p.prendas["camiseta-rojo-1"].extra).toBeUndefined();
   });
 
-  it("Mojar cuerda rival marca cada prenda de la cuerda con su carta", () => {
+  it("Retrasar secado no pasa de 4: a una prenda que ya está a 4 no le hace nada", () => {
     let p = partida();
-    tender(p, 1, "basica", [["calcetin-azul-1", 0], ["camiseta-rojo-1", 1]]);
-    const mojar = darAccion(p, 0, "mojar-cuerda-rival");
-    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: mojar, objetivo: { jugador: 1, linea: 0, posicion: 0 } });
-    expect(p.prendas["calcetin-azul-1"]).toMatchObject({ humedad: 2, extra: 1 });
-    expect(p.prendas["camiseta-rojo-1"]).toMatchObject({ humedad: 3, extra: 1 });
+    tender(p, 1, "basica", [["toalla-rojo-1", 0]]);
+    const objetivo = { jugador: 1, linea: 0, posicion: 0, prenda: "toalla-rojo-1" };
+    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "retrasar-secado"), objetivo });
+    expect(p.prendas["toalla-rojo-1"].humedad).toBe(4);
+    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "retrasar-secado"), objetivo });
+    expect(p.prendas["toalla-rojo-1"].humedad).toBe(4);
+    expect(p.entradas?.at(-1)?.clave).toBe("humedadAlTope");
   });
 
-  it("al secarse se quitan primero las cartas y después baja la escala", () => {
+  it("Mojar cuerda rival sube cada prenda hasta el tope y lo que sobra se pierde", () => {
+    let p = partida();
+    tender(p, 1, "basica", [["calcetin-azul-1", 0], ["toalla-rojo-1", 1]]);
+    p.prendas["toalla-rojo-1"].humedad = 4;
+    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "mojar-cuerda-rival"), objetivo: { jugador: 1, linea: 0, posicion: 0 } });
+    expect(p.prendas["calcetin-azul-1"].humedad).toBe(2);
+    expect(p.prendas["toalla-rojo-1"].humedad).toBe(4);
+  });
+
+  it("los sucesos del día tampoco pasan del tope", () => {
+    let p = partida();
+    tender(p, 0, "basica", [["toalla-azul-1", 0]]);
+    p.prendas["toalla-azul-1"].humedad = 5; // tras el secado de la ronda, 4; la tormenta no la sube de ahí
+    proximaCarta(p, "tormenta-repentina");
+    p = ronda(p);
+    expect(p.prendas["toalla-azul-1"].humedad).toBe(4);
+  });
+
+  it("el tope se puede cambiar en los ajustes", () => {
+    let p = partida("prueba", (a) => void (a.humedadMaxima = 3));
+    tender(p, 1, "basica", [["toalla-rojo-1", 0]]);
+    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "retrasar-secado"), objetivo: { jugador: 1, linea: 0, posicion: 0, prenda: "toalla-rojo-1" } });
+    expect(p.prendas["toalla-rojo-1"].humedad).toBe(3);
+  });
+
+  it("al secarse baja la misma humedad; un `extra` de una partida guardada no tiene efecto", () => {
     let p = partida();
     tender(p, 0, "basica", [["camiseta-rojo-1", 0]]);
     p.prendas["camiseta-rojo-1"].humedad = 4;
     p.prendas["camiseta-rojo-1"].extra = 2;
     p = ronda(p);
-    expect(p.prendas["camiseta-rojo-1"]).toMatchObject({ humedad: 3, extra: 1 });
+    expect(p.prendas["camiseta-rojo-1"].humedad).toBe(3);
+    expect(p.prendas["camiseta-rojo-1"].extra).toBeUndefined();
     p = ronda(p);
-    expect(p.prendas["camiseta-rojo-1"]).toMatchObject({ humedad: 2, extra: 0 });
+    expect(p.prendas["camiseta-rojo-1"].humedad).toBe(2);
   });
 
-  it("Reducir humedad también quita antes las cartas; al caerse o secarse no queda ninguna", () => {
+  it("partidas guardadas sin el ajuste usan el tope de 4", () => {
     let p = partida();
-    tender(p, 0, "basica", [["toalla-azul-1", 0]]);
-    p.prendas["toalla-azul-1"].humedad = 4;
-    p.prendas["toalla-azul-1"].extra = 1;
-    const reducir = darAccion(p, 0, "reducir-humedad");
-    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: reducir, objetivo: { jugador: 0, linea: 0, posicion: 0, prenda: "toalla-azul-1" } });
-    expect(p.prendas["toalla-azul-1"]).toMatchObject({ humedad: 3, extra: 0 });
-    p.prendas["toalla-azul-1"].extra = 2;
-    p.prendas["toalla-azul-1"].humedad = 5;
-    const secar = darAccion(p, 0, "secar-prenda");
-    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: secar, objetivo: { jugador: 0, linea: 0, posicion: 0, prenda: "toalla-azul-1" } });
-    expect(p.prendas["toalla-azul-1"]).toMatchObject({ humedad: 0, extra: 0 });
+    delete (p.ajustes as Partial<Ajustes>).humedadMaxima;
+    tender(p, 1, "basica", [["toalla-rojo-1", 0]]);
+    p.prendas["toalla-rojo-1"].humedad = 4;
+    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "retrasar-secado"), objetivo: { jugador: 1, linea: 0, posicion: 0, prenda: "toalla-rojo-1" } });
+    expect(p.prendas["toalla-rojo-1"].humedad).toBe(4);
   });
 
-  it("ninguna prenda pasa de la humedad inicial más alta en su propia escala", () => {
-    // La carta de prenda solo imprime esas filas (la de la toalla); lo demás son cartas al lado.
-    const maxima = Math.max(...datos.tipos.map((t) => t.humedad));
-    expect(maxima).toBe(3);
+  it("la IA no gasta cartas que mojan en prendas que ya están a 4", () => {
+    const p = partida();
+    tender(p, 1, "basica", [["toalla-rojo-1", 0]]);
+    p.prendas["toalla-rojo-1"].humedad = 4;
+    darAccion(p, 0, "retrasar-secado");
+    darAccion(p, 0, "mojar-cuerda-rival");
+    const moja = candidatas(p, 0).filter(
+      (j) => j.tipo === "jugarAccion" && ["retrasar-secado", "mojar-cuerda-rival"].includes(p.cartas[j.carta]) && j.objetivo?.jugador === 1,
+    );
+    expect(moja).toEqual([]);
   });
 });

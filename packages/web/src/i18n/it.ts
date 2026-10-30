@@ -414,6 +414,8 @@ export const it: Textos = {
     "dorso.objetivos": "Obiettivi",
     "dorso.prendas": "Capi",
     "loseta.titulo": "Corde",
+    "loseta.humedad.nombre": "Umidità",
+    "loseta.humedad.texto": "Al massimo {n} gocce.",
     "leyenda.basica.nombre": "Semplice",
     "leyenda.basica.texto": "Nessuna abilità.",
     "leyenda.tejadillo.nombre": "Tettoia",
@@ -630,7 +632,7 @@ export const it: Textos = {
     "mesa.pilaAcciones": "Azioni · {n}",
     "mesa.mazoPrendas": "Mazzo dei capi: {n} carte",
     "mesa.pilaPrendas": "Capi · {n}",
-    "mesa.mojadas": "{n} di umidità dalle carte che bagnano",
+    "mesa.humedadAlTope": "Max {n}!",
     "mesa.descarte": "Scarti",
     "mesa.descarteVacio": "scarti",
 
@@ -709,6 +711,7 @@ export const it: Textos = {
     "registro.mojaCuerda": "I capi di quella corda di {jugador} guadagnano {h} di umidità.",
     "registro.mojaCuerda.yo": "I capi di quella tua corda guadagnano {h} di umidità.",
     "registro.ganaHumedad": "Capo bagnato: {prenda} guadagna {h} di umidità.",
+    "registro.humedadAlTope": "{prenda} ha già l'umidità massima ({max}): non ne guadagna altra.",
     "registro.cuerdasExtra#one": "In questo turno si può giocare {n} corda in più.",
     "registro.cuerdasExtra#many": "In questo turno si possono giocare {n} corde in più.",
     "registro.cuerdasExtra#other": "In questo turno si possono giocare {n} corde in più.",
@@ -1019,7 +1022,7 @@ export const it: Textos = {
     "tutorial.calcetin.titulo": "E un calzino",
     "tutorial.calcetin.texto": "Trascina un calzino sulla molletta rimasta libera.",
     "tutorial.humedad.titulo": "Le gocce",
-    "tutorial.humedad.texto": "Le gocce sono l'umidità di ogni capo. Alla fine del giorno, quando tutti hanno giocato il loro turno, ogni capo perde una goccia. Quando non ne ha più, è asciutto e ti dà i suoi punti: calzino {calcetin}, maglietta {camiseta}, asciugamano {toalla}.",
+    "tutorial.humedad.texto": "Le gocce sono l'umidità di ogni capo. Alla fine del giorno, quando tutti hanno giocato il loro turno, ogni capo perde una goccia. Quando non ne ha più, è asciutto e ti dà i suoi punti: calzino {calcetin}, maglietta {camiseta}, asciugamano {toalla}. Un capo non ha mai più di {max} gocce: quello che avanza si perde.",
     "tutorial.dia.titulo": "La carta del giorno",
     "tutorial.dia.texto": "Porta il meteo, o qualche evento che scombina tutto. Oggi c'è «{carta}»: col sole il bucato perde una goccia in più asciugandosi; con la pioggia, una in meno.",
     "tutorial.loseta.titulo": "Corde speciali",
@@ -1050,10 +1053,10 @@ export const it: Textos = {
 
   cartas: {
     // ---------- Acciones ----------
-    "mojar-cuerda-rival": { nombre: "Bagna corda rivale", texto: "+1 di umidità a tutti i capi di una carta corda rivale." },
+    "mojar-cuerda-rival": { nombre: "Bagna corda rivale", texto: "+1 di umidità a tutti i capi di una carta corda rivale (max 4)." },
     "rafaga-de-viento": { nombre: "Raffica di vento", texto: "Un capo rivale cade: torna tra i suoi capi da stendere con l'umidità iniziale." },
     "pinza-rota": { nombre: "Molletta rotta", texto: "Annulla l'abilità di una corda." },
-    "retrasar-secado": { nombre: "Ritarda asciugatura", texto: "+1 di umidità a un capo rivale." },
+    "retrasar-secado": { nombre: "Ritarda asciugatura", texto: "+1 di umidità a un capo rivale (max 4)." },
     "mover-prenda-rival": { nombre: "Sposta capo rivale", texto: "Sposta un capo rivale in un altro spazio libero del suo stendino." },
     "colocar-cuerda-extra": { nombre: "Corda extra", texto: "In questo turno puoi giocare 1 corda in più." },
     "secar-prenda": { nombre: "Asciuga subito", texto: "Un tuo capo si asciuga subito e fa punti." },

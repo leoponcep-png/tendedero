@@ -402,6 +402,8 @@ export const ko: Textos = {
     "dorso.objetivos": "목표",
     "dorso.prendas": "빨래",
     "loseta.titulo": "빨랫줄",
+    "loseta.humedad.nombre": "습기",
+    "loseta.humedad.texto": "물방울은 최대 {n}개.",
     "leyenda.basica.nombre": "기본",
     "leyenda.basica.texto": "능력 없음.",
     "leyenda.tejadillo.nombre": "처마",
@@ -590,7 +592,7 @@ export const ko: Textos = {
     "mesa.pilaAcciones": "액션 · {n}",
     "mesa.mazoPrendas": "빨래 덱: {n}장",
     "mesa.pilaPrendas": "빨래 · {n}",
-    "mesa.mojadas": "적시는 카드로 생긴 습기 {n}",
+    "mesa.humedadAlTope": "최대 {n}!",
     "mesa.descarte": "버린 카드",
     "mesa.descarteVacio": "버린 카드",
 
@@ -669,6 +671,7 @@ export const ko: Textos = {
     "registro.mojaCuerda": "{jugador}의 그 빨랫줄에 널린 빨래가 습기 +{h}.",
     "registro.mojaCuerda.yo": "내 그 빨랫줄에 널린 빨래가 습기 +{h}.",
     "registro.ganaHumedad": "{prenda}: 습기 +{h}.",
+    "registro.humedadAlTope": "{prenda}: 습기가 이미 최대({max})라 더 늘지 않아요.",
     "registro.cuerdasExtra#other": "이번 차례에 빨랫줄을 {n}장 더 낼 수 있어요.",
     "registro.pierdeHumedad": "{prenda}: 습기 −{h}.",
     "registro.intercambianPrendas": "{prenda}와(과) {otraPrenda}의 자리를 바꿨어요.",
@@ -955,7 +958,7 @@ export const ko: Textos = {
     "tutorial.calcetin.titulo": "양말도 하나",
     "tutorial.calcetin.texto": "양말 하나를 남은 빈 빨래집게로 끌어다 놓아요.",
     "tutorial.humedad.titulo": "물방울",
-    "tutorial.humedad.texto": "물방울은 빨래의 습기예요. 하루가 끝날 때, 모두가 자기 차례를 마치면 빨래마다 물방울이 하나씩 줄어요. 하나도 안 남으면 마르고 점수를 줘요: 양말 {calcetin}, 티셔츠 {camiseta}, 수건 {toalla}.",
+    "tutorial.humedad.texto": "물방울은 빨래의 습기예요. 하루가 끝날 때, 모두가 자기 차례를 마치면 빨래마다 물방울이 하나씩 줄어요. 하나도 안 남으면 마르고 점수를 줘요: 양말 {calcetin}, 티셔츠 {camiseta}, 수건 {toalla}. 빨래의 물방울은 최대 {max}개예요. 그보다 더 젖으면 넘치는 만큼은 사라져요.",
     "tutorial.dia.titulo": "오늘의 카드",
     "tutorial.dia.texto": "날씨나 모든 걸 뒤흔드는 사건을 가져와요. 오늘은 「{carta}」예요. 해가 나면 마를 때 물방울이 하나 더 줄고, 비가 오면 하나 덜 줄어요.",
     "tutorial.loseta.titulo": "특별한 빨랫줄",
@@ -986,10 +989,10 @@ export const ko: Textos = {
 
   cartas: {
     // ---------- Acciones ----------
-    "mojar-cuerda-rival": { nombre: "물 끼얹기", texto: "상대 빨랫줄 카드 1장의 모든 빨래에 습기 +1." },
+    "mojar-cuerda-rival": { nombre: "물 끼얹기", texto: "상대 빨랫줄 카드 1장의 모든 빨래에 습기 +1 (최대 4)." },
     "rafaga-de-viento": { nombre: "돌풍", texto: "상대 빨래 1개가 떨어진다: 처음 습기로 널 빨래에 돌아간다." },
     "pinza-rota": { nombre: "부러진 빨래집게", texto: "빨랫줄 1장의 능력을 무효로 한다." },
-    "retrasar-secado": { nombre: "건조 방해", texto: "상대 빨래 1개에 습기 +1." },
+    "retrasar-secado": { nombre: "건조 방해", texto: "상대 빨래 1개에 습기 +1 (최대 4)." },
     "mover-prenda-rival": { nombre: "상대 빨래 옮기기", texto: "상대 빨래 1개를 그 빨래 건조대의 다른 빈 칸으로 옮긴다." },
     "colocar-cuerda-extra": { nombre: "빨랫줄 추가", texto: "이번 차례에 빨랫줄을 1장 더 낼 수 있다." },
     "secar-prenda": { nombre: "바로 말리기", texto: "내 빨래 1개가 즉시 말라 점수를 얻는다." },

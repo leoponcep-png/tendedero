@@ -1,5 +1,5 @@
 import { secarPrenda } from "../estado/secado";
-import { caer, defCarta, descolgar, localizar, mojarPrenda, nombrePrenda, numero, prendaEn, quitarHumedad, robar } from "../estado/utilidades";
+import { caer, defCarta, descolgar, humedadMaxima, localizar, mojarPrenda, nombrePrenda, numero, prendaEn, quitarHumedad, robar } from "../estado/utilidades";
 import { anotar, no, refPrenda } from "../estado/registro";
 import type { Partida } from "../estado/tipos";
 import type { JugadaDe } from "../jugadas/tipos";
@@ -51,7 +51,7 @@ export const efectosAccion: Record<string, EfectoAccion> = {
     validar: (p, j) => (cartaObjetivo(p, j).colgadas.length ? null : no("cuerdaSinPrendas", "Esa carta de cuerda no tiene prendas.")),
     aplicar(p, j, params) {
       const h = numero(params, "humedad", 1);
-      // En digital, cada prenda de la cuerda se marca con su carta de mojar.
+      // Cada prenda baja su escala; ninguna pasa del tope de humedad.
       for (const { prenda } of cartaObjetivo(p, j).colgadas) mojarPrenda(p, prenda, h);
       anotar(p, "mojaCuerda", { jugador: j.objetivo!.jugador, h }, `Las prendas de esa cuerda de ${p.jugadores[j.objetivo!.jugador].nombre} ganan ${h} de humedad.`);
     },
@@ -65,15 +65,19 @@ export const efectosAccion: Record<string, EfectoAccion> = {
     aplicar: (p, j) => caer(p, j.objetivo!.prenda!),
   },
 
-  // parametros.humedad: cuánta humedad suma a la prenda.
+  // parametros.humedad: cuánta humedad suma a la prenda (sin pasar del tope).
   "retrasar-secado": {
     tipo: "accion",
     blanco: "prendaRival",
     etiquetas: ["fastidio", "moja"],
     aplicar(p, j, params) {
-      const h = numero(params, "humedad", 1);
-      mojarPrenda(p, j.objetivo!.prenda!, h);
-      anotar(p, "ganaHumedad", { prenda: refPrenda(p, j.objetivo!.prenda!), h }, `${nombrePrenda(p, j.objetivo!.prenda!)} gana ${h} de humedad.`);
+      const prenda = j.objetivo!.prenda!;
+      const h = mojarPrenda(p, prenda, numero(params, "humedad", 1));
+      if (h > 0) anotar(p, "ganaHumedad", { prenda: refPrenda(p, prenda), h }, `${nombrePrenda(p, prenda)} gana ${h} de humedad.`);
+      else {
+        const max = humedadMaxima(p);
+        anotar(p, "humedadAlTope", { prenda: refPrenda(p, prenda), max }, `${nombrePrenda(p, prenda)} ya tiene la humedad máxima (${max}): no gana más.`);
+      }
     },
   },
 

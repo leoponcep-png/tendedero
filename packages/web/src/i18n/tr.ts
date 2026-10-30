@@ -409,6 +409,8 @@ export const tr: Textos = {
     "dorso.objetivos": "Hedefler",
     "dorso.prendas": "Giysiler",
     "loseta.titulo": "İpler",
+    "loseta.humedad.nombre": "Nem",
+    "loseta.humedad.texto": "En fazla {n} damla.",
     "leyenda.basica.nombre": "Basit",
     "leyenda.basica.texto": "Yeteneği yok.",
     "leyenda.tejadillo.nombre": "Saçak",
@@ -612,7 +614,7 @@ export const tr: Textos = {
     "mesa.pilaAcciones": "Aksiyonlar · {n}",
     "mesa.mazoPrendas": "Giysi destesi: {n} kart",
     "mesa.pilaPrendas": "Giysiler · {n}",
-    "mesa.mojadas": "Islatan kartlardan {n} nem",
+    "mesa.humedadAlTope": "En fazla {n}!",
     "mesa.descarte": "Iskarta",
     "mesa.descarteVacio": "ıskarta",
 
@@ -691,6 +693,7 @@ export const tr: Textos = {
     "registro.mojaCuerda": "{jugador}: o ipteki giysiler {h} nem kazandı.",
     "registro.mojaCuerda.yo": "O ipindeki giysiler {h} nem kazandı.",
     "registro.ganaHumedad": "{prenda} {h} nem kazandı.",
+    "registro.humedadAlTope": "{prenda} zaten en yüksek nemde ({max}): daha fazla nem almaz.",
     "registro.cuerdasExtra#one": "Bu sıra {n} ip daha oynanabilir.",
     "registro.cuerdasExtra#other": "Bu sıra {n} ip daha oynanabilir.",
     "registro.pierdeHumedad": "{prenda} {h} nem kaybetti.",
@@ -989,7 +992,7 @@ export const tr: Textos = {
     "tutorial.calcetin.titulo": "Bir de çorap",
     "tutorial.calcetin.texto": "Bir çorabı boş kalan mandala sürükle.",
     "tutorial.humedad.titulo": "Damlalar",
-    "tutorial.humedad.texto": "Damlalar her giysinin nemidir. Günün sonunda, herkes sırasını oynayınca her giysi bir damla kaybeder. Hiç damlası kalmayınca kurur ve puanını verir: çorap {calcetin}, tişört {camiseta}, havlu {toalla}.",
+    "tutorial.humedad.texto": "Damlalar her giysinin nemidir. Günün sonunda, herkes sırasını oynayınca her giysi bir damla kaybeder. Hiç damlası kalmayınca kurur ve puanını verir: çorap {calcetin}, tişört {camiseta}, havlu {toalla}. Bir giysinin en fazla {max} damlası olur: fazlası boşa gider.",
     "tutorial.dia.titulo": "Gün kartı",
     "tutorial.dia.texto": "Havayı ya da her şeyi altüst eden bir olayı getirir. Bugün “{carta}” var: güneşte çamaşır kururken bir damla fazla kaybeder, yağmurda bir damla az.",
     "tutorial.loseta.titulo": "Özel ipler",
@@ -1020,10 +1023,10 @@ export const tr: Textos = {
 
   cartas: {
     // ---------- Acciones ----------
-    "mojar-cuerda-rival": { nombre: "Rakip ipi ıslat", texto: "Bir rakip ip kartındaki tüm giysilere +1 nem." },
+    "mojar-cuerda-rival": { nombre: "Rakip ipi ıslat", texto: "Bir rakip ip kartındaki tüm giysilere +1 nem (en fazla 4)." },
     "rafaga-de-viento": { nombre: "Ani rüzgâr", texto: "Rakibin bir giysisi düşer: başlangıç nemiyle asılacaklara döner." },
     "pinza-rota": { nombre: "Kırık mandal", texto: "Bir ipin yeteneğini iptal eder." },
-    "retrasar-secado": { nombre: "Kurumayı geciktir", texto: "Rakibin bir giysisine +1 nem." },
+    "retrasar-secado": { nombre: "Kurumayı geciktir", texto: "Rakibin bir giysisine +1 nem (en fazla 4)." },
     "mover-prenda-rival": { nombre: "Rakip giysiyi taşı", texto: "Rakibin bir giysisini, onun çamaşır ipinde başka boş bir yere taşı." },
     "colocar-cuerda-extra": { nombre: "Ekstra ip koy", texto: "Bu sıra 1 ip daha oynayabilirsin." },
     "secar-prenda": { nombre: "Anında kurut", texto: "Bir giysin hemen kurur ve puan getirir." },

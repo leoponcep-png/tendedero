@@ -152,7 +152,7 @@ function tipos(): Tipo[] {
       ilustracion: { x: 0, y: 0, w: 0, h: 0 },
       carta: (
         <div className="plantilla-prenda" style={{ position: "relative", width: MM.prenda.ancho * K, height: MM.prenda.alto * K, "--celda": `${(MM.prenda.ancho * K) / 1.45}px` } as CSSProperties}>
-          <CartaPrendaHumeda p={{ id: "plantilla", tipo: "camiseta", color: COLORES.rojo, humedad: 3 }} />
+          <CartaPrendaHumeda p={{ id: "plantilla", tipo: "camiseta", color: COLORES.rojo, humedad: 4 }} />
         </div>
       ),
     },

@@ -88,18 +88,28 @@ export function descolgar(u: Ubicacion): void {
   u.tendida.colgadas = u.tendida.colgadas.filter((c) => c !== u.colgada);
 }
 
-/** Suma humedad con cartas que mojan: va a extra (cartas junto a la prenda) y no a su escala. */
-export function mojarPrenda(p: Partida, prenda: string, h: number): void {
-  const pr = p.prendas[prenda];
-  pr.humedad += h;
-  pr.extra = (pr.extra ?? 0) + h;
+/** Tope de humedad si los ajustes no lo dicen (partidas guardadas de antes de existir el ajuste). */
+export const HUMEDAD_MAXIMA_POR_DEFECTO = 4;
+
+/** Humedad máxima que puede tener una prenda: las filas de gotas de su carta. */
+export function humedadMaxima(p: Partida): number {
+  return p.ajustes.humedadMaxima ?? HUMEDAD_MAXIMA_POR_DEFECTO;
 }
 
-/** Quita humedad: primero las cartas que mojan (extra) y después la escala. Devuelve si se ha quedado sin humedad. */
+/** Suma humedad a una prenda sin pasar del tope (lo que sobra se pierde). Devuelve cuánta ha ganado de verdad. */
+export function mojarPrenda(p: Partida, prenda: string, h: number): number {
+  const pr = p.prendas[prenda];
+  const antes = pr.humedad;
+  pr.humedad = Math.max(antes, Math.min(humedadMaxima(p), antes + h));
+  delete pr.extra;
+  return pr.humedad - antes;
+}
+
+/** Quita humedad. Devuelve si se ha quedado sin humedad. */
 export function quitarHumedad(p: Partida, prenda: string, h: number): boolean {
   const pr = p.prendas[prenda];
   pr.humedad = Math.max(0, pr.humedad - h);
-  pr.extra = Math.min(pr.humedad, Math.max(0, (pr.extra ?? 0) - h));
+  delete pr.extra;
   return pr.humedad === 0;
 }
 
@@ -108,8 +118,8 @@ export function caer(p: Partida, prenda: string): void {
   const u = localizar(p, prenda);
   if (!u) return;
   descolgar(u);
-  p.prendas[prenda].humedad = tipoDe(p, prenda).humedad;
-  p.prendas[prenda].extra = 0;
+  p.prendas[prenda].humedad = Math.min(humedadMaxima(p), tipoDe(p, prenda).humedad);
+  delete p.prendas[prenda].extra;
   p.jugadores[u.jugador].pendientes.push(prenda);
   anotar(p, "seCae", { prenda: refPrenda(p, prenda), jugador: u.jugador }, `${nombrePrenda(p, prenda)} se cae y vuelve a las prendas por tender de ${p.jugadores[u.jugador].nombre}.`);
 }

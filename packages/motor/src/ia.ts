@@ -14,7 +14,7 @@ import { puntuarObjetivo } from "./estado/final";
 import { rondasHastaRomperse } from "./estado/rotura";
 import { efectoDeCuerda } from "./estado/secado";
 import type { Partida } from "./estado/tipos";
-import { defCarta, tipoDe } from "./estado/utilidades";
+import { defCarta, humedadMaxima, tipoDe } from "./estado/utilidades";
 import { aplicarParaIA, esValida, motivoInvalida } from "./jugadas";
 import { efectoAccion, FALTA_DESTINO, pideDestino } from "./jugadas/jugarAccion";
 import { maxCuerdasRobadas } from "./jugadas/terminarTurno";
@@ -205,6 +205,17 @@ function destinosPosibles(p: Partida, jugador: number): { linea: number; posicio
   return lista;
 }
 
+/**
+ * Si mojar ese objetivo no cambia nada: la prenda (o todas las de la carta de cuerda) ya tiene la humedad máxima,
+ * y lo que se moja de más se pierde.
+ */
+export function mojaEnBalde(p: Partida, objetivo: ObjetivoAccion): boolean {
+  const max = humedadMaxima(p);
+  if (objetivo.prenda) return p.prendas[objetivo.prenda].humedad >= max;
+  const t = p.jugadores[objetivo.jugador]?.lineas[objetivo.linea]?.cartas[objetivo.posicion];
+  return !!t && t.colgadas.length > 0 && t.colgadas.every((c) => p.prendas[c.prenda].humedad >= max);
+}
+
 /** `unicas`: las prendas por tender iguales (tipo, color y humedad) se prueban una sola vez. */
 export function candidatas(p: Partida, i: number, unicas = false): Jugada[] {
   const j = p.jugadores[i];
@@ -228,6 +239,7 @@ export function candidatas(p: Partida, i: number, unicas = false): Jugada[] {
       continue;
     }
     for (const objetivo of objetivosPosibles(p)) {
+      if (efecto.etiquetas.includes("moja") && mojaEnBalde(p, objetivo)) continue;
       const base: Jugada = { tipo: "jugarAccion", jugador: i, carta, objetivo };
       if (!pideDestino(efecto.blanco)) {
         lista.push(base);
@@ -244,8 +256,8 @@ export function candidatas(p: Partida, i: number, unicas = false): Jugada[] {
   const vistas = new Set<string>();
   for (const prenda of j.pendientes) {
     if (unicas) {
-      const { tipo, color, humedad, extra } = p.prendas[prenda];
-      const clave = `${tipo}|${color}|${humedad}|${extra ?? 0}`;
+      const { tipo, color, humedad } = p.prendas[prenda];
+      const clave = `${tipo}|${color}|${humedad}`;
       if (vistas.has(clave)) continue;
       vistas.add(clave);
     }

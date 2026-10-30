@@ -416,6 +416,8 @@ export const ptBR: Textos = {
     "dorso.objetivos": "Objetivos",
     "dorso.prendas": "Peças",
     "loseta.titulo": "Cordas",
+    "loseta.humedad.nombre": "Umidade",
+    "loseta.humedad.texto": "No máximo {n} gotas.",
     "leyenda.basica.nombre": "Simples",
     "leyenda.basica.texto": "Sem habilidade.",
     "leyenda.tejadillo.nombre": "Telhadinho",
@@ -632,7 +634,7 @@ export const ptBR: Textos = {
     "mesa.pilaAcciones": "Ações · {n}",
     "mesa.mazoPrendas": "Baralho de peças: {n} cartas",
     "mesa.pilaPrendas": "Peças · {n}",
-    "mesa.mojadas": "{n} de umidade por cartas que molham",
+    "mesa.humedadAlTope": "Máx. {n}!",
     "mesa.descarte": "Descarte",
     "mesa.descarteVacio": "descarte",
 
@@ -711,6 +713,7 @@ export const ptBR: Textos = {
     "registro.mojaCuerda": "As peças dessa corda de {jugador} ganham {h} de umidade.",
     "registro.mojaCuerda.yo": "As peças dessa sua corda ganham {h} de umidade.",
     "registro.ganaHumedad": "{prenda} ganha {h} de umidade.",
+    "registro.humedadAlTope": "{prenda} já está com a umidade máxima ({max}): não ganha mais.",
     "registro.cuerdasExtra#one": "Nesta vez dá para jogar mais {n} corda.",
     "registro.cuerdasExtra#many": "Nesta vez dá para jogar mais {n} cordas.",
     "registro.cuerdasExtra#other": "Nesta vez dá para jogar mais {n} cordas.",
@@ -1021,7 +1024,7 @@ export const ptBR: Textos = {
     "tutorial.calcetin.titulo": "E uma meia",
     "tutorial.calcetin.texto": "Arraste uma meia para o prendedor que ainda está livre.",
     "tutorial.humedad.titulo": "As gotas",
-    "tutorial.humedad.texto": "As gotas são a umidade de cada peça. No fim do dia, quando todos jogaram a sua vez, cada peça perde uma gota. Quando fica sem nenhuma, ela seca e te dá os pontos: meia {calcetin}, camiseta {camiseta}, toalha {toalla}.",
+    "tutorial.humedad.texto": "As gotas são a umidade de cada peça. No fim do dia, quando todos jogaram a sua vez, cada peça perde uma gota. Quando fica sem nenhuma, ela seca e te dá os pontos: meia {calcetin}, camiseta {camiseta}, toalha {toalla}. Uma peça nunca tem mais de {max} gotas: o que passar disso se perde.",
     "tutorial.dia.titulo": "A carta do dia",
     "tutorial.dia.texto": "Ela traz o clima, ou algum evento que bagunça tudo. Hoje é “{carta}”: com sol, a roupa perde uma gota a mais ao secar; com chuva, uma a menos.",
     "tutorial.loseta.titulo": "Cordas especiais",
@@ -1052,10 +1055,10 @@ export const ptBR: Textos = {
 
   cartas: {
     // ---------- Acciones ----------
-    "mojar-cuerda-rival": { nombre: "Molhar corda rival", texto: "+1 de umidade em todas as peças de uma carta de corda rival." },
+    "mojar-cuerda-rival": { nombre: "Molhar corda rival", texto: "+1 de umidade em todas as peças de uma carta de corda rival (máximo 4)." },
     "rafaga-de-viento": { nombre: "Rajada de vento", texto: "Uma peça rival cai: volta para as peças para pendurar do dono com a umidade inicial." },
     "pinza-rota": { nombre: "Prendedor quebrado", texto: "Anula a habilidade de uma corda." },
-    "retrasar-secado": { nombre: "Atrasar secagem", texto: "+1 de umidade em uma peça rival." },
+    "retrasar-secado": { nombre: "Atrasar secagem", texto: "+1 de umidade em uma peça rival (máximo 4)." },
     "mover-prenda-rival": { nombre: "Mover peça rival", texto: "Move uma peça rival para outro espaço livre do mesmo varal." },
     "colocar-cuerda-extra": { nombre: "Corda extra", texto: "Nesta vez você pode jogar mais 1 corda." },
     "secar-prenda": { nombre: "Secar na hora", texto: "Uma peça sua seca agora e pontua." },

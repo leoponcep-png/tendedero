@@ -423,6 +423,8 @@ export const pl: Textos = {
     "dorso.objetivos": "Cele",
     "dorso.prendas": "Ubrania",
     "loseta.titulo": "Sznurki",
+    "loseta.humedad.nombre": "Wilgoć",
+    "loseta.humedad.texto": "Najwyżej {n} krople.",
     "leyenda.basica.nombre": "Zwykły",
     "leyenda.basica.texto": "Bez zdolności.",
     "leyenda.tejadillo.nombre": "Daszek",
@@ -653,7 +655,7 @@ export const pl: Textos = {
     "mesa.pilaAcciones": "Akcje · {n}",
     "mesa.mazoPrendas": "Talia ubrań – kart: {n}",
     "mesa.pilaPrendas": "Ubrania · {n}",
-    "mesa.mojadas": "{n} wilgoci od kart, które moczą",
+    "mesa.humedadAlTope": "Maks. {n}!",
     "mesa.descarte": "Stos odrzuconych",
     "mesa.descarteVacio": "odrzucone",
 
@@ -732,6 +734,7 @@ export const pl: Textos = {
     "registro.mojaCuerda": "Ubrania na tym sznurku ({jugador}) dostają +{h} wilgoci.",
     "registro.mojaCuerda.yo": "Ubrania na tym twoim sznurku dostają +{h} wilgoci.",
     "registro.ganaHumedad": "{prenda}: +{h} wilgoci.",
+    "registro.humedadAlTope": "{prenda} ma już maksymalną wilgoć ({max}): więcej nie przybywa.",
     "registro.cuerdasExtra#one": "W tej turze można zagrać {n} sznurek więcej.",
     "registro.cuerdasExtra#few": "W tej turze można zagrać {n} sznurki więcej.",
     "registro.cuerdasExtra#many": "W tej turze można zagrać {n} sznurków więcej.",
@@ -1054,7 +1057,7 @@ export const pl: Textos = {
     "tutorial.calcetin.titulo": "I skarpetkę",
     "tutorial.calcetin.texto": "Przeciągnij skarpetkę na spinacz, który został wolny.",
     "tutorial.humedad.titulo": "Krople",
-    "tutorial.humedad.texto": "Krople to wilgoć każdego ubrania. Na koniec dnia, gdy wszyscy rozegrali swoją turę, każde ubranie traci jedną kroplę. Gdy nie ma już żadnej, jest suche i daje punkty: skarpetka {calcetin}, koszulka {camiseta}, ręcznik {toalla}.",
+    "tutorial.humedad.texto": "Krople to wilgoć każdego ubrania. Na koniec dnia, gdy wszyscy rozegrali swoją turę, każde ubranie traci jedną kroplę. Gdy nie ma już żadnej, jest suche i daje punkty: skarpetka {calcetin}, koszulka {camiseta}, ręcznik {toalla}. Ubranie nigdy nie ma więcej niż {max} krople: nadmiar przepada.",
     "tutorial.dia.titulo": "Karta dnia",
     "tutorial.dia.texto": "Przynosi pogodę albo zdarzenie, które wszystko miesza. Dziś jest „{carta}”: przy słońcu pranie traci przy suszeniu jedną kroplę więcej, przy deszczu jedną mniej.",
     "tutorial.loseta.titulo": "Specjalne sznurki",
@@ -1085,10 +1088,10 @@ export const pl: Textos = {
 
   cartas: {
     // ---------- Acciones ----------
-    "mojar-cuerda-rival": { nombre: "Zmocz sznurek", texto: "+1 wilgoci dla wszystkich ubrań na karcie sznurka rywala." },
+    "mojar-cuerda-rival": { nombre: "Zmocz sznurek", texto: "+1 wilgoci dla wszystkich ubrań na karcie sznurka rywala (maks. 4)." },
     "rafaga-de-viento": { nombre: "Podmuch wiatru", texto: "Ubranie rywala spada: wraca do jego ubrań do powieszenia z początkową wilgocią." },
     "pinza-rota": { nombre: "Złamany spinacz", texto: "Wyłącza zdolność sznurka." },
-    "retrasar-secado": { nombre: "Opóźnij suszenie", texto: "+1 wilgoci dla ubrania rywala." },
+    "retrasar-secado": { nombre: "Opóźnij suszenie", texto: "+1 wilgoci dla ubrania rywala (maks. 4)." },
     "mover-prenda-rival": { nombre: "Przesuń ubranie rywala", texto: "Przesuń ubranie rywala na inne wolne miejsce na jego suszarce." },
     "colocar-cuerda-extra": { nombre: "Dodatkowy sznurek", texto: "W tej turze możesz zagrać 1 sznurek więcej." },
     "secar-prenda": { nombre: "Od razu suche", texto: "Twoje ubranie od razu schnie i punktuje." },

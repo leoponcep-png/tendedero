@@ -1,3 +1,4 @@
+import { HUMEDAD_MAXIMA_POR_DEFECTO } from "@tendedero/motor";
 import { useId, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
 import { tono } from "../arte/color";
 import { colorEstilo, COLOR, CREMA, GotaBosque, ICONOS_BOSQUE, IconoBosque, MiniPrenda, nombreColor, PinzaBosque, PrendaBosque, Soga, TINTA } from "./ArteBosque";
@@ -282,6 +283,16 @@ export function LosetaBosque({ lineas }: { lineas: number }) {
             </div>
           </div>
         ))}
+        {/* Recordatorio del tope de humedad: las filas de gotas de la carta de prenda */}
+        <div className="loseta-fila loseta-humedad">
+          <svg className="loseta-icono" viewBox="-8 -10 16 18" aria-hidden>
+            <GotaBosque />
+          </svg>
+          <div>
+            <b>{t("loseta.humedad.nombre")}</b>
+            <span>{t("loseta.humedad.texto", { n: HUMEDAD_MAXIMA_POR_DEFECTO })}</span>
+          </div>
+        </div>
       </div>
       <div className="loseta-poste" aria-hidden>
         {Array.from({ length: lineas }, (_, i) => (
@@ -434,34 +445,6 @@ function Medallon({ x, y, r, emblema }: { x: number; y: number; r: number; emble
   );
 }
 
-/**
- * Cartas de fastidio que mojan una prenda rival: su humedad se queda aparte, con la carta metida por debajo de la
- * prenda. Llevan en el pie un recuadro con la gota (lo único que asoma bajo la prenda).
- */
-export const CARTAS_MOJAN = new Set(["mojar-cuerda-rival", "retrasar-secado"]);
-
-/** Recuadro con la gota y el +1 del pie de las cartas que mojan, centrado en (x, y), en mm de la carta. */
-export function RecuadroGota({ x, y }: { x: number; y: number }) {
-  return (
-    <g className="recuadro-gota">
-      <rect x={x - 7.2} y={y - 2.45} width="14.4" height="4.9" rx="1.4" fill="#e6f3fb" stroke={TINTA} strokeWidth=".45" />
-      <rect x={x - 6.45} y={y - 1.75} width="12.9" height="3.5" rx=".9" fill="none" stroke="#8fc3e3" strokeWidth=".28" strokeDasharray=".9 .6" />
-      {/* La gota con un contorno fino propio: la de GotaBosque lleva un trazo fijo de 1,6 mm que aquí se saldría. */}
-      <path
-        transform={`translate(${x - 3} ${y + 0.25}) scale(.26)`}
-        d="M0 -7 C3 -2.5 5 0 5 2.4 A5 5 0 0 1 -5 2.4 C-5 0 -3 -2.5 0 -7Z"
-        fill="#6fb2dc"
-        stroke={TINTA}
-        strokeWidth={1.1} /* unos 0,3 mm una vez escalada */
-        strokeLinejoin="round"
-      />
-      <text x={x + 2.4} y={y + 1.35} textAnchor="middle" fontSize="3.7" fontWeight="800" fill="#1f5e86" style={{ fontFamily: "var(--fuente-titulo)" }}>
-        +1
-      </text>
-    </g>
-  );
-}
-
 /** Rombos del pie, a los lados del nombre del mazo. */
 function RombosPie({ xs, y }: { xs: number[]; y: number }) {
   return (
@@ -474,7 +457,7 @@ function RombosPie({ xs, y }: { xs: number[]; y: number }) {
 }
 
 /** Marco dibujado de una carta vertical, en su capa de fondo o de frente. */
-function MarcoVertical({ t, emblema, capa, moja = false }: { t: Tono; emblema: string; capa: Capa; moja?: boolean }) {
+function MarcoVertical({ t, emblema, capa }: { t: Tono; emblema: string; capa: Capa }) {
   const id = useId().replace(/:/g, "");
   const ventana = VENTANA[t];
   const objetivo = t === "objetivo";
@@ -487,8 +470,6 @@ function MarcoVertical({ t, emblema, capa, moja = false }: { t: Tono; emblema: s
         {objetivo ? <Medallon x={31.5} y={45.6} r={4.3} emblema={emblema} /> : <Medallon x={31.5} y={46.6} r={4.7} emblema={emblema} />}
         <Cinta t={t} />
         <RombosPie xs={[9, 54]} y={84.7} />
-        {/* Dentro del margen seguro de impresión (3 mm del borde de 88 mm) y sin pisar el texto: de 80,1 a 85 mm */}
-        {moja && <RecuadroGota x={31.5} y={82.55} />}
       </svg>
     );
   return (
@@ -539,16 +520,15 @@ export function CaraAccionBosque({ id }: { id: string }) {
   useIdioma();
   const def = ACCIONES[id];
   const grupo = def.grupo === "fastidio" ? "fastidio" : "tactica";
-  const moja = CARTAS_MOJAN.has(def.efecto);
   const nombre = textoCarta(id, "nombre", def.nombre);
   const texto = textoCarta(id, "texto", def.texto);
   return (
-    <div className={`cb cb-${grupo} ${moja ? "cb-moja" : ""}`} data-accion={id}>
+    <div className={`cb cb-${grupo}`} data-accion={id}>
       <MarcoVertical t={grupo} emblema={grupo} capa="fondo" />
       <div className="cb-ilustra">
         <IconoBosque id={def.efecto} className="cb-icono" />
       </div>
-      <MarcoVertical t={grupo} emblema={grupo} capa="frente" moja={moja} />
+      <MarcoVertical t={grupo} emblema={grupo} capa="frente" />
       <div className="cb-nombre" data-largo={largo(nombre, 14, 22)}>
         <span>{nombre}</span>
       </div>

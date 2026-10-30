@@ -2,15 +2,14 @@
 // cesta) y el destino (un hueco, una prenda, una cuerda), así que la carta vuela de uno a otro y luego se enseña
 // la partida nueva. Después se animan las consecuencias que solo se ven al aplicarla (puntos, cartas robadas).
 
-import { cumple, defCarta, efectoAccion, prendasDe, tipoDe, type Jugada, type Partida } from "@tendedero/motor";
+import { cumple, defCarta, efectoAccion, humedadMaxima, prendasDe, tipoDe, type Jugada, type Partida } from "@tendedero/motor";
 import { nombreVisible, t, t as tr, tLibre } from "../i18n";
 import { nombreCarta, nombreObjetivoId } from "../i18n/juego";
-import { CARTAS_MOJAN } from "../prototipos/CartasBosque";
 import * as fx from "../prototipos/efectos";
 import { reproducir } from "../audio";
 import type { Perfil } from "../prototipos/MenuPartida";
-import { MOJADAS_VISIBLES } from "./piezas";
-import { textoPatron } from "./vista";
+import { MAXIMO } from "../prototipos/HumedadTaller";
+import { humedadEscala, textoPatron } from "./vista";
 
 export interface Escena {
   raiz: HTMLElement;
@@ -110,10 +109,8 @@ export async function animarJugada(e: Escena, p: Partida, j: Jugada, despues: Pa
   } finally {
     fx.conPrisa(1);
   }
-  // El día se acaba con la jugada que cierra la ronda (terminar el turno o el último descarte): secado y recuento,
-  // con las cartas de mojar que se van dentro del secado.
+  // El día se acaba con la jugada que cierra la ronda (terminar el turno o el último descarte): secado y recuento.
   if (acabaElDia(p, despues)) await animarFinDia(e, p, despues);
-  else await irseMojadas(e, p, despues);
 }
 
 /** Si la jugada es tuya o va contra ti (un fastidio, una cuerda vieja, una respuesta a tu ataque). */
@@ -127,34 +124,6 @@ function teAfecta(e: Escena, j: Jugada): boolean {
 /** Si con esta jugada se acaba el día (o la partida): toca secar y puntuar. */
 export function acabaElDia(antes: Partida, despues: Partida): boolean {
   return despues.ronda !== antes.ronda || (despues.terminada && !antes.terminada);
-}
-
-/**
- * Las cartas de mojar que se quitan (al secarse, la humedad se lleva primero esas): se meten otra vez por debajo
- * de su prenda, la última primero, antes de enseñar la partida nueva.
- */
-async function irseMojadas(e: Escena, p: Partida, despues: Partida) {
-  const anims: Promise<unknown>[] = [];
-  for (const [id, pr] of Object.entries(p.prendas)) {
-    const antes = Math.min(pr.extra ?? 0, pr.humedad);
-    const ahora = Math.min(despues.prendas[id]?.extra ?? 0, despues.prendas[id]?.humedad ?? 0);
-    if (ahora >= antes) continue;
-    const cartas = [...e.raiz.querySelectorAll<HTMLElement>(`[data-mojadas="${id}"] .mj-moja`)].slice(Math.min(ahora, MOJADAS_VISIBLES));
-    cartas.reverse().forEach((c, i) => {
-      const k = Number(c.dataset.k ?? 0);
-      // Cada carta asoma media altura por cada una que tiene encima: sube eso para volver a esconderse.
-      const subir = (c.offsetHeight / 2) * (k + 1);
-      anims.push(
-        fx.animar(c, [{ translate: "0 0", opacity: 1 }, { translate: `0 ${-subir}px`, opacity: 1, offset: 0.85 }, { translate: `0 ${-subir}px`, opacity: 0 }], {
-          duration: 520,
-          delay: i * 120,
-          fill: "forwards",
-          easing: "cubic-bezier(.5,0,.6,1)",
-        }).finished,
-      );
-    });
-  }
-  await Promise.all(anims);
 }
 
 async function animarSegunTipo(e: Escena, p: Partida, j: Jugada, despues: Partida): Promise<void> {
@@ -286,9 +255,9 @@ async function animarColgar(e: Escena, p: Partida, j: Extract<Jugada, { tipo: "c
     const s = fx.escalaDe(tendida);
     const est = getComputedStyle(tendida);
     const celda = parseFloat(est.getPropertyValue("--celda"));
-    const filas = parseFloat(est.getPropertyValue("--filas")) || 3;
-    const h = p.prendas[j.prenda].humedad - Math.min(p.prendas[j.prenda].extra ?? 0, p.prendas[j.prenda].humedad);
-    const arriba = tendida.offsetHeight - (filas - h) * celda * 0.24;
+    const filas = parseFloat(est.getPropertyValue("--filas")) || MAXIMO;
+    const paso = parseFloat(est.getPropertyValue("--paso")) || celda * 0.2;
+    const arriba = tendida.offsetHeight - (filas - humedadEscala(p, j.prenda)) * paso;
     const y = Number.isFinite(celda) ? carta.top + s * (arriba + origen.offsetHeight / 2) : carta.bottom + origen.offsetHeight * 0.25;
     await fx.volar(clon, { x: (izq + der) / 2, y }, { arco: 110, escala: s, giro: 0, duracion: 650 });
     reproducir("pinza");
@@ -329,11 +298,14 @@ async function efectoSobre(e: Escena, p: Partida, j: Extract<Jugada, { tipo: "ju
     case "retrasar-secado": {
       const quitar = fx.nube(zona);
       await fx.esperar(650);
-      const prendas = o.prenda ? [objetivo] : [...objetivo.parentElement!.querySelectorAll<HTMLElement>("[data-prenda]")];
-      await Promise.all(prendas.map((pr, i) => fx.esperar(i * 120).then(() => (reproducir("gota"), fx.gotaNueva(pr)))));
+      const prendas = o.prenda ? [objetivo] : [...objetivo.querySelectorAll<HTMLElement>("[data-prenda]")];
+      // Las que ya tienen la humedad máxima no ganan nada (lo que se moja de más se pierde).
+      const max = humedadMaxima(p);
+      const alTope = (pr: HTMLElement) => (p.prendas[pr.dataset.prenda ?? ""]?.humedad ?? 0) >= max;
+      await Promise.all(prendas.map((pr, i) => (alTope(pr) ? Promise.resolve() : fx.esperar(i * 120).then(() => (reproducir("gota"), fx.gotaNueva(pr))))));
       prendas.forEach((pr) => {
         const r = pr.getBoundingClientRect();
-        fx.cartelito({ x: r.left + r.width / 2, y: r.top + r.height / 2 }, "+1", "agua");
+        fx.cartelito({ x: r.left + r.width / 2, y: r.top + r.height / 2 }, alTope(pr) ? t("mesa.humedadAlTope", { n: max }) : "+1", "agua");
       });
       await fx.esperar(350);
       await quitar();
@@ -355,27 +327,11 @@ async function efectoSobre(e: Escena, p: Partida, j: Extract<Jugada, { tipo: "ju
   }
 }
 
-/** Si la carta moja prendas (su humedad se queda aparte, como cartas por debajo de la prenda). */
-function mojaPrendas(p: Partida, carta: string): boolean {
-  return CARTAS_MOJAN.has(defCarta(p, carta)?.efecto ?? "");
-}
-
-/**
- * La carta que moja baja hasta el pie de su prenda (o de la primera de la cuerda), se encoge a su ancho y se
- * desvanece como si se metiera por debajo; al enseñar la partida nueva asoma su recuadro con la gota.
- */
-async function meterBajo(e: Escena, clon: HTMLElement, ancho: number, j: Extract<Jugada, { tipo: "jugarAccion" }>) {
-  const o = j.objetivo!;
-  const prenda = o.prenda
-    ? buscar(e, `[data-prenda="${o.prenda}"]`)
-    : buscar(e, `[data-tendida="${o.jugador}:${o.linea}:${o.posicion}"] [data-prenda]`);
-  if (!prenda) return alDescarte(e, clon, ancho);
-  const r = prenda.getBoundingClientRect();
-  const escala = (r.width * 0.9) / ancho;
-  const alto = clon.offsetHeight * escala;
-  await fx.volar(clon, { x: r.left + r.width / 2, y: r.bottom - alto / 2 }, { arco: 30, escala, giro: 0, duracion: 450 });
-  await fx.animar(clon, [{ opacity: 1, clipPath: "inset(0 0 0 0)" }, { opacity: 0.2, clipPath: "inset(0 0 100% 0)" }], { duration: 260, easing: "ease-in", fill: "forwards" }).finished;
-  clon.remove();
+/** Sonido de cada fastidio: las cartas que mojan suenan a lluvia y la de viento a ráfaga. */
+function sonidoFastidio(id: string | undefined): string {
+  if (id === "mojar-cuerda-rival" || id === "retrasar-secado") return "chaparron";
+  if (id === "rafaga-de-viento") return "rafaga";
+  return "fastidio";
 }
 
 async function animarAccion(e: Escena, p: Partida, j: Extract<Jugada, { tipo: "jugarAccion" }>, despues: Partida) {
@@ -384,7 +340,7 @@ async function animarAccion(e: Escena, p: Partida, j: Extract<Jugada, { tipo: "j
   const volver = o ? await e.mirar(o.jugador) : async () => {};
   const detalle = !o || o.jugador === j.jugador ? `${nombre(e, j.jugador)} · ${t(j.jugador === e.yo ? "anuncio.enTuTendedero" : "anuncio.enSuTendedero")}` : `${nombre(e, j.jugador)}  ➜  ${nombre(e, o.jugador)}`;
   fx.anunciar(nombreCarta(p, j.carta), o ? detalle : nombre(e, j.jugador), fastidio ? "fastidio" : "tactica");
-  if (fastidio) reproducir("fastidio");
+  if (fastidio) reproducir(sonidoFastidio(p.cartas[j.carta]));
   const c = await cartaJugada(e, j.jugador, j.carta);
   const destino = o
     ? (o.prenda ? rectDe(e, `[data-prenda="${o.prenda}"]`) : null) ?? rectDe(e, `[data-tendida="${o.jugador}:${o.linea}:${o.posicion}"]`)
@@ -405,9 +361,8 @@ async function animarAccion(e: Escena, p: Partida, j: Extract<Jugada, { tipo: "j
     if (!despues.reaccion) await efectoSobre(e, p, j);
     else await fx.esperar(500);
     quitarEstela();
-    // Las cartas que mojan se quedan debajo de la prenda (asoma su gota); las demás van al descarte.
-    if (!despues.reaccion && mojaPrendas(p, j.carta)) await meterBajo(e, c.clon, c.ancho, j);
-    else await alDescarte(e, c.clon, c.ancho);
+    // Todas van al descarte; las que mojan dejan la prenda una fila más baja (una gota más asomando).
+    await alDescarte(e, c.clon, c.ancho);
   } else c?.clon.remove();
   volverDespues(volver);
 }
@@ -509,7 +464,6 @@ async function animarFinDia(e: Escena, p: Partida, despues: Partida) {
   // Se acaba el día: la ropa pierde humedad y, prenda a prenda, la que se seca da sus puntos y vuela a las secas.
   fx.anunciar(despues.terminada ? t("anuncio.finPartida") : t("anuncio.seAcabaDia"), t("anuncio.seSeca"), despues.terminada ? "fastidio" : "tactica");
   await fx.esperar(500);
-  await irseMojadas(e, p, despues);
   const visibles = [...e.raiz.querySelectorAll<HTMLElement>("[data-prenda]")];
   await Promise.all(visibles.map((el, i) => fx.esperar(i * 40).then(() => fx.evaporar(el, 1))));
   const secado = puntosDelSecado(p, despues);
