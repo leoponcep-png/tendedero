@@ -8,7 +8,7 @@ import { guardarSala, leerSala, nuevaSala } from "../online/anfitrion";
 import { nuevoCodigo } from "../online/protocolo";
 import { entrarConNombre, SalaAnfitrion, SalaInvitado, type SalaNueva } from "../pantallas/SalaOnline";
 import { DefsBosque } from "./ArteBosque";
-import { leerConfig, MenuPartida, modoDe, type ConfigPartida, type Pestana } from "./MenuPartida";
+import { leerConfig, MenuPartida, modoDe, type ConfigPartida } from "./MenuPartida";
 import { leerNombreOnline, MenuOnline } from "./MenuOnline";
 import { CabeceraMenu, FondoTendedero, PantallaTitulo, type DestinoPortada } from "./PortadaJuego";
 import { VentanaAjustes } from "./VentanaAjustes";
@@ -178,14 +178,13 @@ export function MesaFinal({ datos, ruta = [] }: { onVersion?: (v: string) => voi
   }
 
   if (que === "jugar" || que === "perfil") {
-    const pestana: Pestana = que === "perfil" ? "perfil" : "partida";
     return envolver(
       <div className="pt-pantalla pt-sub">
         <FondoTendedero />
         <CabeceraMenu titulo={que === "perfil" ? t("portada.perfil") : t("portada.jugar")} onVolver={aPortada} onAjustes={abrirAjustes} />
         <div className="pt-sub-contenido">
           <MenuPartida
-            pestanaInicial={pestana}
+            vista={que === "perfil" ? "perfil" : "jugar"}
             onAprender={() => ir(`${RUTA}/aprender`)}
             onEmpezar={setConfig}
             onAbrirSala={(cod) => {

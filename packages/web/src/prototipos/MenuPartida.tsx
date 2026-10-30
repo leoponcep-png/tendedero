@@ -131,23 +131,26 @@ const PESTANAS: { id: Pestana; nombre: Clave; icono: Icono }[] = [
 ];
 
 /**
+ * `vista`: «jugar» enseña solo cómo será la partida y el botón de empezar; «perfil», solo el perfil, los récords,
+ * los logros y los amigos (cada cosa en su pantalla de la portada, para no mezclarlas).
  * `onAbrirSala` (opcional): si se pasa, las invitaciones de la pestaña Amigos muestran «Abrir la sala» con el
- * código creado. `pestanaInicial`: con qué pestaña se abre (desde la portada, «Perfil y logros» abre el perfil).
+ * código creado.
  */
 export function MenuPartida({
   onEmpezar,
   onAbrirSala,
   onAprender,
-  pestanaInicial = "partida",
+  vista = "jugar",
 }: {
   onEmpezar: (c: ConfigPartida) => void;
   onAbrirSala?: (codigo: string) => void;
   /** Abre la partida tutorial «Aprender a jugar» (sin ella, no sale el botón). */
   onAprender?: () => void;
-  pestanaInicial?: Pestana;
+  vista?: "jugar" | "perfil";
 }) {
   const t = useT();
-  const [pestana, setPestana] = useState<Pestana>(pestanaInicial);
+  const jugar = vista === "jugar";
+  const [pestana, setPestana] = useState<Pestana>(jugar ? "partida" : "perfil");
   // Al abrir el menú se ponen al día los logros con las partidas guardadas (los nuevos salen en el aviso).
   const [partidas, setPartidas] = useState(() => {
     const lista = leerPartidas();
@@ -205,29 +208,30 @@ export function MenuPartida({
       <aside className="menu-tarjeta mp-ficha">
         <MuestraTapete className="mp-tapete-grande" animal={yo.animal} color={yo.color} tapete={yo.tapete} marco={yo.marco} titulo={yo.titulo} nombre={nombreVisible(yo.nombre.trim()) || t("menu.tu")} />
         <p className="mp-ficha-detalle">{t("menu.fichaDetalle", { animal: nombreAnimal(yo.animal), color: nombreColor(yo.color), tapete: nombreTapete(yo.tapete) })}</p>
-        <button className="mp-ficha-editar" onClick={() => setPestana("perfil")}>
-          {t("menu.cambiarPersonaje")}
-        </button>
-        <div className="mp-ficha-cifras">
-          <button onClick={() => setPestana("records")}>
-            <strong>{estadisticas.partidas}</strong>
-            <span>{t("menu.cifraPartidas", { n: estadisticas.partidas })}</span>
+        {!jugar && (
+          <div className="mp-ficha-cifras">
+            <button onClick={() => setPestana("records")}>
+              <strong>{estadisticas.partidas}</strong>
+              <span>{t("menu.cifraPartidas", { n: estadisticas.partidas })}</span>
+            </button>
+            <button onClick={() => setPestana("records")}>
+              <strong>{estadisticas.ganadas}</strong>
+              <span>{t("menu.cifraGanadas", { n: estadisticas.ganadas })}</span>
+            </button>
+            <button onClick={() => setPestana("logros")}>
+              <strong>
+                {conseguidos}/{estados.length}
+              </strong>
+              <span>{t("menu.cifraLogros")}</span>
+            </button>
+          </div>
+        )}
+        {jugar && (
+          <button className="principal menu-empezar" onClick={empezar}>
+            {t("menu.empezar")}
           </button>
-          <button onClick={() => setPestana("records")}>
-            <strong>{estadisticas.ganadas}</strong>
-            <span>{t("menu.cifraGanadas", { n: estadisticas.ganadas })}</span>
-          </button>
-          <button onClick={() => setPestana("logros")}>
-            <strong>
-              {conseguidos}/{estados.length}
-            </strong>
-            <span>{t("menu.cifraLogros")}</span>
-          </button>
-        </div>
-        <button className="principal menu-empezar" onClick={empezar}>
-          {t("menu.empezar")}
-        </button>
-        {onAprender && (
+        )}
+        {jugar && onAprender && (
           <button className="menu-aprender" onClick={onAprender}>
             {t("portada.aprender")}
           </button>
@@ -235,15 +239,17 @@ export function MenuPartida({
       </aside>
 
       <section className="menu-tarjeta mp-contenido">
-        <nav className="mp-pestanas" role="tablist">
-          {PESTANAS.map((p) => (
-            <button key={p.id} role="tab" aria-selected={pestana === p.id} className={pestana === p.id ? "activa" : ""} onClick={() => setPestana(p.id)}>
-              <IconoPerfil icono={p.icono} />
-              <span>{t(p.nombre)}</span>
-              {p.id === "logros" && <small className="mp-pestana-num">{conseguidos}</small>}
-            </button>
-          ))}
-        </nav>
+        {!jugar && (
+          <nav className="mp-pestanas" role="tablist">
+            {PESTANAS.filter((p) => p.id !== "partida").map((p) => (
+              <button key={p.id} role="tab" aria-selected={pestana === p.id} className={pestana === p.id ? "activa" : ""} onClick={() => setPestana(p.id)}>
+                <IconoPerfil icono={p.icono} />
+                <span>{t(p.nombre)}</span>
+                {p.id === "logros" && <small className="mp-pestana-num">{conseguidos}</small>}
+              </button>
+            ))}
+          </nav>
+        )}
 
         <div className="mp-panel" role="tabpanel">
           {pestana === "partida" && (
