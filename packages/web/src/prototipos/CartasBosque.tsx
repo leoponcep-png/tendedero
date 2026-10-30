@@ -444,10 +444,18 @@ export const CARTAS_MOJAN = new Set(["mojar-cuerda-rival", "retrasar-secado"]);
 export function RecuadroGota({ x, y }: { x: number; y: number }) {
   return (
     <g className="recuadro-gota">
-      <rect x={x - 8} y={y - 3.7} width="16" height="7.4" rx="1.8" fill="#e6f3fb" stroke={TINTA} strokeWidth=".55" />
-      <rect x={x - 7.1} y={y - 2.8} width="14.2" height="5.6" rx="1.2" fill="none" stroke="#8fc3e3" strokeWidth=".35" strokeDasharray=".9 .6" />
-      <GotaBosque x={x - 3.4} y={y + 0.3} r={0.5} />
-      <text x={x + 2.6} y={y + 1.7} textAnchor="middle" fontSize="4.6" fontWeight="800" fill="#1f5e86" style={{ fontFamily: "var(--fuente-titulo)" }}>
+      <rect x={x - 7.2} y={y - 2.45} width="14.4" height="4.9" rx="1.4" fill="#e6f3fb" stroke={TINTA} strokeWidth=".45" />
+      <rect x={x - 6.45} y={y - 1.75} width="12.9" height="3.5" rx=".9" fill="none" stroke="#8fc3e3" strokeWidth=".28" strokeDasharray=".9 .6" />
+      {/* La gota con un contorno fino propio: la de GotaBosque lleva un trazo fijo de 1,6 mm que aquí se saldría. */}
+      <path
+        transform={`translate(${x - 3} ${y + 0.25}) scale(.26)`}
+        d="M0 -7 C3 -2.5 5 0 5 2.4 A5 5 0 0 1 -5 2.4 C-5 0 -3 -2.5 0 -7Z"
+        fill="#6fb2dc"
+        stroke={TINTA}
+        strokeWidth={1.1} /* unos 0,3 mm una vez escalada */
+        strokeLinejoin="round"
+      />
+      <text x={x + 2.4} y={y + 1.35} textAnchor="middle" fontSize="3.7" fontWeight="800" fill="#1f5e86" style={{ fontFamily: "var(--fuente-titulo)" }}>
         +1
       </text>
     </g>
@@ -479,7 +487,8 @@ function MarcoVertical({ t, emblema, capa, moja = false }: { t: Tono; emblema: s
         {objetivo ? <Medallon x={31.5} y={45.6} r={4.3} emblema={emblema} /> : <Medallon x={31.5} y={46.6} r={4.7} emblema={emblema} />}
         <Cinta t={t} />
         <RombosPie xs={[9, 54]} y={84.7} />
-        {moja && <RecuadroGota x={31.5} y={84.1} />}
+        {/* Dentro del margen seguro de impresión (3 mm del borde de 88 mm) y sin pisar el texto: de 80,1 a 85 mm */}
+        {moja && <RecuadroGota x={31.5} y={82.55} />}
       </svg>
     );
   return (
