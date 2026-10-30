@@ -1469,3 +1469,9 @@
 .clon.dia-en-grande .mj-dia-quedan {
   display: none;
 }
+/* La carta de cuerda de un rival se copia desde la muestra oculta: con su proporción de carta apaisada (88 × 63),
+   igual que en la mano, para que vuele sin deformarse */
+.mj-muestra .mb-cuerda-mano {
+  width: calc(var(--carta-w) * 1.4);
+  height: var(--carta-w);
+}

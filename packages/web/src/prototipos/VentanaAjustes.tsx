@@ -3,6 +3,7 @@ import { cambiarVolumen, LISTA_EFECTOS, reproducir, silenciar, useAudio, type Ca
 import { useT } from "../i18n";
 import { SelectorIdioma } from "../i18n/react";
 import { esEscritorio, ponerPantallaCompleta, usePantallaCompleta } from "../escritorio";
+import { CLAVE_VELOCIDAD, leerVelocidad, type Velocidad } from "./efectos";
 
 // Ventana de ajustes del juego: idioma, sonido, pantalla completa y las opciones de la mesa (las mismas que
 // el menú de opciones de la partida, guardadas con las mismas claves para que la mesa las lea al abrirse).
@@ -21,6 +22,9 @@ function guardar(clave: string, valor: string) {
     // Sin almacenamiento solo se pierde la preferencia al recargar.
   }
 }
+
+/** «Velocidad de las animaciones»: multiplica todas las duraciones y pausas de la mesa (prototipos/efectos.ts). */
+const VELOCIDADES: Velocidad[] = ["rapida", "normal", "lenta"];
 
 /** Los mismos tamaños que el menú de opciones de la mesa (juego/MesaJuego.tsx). */
 const TAMANOS = [0.9, 1, 1.15, 1.3];
@@ -78,6 +82,7 @@ export function VentanaAjustes({ onCerrar }: { onCerrar: () => void }) {
   const audio = useAudio();
   const completa = usePantallaCompleta();
   const [tamano, setTamano] = useState(() => Number(leer("tendedero-tamano", "1")) || 1);
+  const [velocidad, setVelocidad] = useState<Velocidad>(leerVelocidad);
 
   useEffect(() => {
     const tecla = (e: KeyboardEvent) => e.key === "Escape" && onCerrar();
@@ -155,6 +160,24 @@ export function VentanaAjustes({ onCerrar }: { onCerrar: () => void }) {
           <section className="aj-grupo">
             <h3>{t("ajustes.mesa")}</h3>
             <Interruptor clave="tendedero-animaciones" texto={t("mesa.opAnimaciones")} />
+            <div className="aj-fila">
+              <span>{t("ajustes.velocidad")}</span>
+              <div className="aj-opciones" role="group" aria-label={t("ajustes.velocidad")}>
+                {VELOCIDADES.map((v) => (
+                  <button
+                    key={v}
+                    className={v === velocidad ? "activa" : ""}
+                    aria-pressed={v === velocidad}
+                    onClick={() => {
+                      setVelocidad(v);
+                      guardar(CLAVE_VELOCIDAD, v);
+                    }}
+                  >
+                    {t(`ajustes.velocidad.${v}`)}
+                  </button>
+                ))}
+              </div>
+            </div>
             <Interruptor clave="tendedero-seguir" texto={t("mesa.opVerJugadas")} />
             <Interruptor clave="tendedero-lupa" texto={t("mesa.opLupa")} />
           </section>

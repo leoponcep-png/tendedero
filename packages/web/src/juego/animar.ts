@@ -103,11 +103,25 @@ function nombre(e: Escena, j: number) {
 
 export async function animarJugada(e: Escena, p: Partida, j: Jugada, despues: Partida): Promise<void> {
   if (rapido(e)) return;
-  await animarSegunTipo(e, p, j, despues);
+  // Lo que hacen los rivales entre ellos va aún más deprisa; lo que te toca a ti, a su ritmo.
+  fx.conPrisa(teAfecta(e, j) ? 1 : 0.75);
+  try {
+    await animarSegunTipo(e, p, j, despues);
+  } finally {
+    fx.conPrisa(1);
+  }
   // El día se acaba con la jugada que cierra la ronda (terminar el turno o el último descarte): secado y recuento,
   // con las cartas de mojar que se van dentro del secado.
   if (acabaElDia(p, despues)) await animarFinDia(e, p, despues);
   else await irseMojadas(e, p, despues);
+}
+
+/** Si la jugada es tuya o va contra ti (un fastidio, una cuerda vieja, una respuesta a tu ataque). */
+function teAfecta(e: Escena, j: Jugada): boolean {
+  if (j.jugador === e.yo) return true;
+  if (j.tipo === "jugarAccion") return j.objetivo?.jugador === e.yo;
+  if (j.tipo === "colocarCuerda") return j.en === e.yo;
+  return j.tipo === "responder";
 }
 
 /** Si con esta jugada se acaba el día (o la partida): toca secar y puntuar. */
@@ -131,7 +145,7 @@ async function irseMojadas(e: Escena, p: Partida, despues: Partida) {
       // Cada carta asoma media altura por cada una que tiene encima: sube eso para volver a esconderse.
       const subir = (c.offsetHeight / 2) * (k + 1);
       anims.push(
-        c.animate([{ translate: "0 0", opacity: 1 }, { translate: `0 ${-subir}px`, opacity: 1, offset: 0.85 }, { translate: `0 ${-subir}px`, opacity: 0 }], {
+        fx.animar(c, [{ translate: "0 0", opacity: 1 }, { translate: `0 ${-subir}px`, opacity: 1, offset: 0.85 }, { translate: `0 ${-subir}px`, opacity: 0 }], {
           duration: 520,
           delay: i * 120,
           fill: "forwards",
@@ -360,7 +374,7 @@ async function meterBajo(e: Escena, clon: HTMLElement, ancho: number, j: Extract
   const escala = (r.width * 0.9) / ancho;
   const alto = clon.offsetHeight * escala;
   await fx.volar(clon, { x: r.left + r.width / 2, y: r.bottom - alto / 2 }, { arco: 30, escala, giro: 0, duracion: 450 });
-  await clon.animate([{ opacity: 1, clipPath: "inset(0 0 0 0)" }, { opacity: 0.2, clipPath: "inset(0 0 100% 0)" }], { duration: 260, easing: "ease-in", fill: "forwards" }).finished;
+  await fx.animar(clon, [{ opacity: 1, clipPath: "inset(0 0 0 0)" }, { opacity: 0.2, clipPath: "inset(0 0 100% 0)" }], { duration: 260, easing: "ease-in", fill: "forwards" }).finished;
   clon.remove();
 }
 
@@ -541,7 +555,7 @@ async function animarFinDia(e: Escena, p: Partida, despues: Partida) {
         const el = buscar(e, `[data-tendida="${k}:${li}:${pos}"]`);
         if (!el) return;
         fx.anunciar(tr("anuncio.seRompe"), k === e.yo ? tr("anuncio.cuerdaDe.yo", { carta: nombreCarta(p, t.carta) }) : tr("anuncio.cuerdaDe", { carta: nombreCarta(p, t.carta), jugador: nombre(e, k) }), "fastidio");
-        void fx.temblar(el, 10).then(() => el.animate([{ translate: "0 0", opacity: 1 }, { translate: "0 60px", opacity: 0 }], { duration: 500, fill: "forwards" }));
+        void fx.temblar(el, 10).then(() => fx.animar(el, [{ translate: "0 0", opacity: 1 }, { translate: "0 60px", opacity: 0 }], { duration: 500, fill: "forwards" }));
       }),
     );
   }
@@ -612,7 +626,7 @@ async function nuevoDia(e: Escena, p: Partida) {
     const titulo = fx.leyenda(t("anuncio.cartaDelDia"), nombreCarta(p, p.dia!));
     await fx.volar(clon, { x: innerWidth / 2, y: innerHeight * 0.46 }, { arco: 80, escala: ancho / el.offsetWidth, giro: 0, duracion: 750 });
     await fx.golpe(clon);
-    await fx.esperar(1700);
+    await fx.esperar(2200);
     titulo();
     void quitarVelo();
     await fx.volar(clon, fx.centro(r), { arco: 60, escala: fx.escalaDe(el), giro: 0, duracion: 650 });

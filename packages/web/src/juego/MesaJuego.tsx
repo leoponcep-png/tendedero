@@ -366,7 +366,7 @@ export function MesaJuego({ partida, ultima, perfiles, miAsiento: yo, modo, onJu
   async function aTiempo(animacion: Promise<void>, limite = 9000) {
     let tarde = false;
     try {
-      await Promise.race([animacion, fx.esperar(limite).then(() => void (tarde = true))]);
+      await Promise.race([animacion, new Promise<void>((r) => setTimeout(r, limite)).then(() => void (tarde = true))]);
     } catch (err) {
       console.error(err);
       tarde = true;

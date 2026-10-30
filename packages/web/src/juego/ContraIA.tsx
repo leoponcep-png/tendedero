@@ -4,6 +4,7 @@
 import { ajustesIniciales, aplicar, cestasPorDefecto, crearPartida, siguienteJugadaIA, vistaPara, type Datos, type Dificultad, type Jugada, type ModoJuego, type Partida } from "@tendedero/motor";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { t } from "../i18n";
+import { ritmo } from "../prototipos/efectos";
 import type { Perfil } from "../prototipos/MenuPartida";
 import { MesaJuego } from "./MesaJuego";
 
@@ -69,9 +70,11 @@ function quienJuegaIA(p: Partida): number | null {
 
 /** Pausa antes de cada jugada de la IA, para que se pueda seguir lo que hace. */
 function pausa(p: Partida): number {
-  if (p.reaccion) return 900;
-  if (p.turno.fase === "cesta" || p.turno.fase === "centro") return 650;
-  return 800;
+  // Cortas, y al ritmo de «Velocidad de las animaciones» (en normal: unos 0,5 s, 0,35 s y 0,4 s).
+  const k = ritmo();
+  if (p.reaccion) return 800 * k;
+  if (p.turno.fase === "cesta" || p.turno.fase === "centro") return 600 * k;
+  return 700 * k;
 }
 
 /** `dificultad`: nivel de la IA de los rivales (sin ella, «normal»). `modo`: modo de juego (sin él, «normal»). */
