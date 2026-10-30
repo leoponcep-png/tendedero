@@ -30,6 +30,8 @@ export type Efecto =
   | "punto"
   | "gota"
   | "fastidio"
+  | "chaparron"
+  | "rafaga"
   | "niHablar"
   | "turno"
   | "ultimaRonda"
@@ -132,6 +134,9 @@ const EFECTOS: Record<string, { archivo: string; volumen: number; variar?: boole
   punto: { archivo: "punto", volumen: 0.35, variar: true },
   gota: { archivo: "gota", volumen: 0.8, variar: true },
   fastidio: { archivo: "fastidio", volumen: 0.6 },
+  // Fastidios con su propio sonido: un chaparrón corto si moja y una ráfaga si es viento.
+  chaparron: { archivo: "chaparron", volumen: 0.55 },
+  rafaga: { archivo: "rafaga", volumen: 0.5 },
   niHablar: { archivo: "ni-hablar", volumen: 0.8 },
   turno: { archivo: "turno", volumen: 0.5 },
   ultimaRonda: { archivo: "ultima-ronda", volumen: 0.6 },

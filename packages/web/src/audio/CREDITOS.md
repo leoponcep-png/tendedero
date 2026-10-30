@@ -46,3 +46,4 @@ recortado 3 s; en los tres, el final se funde con el principio para que empalmen
 Los packs de Kenney traen su `License.txt` (CC0); las páginas de OpenGameArt de los demás indican «License(s): CC0».
 
 Retoques (2026-10-31): secar, punto, logro, ultima-ronda y turno llevan un filtro de paso bajo (2,2 kHz) y algo menos de volumen para que suenen menos estridentes.
+chaparron y rafaga (2026-10-31): recortes cortos de ambiente-lluvia y ambiente-viento, con fundidos (mismos autores y licencia CC0).
