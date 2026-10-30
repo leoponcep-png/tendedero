@@ -3,7 +3,8 @@ import { createRoot, type Root } from "react-dom/client";
 import { tLibre, useT } from "../i18n";
 import { SelectorIdioma } from "../i18n/react";
 import { DefsBosque } from "./ArteBosque";
-import { CaraAccionBosque, CartaCuerdaBosque, CartaDiaBosque, CartaPrendaBosque, CartaObjetivoBosque, CATALOGO_CARTAS, DorsoBosque, LosetaBosque } from "./CartasBosque";
+import { CaraAccionBosque, CartaCuerdaBosque, CartaDiaBosque, CartaObjetivoBosque, CATALOGO_CARTAS, DorsoBosque, LosetaBosque } from "./CartasBosque";
+import { CartaPrendaHumeda } from "./HumedadTaller";
 import { MM } from "./medidas";
 import { ESTILOS } from "./MesaBosque";
 import { ACCIONES, CUERDAS } from "./Prototipos";
@@ -223,11 +224,12 @@ function Galeria() {
       <Seccion titulo={t("galeria.prendas")}>
         {(["calcetin", "camiseta", "toalla"] as const).flatMap((tipo) =>
           PINZAS.map((color) => (
-            <CartaPrendaBosque
-              key={`${tipo}-${color}`}
-              p={{ id: `${tipo}-${color}`, tipo, color, humedad: 2 }}
-              style={{ width: MM.prenda.ancho * mm * (tipo === "calcetin" ? 1 : tipo === "camiseta" ? 1.6 : 2.2), height: MM.prenda.alto * mm, fontSize: 4 * mm } as CSSProperties}
-            />
+            // La carta del juego tal cual (41 × 63 mm, 4 filas de gotas, dibujo y pie), con humedad 2
+            <Valorar key={`${tipo}-${color}`} clave={`prenda:${tipo}-${color}`} carta={`Prenda ${tipo} ${color}`}>
+              <div className="hp-suelta" style={{ width: MM.prenda.ancho * mm, height: MM.prenda.alto * mm, "--celda": `${(MM.prenda.ancho * mm) / 1.45}px` } as CSSProperties}>
+                <CartaPrendaHumeda p={{ id: `${tipo}-${color}`, tipo, color, humedad: 2 }} />
+              </div>
+            </Valorar>
           )),
         )}
       </Seccion>

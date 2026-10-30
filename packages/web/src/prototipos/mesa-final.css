@@ -450,7 +450,6 @@
 }
 .me .cb,
 .me .db,
-.me .hp,
 .me .dia-bosque {
   box-shadow:
     0 0 0 2px var(--tinta),
@@ -459,7 +458,6 @@
     var(--canto-carta);
 }
 .me .cb::after,
-.me .hp::after,
 .me .dia-bosque::after {
   content: "";
   position: absolute;

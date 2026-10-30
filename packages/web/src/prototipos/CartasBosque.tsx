@@ -3,6 +3,8 @@ import { useId, type CSSProperties, type HTMLAttributes, type ReactNode } from "
 import { tono } from "../arte/color";
 import { colorEstilo, COLOR, CREMA, GotaBosque, ICONOS_BOSQUE, IconoBosque, MiniPrenda, nombreColor, PinzaBosque, PrendaBosque, Soga, TINTA } from "./ArteBosque";
 import { EMBLEMAS, IconoDia, IlustraObjetivo } from "./IconosJuego";
+import { DibujoPrenda, GotaCozy, imagenPrenda, TINTA_CARTA } from "./ArtePrendas";
+import "./carta-prenda.css";
 import { LIENZO, MM } from "./medidas";
 import { cartaTraducida, t, textoCarta, textoObjetivo, tLibre, useIdioma } from "../i18n";
 import cuerdasJson from "../../../../data/cuerdas.json";
@@ -516,18 +518,32 @@ function MarcoVertical({ t, emblema, capa }: { t: Tono; emblema: string; capa: C
 // ---------- Carta de acción (63 × 88 mm) ----------
 
 /** Carta de acción: cinta con el nombre, ilustración en su ventana, emblema del grupo, texto y tipo. */
+/**
+ * Ilustraciones en PNG de las cartas de acción (fondo transparente, proporción de la ventana: 52 × 29 mm):
+ * si existe src/arte/acciones/<id>.png, la carta la usa en vez del icono SVG. Va entre el fondo y el frente del
+ * marco, así que la cinta del título y el medallón quedan por encima.
+ */
+const PNG_ACCIONES = import.meta.glob<string>("../arte/acciones/*.png", { eager: true, query: "?url", import: "default" });
+
 export function CaraAccionBosque({ id }: { id: string }) {
   useIdioma();
   const def = ACCIONES[id];
   const grupo = def.grupo === "fastidio" ? "fastidio" : "tactica";
   const nombre = textoCarta(id, "nombre", def.nombre);
   const texto = textoCarta(id, "texto", def.texto);
+  const png = PNG_ACCIONES[`../arte/acciones/${id}.png`];
   return (
     <div className={`cb cb-${grupo}`} data-accion={id}>
       <MarcoVertical t={grupo} emblema={grupo} capa="fondo" />
-      <div className="cb-ilustra">
-        <IconoBosque id={def.efecto} className="cb-icono" />
-      </div>
+      {png ? (
+        <div className="cb-ilustra cb-ilustra-png">
+          <img src={png} alt="" className="cb-png" draggable={false} aria-hidden />
+        </div>
+      ) : (
+        <div className="cb-ilustra">
+          <IconoBosque id={def.efecto} className="cb-icono" />
+        </div>
+      )}
       <MarcoVertical t={grupo} emblema={grupo} capa="frente" />
       <div className="cb-nombre" data-largo={largo(nombre, 14, 22)}>
         <span>{nombre}</span>
@@ -740,8 +756,85 @@ function CentroDorso({ clase }: { clase: ClaseDorso }) {
   );
 }
 
+/**
+ * Dorso del mazo de prendas con el mismo acabado que su cara (carta-prenda.css): papel crema con grano, panel
+ * pastel con lunares y luz en el centro, filo dorado, un tendedero con las tres prendas y la cinta con el nombre.
+ */
+function DorsoPrendas() {
+  const titulo = tLibre("dorso.prendas");
+  const W = MM.prenda.ancho;
+  const H = MM.prenda.alto;
+  const tinta = TINTA_CARTA;
+  const u = `dp${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
+  // Cuerda combada de un lado a otro; las prendas cuelgan de ella con una pinza
+  const cuerdaY = (x: number) => 16.5 + (1 - ((x - W / 2) / (W / 2 - 2.6)) ** 2) * 2.2;
+  const colgadas: { tipo: string; color: string; x: number; w: number }[] = [
+    { tipo: "calcetin", color: "#4a7fd0", x: 9, w: 14 },
+    { tipo: "camiseta", color: "#d2513f", x: 20.5, w: 17.5 },
+    { tipo: "toalla", color: "#e8c23a", x: 32, w: 13.5 },
+  ];
+  return (
+    <div className="db db-prendas db-cozy">
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden>
+        <defs>
+          <radialGradient id={`${u}-luz`} cx="50%" cy="45%" r="60%">
+            <stop offset="0" stopColor="#fff" stopOpacity=".75" />
+            <stop offset="1" stopColor="#fff" stopOpacity="0" />
+          </radialGradient>
+          <pattern id={`${u}-lunares`} width="2.6" height="2.6" patternUnits="userSpaceOnUse">
+            <circle cx=".65" cy=".65" r=".42" fill="#fff" opacity=".6" />
+            <circle cx="1.95" cy="1.95" r=".42" fill="#fff" opacity=".6" />
+          </pattern>
+        </defs>
+        <rect width={W} height={H} fill="#f8efdc" />
+        {/* Panel pastel con lunares y luz en el centro */}
+        <rect x="2.4" y="2.4" width={W - 4.8} height={H - 4.8} rx="2.4" fill="#f4cbd0" />
+        <rect x="2.4" y="2.4" width={W - 4.8} height={H - 4.8} rx="2.4" fill={`url(#${u}-lunares)`} />
+        <rect x="2.4" y="2.4" width={W - 4.8} height={H - 4.8} rx="2.4" fill={`url(#${u}-luz)`} />
+        <rect x="3.7" y="3.7" width={W - 7.4} height={H - 7.4} rx="1.6" fill="none" stroke="#c9a46a" strokeWidth=".32" />
+        <rect x="2.4" y="2.4" width={W - 4.8} height={H - 4.8} rx="2.4" fill="none" stroke={tinta} strokeWidth=".45" />
+        {/* Tendedero con las tres prendas */}
+        <path d={`M2.6 ${cuerdaY(2.6)} Q${W / 2} ${16.5 + 4.4} ${W - 2.6} ${cuerdaY(W - 2.6)}`} fill="none" stroke={tinta} strokeWidth=".9" strokeLinecap="round" />
+        <path d={`M2.6 ${cuerdaY(2.6)} Q${W / 2} ${16.5 + 4.4} ${W - 2.6} ${cuerdaY(W - 2.6)}`} fill="none" stroke="#d8b47c" strokeWidth=".45" strokeDasharray=".7 .5" strokeLinecap="round" />
+        {colgadas.map((c) => {
+          const y = cuerdaY(c.x);
+          const h = (c.w * 100) / 140;
+          return (
+            <g key={c.tipo}>
+              {imagenPrenda(c.tipo, c.color) ? (
+                <image href={imagenPrenda(c.tipo, c.color)} x={c.x - c.w / 2} y={y - 2} width={c.w} height={c.w * 0.89} preserveAspectRatio="xMidYMin meet" />
+              ) : (
+                <svg x={c.x - c.w / 2} y={y - 0.9} width={c.w} height={h} viewBox="0 0 140 100" overflow="visible">
+                  <DibujoPrenda tipo={c.tipo} color={c.color} />
+                </svg>
+              )}
+              <rect x={c.x - 0.6} y={y - 1.6} width="1.2" height="3" rx=".35" fill="#e2b678" stroke={tinta} strokeWidth=".25" />
+            </g>
+          );
+        })}
+        {/* Cinta con el nombre del mazo */}
+        <g transform={`translate(${W / 2} 39)`}>
+          <path d="M-17 -3.6 H17 L15 0 L17 3.6 H-17 L-15 0 Z" fill={tinta} transform="translate(.3 .45)" />
+          <path d="M-17 -3.6 H17 L15 0 L17 3.6 H-17 L-15 0 Z" fill="#3f86cf" stroke={tinta} strokeWidth=".45" strokeLinejoin="round" />
+          <path d="M-16.4 -3 H16.4 L16 -2.2 H-16 Z" fill="#fff" opacity=".3" />
+          <text y="1.75" textAnchor="middle" fontSize="5" fontWeight="800" fill="#fffaf0" stroke={tinta} strokeWidth="1" strokeLinejoin="round" paintOrder="stroke" style={{ fontFamily: '"Baloo 2", "Fredoka", var(--fuente-titulo), sans-serif' }} {...ajustarTexto(titulo, 5, 28)}>
+            {titulo}
+          </text>
+        </g>
+        {/* Las cuatro gotas de la escala de humedad */}
+        {[0, 1, 2, 3].map((i) => (
+          <g key={i} transform={`translate(${W / 2 + (i - 1.5) * 5} 50) scale(.34)`}>
+            <GotaCozy />
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
 export function DorsoBosque({ clase = "acciones" }: { clase?: ClaseDorso }) {
   useIdioma();
+  if (clase === "prendas") return <DorsoPrendas />;
   const d = DORSO[clase];
   const titulo = tLibre(`dorso.${clase}`);
   const horizontal = d.medida === "cuerda";

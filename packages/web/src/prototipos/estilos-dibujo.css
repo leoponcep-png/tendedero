@@ -835,8 +835,7 @@
 .estilo-fusion .co-arte {
   filter: drop-shadow(0.9cqw 0.6cqw 0 #ff4f8b40);
 }
-.estilo-fusion .pb-marco,
-.estilo-fusion .hp {
+.estilo-fusion .pb-marco {
   border-radius: 9px;
   box-shadow:
     0 0 0 2px var(--tinta),
@@ -844,8 +843,7 @@
     inset 0 0 0 3px var(--dorado),
     0 6px 8px #3a1d1266;
 }
-.estilo-fusion .pb-ilustra,
-.estilo-fusion .hp-ilustra {
+.estilo-fusion .pb-ilustra {
   background:
     radial-gradient(circle, #ffffff55 1px, transparent 1.6px) 0 0 / 6px 6px,
     radial-gradient(circle at 50% 35%, #fff, transparent 70%),

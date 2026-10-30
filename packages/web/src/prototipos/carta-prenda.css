@@ -1,0 +1,179 @@
+/*
+ * Carta de prenda (CartaPrendaHumeda) con acabado de cartón impreso «cozy»: papel crema con grano suave,
+ * escala de humedad como papel pautado azul, ilustración sobre fondo pastel con lunares y luz en el centro,
+ * y el pie con la moneda dorada de los puntos. Los bordes van limpios, sin desgaste ni manchas.
+ * Solo es el acabado: dónde va la carta y cuánto asoma bajo la cuerda lo deciden taller.css y mesa-final.css.
+ * Todo con .hp-unica (dos clases) para ganar a las reglas genéricas de .hp sin depender del orden de los CSS.
+ */
+
+.hp-unica {
+  --tinta-carta: #3b2516;
+  --papel: #f8efdc;
+  --papel-grano: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='g' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .42  0 0 0 0 .3  0 0 0 0 .16  0 0 0 .55 -.18'/></filter><rect width='100%25' height='100%25' filter='url(%23g)'/></svg>");
+  --raya: max(1px, 0.075em);
+}
+
+.hp.hp-unica {
+  border-radius: 7.3% / 4.8%;
+  overflow: hidden;
+  background: var(--papel);
+  box-shadow:
+    0 0 0 max(1px, 0.05em) #6e5136,
+    0 0.12em 0.3em #2a170a40,
+    0 0.04em 0.08em #2a170a40;
+}
+/* Grano del papel por encima de todo, como cartón impreso (no toca los contornos: es una capa aparte) */
+.hp.hp-unica::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  border-radius: inherit;
+  background: var(--papel-grano) 0 0 / 160px 160px;
+  opacity: 0.38;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* ---------- Escala de humedad: papel pautado azul con una gota por fila ---------- */
+.hp-unica .hp-escala {
+  background:
+    repeating-linear-gradient(180deg, transparent 0 calc(var(--paso) / 4 - 1px), #8fb6cf2e calc(var(--paso) / 4 - 1px) calc(var(--paso) / 4)),
+    linear-gradient(180deg, #e7f2f8, #d9ebf5);
+  border-bottom: var(--raya) solid var(--tinta-carta);
+}
+.hp-unica .hp-fila {
+  justify-content: center;
+  border-bottom: max(1px, 0.04em) solid #b08d5c;
+}
+.hp-unica .hp-fila:last-child {
+  border-bottom: 0;
+}
+.hp-unica .hp-fila svg {
+  height: 84%;
+  width: auto;
+  overflow: visible;
+}
+
+/* ---------- Ilustración: fondo pastel del color de la prenda, lunares blancos y luz en el centro ---------- */
+.hp-unica .hp-ilustra {
+  background:
+    radial-gradient(ellipse 62% 58% at 50% 50%, #ffffffb3, #ffffff00 100%),
+    radial-gradient(circle, #ffffff8c 0.09em, transparent 0.13em) 0 0 / 0.62em 0.62em,
+    radial-gradient(circle, #ffffff8c 0.09em, transparent 0.13em) 0.31em 0.31em / 0.62em 0.62em,
+    var(--fondo, color-mix(in srgb, var(--c), #fff 68%));
+}
+.hp-unica .hp-arte {
+  inset: 3% 2%;
+  width: 96%;
+  height: 94%;
+  filter: drop-shadow(0 0.05em 0.06em #3b25163d);
+}
+
+/* ---------- Pie: franja crema con un recuadro fino y la moneda de los puntos ---------- */
+.hp-unica .hp-pie {
+  position: relative;
+  flex: none;
+  border-top: var(--raya) solid var(--tinta-carta);
+  padding: 0.16em 0.3em;
+  background: linear-gradient(180deg, #fbf4e4, var(--papel));
+}
+.hp-unica .hp-pie::before {
+  content: "";
+  position: absolute;
+  left: 0.75em;
+  right: 0.32em;
+  top: 0.3em;
+  bottom: 0.3em;
+  border: max(1px, 0.05em) solid #c9a46a;
+  border-radius: 0.32em;
+  pointer-events: none;
+}
+.hp-unica .pb-puntos {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  width: 1.5em;
+  height: 1.5em;
+  background:
+    radial-gradient(circle at 36% 30%, #fff3c4 0 12%, transparent 38%),
+    radial-gradient(circle at 50% 50%, #f6c95a 0 58%, #e3a536 72%, #c98a28 100%);
+  box-shadow:
+    0 0 0 max(1px, 0.07em) var(--tinta-carta),
+    inset 0 0 0 0.09em #fbe39a,
+    inset 0 0 0 0.15em #d89a30,
+    0 0.06em 0.08em #3b251640;
+  font: 800 1.02em/1 "Baloo 2", "Fredoka", var(--fuente-titulo), sans-serif;
+  color: var(--tinta-carta);
+  text-shadow: 0 0.04em 0 #fff2bf;
+  padding-top: 0.08em;
+}
+.hp-unica .hp-coste {
+  display: none;
+}
+
+/* ---------- Carta suelta (galería y capturas): la carta entera a su tamaño, sin colgar de ninguna cuerda ---------- */
+.hp-suelta {
+  position: relative;
+  flex: none;
+  --paso: calc(var(--celda) * 0.2);
+  --filas: 4;
+}
+.hp-suelta > .hp {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  font-size: calc(var(--celda) * 0.2);
+  transition: none;
+}
+.hp-suelta .hp-escala {
+  flex: none;
+  display: grid;
+  grid-template-rows: repeat(var(--filas, 4), var(--paso));
+}
+.hp-suelta .hp-fila {
+  display: flex;
+  align-items: center;
+  min-height: 0;
+}
+.hp-suelta .hp-ilustra {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+.hp-suelta .hp-arte {
+  position: absolute;
+}
+.hp-suelta .hp-pie {
+  display: flex;
+  align-items: center;
+}
+
+/* Ilustración en PNG (src/arte/prendas/<tipo>-<color>.png), si la hay: entera y sin deformar */
+.hp-unica .hp-arte-png {
+  position: absolute;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* ---------- Dorso del mazo de prendas, con el mismo acabado ---------- */
+.db.db-cozy.db-prendas {
+  border-radius: 7.3% / 4.8%;
+  background: #f8efdc;
+  box-shadow:
+    0 0 0 1px #6e5136,
+    0 2px 5px #2a170a40;
+}
+.db.db-cozy.db-prendas::after {
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='g' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .42  0 0 0 0 .3  0 0 0 0 .16  0 0 0 .55 -.18'/></filter><rect width='100%25' height='100%25' filter='url(%23g)'/></svg>") 0 0 / 160px 160px;
+  opacity: 0.38;
+  mix-blend-mode: multiply;
+  border-radius: inherit;
+}

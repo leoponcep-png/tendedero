@@ -1,8 +1,10 @@
 import { useState, type CSSProperties, type HTMLAttributes } from "react";
 import { t } from "../i18n";
-import { GotaBosque, PrendaBosque } from "./ArteBosque";
+import { PrendaBosque } from "./ArteBosque";
+import { GotaCozy, PrendaCozy, tieneDibujoCozy, tonosDe } from "./ArtePrendas";
 import { CartaCuerdaBosque } from "./CartasBosque";
 import { COLORES, TIPOS, type Prenda } from "./Prototipos";
+import "./carta-prenda.css";
 
 // Humedad «física»: la carta de prenda va por debajo de la carta de cuerda y lleva la escala de humedad arriba.
 // Lo que asoma por debajo del borde es la humedad que le queda; al secarse se sube un paso y se esconde una
@@ -40,7 +42,7 @@ export function Escala({ variante }: { variante: Variante }) {
           <div key={fila} className="hp-fila">
             {variante === "columna" && (
               <svg viewBox="-7 -9 14 16">
-                <GotaBosque />
+                <GotaCozy />
               </svg>
             )}
             {variante === "regla" && (
@@ -48,14 +50,14 @@ export function Escala({ variante }: { variante: Variante }) {
                 <span className="hp-marca" />
                 <b>{valor}</b>
                 <svg viewBox="-7 -9 14 16">
-                  <GotaBosque />
+                  <GotaCozy />
                 </svg>
               </>
             )}
             {variante === "filas" && (
               <svg viewBox={`0 -9 ${valor * 13} 16`} style={{ width: `${valor * 0.95}em` }}>
                 {Array.from({ length: valor }, (_, i) => (
-                  <GotaBosque key={i} x={6.5 + i * 13} />
+                  <GotaCozy key={i} x={6.5 + i * 13} />
                 ))}
               </svg>
             )}
@@ -91,10 +93,18 @@ export function CartaPrendaHumeda({ p, variante = "columna", className, style, .
   const esp = TIPOS[p.tipo].espacios;
   const nombre = Object.entries(COLORES).find(([, h]) => h === p.color)?.[0];
   return (
-    <div {...resto} className={`hp hp-unica ${p.humedad === 0 ? "seca" : ""} ${className ?? ""}`} style={{ "--h": p.humedad, "--c": `var(--p-${nombre})`, ...style } as CSSProperties}>
+    <div
+      {...resto}
+      className={`hp hp-unica ${p.humedad === 0 ? "seca" : ""} ${className ?? ""}`}
+      style={{ "--h": p.humedad, "--c": `var(--p-${nombre})`, "--fondo": tonosDe(p.color).fondo, ...style } as CSSProperties}
+    >
       <Escala variante={variante} />
       <div className="hp-ilustra">
-        <PrendaBosque tipo={p.tipo} color={p.color} espacios={esp} className="hp-arte" />
+        {tieneDibujoCozy(p.tipo) ? (
+          <PrendaCozy tipo={p.tipo} color={p.color} className="hp-arte" />
+        ) : (
+          <PrendaBosque tipo={p.tipo} color={p.color} espacios={esp} className="hp-arte" />
+        )}
       </div>
       <div className="hp-pie">
         <span className="pb-puntos">{p.puntos ?? TIPOS[p.tipo].puntos}</span>
