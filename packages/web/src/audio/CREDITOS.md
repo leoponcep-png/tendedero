@@ -44,3 +44,5 @@ recortado 3 s; en los tres, el final se funde con el principio para que empalmen
 | `logro.ogg` | jingles_STEEL01 (Music Jingles) | Kenney (kenney.nl) | https://opengameart.org/content/85-short-music-jingles |
 
 Los packs de Kenney traen su `License.txt` (CC0); las páginas de OpenGameArt de los demás indican «License(s): CC0».
+
+Retoques (2026-10-31): secar, punto, logro, ultima-ronda y turno llevan un filtro de paso bajo (2,2 kHz) y algo menos de volumen para que suenen menos estridentes.
