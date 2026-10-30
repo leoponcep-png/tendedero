@@ -533,3 +533,33 @@
   object-fit: contain;
   pointer-events: none;
 }
+/* Objetivo en PNG (src/arte/objetivos/<id>.png): la ventana redonda entera (27,2 mm desde x 17,9 y 17,9), recortada al círculo */
+.co-ilustra.co-ilustra-png {
+  left: 28.41%;
+  width: 43.17%;
+  top: 20.34%;
+  height: 30.91%;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.co-png {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+/* Carta del día en PNG (src/arte/dias/<id>.png): la ventana entera (31 × 36 mm desde x 5 y 15,2) */
+.dia-carta .dia-icono.dia-icono-png {
+  left: 5.68%;
+  top: 24.13%;
+  width: 35.23%;
+  height: 57.14%;
+  border-radius: 0.6cqw;
+  overflow: hidden;
+}
+.dia-png {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}

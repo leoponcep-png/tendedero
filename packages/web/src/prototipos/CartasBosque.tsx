@@ -524,6 +524,9 @@ function MarcoVertical({ t, emblema, capa }: { t: Tono; emblema: string; capa: C
  * marco, así que la cinta del título y el medallón quedan por encima.
  */
 const PNG_ACCIONES = import.meta.glob<string>("../arte/acciones/*.png", { eager: true, query: "?url", import: "default" });
+/** Lo mismo para las cartas del día (src/arte/dias/<id>.png, ventana de 31 × 36 mm) y los objetivos (src/arte/objetivos/<id>.png, ventana redonda de 27,2 mm). */
+const PNG_DIAS = import.meta.glob<string>("../arte/dias/*.png", { eager: true, query: "?url", import: "default" });
+const PNG_OBJETIVOS = import.meta.glob<string>("../arte/objetivos/*.png", { eager: true, query: "?url", import: "default" });
 
 export function CaraAccionBosque({ id }: { id: string }) {
   useIdioma();
@@ -582,9 +585,15 @@ export function CartaObjetivoBosque({
   return (
     <div {...resto} className={`cb co ${className ?? ""}`} data-objetivo={id} data-secreto={secreto || undefined}>
       <MarcoVertical t="objetivo" emblema="objetivo" capa="fondo" />
-      <div className="co-ilustra">
-        <IlustraObjetivo id={o.id} tipo={o.parametros?.tipo} color={o.parametros?.color} className="co-arte" />
-      </div>
+      {PNG_OBJETIVOS[`../arte/objetivos/${o.id}.png`] ? (
+        <div className="co-ilustra co-ilustra-png">
+          <img src={PNG_OBJETIVOS[`../arte/objetivos/${o.id}.png`]} alt="" className="co-png" draggable={false} aria-hidden />
+        </div>
+      ) : (
+        <div className="co-ilustra">
+          <IlustraObjetivo id={o.id} tipo={o.parametros?.tipo} color={o.parametros?.color} className="co-arte" />
+        </div>
+      )}
       <MarcoVertical t="objetivo" emblema="objetivo" capa="frente" />
       <div className="cb-nombre" data-largo={largo(nombre, 14, 22)}>
         <span>{nombre}</span>
@@ -683,9 +692,15 @@ export function CartaDiaBosque({ id, className, ...resto }: { id?: string } & HT
   return (
     <div {...resto} className={`dia-bosque dia-carta ${suceso ? "dia-suceso" : "dia-tiempo"} ${className ?? ""}`} data-dia={d.id}>
       <MarcoDia suceso={suceso} capa="fondo" />
-      <div className="dia-icono">
-        <IconoDia id={d.id} efecto={d.efecto} className="dia-icono-arte" />
-      </div>
+      {PNG_DIAS[`../arte/dias/${d.id}.png`] ? (
+        <div className="dia-icono dia-icono-png">
+          <img src={PNG_DIAS[`../arte/dias/${d.id}.png`]} alt="" className="dia-png" draggable={false} aria-hidden />
+        </div>
+      ) : (
+        <div className="dia-icono">
+          <IconoDia id={d.id} efecto={d.efecto} className="dia-icono-arte" />
+        </div>
+      )}
       <MarcoDia suceso={suceso} capa="frente" />
       <div className="dia-bosque-nombre" data-largo={largo(nombre, 14, 19)}>
         <span>{nombre}</span>
