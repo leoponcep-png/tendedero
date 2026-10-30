@@ -20,6 +20,8 @@ const AMBIENTE: Record<string, string> = {
 
 /** Cuántas partículas lleva cada ambiente (0: solo la luz). */
 const PARTICULAS: Record<string, number> = { sol: 6, lluvia: 26, viento: 5, tormenta: 34, calor: 5, polvo: 14, pinzas: 3, enganche: 6, rafagas: 7 };
+/** Gotitas de la tormenta que caen por encima de la mesa (las demás van por debajo, sobre la madera). */
+const GOTITAS_ENCIMA = 14;
 
 /** Azar fijo (siempre las mismas posiciones para el mismo ambiente: no salta al volver a pintar). */
 function azar(semilla: number) {
@@ -49,7 +51,19 @@ export function Ambiente({ efecto, animar, capa }: { efecto: string | null | und
     }));
   }, [tipo]);
   if (!tipo) return null;
-  if (capa === "luz") return <div key={tipo} className={`mj-ambiente-luz amb-${tipo} ${animar ? "" : "quieto"}`} aria-hidden />;
+  if (capa === "luz")
+    return (
+      <div key={tipo} className={`mj-ambiente-luz amb-${tipo} ${animar ? "" : "quieto"}`} aria-hidden>
+        {/* En la tormenta caen por encima unas pocas gotitas pequeñas y transparentes: se ven sin tapar el juego. */}
+        {animar && tipo === "tormenta" && (
+          <div className="amb-gotitas">
+            {particulas.slice(0, GOTITAS_ENCIMA).map((p) => (
+              <i key={p["--i"]} style={p as unknown as CSSProperties} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
   return (
     // La clave hace que al cambiar de día el ambiente nuevo entre con su fundido.
     <div key={tipo} className={`mj-ambiente amb-${tipo} ${animar ? "" : "quieto"}`} aria-hidden>

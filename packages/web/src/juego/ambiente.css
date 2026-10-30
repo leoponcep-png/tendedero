@@ -124,6 +124,50 @@
   opacity: 0.4;
   animation-duration: calc(var(--t) * 0.85s);
 }
+
+/* Tormenta: gotitas con forma de gota que caen por encima de todo, pequeñas y transparentes. El tinte de la capa
+ * va en un ::before para que las gotas no hereden su mezcla ni su opacidad. */
+.mj-ambiente-luz.amb-tormenta {
+  background: none;
+  mix-blend-mode: normal;
+  opacity: 1;
+}
+.mj-ambiente-luz.amb-tormenta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #1d3557;
+  mix-blend-mode: multiply;
+  opacity: 0.09;
+}
+.amb-gotitas {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.amb-gotitas i {
+  position: absolute;
+  left: calc(var(--x) * 100%);
+  top: -4vh;
+  width: calc(8px + var(--r) * 4px);
+  height: calc(8px + var(--r) * 4px);
+  border-radius: 0 50% 50% 50%;
+  rotate: 45deg;
+  background: radial-gradient(circle at 60% 60%, #ffffffd9 0 14%, #9fd0f0 40%, #4f98c8);
+  box-shadow: 0 0 0 1.5px #2b201966;
+  opacity: 0.6;
+  animation: amb-gotita calc(var(--t) * 3.2s) linear infinite var(--d);
+}
+@keyframes amb-gotita {
+  to {
+    translate: -6vh 110vh;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .amb-gotitas {
+    display: none;
+  }
+}
 @keyframes amb-cae {
   to {
     translate: -24vh 125vh;
