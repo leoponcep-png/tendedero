@@ -11,11 +11,97 @@
   font-family: var(--fuente-texto);
 }
 
-/* La pantalla de título está en portada-pintada.css. */
+/* ---------- Pantalla de título ---------- */
+
+.pt-centro {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(6px, 1.4vh, 14px);
+  padding: 16px;
+}
+.pt-logo {
+  width: min(680px, 94vw);
+  max-height: 42vh;
+  overflow: visible;
+}
+.pt-rotulo {
+  font: 800 74px var(--fuente-titulo);
+  letter-spacing: 0.01em;
+}
+.pt-colgada {
+  transform-box: view-box;
+  animation: pt-balanceo 4.2s ease-in-out infinite alternate;
+}
+@keyframes pt-balanceo {
+  from {
+    transform: rotate(-2.2deg);
+  }
+  to {
+    transform: rotate(2.2deg);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
+  .pt-colgada,
   .sl-hueco-pinza {
     animation: none;
   }
+}
+.pt-lema {
+  margin: 0 0 4px;
+  color: var(--crema);
+  font: italic 700 clamp(13px, 2vh, 16px) var(--fuente-texto);
+  text-shadow: 0 1px 2px #0008;
+}
+.pt-botones.menu-tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(320px, 100%);
+  padding: 18px 20px;
+}
+.pt-botones .pt-boton {
+  padding: 9px 16px;
+  border: 2.5px solid var(--tinta);
+  border-radius: 12px;
+  background: #fffaf0;
+  box-shadow: 0 3px 0 var(--tinta);
+  color: var(--tinta);
+  font: 800 18px var(--fuente-titulo);
+  transition:
+    translate 0.12s,
+    box-shadow 0.12s;
+}
+.pt-botones .pt-boton:hover,
+.pt-botones .pt-boton:focus-visible {
+  translate: 0 -1px;
+  background: #fff;
+}
+.pt-botones .pt-boton:active {
+  translate: 0 3px;
+  box-shadow: 0 0 0 var(--tinta);
+}
+.pt-botones .pt-boton.principal {
+  padding: 11px 16px;
+  background: var(--tactica);
+  color: #fff;
+  font-size: 21px;
+  box-shadow:
+    0 4px 0 var(--tinta),
+    0 8px 14px #0004;
+}
+.pt-botones .pt-salir {
+  margin-top: 4px;
+  background: transparent;
+  box-shadow: none;
+  border-style: dashed;
+  font-size: 16px;
 }
 
 /* ---------- Pantallas del menú: barra de arriba y contenido ---------- */
