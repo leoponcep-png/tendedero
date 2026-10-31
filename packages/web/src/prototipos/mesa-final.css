@@ -58,11 +58,12 @@
   color: #fff6e6;
 }
 
-/* Prenda colgada: por debajo de la carta de cuerda, más baja cuanto más mojada. */
+/* Prenda colgada: por debajo de la carta de cuerda, más baja cuanto más mojada. Por encima de la loseta
+   (z-index 2): la de la primera posición asoma sobre el poste y su moneda tiene que verse. */
 .me .me-colgada {
   left: calc(var(--celda) * var(--x));
   width: var(--ancho-prenda);
-  z-index: calc(1 + var(--orden));
+  z-index: calc(3 + var(--orden));
   transform-origin: 50% 0;
   transition:
     top 0.8s cubic-bezier(0.4, 1.35, 0.5, 1),

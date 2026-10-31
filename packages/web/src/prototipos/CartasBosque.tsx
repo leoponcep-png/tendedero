@@ -1,5 +1,5 @@
 import { HUMEDAD_MAXIMA_POR_DEFECTO } from "@tendedero/motor";
-import { useId, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
+import { useId, useLayoutEffect, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode, type SVGProps } from "react";
 import { tono } from "../arte/color";
 import { colorEstilo, COLOR, CREMA, GotaBosque, ICONOS_BOSQUE, IconoBosque, nombreColor, PinzaBosque, PrendaBosque, TINTA } from "./ArteBosque";
 import { EMBLEMAS, IconoDia, IlustraObjetivo } from "./IconosJuego";
@@ -72,11 +72,45 @@ const largo = (texto: string, cortos: number, medios: number) => {
 };
 
 /**
- * Para un <text> de SVG de una sola línea: si a este tamaño no cabe en `hueco` unidades, se comprime a lo ancho
- * (textLength) en vez de salirse de la carta. Los nombres traducidos (alemán, ruso…) pueden ser largos.
+ * Título de una sola línea en SVG (nombre de la carta de cuerda): siempre con la misma letra y la misma anchura de
+ * letra; si a `tam` no cabe en `hueco` unidades, se baja el tamaño (nunca se estrecha). El tamaño se calcula a ojo
+ * y luego se mide de verdad con la fuente ya cargada. Los nombres traducidos (alemán, ruso…) pueden ser largos.
  */
-const ajustarTexto = (texto: string, tam: number, hueco: number) =>
-  ancho(texto) * tam * 0.56 > hueco ? { textLength: hueco, lengthAdjust: "spacingAndGlyphs" as const } : {};
+function TituloSvg({ texto, tam, hueco, ...props }: { texto: string; tam: number; hueco: number } & Omit<SVGProps<SVGTextElement>, "fontSize">) {
+  const ref = useRef<SVGTextElement>(null);
+  const [tamano, setTamano] = useState(() => Math.min(tam, hueco / (ancho(texto) * 0.6)));
+  useLayoutEffect(() => {
+    const el = ref.current;
+    let vivo = true;
+    const medir = () => {
+      if (!vivo || !el?.isConnected || typeof el.getComputedTextLength !== "function") return;
+      const antes = el.getAttribute("font-size");
+      el.setAttribute("font-size", String(tam));
+      const largo = el.getComputedTextLength();
+      if (!(largo > 0)) {
+        // Sin medir (carta oculta): se queda el tamaño a ojo
+        if (antes) el.setAttribute("font-size", antes);
+        return;
+      }
+      const nuevo = Number((largo > hueco ? (tam * hueco) / largo : tam).toFixed(2));
+      el.setAttribute("font-size", String(nuevo));
+      setTamano(nuevo);
+    };
+    medir();
+    const fuentes = typeof document !== "undefined" ? document.fonts : undefined;
+    fuentes?.ready.then(medir);
+    fuentes?.addEventListener?.("loadingdone", medir);
+    return () => {
+      vivo = false;
+      fuentes?.removeEventListener?.("loadingdone", medir);
+    };
+  }, [texto, tam, hueco]);
+  return (
+    <text ref={ref} {...props} fontSize={tamano}>
+      {texto}
+    </text>
+  );
+}
 
 /** Id de /data/cuerdas.json de cada clase de cuerda (las de pinzas de color van por su color). */
 const ID_CUERDA: Record<string, string> = { basica: "basica", tejadillo: "tejadillo", resistente: "resistente", "secado-rapido": "secado-rapido", fragil: "vieja" };
@@ -202,15 +236,41 @@ export function CartaCuerdaBosque({
               <SogaCozy a={[-2, yCuerda]} c={[W / 2, yCuerda + 9]} b={[W + 2, yCuerda]} gruesa={gruesa} vieja={vieja} />
             )}
           </g>
-          {clave === "tejadillo" && <TejadoCozy x0={1.9} x1={W - 1.9} y={96} id={`${uid}-tejado`} />}
-          {/* Pinzas impresas en el borde: muerden las prendas que asoman por debajo */}
-          {[30, 90, 150].map((x) => (
-            <g key={x} clipPath={`url(#${uid}-corte)`}>
-             <g transform={`translate(0 ${yCuerda - 4})`}>
-              {pinzaPng ? <image href={pinzaPng} x={x - 6} y="-5" width="12" height={(12 * 218) / 100} preserveAspectRatio="xMidYMid meet" /> : <PinzaCozy x={x} color={color} />}
-             </g>
-            </g>
-          ))}
+          {clave === "tejadillo" && <TejadoCozy x0={1.9} x1={W - 1.9} y={94.2} id={`${uid}-tejado`} />}
+          {/* Pinzas impresas en el borde: muerden la cuerda y las prendas que asoman por debajo. La pinza pintada
+              (100 × 218 px) va derecha, con la cuerda pasando por la boca (la V de arriba, a 40 px de su borde de
+              arriba): la soga se ve entre las dos patas y las puntas asoman por encima. Abajo la corta el borde de la
+              carta, como si siguiera mordiendo la prenda. Sombra suave sobre la cuerda y el fondo. */}
+          {pinzaPng && (
+            <filter id={`${uid}-sombra-pinza`} x="-60%" y="-30%" width="220%" height="160%" colorInterpolationFilters="sRGB">
+              <feGaussianBlur in="SourceAlpha" stdDeviation=".75" />
+              <feOffset dx="1" dy="1.4" />
+              <feComponentTransfer>
+                <feFuncA type="linear" slope=".5" />
+              </feComponentTransfer>
+              <feColorMatrix type="matrix" values="0 0 0 0 .2  0 0 0 0 .12  0 0 0 0 .06  0 0 0 1 0" />
+              <feMerge>
+                <feMergeNode />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          )}
+          {[30, 90, 150].map((x) => {
+            // Ancho de la pinza en la carta; el eje de la pinza está en el píxel 45,5 del PNG (no en el centro)
+            const ancho = 15;
+            const alto = (ancho * 218) / 100;
+            return (
+              <g key={x} clipPath={`url(#${uid}-corte)`}>
+                {pinzaPng ? (
+                  <image href={pinzaPng} x={x - (45.5 / 100) * ancho} y={ySoga - (40 / 218) * alto} width={ancho} height={alto} preserveAspectRatio="xMidYMid meet" filter={`url(#${uid}-sombra-pinza)`} />
+                ) : (
+                  <g transform={`translate(0 ${yCuerda - 4})`}>
+                    <PinzaCozy x={x} color={color} />
+                  </g>
+                )}
+              </g>
+            );
+          })}
           {/* Cabecera: cinta de pergamino ondulada con el nombre y medallón redondo con el icono */}
           <g className="ccb-cinta">
             <path d="M163 22 C170 22.6 173 27.6 170.6 31.4 C168.4 28.6 165.4 28 162 28.4 Z" fill="#cdb58a" stroke={T_CARTA} strokeWidth="1.2" strokeLinejoin="round" />
@@ -221,9 +281,7 @@ export function CartaCuerdaBosque({
             <path d="M36 26.6 C72 24.8 118 26.6 158 24.6" stroke="#c9ad7a" strokeOpacity=".6" strokeWidth="1" fill="none" strokeLinecap="round" />
             <path d="M159.6 9.6 C162.6 11.6 162.6 15.4 160.4 17" stroke="#c9ad7a" strokeWidth=".9" fill="none" />
           </g>
-          <text x="100" y="22.2" textAnchor="middle" className="ccb-nombre" fontSize="12.8" fontWeight="800" fill={T_CARTA} style={{ fontFamily: '"Baloo 2", "Fredoka", var(--fuente-titulo), sans-serif' }} {...ajustarTexto(nombre, 15.4, 108)}>
-            {nombre}
-          </text>
+          <TituloSvg texto={nombre} tam={12.8} hueco={112} x="100" y="22.2" textAnchor="middle" className="ccb-nombre" fontWeight="800" fill={T_CARTA} style={{ fontFamily: '"Baloo 2", "Fredoka", var(--fuente-titulo), sans-serif' }} />
           <g className="ccb-medallon">
             <path d="M8 3.6 l1.6 3.2 M12.6 1.8 l.4 3.4" stroke="#f2b632" strokeWidth="1.5" strokeLinecap="round" />
             <circle cx="21.5" cy="18.4" r="14.6" fill={T_CARTA} transform="translate(.8 1.2)" />
@@ -357,9 +415,7 @@ export function CartaCuerdaBosque({
             <circle cx="19" cy="16" r="12.5" fill={CREMA} stroke={TINTA} strokeWidth="2.2" />
             <circle cx="19" cy="16" r="10.2" fill="none" style={{ stroke: colorBanda }} strokeWidth="1.5" opacity=".85" />
             <g transform="translate(10.7 7.7) scale(.26)">{ICONOS_BOSQUE[clave]}</g>
-            <text x="37" y="20.6" className="ccb-nombre" style={{ fontFamily: "var(--fuente-titulo)" }} fontWeight="800" fontSize="14.5" fill="#ffffff" stroke={TINTA} strokeWidth="3.2" strokeLinejoin="round" paintOrder="stroke" {...ajustarTexto(nombre, 14.5, W - 37 - 8)}>
-              {nombre}
-            </text>
+            <TituloSvg texto={nombre} tam={14.5} hueco={W - 37 - 8} x="37" y="20.6" className="ccb-nombre" style={{ fontFamily: "var(--fuente-titulo)" }} fontWeight="800" fill="#ffffff" stroke={TINTA} strokeWidth="3.2" strokeLinejoin="round" paintOrder="stroke" />
           </g>
         ) : (
           <g>
@@ -368,9 +424,7 @@ export function CartaCuerdaBosque({
             <path d={festones(1.5, W - 1.5, 104, 30, false)} {...bandaF} stroke={TINTA} strokeWidth="1.4" strokeLinejoin="round" />
             <circle cx="17" cy="115" r="11.5" fill={CREMA} stroke={TINTA} strokeWidth="2.2" />
             <g transform="translate(8.7 106.7) scale(.26)">{ICONOS_BOSQUE[clave]}</g>
-            <text x="33" y="120" className="ccb-nombre" style={{ fontFamily: "var(--fuente-titulo)" }} fontWeight="800" fontSize="13.5" fill="#ffffff" stroke={TINTA} strokeWidth="3" strokeLinejoin="round" paintOrder="stroke" {...ajustarTexto(nombre, 13.5, W - 33 - 8)}>
-              {nombre}
-            </text>
+            <TituloSvg texto={nombre} tam={13.5} hueco={W - 33 - 8} x="33" y="120" className="ccb-nombre" style={{ fontFamily: "var(--fuente-titulo)" }} fontWeight="800" fill="#ffffff" stroke={TINTA} strokeWidth="3" strokeLinejoin="round" paintOrder="stroke" />
           </g>
         )}
         {/* Índice de esquina: se lee aunque la carta esté medio tapada en la mano */}
