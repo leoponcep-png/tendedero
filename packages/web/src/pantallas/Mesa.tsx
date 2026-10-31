@@ -49,7 +49,7 @@ function textoSegundoPaso(p: Partida, j: JugadaDe<"jugarAccion">): string {
     case "moverCuerda":
       return `Pulsa otra carta de cuerda tuya para cambiarlas de sitio, o un hueco libre para llevar ${cuerda} al final de esa línea.`;
     default:
-      return `Pulsa el espacio al que mover ${nombrePrenda(p, o.prenda!)}.`;
+      return `Pulsa el espacio al que mover ${nombrePrenda(p, o.prenda!)}, o otra prenda para intercambiarlas.`;
   }
 }
 

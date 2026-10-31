@@ -182,7 +182,7 @@ describe("colgar prendas y cuerdas", () => {
     expect(motivo(p, { ...sitio, prenda: "calcetin-azul-1", inicio: 2 })).toBeNull();
   });
 
-  it("respeta el máximo de cuerdas por turno y Colocar cuerda extra lo amplía", () => {
+  it("respeta el máximo de cuerdas por turno (las cuerdas extra de partidas guardadas lo amplían)", () => {
     let p = partida();
     const [a, b] = p.jugadores[0].mano;
     const c = copia(p, "basica");
@@ -190,8 +190,8 @@ describe("colgar prendas y cuerdas", () => {
     p = jugar(p, { tipo: "colocarCuerda", jugador: 0, carta: a, linea: 0 });
     p = jugar(p, { tipo: "colocarCuerda", jugador: 0, carta: b, linea: 0 });
     expect(motivo(p, { tipo: "colocarCuerda", jugador: 0, carta: c, linea: 0 })).toMatch(/Ya has jugado 2 cuerdas/);
-    const extra = darAccion(p, 0, "colocar-cuerda-extra");
-    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: extra });
+    // «Colocar cuerda extra» ya no está en el mazo, pero una partida guardada puede tener el turno ampliado.
+    p.turno.cuerdasExtra = 1;
     expect(motivo(p, { tipo: "colocarCuerda", jugador: 0, carta: c, linea: 0 })).toBeNull();
   });
 });
@@ -453,11 +453,11 @@ describe("acciones", () => {
     expect(p.jugadores[0].lineas[0].cartas[0].protegida).toBeUndefined();
   });
 
-  it("Cambiar prendas de sitio intercambia dos prendas tuyas", () => {
+  it("Mover prenda propia, soltada sobre otra prenda tuya, las intercambia", () => {
     let p = partida();
     tender(p, 0, "basica", [["calcetin-azul-1", 2]]);
     tender(p, 0, "tejadillo", [["camiseta-rojo-1", 0], ["calcetin-rojo-1", 2]], 1);
-    const carta = darAccion(p, 0, "cambiar-prendas");
+    const carta = darAccion(p, 0, "mover-prenda-propia");
     const objetivo = { jugador: 0, linea: 0, posicion: 0, prenda: "camiseta-rojo-1" };
     const calcetin = { jugador: 0, linea: 0, posicion: 0, prenda: "calcetin-azul-1" };
     expect(motivo(p, { tipo: "jugarAccion", jugador: 0, carta, objetivo: calcetin })).toMatch(/adónde/);
@@ -492,10 +492,61 @@ describe("acciones", () => {
     expect(cuerdas(p)).toBe(antes + 1);
   });
 
+  it("Mover una prenda rival también intercambia dos prendas del rival, salvo si una está en una cuerda resistente", () => {
+    let p = partida();
+    tender(p, 1, "basica", [["calcetin-azul-1", 0], ["calcetin-rojo-1", 2]]);
+    tender(p, 1, "resistente", [["calcetin-amarillo-1", 0]], 1);
+    const carta = darAccion(p, 0, "mover-prenda-rival");
+    const azul = { jugador: 1, linea: 0, posicion: 0, prenda: "calcetin-azul-1" };
+    expect(motivo(p, { tipo: "jugarAccion", jugador: 0, carta, objetivo: { ...azul, destino: { linea: 1, posicion: 0, inicio: 0 } } })).toMatch(/protege/);
+    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta, objetivo: { ...azul, destino: { linea: 0, posicion: 0, inicio: 2 } } });
+    expect(p.jugadores[1].lineas[0].cartas[0].colgadas).toEqual(expect.arrayContaining([{ prenda: "calcetin-azul-1", inicio: 2 }, { prenda: "calcetin-rojo-1", inicio: 0 }]));
+  });
+
+  it("Cesto de ropa sucia roba 3 prendas de la bolsa (o las que queden)", () => {
+    let p = partida();
+    const antes = p.jugadores[0].pendientes.length;
+    const bolsa = p.bolsa.length;
+    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "cesto-ropa-sucia") });
+    expect(p.jugadores[0].pendientes.length).toBe(antes + 3);
+    expect(p.bolsa.length).toBe(bolsa - 3);
+    p.bolsa = p.bolsa.slice(0, 2);
+    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "cesto-ropa-sucia") });
+    expect(p.jugadores[0].pendientes.length).toBe(antes + 5);
+    p.turno.accionesJugadas = 0;
+    expect(motivo(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "cesto-ropa-sucia") })).toMatch(/bolsa/);
+  });
+
+  it("Manguerazo: +2 de humedad a una prenda rival, con tope de 4, y el tejadillo lo para", () => {
+    let p = partida();
+    tender(p, 1, "basica", [["camiseta-azul-1", 0]]);
+    tender(p, 1, "tejadillo", [["calcetin-azul-1", 0]], 1);
+    p.prendas["camiseta-azul-1"].humedad = 1;
+    const bajoTecho = { jugador: 1, linea: 1, posicion: 0, prenda: "calcetin-azul-1" };
+    expect(motivo(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "manguerazo"), objetivo: bajoTecho })).toMatch(/protege/);
+    const objetivo = { jugador: 1, linea: 0, posicion: 0, prenda: "camiseta-azul-1" };
+    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "manguerazo"), objetivo });
+    expect(p.prendas["camiseta-azul-1"].humedad).toBe(3);
+    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "manguerazo"), objetivo });
+    expect(p.prendas["camiseta-azul-1"].humedad).toBe(4);
+  });
+
+  it("Secador: −2 de humedad a una prenda tuya; si llega a 0, se seca y puntúa", () => {
+    let p = partida();
+    tender(p, 0, "basica", [["toalla-azul-1", 0]]);
+    p.prendas["toalla-azul-1"].humedad = 3;
+    const objetivo = { jugador: 0, linea: 0, posicion: 0, prenda: "toalla-azul-1" };
+    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "secador"), objetivo });
+    expect(p.prendas["toalla-azul-1"].humedad).toBe(1);
+    p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "secador"), objetivo });
+    expect(p.jugadores[0].seca).toContain("toalla-azul-1");
+    expect(p.jugadores[0].puntos).toBe(3);
+  });
+
   it("como máximo 2 acciones por turno", () => {
     let p = partida();
-    for (let i = 0; i < 2; i++) p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "colocar-cuerda-extra") });
-    expect(motivo(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "colocar-cuerda-extra") })).toMatch(/2 acciones/);
+    for (let i = 0; i < 2; i++) p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "buscar-cuerda") });
+    expect(motivo(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "buscar-cuerda") })).toMatch(/2 acciones/);
   });
 });
 
@@ -651,7 +702,7 @@ describe("objetivos", () => {
     expect(p.jugadores[1].lineas[0].cartas).toHaveLength(0);
     expect(p.jugadores[0].trofeos.map((c) => p.cartas[c])).toEqual(["vieja"]);
     expect(p.registro).toContain("Jugador 1 se queda Cuerda vieja como trofeo.");
-    expect(puntuarObjetivo(p, 0, objetivo("regalo-envenenado")).puntos).toBe(4);
+    expect(puntuarObjetivo(p, 0, objetivo("regalo-envenenado")).puntos).toBe(objetivo("regalo-envenenado").puntos);
   });
 
   it("la vieja colocada con la jugada normal se rompe al acabar su 2.ª ronda y es trofeo de quien la puso", () => {

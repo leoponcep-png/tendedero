@@ -58,10 +58,11 @@ function motivoBlanco(p: Partida, j: JugadaDe<"jugarAccion">, efecto: EfectoAcci
 
   if (!pideDestino(blanco)) return null;
   if (!o.destino) return no("faltaDestino", FALTA_DESTINO);
-  return motivoDestino(p, o, blanco, tendida);
+  return motivoDestino(p, o, efecto, tendida);
 }
 
-function motivoDestino(p: Partida, o: ObjetivoAccion, blanco: Blanco, tendida: CartaTendida): Motivo | null {
+function motivoDestino(p: Partida, o: ObjetivoAccion, efecto: EfectoAccion, tendida: CartaTendida): Motivo | null {
+  const { blanco } = efecto;
   const d = o.destino!;
   const sitio = { jugador: o.jugador, ...d };
   const lineas = p.jugadores[o.jugador].lineas;
@@ -69,6 +70,20 @@ function motivoDestino(p: Partida, o: ObjetivoAccion, blanco: Blanco, tendida: C
   if (blanco === "moverPropia" || blanco === "moverRival") {
     const actual = tendida.colgadas.find((c) => c.prenda === o.prenda)!;
     if (d.linea === o.linea && d.posicion === o.posicion && d.inicio === actual.inicio) return no("prendaYaAhi", "La prenda ya está ahí.");
+    // Soltada sobre otra prenda del mismo tendedero: se intercambian el sitio.
+    const otra = prendaEn(p, sitio);
+    if (otra && otra !== o.prenda) {
+      // La otra prenda también se mueve: su cuerda tiene que dejar (resistente, protegida, tejadillo…).
+      if (efecto.etiquetas.includes("fastidio")) {
+        const suya = localizar(p, otra)!.tendida;
+        if (suya.protegida) return no("protegida", "Esa cuerda está protegida hasta el próximo turno de su dueño.");
+        for (const etiqueta of efecto.etiquetas) {
+          const protege = quienProtege(p, suya, etiqueta);
+          if (protege) return no("protege", `${defCarta(p, protege.carta).nombre} protege de esta carta.`, { carta: defCarta(p, protege.carta).id });
+        }
+      }
+      return motivoIntercambio(p, o.prenda!, otra);
+    }
     return motivoNoCabe(p, sitio, o.prenda!, o.prenda);
   }
 

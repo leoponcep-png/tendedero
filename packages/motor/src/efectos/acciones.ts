@@ -18,8 +18,17 @@ function cambiarHumedad(p: Partida, prenda: string, cambio: number) {
   else if (quitarHumedad(p, prenda, -cambio)) secarPrenda(p, prenda);
 }
 
+/**
+ * Mover o intercambiar: si en el destino hay otra prenda del mismo jugador, las dos se cambian el sitio
+ * (cada una pasa a la carta y al espacio de inicio de la otra); si no, la prenda pasa al hueco libre.
+ */
 function mover(p: Partida, j: JugadaDe<"jugarAccion">) {
   const { prenda, destino, jugador } = j.objetivo!;
+  const otra = prendaEn(p, { jugador, ...destino! });
+  if (otra && otra !== prenda) {
+    intercambiar(p, prenda!, otra);
+    return;
+  }
   const u = localizar(p, prenda!)!;
   descolgar(u);
   p.jugadores[jugador].lineas[destino!.linea].cartas[destino!.posicion].colgadas.push({ prenda: prenda!, inicio: destino!.inicio });
@@ -29,6 +38,33 @@ function mover(p: Partida, j: JugadaDe<"jugarAccion">) {
     { prenda: refPrenda(p, prenda!), linea: destino!.linea + 1, posicion: destino!.posicion + 1 },
     `Se mueve ${nombrePrenda(p, prenda!)} a la línea ${destino!.linea + 1}, carta ${destino!.posicion + 1}.`,
   );
+}
+
+/** Dos prendas se cambian el sitio: cada una pasa a la carta y al espacio de inicio de la otra. */
+function intercambiar(p: Partida, a: string, b: string) {
+  const ua = localizar(p, a)!;
+  const ub = localizar(p, b)!;
+  descolgar(ua);
+  descolgar(ub);
+  ub.tendida.colgadas.push({ prenda: a, inicio: ub.colgada.inicio });
+  ua.tendida.colgadas.push({ prenda: b, inicio: ua.colgada.inicio });
+  anotar(p, "intercambianPrendas", { prenda: refPrenda(p, a), otraPrenda: refPrenda(p, b) }, `Se intercambian ${nombrePrenda(p, a)} y ${nombrePrenda(p, b)}.`);
+}
+
+/** +h de humedad a una prenda (sin pasar del tope), con su línea en el registro. */
+function mojarUna(p: Partida, prenda: string, cuanta: number) {
+  const h = mojarPrenda(p, prenda, cuanta);
+  if (h > 0) anotar(p, "ganaHumedad", { prenda: refPrenda(p, prenda), h }, `${nombrePrenda(p, prenda)} gana ${h} de humedad.`);
+  else {
+    const max = humedadMaxima(p);
+    anotar(p, "humedadAlTope", { prenda: refPrenda(p, prenda), max }, `${nombrePrenda(p, prenda)} ya tiene la humedad máxima (${max}): no gana más.`);
+  }
+}
+
+/** −h de humedad a una prenda propia; si llega a 0, se seca y puntúa. */
+function secarUn(p: Partida, prenda: string, h: number) {
+  anotar(p, "pierdeHumedad", { prenda: refPrenda(p, prenda), h }, `${nombrePrenda(p, prenda)} pierde ${h} de humedad.`);
+  cambiarHumedad(p, prenda, -h);
 }
 
 function sitio(p: Partida, j: JugadaDe<"jugarAccion">): string {
@@ -70,20 +106,35 @@ export const efectosAccion: Record<string, EfectoAccion> = {
     tipo: "accion",
     blanco: "prendaRival",
     etiquetas: ["fastidio", "moja"],
-    aplicar(p, j, params) {
-      const prenda = j.objetivo!.prenda!;
-      const h = mojarPrenda(p, prenda, numero(params, "humedad", 1));
-      if (h > 0) anotar(p, "ganaHumedad", { prenda: refPrenda(p, prenda), h }, `${nombrePrenda(p, prenda)} gana ${h} de humedad.`);
-      else {
-        const max = humedadMaxima(p);
-        anotar(p, "humedadAlTope", { prenda: refPrenda(p, prenda), max }, `${nombrePrenda(p, prenda)} ya tiene la humedad máxima (${max}): no gana más.`);
-      }
-    },
+    aplicar: (p, j, params) => mojarUna(p, j.objetivo!.prenda!, numero(params, "humedad", 1)),
   },
 
+  // Como «Retrasar secado», pero de golpe (parametros.humedad, 2 en los datos).
+  manguerazo: {
+    tipo: "accion",
+    blanco: "prendaRival",
+    etiquetas: ["fastidio", "moja"],
+    aplicar: (p, j, params) => mojarUna(p, j.objetivo!.prenda!, numero(params, "humedad", 2)),
+  },
+
+  // Mover a un hueco libre, o intercambiar con otra prenda del mismo tendedero (según dónde se suelte).
   "mover-prenda-rival": { tipo: "accion", blanco: "moverRival", etiquetas: ["fastidio", "mueve"], aplicar: mover },
   "mover-prenda-propia": { tipo: "accion", blanco: "moverPropia", etiquetas: [], aplicar: mover },
 
+  // parametros.prendas: cuántas prendas roba de la bolsa (si quedan menos, las que haya).
+  "cesto-ropa-sucia": {
+    tipo: "accion",
+    blanco: "ninguno",
+    etiquetas: [],
+    validar: (p) => (p.bolsa.length > 0 ? null : no("bolsaVacia", "No quedan prendas en la bolsa.")),
+    aplicar(p, j, params) {
+      const cogidas = p.bolsa.splice(-Math.min(numero(params, "prendas", 3), p.bolsa.length));
+      p.jugadores[j.jugador].pendientes.push(...cogidas);
+      anotar(p, "robaPrendas", { jugador: j.jugador, n: cogidas.length }, `${p.jugadores[j.jugador].nombre} roba ${cogidas.length} prenda(s) de la bolsa.`);
+    },
+  },
+
+  // Ya no está en el mazo (con 2 cuerdas por turno sobra): se queda para las partidas guardadas que aún la tengan.
   // parametros.cuerdas: cuerdas de más que se pueden jugar este turno.
   "colocar-cuerda-extra": {
     tipo: "accion",
@@ -108,29 +159,23 @@ export const efectosAccion: Record<string, EfectoAccion> = {
     tipo: "accion",
     blanco: "prendaPropia",
     etiquetas: [],
-    aplicar(p, j, params) {
-      const h = numero(params, "humedad", 1);
-      anotar(p, "pierdeHumedad", { prenda: refPrenda(p, j.objetivo!.prenda!), h }, `${nombrePrenda(p, j.objetivo!.prenda!)} pierde ${h} de humedad.`);
-      cambiarHumedad(p, j.objetivo!.prenda!, -h);
-    },
+    aplicar: (p, j, params) => secarUn(p, j.objetivo!.prenda!, numero(params, "humedad", 1)),
   },
 
-  // Dos prendas tuyas se cambian el sitio: cada una pasa a la carta y al espacio de la otra.
+  // Como «Reducir humedad», pero más fuerte (parametros.humedad, 2 en los datos).
+  secador: {
+    tipo: "accion",
+    blanco: "prendaPropia",
+    etiquetas: [],
+    aplicar: (p, j, params) => secarUn(p, j.objetivo!.prenda!, numero(params, "humedad", 2)),
+  },
+
+  // Ya no está en el mazo (va dentro de «Mover prenda propia»): se queda para las partidas guardadas que aún la tengan.
   "cambiar-prendas": {
     tipo: "accion",
     blanco: "cambiarPrendas",
     etiquetas: [],
-    aplicar(p, j) {
-      const a = j.objetivo!.prenda!;
-      const b = prendaEn(p, { jugador: j.jugador, ...j.objetivo!.destino! })!;
-      const ua = localizar(p, a)!;
-      const ub = localizar(p, b)!;
-      descolgar(ua);
-      descolgar(ub);
-      ub.tendida.colgadas.push({ prenda: a, inicio: ub.colgada.inicio });
-      ua.tendida.colgadas.push({ prenda: b, inicio: ua.colgada.inicio });
-      anotar(p, "intercambianPrendas", { prenda: refPrenda(p, a), otraPrenda: refPrenda(p, b) }, `Se intercambian ${nombrePrenda(p, a)} y ${nombrePrenda(p, b)}.`);
-    },
+    aplicar: (p, j) => intercambiar(p, j.objetivo!.prenda!, prendaEn(p, { jugador: j.jugador, ...j.objetivo!.destino! })!),
   },
 
   // Todo lo colgado en una carta de cuerda tuya pasa a otra, y al revés; las cartas no se mueven.

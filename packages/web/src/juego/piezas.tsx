@@ -123,13 +123,13 @@ function CuerdaTendida({ jugador, linea, posicion, tendida }: { jugador: number;
     const ob = j.objetivo;
     if (ob.destino) {
       const blanco = efectoAccion(p, j.carta)?.blanco;
+      // La prenda que ocupa el hueco de destino (al mover sobre otra prenda, se intercambian).
+      const otra = tendida.colgadas.find((c) => c.prenda !== ob.prenda && ob.destino!.inicio >= c.inicio && ob.destino!.inicio < c.inicio + tipoDe(p, c.prenda).espacios);
       if (blanco === "moverPropia" || blanco === "moverRival") {
+        if (otra) return { tipo: "prenda", prenda: otra.prenda };
         return { tipo: "fantasma", x: ob.destino.inicio + tipoDe(p, ob.prenda!).espacios / 2 - ANCHO_PRENDA / 2, prenda: ob.prenda! };
       }
-      if (blanco === "cambiarPrendas") {
-        const otra = tendida.colgadas.find((c) => ob.destino!.inicio >= c.inicio && ob.destino!.inicio < c.inicio + tipoDe(p, c.prenda).espacios);
-        return otra ? { tipo: "prenda", prenda: otra.prenda } : null;
-      }
+      if (blanco === "cambiarPrendas") return otra ? { tipo: "prenda", prenda: otra.prenda } : null;
       return { tipo: "carta" };
     }
     return ob.prenda ? { tipo: "prenda", prenda: ob.prenda } : { tipo: "carta" };

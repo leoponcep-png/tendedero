@@ -20,8 +20,9 @@ export type Etiqueta = "fastidio" | "moja" | "tira" | "mueve";
 /**
  * Sobre qué se suelta la carta de acción. Los que acaban en «Rival» van al tendedero de otro; el resto, al tuyo.
  * Los de dos pasos (ver BLANCOS_CON_DESTINO) piden además un destino:
- * - moverPropia / moverRival: un espacio libre adonde llevar la prenda.
- * - cambiarPrendas: un espacio de otra prenda tuya; se intercambian sus sitios.
+ * - moverPropia / moverRival: un espacio libre adonde llevar la prenda, o un espacio de otra prenda del mismo
+ *   tendedero, y entonces se intercambian sus sitios.
+ * - cambiarPrendas (solo partidas guardadas antiguas): un espacio de otra prenda tuya; se intercambian sus sitios.
  * - cambiarCuerdas: otra carta de cuerda tuya; se intercambia todo lo colgado en ellas.
  * - moverCuerda: otra carta de cuerda tuya (se intercambian de sitio) o el hueco siguiente de una línea.
  * «reaccion» no se juega en tu turno: se responde con ella al fastidio de un rival.

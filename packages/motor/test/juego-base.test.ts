@@ -145,6 +145,9 @@ describe("juego base", () => {
     p.jugadores[i].pendientes = [];
     p.jugadores[i].mano = [copia(p, "secado-rapido")];
     p.ultimaRonda = false;
+    // Sin objetivos, para que la jugada no dependa de los ritmos de data/objetivos.json.
+    p.objetivosComunes = [];
+    p.jugadores.forEach((jg) => (jg.objetivoSecreto = null));
     let s = 3;
     const azar = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32);
     const j = mejorJugada(p, i, { dificultad, azar })?.jugada;

@@ -716,7 +716,58 @@ export const ICONOS_BOSQUE: Record<string, ReactElement> = {
       <Flecha d="M6 15 Q16 1 28 9" punta={[28, 9, 30]} c={COLOR.fastidio} />
     </g>
   ),
+  // Manguera verde con la boquilla echando un chorro de agua sobre una camiseta rival.
+  manguerazo: (
+    <g>
+      <path d="M4 58 Q4 44 14 42 Q22 40 24 32" fill="none" stroke={TINTA} strokeWidth="7.5" strokeLinecap="round" />
+      <path d="M4 58 Q4 44 14 42 Q22 40 24 32" fill="none" {...linea(COLOR.hierba)} strokeWidth="4.5" strokeLinecap="round" />
+      <path d="M19 33 L26 21 L33 25 L27 36 Z" {...relleno(COLOR.amarillo)} {...trazo} strokeWidth={2.4} />
+      <path d="M30 20 Q42 14 50 22 M31 25 Q44 24 52 32 M29 19 Q38 8 48 10" fill="none" {...linea(COLOR.agua)} strokeWidth="2.8" strokeLinecap="round" />
+      <MiniPrenda tipo="camiseta" c={COLOR.rojo} x={34} y={28} s={0.38} />
+      <GotaBosque x={56} y={18} r={1.1} />
+      <GotaBosque x={44} y={58} r={1.15} />
+      <g transform="translate(11 14)">
+        <circle r="8.5" {...relleno(COLOR.fastidio)} {...trazo} strokeWidth={2.2} />
+        <text y="3.8" textAnchor="middle" fontSize="10.5" fontWeight="800" fill="#ffffff" style={{ fontFamily: "var(--fuente-titulo)" }}>
+          +2
+        </text>
+      </g>
+    </g>
+  ),
   // ----- Acciones tácticas -----
+  // Cesto de mimbre con ropa asomando y el «+3» de las prendas que se roban.
+  "cesto-ropa-sucia": (
+    <g>
+      <MiniPrenda tipo="calcetin" c={COLOR.azul} x={10} y={8} s={0.34} />
+      <MiniPrenda tipo="camiseta" c={COLOR.amarillo} x={20} y={4} s={0.3} />
+      <path d="M8 30 H50 L45 56 Q44 59 41 59 H17 Q14 59 13 56 Z" {...relleno(COLOR.madera)} />
+      <path className="sombra" d="M38 30 H50 L45 56 Q44 59 41 59 H36 Z" style={{ fill: oscuro("#c99a62", 25) }} />
+      <path d="M11 40 H47 M13 49 H45 M20 30 L22 59 M29 30 V59 M38 30 L36 59" fill="none" stroke={TINTA} strokeWidth="1.4" opacity=".55" />
+      <path d="M8 30 H50 L45 56 Q44 59 41 59 H17 Q14 59 13 56 Z" fill="none" {...trazo} />
+      <rect x="5" y="26" width="48" height="6" rx="3" {...relleno(COLOR.madera)} {...trazo} strokeWidth={2.4} />
+      <g transform="translate(52 16)">
+        <circle r="9.5" {...relleno(COLOR.tactica)} {...trazo} strokeWidth={2.4} />
+        <text y="4.2" textAnchor="middle" fontSize="12" fontWeight="800" fill="#ffffff" style={{ fontFamily: "var(--fuente-titulo)" }}>
+          +3
+        </text>
+      </g>
+    </g>
+  ),
+  // Secador de pelo echando aire caliente a un calcetín.
+  secador: (
+    <g>
+      <path d="M22 34 L30 34 L34 58 Q34 61 31 61 H27 Q24 61 23 58 Z" {...relleno(COLOR.tactica)} {...trazo} strokeWidth={2.6} />
+      <path d="M12 14 H38 L46 18 V30 L38 34 H12 Z" {...relleno(COLOR.tactica)} />
+      <path className="sombra" d="M12 27 H44 L38 34 H12 Z" style={{ fill: oscuro("#4f7d6a", 25) }} />
+      <path d="M12 14 H38 L46 18 V30 L38 34 H12 Z" fill="none" {...trazo} />
+      <circle cx="14" cy="24" r="10" fill={CREMA} {...trazo} />
+      <circle cx="14" cy="24" r="5" fill="none" stroke={TINTA} strokeWidth="1.6" />
+      <circle cx="14" cy="24" r="1.6" fill={TINTA} />
+      <path d="M49 19 Q53 21 57 18 M49 24 Q54 26 60 23 M49 29 Q53 31 57 28" fill="none" {...linea(COLOR.rojo)} strokeWidth="2.4" strokeLinecap="round" />
+      <MiniPrenda tipo="calcetin" c={COLOR.azul} x={42} y={34} s={0.36} />
+      <Chispa x={58} y={10} r={3.6} />
+    </g>
+  ),
   "colocar-cuerda-extra": (
     <g>
       <g opacity=".85">

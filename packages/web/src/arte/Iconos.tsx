@@ -97,6 +97,31 @@ const ICONOS: Record<string, ReactElement> = {
       <Flecha d="M30 46 C40 50 50 46 56 36 M56 36 L48 37 M56 36 L56 44" color="#2f6f5e" />
     </g>
   ),
+  manguerazo: (
+    <g>
+      <path d="M6 58 Q6 42 20 38" fill="none" stroke="#5d8a4e" strokeWidth={6} strokeLinecap="round" />
+      <path d="M18 34 L26 24 L32 30 L24 40 Z" fill="#e8c23a" {...t} />
+      <path d="M30 24 Q42 18 52 26 M32 30 Q44 30 54 38" fill="none" stroke="#6fb2dc" strokeWidth={3} strokeLinecap="round" />
+      <Gota x={50} y={48} />
+      <Gota x={58} y={30} s={0.8} />
+    </g>
+  ),
+  "cesto-ropa-sucia": (
+    <g>
+      <Camisa x={14} y={4} s={0.4} fill="#4a7fd0" />
+      <path d="M10 30 H54 L48 56 H16 Z" fill="#c99a62" {...t} />
+      <path d="M8 26 H56 V32 H8 Z" fill="#c99a62" {...t} />
+      <path d="M14 42 H50" fill="none" {...t} strokeWidth={1.5} />
+    </g>
+  ),
+  secador: (
+    <g>
+      <path d="M22 34 H30 L34 58 H24 Z" fill="#2f6f5e" {...t} />
+      <path d="M12 14 H40 L48 18 V30 L40 34 H12 Z" fill="#2f6f5e" {...t} />
+      <circle cx={14} cy={24} r={10} fill="#f5efe4" {...t} />
+      <path d="M50 18 Q54 20 58 17 M50 24 Q55 26 60 23 M50 30 Q54 32 58 29" fill="none" stroke="#d2513f" strokeWidth={2.5} strokeLinecap="round" />
+    </g>
+  ),
   "colocar-cuerda-extra": (
     <g>
       <Cuerda y={34} />

@@ -26,7 +26,7 @@ import {
   type Patron,
 } from "@tendedero/motor";
 
-export const SEMILLA_TUTORIAL = "aprende-a-tender-833";
+export const SEMILLA_TUTORIAL = "aprende-a-tender-4442"; // cambiada con el mazo nuevo de acciones (la 833 ya no daba lo de arriba)
 export const YO = 0;
 export const RIVAL = 1;
 
@@ -93,10 +93,10 @@ export const cuerdaBasica = (p: Partida) => mano(p).find((c) => idDe(p, c) === "
 /** La cuerda con habilidad que tienes en la mano (para enseñar la loseta). */
 export const cuerdaEspecial = (p: Partida) => mano(p).find((c) => defCarta(p, c).mazo === "cuerdas" && idDe(p, c) !== "basica") ?? null;
 /** Tácticas que sirven para enseñar (por orden de preferencia): sobre una prenda tuya o sin objetivo. */
-export const TACTICAS = ["reducir-humedad", "secar-prenda", "buscar-cuerda", "colocar-cuerda-extra"];
+export const TACTICAS = ["reducir-humedad", "secador", "secar-prenda", "buscar-cuerda", "cesto-ropa-sucia"];
 export const tactica = (p: Partida) => TACTICAS.map((t) => mano(p).find((c) => idDe(p, c) === t)).find(Boolean) ?? null;
 /** Fastidios que el rival te puede jugar de guion (sobre tu calcetín o su cuerda). */
-export const FASTIDIOS = ["retrasar-secado", "mojar-cuerda-rival", "rafaga-de-viento"];
+export const FASTIDIOS = ["retrasar-secado", "manguerazo", "mojar-cuerda-rival", "rafaga-de-viento"];
 export const niHablar = (p: Partida) => mano(p).find((c) => idDe(p, c) === "ni-hablar") ?? null;
 
 /** La prenda de un tipo que tienes por tender (de las que cogiste de la cesta) o, si ya está colgada, null. */

@@ -295,7 +295,8 @@ async function efectoSobre(e: Escena, p: Partida, j: Extract<Jugada, { tipo: "ju
       return;
     }
     case "mojar-cuerda-rival":
-    case "retrasar-secado": {
+    case "retrasar-secado":
+    case "manguerazo": {
       const quitar = fx.nube(zona);
       await fx.esperar(650);
       const prendas = o.prenda ? [objetivo] : [...objetivo.querySelectorAll<HTMLElement>("[data-prenda]")];
@@ -305,18 +306,19 @@ async function efectoSobre(e: Escena, p: Partida, j: Extract<Jugada, { tipo: "ju
       await Promise.all(prendas.map((pr, i) => (alTope(pr) ? Promise.resolve() : fx.esperar(i * 120).then(() => (reproducir("gota"), fx.gotaNueva(pr))))));
       prendas.forEach((pr) => {
         const r = pr.getBoundingClientRect();
-        fx.cartelito({ x: r.left + r.width / 2, y: r.top + r.height / 2 }, alTope(pr) ? t("mesa.humedadAlTope", { n: max }) : "+1", "agua");
+        fx.cartelito({ x: r.left + r.width / 2, y: r.top + r.height / 2 }, alTope(pr) ? t("mesa.humedadAlTope", { n: max }) : id === "manguerazo" ? "+2" : "+1", "agua");
       });
       await fx.esperar(350);
       await quitar();
       return;
     }
     case "secar-prenda":
-    case "reducir-humedad": {
+    case "reducir-humedad":
+    case "secador": {
       const quitar = fx.sol(zona);
       await fx.esperar(450);
       reproducir("secar");
-      await fx.evaporar(objetivo, id === "reducir-humedad" ? 1 : Infinity);
+      await fx.evaporar(objetivo, id === "reducir-humedad" ? 1 : id === "secador" ? 2 : Infinity);
       await quitar();
       return;
     }
@@ -329,7 +331,7 @@ async function efectoSobre(e: Escena, p: Partida, j: Extract<Jugada, { tipo: "ju
 
 /** Sonido de cada fastidio: las cartas que mojan suenan a lluvia y la de viento a ráfaga. */
 function sonidoFastidio(id: string | undefined): string {
-  if (id === "mojar-cuerda-rival" || id === "retrasar-secado") return "chaparron";
+  if (id === "mojar-cuerda-rival" || id === "retrasar-secado" || id === "manguerazo") return "chaparron";
   if (id === "rafaga-de-viento") return "rafaga";
   return "fastidio";
 }
