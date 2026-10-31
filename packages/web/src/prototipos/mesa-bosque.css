@@ -13,9 +13,13 @@
   --carta-w: clamp(92px, 12vh, 140px);
   --fastidio: #b5523b;
   --tactica: #4f7d6a;
-  --grano: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n' filterUnits='userSpaceOnUse' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .3  0 0 0 0 .2  0 0 0 0 .1  0 0 0 .25 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-  --veta: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='300'><filter id='v' filterUnits='userSpaceOnUse' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='.0025 .06' numOctaves='4' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .18  0 0 0 0 .09  0 0 0 0 .03  0 0 0 1.4 -.35'/></filter><rect width='100%' height='100%' filter='url(%23v)'/></svg>");
-  --fieltro: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='f' filterUnits='userSpaceOnUse' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='1.6' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .08 0'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>");
+  /* Grano, veta y fieltro: ruido pre-renderizado UNA vez a PNG (src/arte/texturas). Antes eran SVG con feTurbulence
+   * en data-URI y el navegador recalculaba el ruido cada vez que repintaba un trozo de mesa: era lo que más tirones
+   * daba. Los PNG salen de estos mismos SVG, pintados en un canvas de Chrome, así que se ven igual; los SVG originales y
+   * el script que los vuelve a generar están en informes/rendimiento/texturas.mjs. */
+  --grano: image-set(url("../arte/texturas/grano-mesa.png") 1x, url("../arte/texturas/grano-mesa@2x.png") 2x);
+  --veta: url("../arte/texturas/veta-mesa.png");
+  --fieltro: image-set(url("../arte/texturas/fieltro-mesa.png") 1x, url("../arte/texturas/fieltro-mesa@2x.png") 2x);
   background: var(--veta) 0 0 / 900px 300px, linear-gradient(180deg, #8a5a34, #6c4325);
   font-family: var(--fuente-texto);
 }

@@ -196,16 +196,26 @@
   font-weight: 800;
   font-size: 15px;
 }
-.me-reparto-aviso.tu-turno {
+/* Latido de «te toca»: el halo va en una capa aparte y solo se anima su opacidad (animar el box-shadow
+ * repintaba el aviso y la mesa de debajo en cada fotograma). */
+.me-reparto-aviso {
+  position: relative;
+}
+.me-reparto-aviso.tu-turno::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    0 0 0 6px #f2c25a,
+    0 0 24px #f2c25a;
+  opacity: 0;
+  pointer-events: none;
   animation: me-aviso 1.2s ease-in-out infinite alternate;
 }
 @keyframes me-aviso {
   to {
-    box-shadow:
-      0 0 0 2px var(--tinta),
-      inset 5px 0 0 var(--jugador),
-      0 0 0 6px #f2c25a,
-      0 0 24px #f2c25a;
+    opacity: 1;
   }
 }
 .me-reparto-animal {

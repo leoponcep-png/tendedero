@@ -1367,25 +1367,33 @@
   box-shadow:
     0 0 0 2px #fff6e6,
     0 0 0 3.5px #c2553a;
-  animation: mj-ultima-late 1.6s ease-in-out infinite;
+  position: relative;
 }
 .mj .me-ronda.mj-ultima::before {
   content: "⏳ ";
 }
+/* El resplandor va en una capa aparte y solo se anima su opacidad (sin repintar en cada fotograma) */
+.mj .me-ronda.mj-ultima::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 14px 4px #ff7a5a99;
+  opacity: 0;
+  pointer-events: none;
+  animation: mj-ultima-late 1.6s ease-in-out infinite;
+}
 @keyframes mj-ultima-late {
   50% {
-    box-shadow:
-      0 0 0 2px #fff6e6,
-      0 0 0 3.5px #c2553a,
-      0 0 14px 4px #ff7a5a99;
+    opacity: 1;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .mj .me-ronda.mj-ultima {
+  .mj .me-ronda.mj-ultima::after {
     animation: none;
   }
 }
-.mj.sin-animaciones .me-ronda.mj-ultima {
+.mj.sin-animaciones .me-ronda.mj-ultima::after {
   animation: none;
 }
 /* La carta del día en grande va por encima de los anuncios; su sello de días ya lo lleva la carta */

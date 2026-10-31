@@ -9,7 +9,9 @@
 .hp-unica {
   --tinta-carta: #3b2516;
   --papel: #f8efdc;
-  --papel-grano: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='g' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .42  0 0 0 0 .3  0 0 0 0 .16  0 0 0 .55 -.18'/></filter><rect width='100%25' height='100%25' filter='url(%23g)'/></svg>");
+  /* Grano y acuarela pre-renderizados a PNG (src/arte/texturas; SVG originales y script en
+   * informes/rendimiento/texturas.mjs): con el SVG vivo el navegador recalculaba el ruido en cada repintado. */
+  --papel-grano: image-set(url("../arte/texturas/grano-papel.png") 1x, url("../arte/texturas/grano-papel@2x.png") 2x);
   --raya: max(1px, 0.075em);
 }
 
@@ -168,8 +170,8 @@
 .db-cozy,
 .cb-cozy,
 .dia-cozy {
-  --acuarela: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='a' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='4' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .3  0 0 0 0 .15  0 0 0 .9 -.32'/></filter><rect width='100%25' height='100%25' filter='url(%23a)'/></svg>");
-  --grano-papel: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='g' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .42  0 0 0 0 .3  0 0 0 0 .16  0 0 0 .55 -.18'/></filter><rect width='100%25' height='100%25' filter='url(%23g)'/></svg>");
+  --acuarela: url("../arte/texturas/acuarela.png");
+  --grano-papel: image-set(url("../arte/texturas/grano-papel.png") 1x, url("../arte/texturas/grano-papel@2x.png") 2x);
 }
 
 /* ---------- Dorsos de los 5 mazos, con el mismo acabado (acuarela y grano por encima) ---------- */

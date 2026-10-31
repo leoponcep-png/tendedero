@@ -62,16 +62,23 @@
     0 0 0 5px var(--jugador),
     0 8px 18px #0007;
 }
-.mf-panel.turno {
+/* Latido del panel en turno. El halo va en una capa aparte y solo se anima su opacidad: animar el box-shadow
+ * obligaba a repintar el panel (y la madera de debajo) en cada fotograma, y eso daba tirones. */
+.mf-panel.turno::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    0 0 0 5px #f2c25a,
+    0 0 26px #f2c25a;
+  opacity: 0;
+  pointer-events: none;
   animation: mf-turno 1.1s ease-in-out infinite alternate;
 }
 @keyframes mf-turno {
   to {
-    box-shadow:
-      0 0 0 2px var(--tinta),
-      inset 7px 0 0 var(--jugador),
-      0 0 0 5px #f2c25a,
-      0 0 26px #f2c25a;
+    opacity: 1;
   }
 }
 .mf-panel.apuntado {

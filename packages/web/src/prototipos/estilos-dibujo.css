@@ -751,9 +751,14 @@
     radial-gradient(ellipse 60% 55% at 50% 40%, #ffe7b866, transparent 70%),
     radial-gradient(ellipse 85% 80% at 50% 45%, transparent 58%, #3a1d1288 100%);
 }
-/* Tinta temblorosa con el color un pelín desplazado, como una risografía */
+/* El color un pelín desplazado, como una risografía. Sin url(#tinta-bosque): ese filtro ya no hace nada y cada
+ * dibujo pagaba igualmente una pasada de filtro más al pintarse. */
 .estilo-fusion .ilu g[filter] {
-  filter: url(#tinta-bosque) drop-shadow(1.4px 1px 0 #ff4f8b55);
+  filter: drop-shadow(1.4px 1px 0 #ff4f8b55);
+}
+/* Fuera de las ilustraciones, el atributo filter="url(#tinta-bosque)" (que no cambia nada) tampoco se aplica */
+g[filter="url(#tinta-bosque)"] {
+  filter: none;
 }
 .estilo-fusion .ilu .capa-rica {
   display: inline;
