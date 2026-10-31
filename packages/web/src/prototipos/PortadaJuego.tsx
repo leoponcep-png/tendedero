@@ -58,7 +58,21 @@ export function LogoTendedero({ className }: { className?: string }) {
         <rect x={121} y={67} width={398} height={106} rx={10} fill="none" stroke={TONO.ribete} strokeWidth={2.6} />
         <rect x={126} y={72} width={388} height={96} rx={7} fill={TONO.carton} opacity={0.45} />
         <path d="M150 150 H490" stroke={TONO.ribete} strokeWidth={2} strokeDasharray="2 5" strokeLinecap="round" />
-        <text x={320} y={138} textAnchor="middle" className="pt-rotulo" fill={TINTA}>
+        <defs>
+          <linearGradient id="pt-rotulo-relleno" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#fff6dd" />
+            <stop offset="0.55" stopColor="#f6d98f" />
+            <stop offset="1" stopColor={TONO.mostaza} />
+          </linearGradient>
+        </defs>
+        {/* Rótulo con volumen: un canto rojo debajo con su contorno de tinta, y encima el relleno dorado con su brillo */}
+        <text x={320} y={144} textAnchor="middle" className="pt-rotulo" fill={TONO.rojo} stroke={TINTA} strokeWidth={9} strokeLinejoin="round" paintOrder="stroke">
+          Tendedero
+        </text>
+        <text x={320} y={138} textAnchor="middle" className="pt-rotulo" fill="url(#pt-rotulo-relleno)" stroke={TINTA} strokeWidth={5} strokeLinejoin="round" paintOrder="stroke">
+          Tendedero
+        </text>
+        <text x={320} y={138} textAnchor="middle" className="pt-rotulo pt-rotulo-brillo" fill="none" stroke="#ffffff" strokeOpacity={0.55} strokeWidth={1.6} transform="translate(-1.5 -2.5)">
           Tendedero
         </text>
       </g>
