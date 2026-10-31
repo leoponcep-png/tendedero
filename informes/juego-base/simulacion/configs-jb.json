@@ -1,0 +1,716 @@
+[
+ {
+  "id": "ref-2j",
+  "semilla": "jb-2",
+  "jugadores": 2,
+  "niveles": [
+   "normal",
+   "dificil"
+  ]
+ },
+ {
+  "id": "ref-3j",
+  "semilla": "jb-3",
+  "jugadores": 3,
+  "niveles": [
+   "normal",
+   "dificil"
+  ]
+ },
+ {
+  "id": "ref-4j",
+  "semilla": "jb-4",
+  "jugadores": 4,
+  "niveles": [
+   "normal",
+   "dificil"
+  ]
+ },
+ {
+  "id": "a40-2j",
+  "semilla": "jb-2",
+  "jugadores": 2,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "umbral": 40
+ },
+ {
+  "id": "a40-3j",
+  "semilla": "jb-3",
+  "jugadores": 3,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "umbral": 40
+ },
+ {
+  "id": "a40-4j",
+  "semilla": "jb-4",
+  "jugadores": 4,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "umbral": 40
+ },
+ {
+  "id": "b30-2j",
+  "semilla": "jb-2",
+  "jugadores": 2,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   2,
+   3
+  ]
+ },
+ {
+  "id": "b30-3j",
+  "semilla": "jb-3",
+  "jugadores": 3,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   2,
+   3
+  ]
+ },
+ {
+  "id": "b30-4j",
+  "semilla": "jb-4",
+  "jugadores": 4,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   2,
+   3
+  ]
+ },
+ {
+  "id": "c30-2j",
+  "semilla": "jb-2",
+  "jugadores": 2,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   3,
+   5
+  ]
+ },
+ {
+  "id": "c30-3j",
+  "semilla": "jb-3",
+  "jugadores": 3,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   3,
+   5
+  ]
+ },
+ {
+  "id": "c30-4j",
+  "semilla": "jb-4",
+  "jugadores": 4,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   3,
+   5
+  ]
+ },
+ {
+  "id": "d-2j",
+  "semilla": "jb-2",
+  "jugadores": 2,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  }
+ },
+ {
+  "id": "d-3j",
+  "semilla": "jb-3",
+  "jugadores": 3,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  }
+ },
+ {
+  "id": "d-4j",
+  "semilla": "jb-4",
+  "jugadores": 4,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  }
+ },
+ {
+  "id": "e-2j",
+  "semilla": "jb-2",
+  "jugadores": 2,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "mejoraLibre": true
+ },
+ {
+  "id": "e-3j",
+  "semilla": "jb-3",
+  "jugadores": 3,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "mejoraLibre": true
+ },
+ {
+  "id": "e-4j",
+  "semilla": "jb-4",
+  "jugadores": 4,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "mejoraLibre": true
+ },
+ {
+  "id": "b25-2j",
+  "semilla": "jb-2",
+  "jugadores": 2,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   2,
+   3
+  ],
+  "umbral": 25
+ },
+ {
+  "id": "b25-3j",
+  "semilla": "jb-3",
+  "jugadores": 3,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   2,
+   3
+  ],
+  "umbral": 25
+ },
+ {
+  "id": "b25-4j",
+  "semilla": "jb-4",
+  "jugadores": 4,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   2,
+   3
+  ],
+  "umbral": 25
+ },
+ {
+  "id": "c35-2j",
+  "semilla": "jb-2",
+  "jugadores": 2,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   3,
+   5
+  ],
+  "umbral": 35
+ },
+ {
+  "id": "c35-3j",
+  "semilla": "jb-3",
+  "jugadores": 3,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   3,
+   5
+  ],
+  "umbral": 35
+ },
+ {
+  "id": "c35-4j",
+  "semilla": "jb-4",
+  "jugadores": 4,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   3,
+   5
+  ],
+  "umbral": 35
+ },
+ {
+  "id": "de-2j",
+  "semilla": "jb-2",
+  "jugadores": 2,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true
+ },
+ {
+  "id": "de-3j",
+  "semilla": "jb-3",
+  "jugadores": 3,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true
+ },
+ {
+  "id": "de-4j",
+  "semilla": "jb-4",
+  "jugadores": 4,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true
+ },
+ {
+  "id": "ade40-2j",
+  "semilla": "jb-2",
+  "jugadores": 2,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true,
+  "umbral": 40
+ },
+ {
+  "id": "ade40-3j",
+  "semilla": "jb-3",
+  "jugadores": 3,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true,
+  "umbral": 40
+ },
+ {
+  "id": "ade40-4j",
+  "semilla": "jb-4",
+  "jugadores": 4,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true,
+  "umbral": 40
+ },
+ {
+  "id": "cde30-2j",
+  "semilla": "jb-2",
+  "jugadores": 2,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   3,
+   5
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true
+ },
+ {
+  "id": "cde30-3j",
+  "semilla": "jb-3",
+  "jugadores": 3,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   3,
+   5
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true
+ },
+ {
+  "id": "cde30-4j",
+  "semilla": "jb-4",
+  "jugadores": 4,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   3,
+   5
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true
+ },
+ {
+  "id": "cde35-2j",
+  "semilla": "jb-2",
+  "jugadores": 2,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   3,
+   5
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true,
+  "umbral": 35
+ },
+ {
+  "id": "cde35-3j",
+  "semilla": "jb-3",
+  "jugadores": 3,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   3,
+   5
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true,
+  "umbral": 35
+ },
+ {
+  "id": "cde35-4j",
+  "semilla": "jb-4",
+  "jugadores": 4,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   3,
+   5
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true,
+  "umbral": 35
+ },
+ {
+  "id": "bde25-2j",
+  "semilla": "jb-2",
+  "jugadores": 2,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   2,
+   3
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true,
+  "umbral": 25
+ },
+ {
+  "id": "bde25-3j",
+  "semilla": "jb-3",
+  "jugadores": 3,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   2,
+   3
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true,
+  "umbral": 25
+ },
+ {
+  "id": "bde25-4j",
+  "semilla": "jb-4",
+  "jugadores": 4,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   2,
+   3
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true,
+  "umbral": 25
+ },
+ {
+  "id": "bde30-2j",
+  "semilla": "jb-2",
+  "jugadores": 2,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   2,
+   3
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true
+ },
+ {
+  "id": "bde30-3j",
+  "semilla": "jb-3",
+  "jugadores": 3,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   2,
+   3
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true
+ },
+ {
+  "id": "bde30-4j",
+  "semilla": "jb-4",
+  "jugadores": 4,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "prendas": [
+   1,
+   2,
+   3
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true
+ },
+ {
+  "id": "de35-2j",
+  "semilla": "jb-2",
+  "jugadores": 2,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true,
+  "umbral": 35
+ },
+ {
+  "id": "de35-3j",
+  "semilla": "jb-3",
+  "jugadores": 3,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true,
+  "umbral": 35
+ },
+ {
+  "id": "de35-4j",
+  "semilla": "jb-4",
+  "jugadores": 4,
+  "niveles": [
+   "normal",
+   "dificil"
+  ],
+  "ajustes": {
+   "jugablesPorTurno": {
+    "cuerdas": 2,
+    "acciones": 2
+   }
+  },
+  "mejoraLibre": true,
+  "umbral": 35
+ }
+]

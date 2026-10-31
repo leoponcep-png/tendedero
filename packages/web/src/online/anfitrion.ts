@@ -1,4 +1,4 @@
-import { aplicar, cestasPorDefecto, crearPartida, porQueNoVale, siguienteJugadaIA, vistaPara, type Ajustes, type Datos, type Dificultad, type Jugada, type Partida } from "@tendedero/motor";
+import { aplicar, cestasPorDefecto, crearPartida, partidaAlDia, porQueNoVale, siguienteJugadaIA, vistaPara, type Ajustes, type Datos, type Dificultad, type Jugada, type Partida } from "@tendedero/motor";
 import Peer, { type DataConnection } from "peerjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LINEAS_DE_REGISTRO, PREFIJO, textoError, type Asiento, type MensajeAnfitrion, type MensajeInvitado, type PerfilOnline } from "./protocolo";
@@ -94,7 +94,11 @@ function asientosDe(sala: SalaGuardada, conectados: string[]): Asiento[] {
  * y aplica todas las jugadas (las suyas y las de los demás) sobre la partida, que solo existe aquí.
  */
 export function useAnfitrion(inicial: SalaGuardada, datos: Datos) {
-  const [sala, setSala] = useState<SalaGuardada>(inicial);
+  // Una sala guardada con una versión anterior (p. ej. en el antiguo modo «Partida larga») se pone al día.
+  const [sala, setSala] = useState<SalaGuardada>(() => {
+    const { modo: _, ...ajustes } = inicial.ajustes as SalaGuardada["ajustes"] & { modo?: unknown };
+    return { ...inicial, ajustes, partida: inicial.partida && partidaAlDia(inicial.partida, datos) };
+  });
   const [abierta, setAbierta] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [conectados, setConectados] = useState<string[]>([]);

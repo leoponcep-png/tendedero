@@ -230,7 +230,7 @@ function Configuraciones({
           Borrar
         </button>
         <span className="separador" />
-        <input type="text" placeholder="Nombre, p. ej. 1-3-6 con umbral 40" value={nombre} onChange={(e) => onNombre(e.target.value)} />
+        <input type="text" placeholder="Nombre, p. ej. 1-2-3 con umbral 35" value={nombre} onChange={(e) => onNombre(e.target.value)} />
         <button
           disabled={!nombre.trim()}
           onClick={async () => {

@@ -47,7 +47,7 @@ const opcionesIA = (p: Partida) => ({ dificultad: "facil" as const, azar: azarDe
 /** Crea la partida del tutorial con los objetivos secretos ya elegidos (el tuyo, el primero que te ofrecen). */
 export function partidaTutorial(datos: Datos, nombres: [string, string], semilla = SEMILLA_TUTORIAL): Partida {
   const base = ajustesIniciales(datos);
-  let p = crearPartida(datos, { ...base, jugadores: 2, cestas: { ...base.cestas, numero: cestasPorDefecto(datos, 2) }, modo: "normal", semilla });
+  let p = crearPartida(datos, { ...base, jugadores: 2, cestas: { ...base.cestas, numero: cestasPorDefecto(datos, 2) }, semilla });
   p.jugadores[YO].nombre = nombres[0];
   p.jugadores[RIVAL].nombre = nombres[1];
   for (const j of [YO, RIVAL]) {

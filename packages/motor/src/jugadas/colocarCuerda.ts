@@ -79,8 +79,9 @@ export const colocarCuerda: Manejador<JugadaDe<"colocarCuerda">> = {
   },
 };
 
-// Se mejora poniendo la carta encima de otra tuya; las prendas se quedan. Las cuerdas con habilidad van sobre
-// una básica, y una que se rompe (la vieja) solo se arregla poniéndole encima una básica.
+// Se mejora poniendo la carta encima de otra tuya; las prendas se quedan y la de debajo se descarta. Una cuerda con
+// habilidad va encima de una básica o de otra con habilidad (se cambia una habilidad por otra); una básica no tapa
+// una con habilidad. La que se rompe (la vieja) solo se arregla poniéndole encima una básica, y no sirve para mejorar.
 export const mejorarCuerda: Manejador<JugadaDe<"mejorarCuerda">> = {
   soloEnSuTurno: true,
   validar(p, j) {
@@ -91,7 +92,9 @@ export const mejorarCuerda: Manejador<JugadaDe<"mejorarCuerda">> = {
     const debajo = defCarta(p, tendida.carta);
     const encima = defCarta(p, j.carta);
     const seRompe = (carta: string) => Boolean(efectoDeCuerda(p, carta)?.efecto.seRompeTras);
-    if (debajo.efecto !== null && !seRompe(tendida.carta)) return no("soloMejoraBasica", "Solo se mejoran las cuerdas básicas y las viejas.");
+    if (debajo.efecto !== null && !seRompe(tendida.carta) && encima.efecto === null) {
+      return no("soloConHabilidad", `${debajo.nombre} solo se cambia por otra cuerda con habilidad.`, { carta: debajo.id });
+    }
     if (encima.id === debajo.id) return no("yaEs", `Ya es una ${debajo.nombre.toLowerCase()}.`, { carta: debajo.id });
     if (seRompe(j.carta)) return no("noMejora", `${encima.nombre} no sirve para mejorar una cuerda.`, { carta: encima.id });
     if (seRompe(tendida.carta) && encima.efecto !== null) return no("arreglarConBasica", `${debajo.nombre} solo se arregla poniéndole encima una cuerda básica.`, { carta: debajo.id });

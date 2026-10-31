@@ -1,0 +1,26 @@
+--- /c/Users/Leo/Desktop/tendedero/packages/motor/src/jugadas/colocarCuerda.ts	2026-10-24 01:48:07.907826900 +0200
++++ packages/motor/src/jugadas/colocarCuerda.ts	2026-10-30 23:35:48.010455200 +0100
+@@ -91,7 +91,9 @@
+     const debajo = defCarta(p, tendida.carta);
+     const encima = defCarta(p, j.carta);
+     const seRompe = (carta: string) => Boolean(efectoDeCuerda(p, carta)?.efecto.seRompeTras);
+-    if (debajo.efecto !== null && !seRompe(tendida.carta)) return no("soloMejoraBasica", "Solo se mejoran las cuerdas básicas y las viejas.");
++    // SIMULACIÓN idea (e): con __MEJORA_LIBRE, una cuerda con habilidad también se puede poner encima de otra con habilidad.
++    const libre = Boolean((globalThis as { __MEJORA_LIBRE?: boolean }).__MEJORA_LIBRE);
++    if (debajo.efecto !== null && !seRompe(tendida.carta) && !(libre && encima.efecto !== null)) return no("soloMejoraBasica", "Solo se mejoran las cuerdas básicas y las viejas.");
+     if (encima.id === debajo.id) return no("yaEs", `Ya es una ${debajo.nombre.toLowerCase()}.`, { carta: debajo.id });
+     if (seRompe(j.carta)) return no("noMejora", `${encima.nombre} no sirve para mejorar una cuerda.`, { carta: encima.id });
+     if (seRompe(tendida.carta) && encima.efecto !== null) return no("arreglarConBasica", `${debajo.nombre} solo se arregla poniéndole encima una cuerda básica.`, { carta: debajo.id });
+--- /c/Users/Leo/Desktop/tendedero/packages/motor/src/ia.ts	2026-10-30 23:09:49.000868400 +0100
++++ packages/motor/src/ia.ts	2026-10-30 23:36:07.647281200 +0100
+@@ -360,7 +360,9 @@
+   if (huecos > 0) return Math.max(0, Math.min(maxCuerdasRobadas(p), huecos - mano.length));
+   const basicas = p.jugadores[i].lineas.reduce((s, l) => s + l.cartas.filter((t) => defCarta(p, t.carta).efecto === null).length, 0);
+   const paraMejorar = mano.filter((x) => defCarta(p, x).efecto !== null && !efectoDeCuerda(p, x)?.efecto.seRompeTras).length;
+-  return Math.max(0, Math.min(maxCuerdasRobadas(p), basicas - paraMejorar));
++  // SIMULACIÓN idea (e): con el tendedero lleno quiere tener al menos 1 cuerda con habilidad en la mano para cambiar.
++  const extra = (globalThis as { __MEJORA_LIBRE?: boolean }).__MEJORA_LIBRE ? 1 : 0;
++  return Math.max(0, Math.min(maxCuerdasRobadas(p), basicas + extra - paraMejorar));
+ }
+ 
+ /** Si el atacado anula el fastidio: solo cuando le perjudica (lo que pierde pesa más que gastar la carta). */

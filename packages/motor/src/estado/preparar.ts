@@ -1,4 +1,4 @@
-import { ajustesConModo, enJuego, objetivoConModo, type Ajustes } from "../ajustes";
+import { enJuego, type Ajustes } from "../ajustes";
 import { barajar, semillaNueva, sembrar } from "../azar";
 import type { Datos } from "../datos/esquemas";
 import { anotar } from "./registro";
@@ -9,8 +9,9 @@ import { humedadMaxima, pilaDe, robar } from "./utilidades";
 
 export function crearPartida(datos: Datos, ajustesElegidos: Ajustes): Partida {
   const semilla = ajustesElegidos.semilla.trim() || semillaNueva();
-  // La partida guarda los ajustes con lo que cambia su modo ya aplicado (puntos de las prendas, umbral…).
-  const ajustes = structuredClone(ajustesConModo({ ...ajustesElegidos, semilla }, datos));
+  const ajustes = structuredClone({ ...ajustesElegidos, semilla });
+  // Las partidas guardadas con el antiguo modo «larga» ya no lo llevan: se juegan con las reglas de siempre.
+  delete (ajustes as { modo?: unknown }).modo;
 
   const p: Partida = {
     version: 1,
@@ -71,7 +72,7 @@ export function crearPartida(datos: Datos, ajustesElegidos: Ajustes): Partida {
   barajar(p, p.mazos.acciones);
   barajar(p, p.mazos.dia);
 
-  const objetivos = datos.objetivos.filter((o) => enJuego(o, ajustes)).map((o) => objetivoConModo(o, datos, ajustes.modo));
+  const objetivos = datos.objetivos.filter((o) => enJuego(o, ajustes));
   for (const o of objetivos) p.catalogo.objetivos[o.id] = o;
   // Un solo montón: los primeros son los comunes y del resto se reparten los secretos.
   const secretos = objetivos.map((o) => o.id);
@@ -100,4 +101,31 @@ export function crearPartida(datos: Datos, ajustesElegidos: Ajustes): Partida {
   renovarCestas(p);
   empezarReparto(p);
   return p;
+}
+
+/**
+ * Pone al día una partida guardada con una versión anterior. Hoy solo hace una cosa: las que se empezaron con el
+ * antiguo modo «Partida larga» (`ajustes.modo`, ya no existe) siguen como partidas normales, con la meta, las cuerdas
+ * por turno, los puntos de las prendas y los ritmos de los objetivos de siempre. Lo demás no se toca. Devuelve una
+ * copia si cambia algo; si no, la misma partida.
+ */
+export function partidaAlDia(p: Partida, datos: Datos): Partida {
+  const viejo = p.ajustes as Partida["ajustes"] & { modo?: unknown };
+  if (viejo.modo === undefined) return p;
+  const q = structuredClone(p);
+  const a = q.ajustes as Partida["ajustes"] & { modo?: unknown };
+  const eraLarga = a.modo === "larga";
+  delete a.modo;
+  if (!eraLarga) return q;
+  a.umbralFinal = datos.porDefecto.umbralFinal;
+  a.jugablesPorTurno = structuredClone(datos.porDefecto.jugablesPorTurno);
+  for (const t of datos.tipos) {
+    if (a.prendas[t.id]) a.prendas[t.id].puntos = t.puntos;
+    if (q.catalogo.tipos[t.id]) q.catalogo.tipos[t.id].puntos = t.puntos;
+  }
+  for (const o of datos.objetivos) {
+    const enPartida = q.catalogo.objetivos[o.id];
+    if (enPartida) q.catalogo.objetivos[o.id] = { ...enPartida, cada: o.cada, puntos: o.puntos };
+  }
+  return q;
 }

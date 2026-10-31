@@ -29,7 +29,7 @@ export const ACCIONES: Record<string, Def> = Object.fromEntries(acciones.cartas.
 export const CUERDAS: Record<string, { nombre: string; efecto: string | null }> = Object.fromEntries(cuerdas.cartas.map((c) => [c.efecto ?? "basica", c]));
 
 export const COLORES = { blanco: "#f4f1ea", azul: "#4a7fd0", rojo: "#d2513f", amarillo: "#e8c23a" };
-export const TIPOS = { calcetin: { espacios: 1, humedad: 1, puntos: 1 }, camiseta: { espacios: 2, humedad: 2, puntos: 3 }, toalla: { espacios: 3, humedad: 3, puntos: 6 } };
+export const TIPOS = { calcetin: { espacios: 1, humedad: 1, puntos: 1 }, camiseta: { espacios: 2, humedad: 2, puntos: 2 }, toalla: { espacios: 3, humedad: 3, puntos: 3 } };
 export const JUGADORES = [
   { nombre: "Tú", color: "#2f7a63" },
   { nombre: "Lu", color: "#c4643d" },
@@ -37,7 +37,7 @@ export const JUGADORES = [
 export const MAZO_TU = ["rafaga-de-viento", "retrasar-secado", "mojar-cuerda-rival", "secar-prenda", "reducir-humedad"];
 export const MAZO_RIVAL = ["rafaga-de-viento", "retrasar-secado", "mojar-cuerda-rival"];
 
-/** `puntos`: los que da al secarse en la partida (cambian con el modo de juego); sin ellos, los de TIPOS. */
+/** `puntos`: los que da al secarse en la partida (los de sus ajustes); sin ellos, los de TIPOS. */
 export type Prenda = { id: string; tipo: keyof typeof TIPOS; color: string; humedad: number; puntos?: number };
 export type Cuerda = { id: string; efecto: string | null; pinzas?: string; colgadas: { prenda: Prenda; inicio: number }[] };
 export type Jugador = { lineas: Cuerda[][]; porTender: Prenda[]; secas: Prenda[]; puntos: number };

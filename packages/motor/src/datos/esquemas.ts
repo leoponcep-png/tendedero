@@ -61,20 +61,6 @@ export const esquemaObjetivos = z.object({ objetivos: z.array(esquemaObjetivo) }
 
 const parCartas = z.object({ cuerdas: entero(), acciones: entero() });
 
-/** Lo que cambia un modo de juego. Todo es opcional: lo que no se dice queda como en el modo normal. */
-export const esquemaModo = z.object({
-  umbralFinal: entero(1).optional(),
-  /** Por id de tipo de prenda: los puntos que da al secarse. */
-  prendas: z.record(id, z.object({ puntos: z.number().int() })).optional(),
-  /** Por id de objetivo: su ritmo en este modo (cada `cada`, `puntos`). */
-  objetivos: z.record(id, z.object({ cada: entero(1), puntos: entero() })).optional(),
-  manoInicial: parCartas.optional(),
-  roboPorTurno: z.object({ cartas: entero(), maxCuerdas: entero() }).optional(),
-  jugablesPorTurno: parCartas.optional(),
-  limiteMano: entero(1).optional(),
-  humedadMaxima: entero(1).optional(),
-});
-
 export const esquemaAjustesPorDefecto = z.object({
   jugadores: entero(2).max(4, "como máximo 4"),
   manoInicial: parCartas,
@@ -91,11 +77,6 @@ export const esquemaAjustesPorDefecto = z.object({
   }),
   tendedero: z.object({ lineas: entero(1), cartasPorLinea: entero(1) }),
   objetivos: z.object({ comunes: entero(), secretosRepartidos: entero() }),
-  /**
-   * Modos de juego distintos del normal (p. ej. «larga»): lo que cambian sobre las reglas de siempre.
-   * El modo normal no está aquí porque no cambia nada.
-   */
-  modos: z.record(id, esquemaModo).optional(),
 });
 
 export type EstadoCarta = z.infer<typeof esquemaEstado>;
@@ -103,7 +84,6 @@ export type Color = z.infer<typeof esquemaColor>;
 export type TipoPrenda = z.infer<typeof esquemaTipoPrenda>;
 export type DefObjetivo = z.infer<typeof esquemaObjetivo>;
 export type AjustesPorDefecto = z.infer<typeof esquemaAjustesPorDefecto>;
-export type DefModo = z.infer<typeof esquemaModo>;
 
 export type Parametros = Record<string, number | string>;
 

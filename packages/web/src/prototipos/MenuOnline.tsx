@@ -2,8 +2,7 @@ import { useState, type CSSProperties, type ReactNode } from "react";
 import { esNombreTu, useT } from "../i18n";
 import { limpiarCodigo } from "../online/protocolo";
 import { Animal } from "./Animales";
-import { MODOS_JUEGO, type ModoJuego } from "@tendedero/motor";
-import { leerConfig, modoDe, type Perfil } from "./MenuPartida";
+import { type Perfil } from "./MenuPartida";
 
 // Pantalla «Online» de la portada: con qué nombre te ven, crear una sala (y cuántas plazas tiene), unirte con
 // el código que te han pasado y el hueco de la partida rápida (emparejamiento, lo conecta la capa de Steam).
@@ -25,8 +24,7 @@ export function MenuOnline({
   partidaRapida,
 }: {
   perfil: Perfil;
-  /** `modo`: el modo de juego que elige el anfitrión para la sala. */
-  onCrear: (nombre: string, plazas: number, modo: ModoJuego) => void;
+  onCrear: (nombre: string, plazas: number) => void;
   onUnirse: (nombre: string, codigo: string) => void;
   /** Hueco para la partida rápida: si no se pasa, sale el botón como «muy pronto». */
   partidaRapida?: ReactNode;
@@ -34,8 +32,6 @@ export function MenuOnline({
   const t = useT();
   const [nombre, setNombre] = useState(() => leerNombreOnline(perfil));
   const [plazas, setPlazas] = useState(4);
-  // Empieza con el modo que elegiste la última vez en el menú de partida.
-  const [modo, setModo] = useState<ModoJuego>(() => modoDe(leerConfig()));
   const [codigo, setCodigo] = useState("");
   const limpio = nombre.trim();
   const cod = limpiarCodigo(codigo);
@@ -65,15 +61,7 @@ export function MenuOnline({
               </button>
             ))}
           </div>
-          <div className="ol-plazas ol-modo-juego" role="group" aria-label={t("menu.modoJuego")}>
-            <span>{t("menu.modoJuego")}</span>
-            {MODOS_JUEGO.map((m) => (
-              <button key={m} className={modo === m ? "activa" : ""} aria-pressed={modo === m} onClick={() => setModo(m)} title={t(`menu.ayudaModoJuego.${m}`)}>
-                {t(`menu.modoJuego.${m}`)}
-              </button>
-            ))}
-          </div>
-          <button className="principal ol-accion" disabled={!limpio} onClick={() => onCrear(limpio, plazas, modo)}>
+          <button className="principal ol-accion" disabled={!limpio} onClick={() => onCrear(limpio, plazas)}>
             {t("online.crearBoton")}
           </button>
         </section>

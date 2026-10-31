@@ -32,7 +32,7 @@ export function prendaDibujo(p: Partida, id: string): PrendaDibujo {
     tipo: pr.tipo as keyof typeof TIPOS,
     color: p.catalogo.colores[pr.color]?.hex ?? "#ccc",
     humedad: humedadEscala(p, id),
-    // Los puntos de la partida: dependen del modo de juego.
+    // Los puntos de la partida (los de sus ajustes).
     puntos: p.catalogo.tipos[pr.tipo]?.puntos,
   };
 }

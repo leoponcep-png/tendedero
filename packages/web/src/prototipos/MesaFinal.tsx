@@ -1,4 +1,4 @@
-import { ajustesIniciales, cestasPorDefecto, type Datos, type ModoJuego } from "@tendedero/motor";
+import { ajustesIniciales, cestasPorDefecto, type Datos } from "@tendedero/motor";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { musica, pistaPedida, reproducir } from "../audio";
 import { useT } from "../i18n";
@@ -8,7 +8,7 @@ import { guardarSala, leerSala, nuevaSala } from "../online/anfitrion";
 import { nuevoCodigo } from "../online/protocolo";
 import { entrarConNombre, SalaAnfitrion, SalaInvitado, type SalaNueva } from "../pantallas/SalaOnline";
 import { DefsBosque } from "./ArteBosque";
-import { leerConfig, MenuPartida, modoDe, type ConfigPartida } from "./MenuPartida";
+import { leerConfig, MenuPartida, type ConfigPartida } from "./MenuPartida";
 import { leerNombreOnline, MenuOnline } from "./MenuOnline";
 import { CabeceraMenu, FondoTendedero, PantallaTitulo, type DestinoPortada } from "./PortadaJuego";
 import { VentanaAjustes } from "./VentanaAjustes";
@@ -46,7 +46,7 @@ export function MesaFinal({ datos, ruta = [] }: { onVersion?: (v: string) => voi
   // Si había una partida contra la IA a medias en esta pestaña, se sigue con ella.
   const [config, setConfig] = useState<ConfigPartida | null>(() => {
     const g = partidaGuardada();
-    return g ? { jugadores: g.perfiles, dificultad: g.dificultad, modo: modoDe(g.partida.ajustes) } : null;
+    return g ? { jugadores: g.perfiles, dificultad: g.dificultad } : null;
   });
   const [ajustes, setAjustes] = useState(false);
   const t = useT();
@@ -113,15 +113,15 @@ export function MesaFinal({ datos, ruta = [] }: { onVersion?: (v: string) => voi
 
   // La partida tutorial «Aprender a jugar» (se abre desde la portada y desde el menú de partida).
   if (que === "aprender") return <TutorialPartida datos={datos} onSalir={aPortada} />;
-  if (config) return <PartidaContraIA datos={datos} perfiles={config.jugadores} dificultad={config.dificultad} modo={modoDe(config)} onSalir={() => setConfig(null)} />;
+  if (config) return <PartidaContraIA datos={datos} perfiles={config.jugadores} dificultad={config.dificultad} onSalir={() => setConfig(null)} />;
 
-  /** Crea la sala online con estas plazas y la abre como anfitrión. `modo`: sin él, el elegido en el menú de partida. */
-  function abrirSala(nombre: string, plazas: number, cod = nuevoCodigo(), modo: ModoJuego = modoDe(leerConfig())) {
+  /** Crea la sala online con estas plazas y la abre como anfitrión. */
+  function abrirSala(nombre: string, plazas: number, cod = nuevoCodigo()) {
     const yo = leerConfig().jugadores[0];
     recordarNombre(nombre);
     if (!leerSala(cod)) {
       const base = ajustesIniciales(datos);
-      guardarSala(nuevaSala(cod, { ...base, jugadores: plazas, cestas: { ...base.cestas, numero: cestasPorDefecto(datos, plazas) }, modo }, nombre, { animal: yo.animal, color: yo.color, tapete: yo.tapete }));
+      guardarSala(nuevaSala(cod, { ...base, jugadores: plazas, cestas: { ...base.cestas, numero: cestasPorDefecto(datos, plazas) } }, nombre, { animal: yo.animal, color: yo.color, tapete: yo.tapete }));
     }
     ir(`${RUTA}/anfitrion/${cod}`);
   }
@@ -141,7 +141,7 @@ export function MesaFinal({ datos, ruta = [] }: { onVersion?: (v: string) => voi
         <div className="pt-sub-contenido">
           <MenuOnline
             perfil={perfil}
-            onCrear={(nombre, plazas, modo) => abrirSala(nombre, plazas, undefined, modo)}
+            onCrear={(nombre, plazas) => abrirSala(nombre, plazas)}
             onUnirse={unirse}
             partidaRapida={
               <button className="principal ol-accion" onClick={() => setRapida(true)}>

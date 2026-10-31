@@ -81,7 +81,7 @@ export const PASOS: Paso[] = [
   {
     id: "cuerda",
     si: (p) => miTurno(p) && !!cuerdaBasica(p) && p.jugadores[YO].lineas[0].cartas.length === 0,
-    datos: (p) => ({ carta: nombre(p, cuerdaBasica(p)) }),
+    datos: (p) => ({ carta: nombre(p, cuerdaBasica(p)), n: p.ajustes.jugablesPorTurno.cuerdas }),
     foco: (p) => [enMano(cuerdaBasica(p)), `[data-hueco="${YO}:0"]`],
     // En la línea de arriba: así la cuerda especial de después nunca le hace sombra.
     permitida: (j, p) => esMia(j) && j.tipo === "colocarCuerda" && j.carta === cuerdaBasica(p) && j.linea === 0 && j.en === undefined,
@@ -105,8 +105,8 @@ export const PASOS: Paso[] = [
     id: "humedad",
     datos: (p) => ({
       calcetin: p.catalogo.tipos.calcetin?.puntos ?? 1,
-      camiseta: p.catalogo.tipos.camiseta?.puntos ?? 3,
-      toalla: p.catalogo.tipos.toalla?.puntos ?? 6,
+      camiseta: p.catalogo.tipos.camiseta?.puntos ?? 2,
+      toalla: p.catalogo.tipos.toalla?.puntos ?? 3,
       max: humedadMaxima(p),
     }),
     foco: () => [...tendida(0, 0)],

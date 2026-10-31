@@ -2,7 +2,7 @@ export * from "./datos/esquemas";
 export { ARCHIVOS_DATOS, cargarDatos, ErrorDatos, type DatosCrudos, type NombreArchivo } from "./datos/cargar";
 export * from "./ajustes";
 export * from "./estado/tipos";
-export { crearPartida } from "./estado/preparar";
+export { crearPartida, partidaAlDia } from "./estado/preparar";
 export { cierraLaRonda, jugadorInicial, ordenDeRonda, diasRestantes } from "./estado/ronda";
 export { maxCuerdasRobadas } from "./jugadas/terminarTurno";
 export { puntuarObjetivo } from "./estado/final";

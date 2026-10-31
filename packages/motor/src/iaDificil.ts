@@ -30,8 +30,8 @@ export function rondasRestantes(p: Partida): number {
   const falta = p.ajustes.umbralFinal - lider;
   if (falta <= 0) return 1;
   // Ritmo de puntos por ronda del que va primero: lo visto hasta ahora, o una estimación al principio.
-  // La estimación va con lo que dan las prendas en esta partida (depende del modo): con las de siempre
-  // (1,5 puntos por pinza de media) empieza en 6 y no baja de 4.
+  // La estimación va con lo que dan las prendas en esta partida: con 1/2/3 puntos (1 por pinza de media)
+  // empieza en 4 y no baja de 2,7.
   const porPinza = puntosPorPinza(p);
   const ritmo = p.ronda > 1 ? Math.max((porPinza * 8) / 3, lider / (p.ronda - 1)) : 4 * porPinza;
   let r = Math.max(1, Math.ceil(falta / ritmo));
@@ -42,7 +42,7 @@ export function rondasRestantes(p: Partida): number {
   return r;
 }
 
-/** Puntos por pinza de las prendas de la partida, de media entre los tipos (salen del modo de juego). */
+/** Puntos por pinza de las prendas de la partida, de media entre los tipos (salen de los ajustes). */
 function puntosPorPinza(p: Partida): number {
   const tipos = Object.values(p.catalogo.tipos);
   if (tipos.length === 0) return 1.5;

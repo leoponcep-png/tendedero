@@ -4,7 +4,7 @@ import { tono } from "../arte/color";
 import { colorEstilo, COLOR, CREMA, GotaBosque, ICONOS_BOSQUE, IconoBosque, nombreColor, PinzaBosque, PrendaBosque, TINTA } from "./ArteBosque";
 import { EMBLEMAS, IconoDia, IlustraObjetivo } from "./IconosJuego";
 import { DibujoPrenda, GotaCozy, imagenPrenda, TINTA_CARTA } from "./ArtePrendas";
-import { COLORES_CUERDA, EmblemaAcciones, EmblemaCuerdas, EmblemaDias, EmblemaObjetivos, IconoCuerdaCozy, NudoCozy, PinzaCozy, SogaCozy, TejadoCozy } from "./ArteCuerdas";
+import { COLORES_CUERDA, EmblemaAcciones, EmblemaCuerdas, EmblemaDias, EmblemaObjetivos, IconoCuerdaCozy, PinzaCozy, SogaCozy, TejadoCozy } from "./ArteCuerdas";
 import "./carta-prenda.css";
 import { LIENZO, MM } from "./medidas";
 import { cartaTraducida, t, textoCarta, textoObjetivo, tLibre, useIdioma } from "../i18n";
@@ -136,7 +136,6 @@ export function CartaCuerdaBosque({
     const pieza = (nombre: string) => PNG_CUERDAS[`../arte/cuerdas/${nombre}.png`];
     const medallonPng = pieza(`icono-${idCarta}`);
     const sogaPng = pieza(gruesa ? "cuerda-gris" : "cuerda-esparto");
-    const viejaPng = vieja ? pieza("cuerda-vieja") : undefined;
     const pinzaPng = pieza(`pinza-${color ? { blanco: "blanca", azul: "azul", rojo: "roja", amarillo: "amarilla" }[color] : gruesa ? "gris" : "madera"}`);
     // La cuerda pintada va recta, a la altura del borde de siempre: así empalma con la carta de al lado
     const ySoga = yCuerda + 1.5;
@@ -171,9 +170,10 @@ export function CartaCuerdaBosque({
           <rect x="12" y="33.5" width="156" height="46" rx="7" fill="none" stroke={T_CARTA} strokeOpacity=".22" strokeWidth=".9" />
           <rect x="15.5" y="37" width="149" height="39" rx="4.6" fill="none" stroke={colores.oscuro} strokeWidth="1.3" strokeDasharray="3.6 2.4" strokeLinecap="round" />
           {/* La cuerda de esparto, de borde a borde, a la misma altura en todas */}
-          {/* Recortada justo en el borde: con la carta de al lado pegada, la cuerda sigue sin corte */}
+          {/* Recortada al interior redondeado de la carta (dentro del borde de tinta): no asoma nada por fuera y,
+              con la carta de al lado pegada, sigue a la misma altura al otro lado del borde */}
           <clipPath id={`${uid}-corte`}>
-            <rect x="0" y="0" width={W} height={H} />
+            <rect x="1.9" y="1.9" width={W - 3.8} height={H - 3.8} rx="8.1" />
           </clipPath>
           <g clipPath={`url(#${uid}-corte)`}>
             {sogaPng ? (
@@ -184,30 +184,31 @@ export function CartaCuerdaBosque({
                   <image href={sogaPng} x="146" y={ySoga - 17 * k} width={590 * k} height={36 * k} preserveAspectRatio="none" />
                 </g>
                 {vieja && (
-                  // Hebras sueltas de la cuerda gastada
-                  <g stroke="#b59a70" strokeWidth=".7" strokeLinecap="round" fill="none">
-                    {[14, 52, 68, 104, 138, 168].map((x, i) => (
-                      <path key={x} d={i % 2 ? `M${x} ${ySoga + 1.6} q1.2 2.4 3 3` : `M${x} ${ySoga - 1.8} q1.6 -2 3.4 -2.2`} />
-                    ))}
+                  // Hebras sueltas finas de la cuerda gastada (el nudo ya lo enseña el medallón)
+                  <g fill="none" strokeLinecap="round">
+                    {[11, 24, 47, 61, 78, 103, 117, 129, 142, 163, 172].map((x, i) => {
+                      const d = i % 2 ? `M${x} ${ySoga + 1.4} q.9 2 2.6 2.7` : `M${x} ${ySoga - 1.6} q1.3 -1.7 3 -2`;
+                      return (
+                        <g key={x}>
+                          <path d={d} stroke="#6e5232" strokeWidth=".75" />
+                          <path d={d} stroke="#d9c39a" strokeWidth=".35" />
+                        </g>
+                      );
+                    })}
                   </g>
-                )}
-                {viejaPng && (
-                  // El nudo, recortado del PNG de la cuerda vieja sin estirarlo, entre la 2.ª y la 3.ª pinza
-                  <svg style={{ filter: "saturate(.75) brightness(.97)" }} x={120 - (57 * 0.3) / 2} y={ySoga - (38 - 6) * 0.3} width={57 * 0.3} height={64 * 0.3} viewBox="284 6 57 64" overflow="hidden">
-                    <image href={viejaPng} x="0" y="0" width="594" height="94" />
-                  </svg>
                 )}
               </g>
             ) : (
               <SogaCozy a={[-2, yCuerda]} c={[W / 2, yCuerda + 9]} b={[W + 2, yCuerda]} gruesa={gruesa} vieja={vieja} />
             )}
           </g>
-          {vieja && !sogaPng && <NudoCozy x={121} y={yCuerda + 6.6} />}
-          {clave === "tejadillo" && <TejadoCozy x0={1} x1={W - 1} y={95} id={`${uid}-tejado`} />}
+          {clave === "tejadillo" && <TejadoCozy x0={1.9} x1={W - 1.9} y={96} id={`${uid}-tejado`} />}
           {/* Pinzas impresas en el borde: muerden las prendas que asoman por debajo */}
           {[30, 90, 150].map((x) => (
-            <g key={x} transform={`translate(0 ${yCuerda - 4})`}>
+            <g key={x} clipPath={`url(#${uid}-corte)`}>
+             <g transform={`translate(0 ${yCuerda - 4})`}>
               {pinzaPng ? <image href={pinzaPng} x={x - 6} y="-5" width="12" height={(12 * 218) / 100} preserveAspectRatio="xMidYMid meet" /> : <PinzaCozy x={x} color={color} />}
+             </g>
             </g>
           ))}
           {/* Cabecera: cinta de pergamino ondulada con el nombre y medallón redondo con el icono */}

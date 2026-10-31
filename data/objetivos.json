@@ -1,23 +1,23 @@
 {
   "objetivos": [
-    { "id": "calcetinero", "nombre": "Calcetinero", "estado": "definida", "efecto": "prendas-secas", "parametros": { "tipo": "calcetin" }, "texto": "Calcetines secos.", "cada": 2, "puntos": 2 },
-    { "id": "toallero", "nombre": "Toallero", "estado": "definida", "efecto": "prendas-secas", "parametros": { "tipo": "toalla" }, "texto": "Toallas secas.", "cada": 2, "puntos": 3 },
-    { "id": "camisetero", "nombre": "Camisetero", "estado": "definida", "efecto": "prendas-secas", "parametros": { "tipo": "camiseta" }, "texto": "Camisetas secas.", "cada": 2, "puntos": 3 },
-    { "id": "coleccion-color", "nombre": "Colección de color", "estado": "definida", "efecto": "mismo-color", "texto": "Prendas secas del color del que más tengas.", "cada": 2, "puntos": 3 },
-    { "id": "arcoiris", "nombre": "Arcoíris", "estado": "definida", "efecto": "juegos-de-colores", "texto": "Juegos de 4 prendas secas, una de cada color.", "cada": 1, "puntos": 5 },
-    { "id": "monton-de-ropa", "nombre": "Montón de ropa", "estado": "definida", "efecto": "prendas-secas", "texto": "Prendas secas de cualquier tipo.", "cada": 4, "puntos": 2 },
-    { "id": "tendedero-completo", "nombre": "Tendedero completo", "estado": "definida", "efecto": "lineas-completas", "texto": "Líneas con todas sus cartas de cuerda.", "cada": 1, "puntos": 6 },
+    { "id": "calcetinero", "nombre": "Calcetinero", "estado": "definida", "efecto": "prendas-secas", "parametros": { "tipo": "calcetin" }, "texto": "Calcetines secos.", "cada": 3, "puntos": 2 },
+    { "id": "toallero", "nombre": "Toallero", "estado": "definida", "efecto": "prendas-secas", "parametros": { "tipo": "toalla" }, "texto": "Toallas secas.", "cada": 2, "puntos": 2 },
+    { "id": "camisetero", "nombre": "Camisetero", "estado": "definida", "efecto": "prendas-secas", "parametros": { "tipo": "camiseta" }, "texto": "Camisetas secas.", "cada": 3, "puntos": 2 },
+    { "id": "coleccion-color", "nombre": "Colección de color", "estado": "definida", "efecto": "mismo-color", "texto": "Prendas secas del color del que más tengas.", "cada": 1, "puntos": 1 },
+    { "id": "arcoiris", "nombre": "Arcoíris", "estado": "definida", "efecto": "juegos-de-colores", "texto": "Juegos de 4 prendas secas, una de cada color.", "cada": 1, "puntos": 3 },
+    { "id": "monton-de-ropa", "nombre": "Montón de ropa", "estado": "definida", "efecto": "prendas-secas", "texto": "Prendas secas de cualquier tipo.", "cada": 6, "puntos": 2 },
+    { "id": "tendedero-completo", "nombre": "Tendedero completo", "estado": "definida", "efecto": "lineas-completas", "texto": "Líneas con todas sus cartas de cuerda.", "cada": 1, "puntos": 2 },
     { "id": "variedad-de-cuerdas", "nombre": "Variedad de cuerdas", "estado": "definida", "efecto": "clases-de-cuerda", "texto": "Clases distintas de cuerda en tu tendedero (las básicas cuentan como una).", "cada": 2, "puntos": 3 },
 
-    { "id": "todo-blanco", "nombre": "Todo blanco", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "blanco" }, "texto": "Prendas blancas secas.", "cada": 2, "puntos": 5 },
-    { "id": "todo-azul", "nombre": "Todo azul", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "azul" }, "texto": "Prendas azules secas.", "cada": 2, "puntos": 5 },
-    { "id": "todo-rojo", "nombre": "Todo rojo", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "rojo" }, "texto": "Prendas rojas secas.", "cada": 2, "puntos": 5 },
-    { "id": "todo-amarillo", "nombre": "Todo amarillo", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "amarillo" }, "texto": "Prendas amarillas secas.", "cada": 2, "puntos": 5 },
-    { "id": "parejas", "nombre": "Cada oveja con su pareja", "estado": "definida", "efecto": "parejas", "parametros": { "tipo": "calcetin" }, "texto": "Parejas de calcetines secos del mismo color.", "cada": 1, "puntos": 2 },
-    { "id": "bajo-techo", "nombre": "Bajo techo", "estado": "definida", "efecto": "secadas-en", "parametros": { "efecto": "tejadillo" }, "texto": "Prendas secadas en un tejadillo o en la cuerda que cubre.", "cada": 1, "puntos": 2 },
-    { "id": "a-toda-prisa", "nombre": "A toda prisa", "estado": "definida", "efecto": "secadas-en", "parametros": { "efecto": "secado-rapido" }, "texto": "Prendas secadas en una cuerda de secado rápido.", "cada": 2, "puntos": 4 },
+    { "id": "todo-blanco", "nombre": "Todo blanco", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "blanco" }, "texto": "Prendas blancas secas.", "cada": 2, "puntos": 3 },
+    { "id": "todo-azul", "nombre": "Todo azul", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "azul" }, "texto": "Prendas azules secas.", "cada": 2, "puntos": 3 },
+    { "id": "todo-rojo", "nombre": "Todo rojo", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "rojo" }, "texto": "Prendas rojas secas.", "cada": 2, "puntos": 3 },
+    { "id": "todo-amarillo", "nombre": "Todo amarillo", "estado": "definida", "efecto": "prendas-secas", "parametros": { "color": "amarillo" }, "texto": "Prendas amarillas secas.", "cada": 2, "puntos": 3 },
+    { "id": "parejas", "nombre": "Cada oveja con su pareja", "estado": "definida", "efecto": "parejas", "parametros": { "tipo": "calcetin" }, "texto": "Parejas de calcetines secos del mismo color.", "cada": 1, "puntos": 1 },
+    { "id": "bajo-techo", "nombre": "Bajo techo", "estado": "definida", "efecto": "secadas-en", "parametros": { "efecto": "tejadillo" }, "texto": "Prendas secadas en un tejadillo o en la cuerda que cubre.", "cada": 2, "puntos": 3 },
+    { "id": "a-toda-prisa", "nombre": "A toda prisa", "estado": "definida", "efecto": "secadas-en", "parametros": { "efecto": "secado-rapido" }, "texto": "Prendas secadas en una cuerda de secado rápido.", "cada": 2, "puntos": 3 },
     { "id": "cuerdas-llenas", "nombre": "Cuerdas llenas", "estado": "definida", "efecto": "cuerdas-llenas", "parametros": { "mismoColor": 1 }, "texto": "Al final de la partida, cartas de cuerda con todos sus huecos ocupados por prendas de un mismo color.", "cada": 1, "puntos": 2 },
     { "id": "regalo-envenenado", "nombre": "Regalo envenenado", "estado": "definida", "efecto": "viejas-colocadas", "texto": "Al final de la partida, cuerdas viejas tuyas en tendederos rivales, más las que se les rompieron (tus trofeos).", "cada": 1, "puntos": 4 },
-    { "id": "conjunto-completo", "nombre": "Conjunto completo", "estado": "definida", "efecto": "conjuntos", "texto": "Un calcetín, una camiseta y una toalla secos del mismo color.", "cada": 1, "puntos": 7 }
+    { "id": "conjunto-completo", "nombre": "Conjunto completo", "estado": "definida", "efecto": "conjuntos", "texto": "Un calcetín, una camiseta y una toalla secos del mismo color.", "cada": 1, "puntos": 3 }
   ]
 }

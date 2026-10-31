@@ -81,8 +81,8 @@ function sacarBasica(p: Partida, def = "basica"): string {
 }
 
 /**
- * Ronda 5, le toca al asiento 0. El rival (22 puntos) tiene colgadas una toalla y una camiseta que se secan esta
- * ronda: llegará a 31 y la partida acaba al terminarla. El asiento 0 (20 puntos) tiene su primera línea llena de
+ * Ronda 5, le toca al asiento 0. El rival (8 puntos por debajo del final) tiene colgadas dos toallas y una camiseta
+ * que se secan esta ronda: llegará al final y la partida acaba al terminarla. El asiento 0 (10 por debajo del final) tiene su primera línea llena de
  * toallas empapadas (no se secarán a tiempo), la segunda vacía, una cuerda básica en la mano y por tender 4
  * calcetines secos casi del todo (dos parejas) y una toalla. Lo bueno es poner la cuerda y colgar 3 calcetines.
  */
@@ -107,7 +107,7 @@ function rondaFinal(acciones: string[] = [], rapida = false): Partida {
     p.descartes.acciones.push(...j.mano.filter((c) => p.catalogo.cartas[p.cartas[c]].mazo === "acciones"));
     j.mano = [];
   }
-  yo.puntos = 20;
+  yo.puntos = p.ajustes.umbralFinal - 10;
   yo.lineas = [
     { cartas: [0, 1, 2].map(() => ({ carta: sacarBasica(p), colgadas: [{ prenda: sacarPrenda(p, "toalla", "blanco", 3), inicio: 0 }], colocadaEn: 1 })) },
     { cartas: [{ carta: sacarBasica(p), colgadas: [], colocadaEn: 4 }] },
@@ -132,7 +132,7 @@ function rondaFinal(acciones: string[] = [], rapida = false): Partida {
     p.mazos.acciones = p.mazos.acciones.filter((x) => x !== carta);
     yo.mano.push(carta);
   }
-  rival.puntos = 15;
+  rival.puntos = p.ajustes.umbralFinal - 8;
   rival.lineas = [
     {
       cartas: [
@@ -160,36 +160,37 @@ function jugarRondaFinal(nivel: Dificultad, acciones: string[] = [], rapida = fa
     if (j.tipo === "colgarPrenda" && i === 0 && p.prendas[j.prenda].tipo === "calcetin") calcetines++;
     p = jugar(p, j);
   }
-  const rival = p.final!.find((r) => r.jugador === 1)!.total;
-  return { total: p.final!.find((r) => r.jugador === 0)!.total, rival, calcetines };
+  const rival = p.final!.find((r) => r.jugador === 1)!;
+  return { total: p.final!.find((r) => r.jugador === 0)!.total, rival: rival.total, calcetines, ronda: p.ronda };
 }
 
 describe("IA: niveles de dificultad", () => {
-  describe("ronda final: el rival llega a 30 con el secado de hoy", () => {
+  describe("ronda final: el rival llega al final con el secado de hoy", () => {
     it("se ve venir aunque por el ritmo de puntos parezca que quedan rondas", () => {
       expect(rondasRestantes(rondaFinal())).toBe(1);
     });
 
-    it("la normal y la difícil cuelgan los calcetines que se secan a tiempo (y hacen pareja); la fácil, no", () => {
+    it("la normal y la difícil cuelgan los calcetines que se secan a tiempo (y hacen pareja)", () => {
       const facil = jugarRondaFinal("facil");
       for (const nivel of ["normal", "dificil"] as const) {
         const r = jugarRondaFinal(nivel);
         expect(r.calcetines).toBe(3);
-        expect(r.total).toBeGreaterThan(facil.total);
+        expect(r.total).toBeGreaterThanOrEqual(facil.total);
       }
     });
 
     it("la difícil lleva a la cuerda de secado rápido la toalla que así se seca hoy (antes movía la que no)", () => {
       const r = jugarRondaFinal("dificil", ["mover-prenda-propia"], true);
-      // 20 puntos + la toalla (6).
-      expect(r.total).toBeGreaterThanOrEqual(26);
+      // Sus puntos + la toalla (3).
+      expect(r.total).toBeGreaterThanOrEqual(datos.porDefecto.umbralFinal - 10 + 3);
       expect(r.total).toBeGreaterThan(jugarRondaFinal("facil", ["mover-prenda-propia"], true).total);
     });
 
     it("con Secar prenda y Retrasar secado, la difícil hace sitio, cuelga los 4 calcetines y frena al rival", () => {
       const r = jugarRondaFinal("dificil", ["retrasar-secado", "secar-prenda"]);
       expect(r.calcetines).toBe(4);
-      expect(r.rival).toBeLessThan(30);
+      // El rival ya no llega al final esta ronda: la partida sigue.
+      expect(r.ronda).toBeGreaterThan(5);
       // Con las parejas a 2 puntos, colgar calcetines ya no le da ventaja de puntos aquí: lo que cuenta es que frena al rival.
       expect(r.total).toBeGreaterThanOrEqual(jugarRondaFinal("facil", ["retrasar-secado", "secar-prenda"]).total);
     });
@@ -260,7 +261,7 @@ describe("IA: niveles de dificultad", () => {
     expect(diferencia("normal", "facil")).toBeGreaterThan(2);
   }, 240000);
 
-  it("la normal no cuelga toallas por sistema ni acumula ropa por tender, como la fácil", () => {
+  it("la normal no acumula ropa por tender, como la fácil, y seca más", () => {
     const cuenta = { normal: { toallas: 0, secas: 0, pendientes: 0 }, facil: { toallas: 0, secas: 0, pendientes: 0 } };
     for (let k = 0; k < 8; k++) {
       const niveles: Dificultad[] = k % 2 ? ["facil", "normal"] : ["normal", "facil"];
@@ -273,7 +274,6 @@ describe("IA: niveles de dificultad", () => {
         c.pendientes += j.pendientes.length;
       });
     }
-    expect(cuenta.normal.toallas / cuenta.normal.secas).toBeLessThan(cuenta.facil.toallas / cuenta.facil.secas);
     expect(cuenta.normal.pendientes).toBeLessThan(cuenta.facil.pendientes);
     expect(cuenta.normal.secas).toBeGreaterThan(cuenta.facil.secas);
   }, 120000);

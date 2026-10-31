@@ -185,11 +185,14 @@ describe("colgar prendas y cuerdas", () => {
   it("respeta el máximo de cuerdas por turno y Colocar cuerda extra lo amplía", () => {
     let p = partida();
     const [a, b] = p.jugadores[0].mano;
+    const c = copia(p, "basica");
+    p.jugadores[0].mano.push(c);
     p = jugar(p, { tipo: "colocarCuerda", jugador: 0, carta: a, linea: 0 });
-    expect(motivo(p, { tipo: "colocarCuerda", jugador: 0, carta: b, linea: 0 })).toMatch(/Ya has jugado una cuerda/);
+    p = jugar(p, { tipo: "colocarCuerda", jugador: 0, carta: b, linea: 0 });
+    expect(motivo(p, { tipo: "colocarCuerda", jugador: 0, carta: c, linea: 0 })).toMatch(/Ya has jugado 2 cuerdas/);
     const extra = darAccion(p, 0, "colocar-cuerda-extra");
     p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: extra });
-    expect(motivo(p, { tipo: "colocarCuerda", jugador: 0, carta: b, linea: 0 })).toBeNull();
+    expect(motivo(p, { tipo: "colocarCuerda", jugador: 0, carta: c, linea: 0 })).toBeNull();
   });
 });
 
@@ -203,7 +206,7 @@ describe("rondas, secado y puntos", () => {
     expect(p.jugadores[0].puntos).toBe(1);
     p = ronda(p);
     expect(p.jugadores[0].seca).toContain("camiseta-azul-1");
-    expect(p.jugadores[0].puntos).toBe(4);
+    expect(p.jugadores[0].puntos).toBe(3);
   });
 
   it("terminar el turno no seca nada: se seca y se puntúa a la vez cuando han jugado todos", () => {
@@ -293,22 +296,56 @@ describe("cuerda vieja y mejoras", () => {
     expect(p.descartes.cuerdas.map((c) => p.cartas[c])).toEqual(expect.arrayContaining(["vieja", "tejadillo"]));
   });
 
-  it("una vieja solo se salva poniéndole encima una básica; las de habilidad mejoran básicas", () => {
+  it("una vieja solo se salva poniéndole encima una básica; una básica no tapa una cuerda con habilidad", () => {
     let p = partida();
     tenderVieja(p, 0, [["toalla-azul-1", 0]]);
     tender(p, 0, "tejadillo", [], 1);
     p.prendas["toalla-azul-1"].humedad = 9;
-    const [a, b] = [copia(p, "secado-rapido"), copia(p, "basica")];
-    p.jugadores[0].mano.push(a, b);
-    expect(motivo(p, { tipo: "mejorarCuerda", jugador: 0, carta: a, linea: 1, posicion: 0 })).toMatch(/básicas y las viejas/);
+    const [a, b, c] = [copia(p, "secado-rapido"), copia(p, "basica"), copia(p, "basica")];
+    p.jugadores[0].mano.push(a, b, c);
+    expect(motivo(p, { tipo: "mejorarCuerda", jugador: 0, carta: b, linea: 1, posicion: 0 })).toMatch(/solo se cambia por otra cuerda con habilidad/);
     expect(motivo(p, { tipo: "mejorarCuerda", jugador: 0, carta: a, linea: 0, posicion: 0 })).toMatch(/solo se arregla poniéndole encima una cuerda básica/);
     p = jugar(p, { tipo: "mejorarCuerda", jugador: 0, carta: b, linea: 0, posicion: 0 });
     expect(p.cartas[p.jugadores[0].lineas[0].cartas[0].carta]).toBe("basica");
     expect(p.jugadores[0].lineas[0].cartas[0].colgadas).toEqual([{ prenda: "toalla-azul-1", inicio: 0 }]);
-    expect(motivo(p, { tipo: "mejorarCuerda", jugador: 0, carta: a, linea: 0, posicion: 0 })).toMatch(/Ya has jugado una cuerda/);
     p = ronda(ronda(p));
     expect(p.jugadores[0].lineas[0].cartas).toHaveLength(1);
     expect(p.perdidas).toEqual([]);
+  });
+
+  it("una cuerda con habilidad se pone encima de otra con habilidad: las prendas se quedan y la de debajo se descarta", () => {
+    let p = partida();
+    const i = tender(p, 0, "pinzas-amarillas", [["camiseta-rojo-1", 0], ["calcetin-azul-1", 2]]);
+    const debajo = p.jugadores[0].lineas[0].cartas[i].carta;
+    const tejadillo = copia(p, "tejadillo");
+    p.jugadores[0].mano.push(tejadillo);
+    p = jugar(p, { tipo: "mejorarCuerda", jugador: 0, carta: tejadillo, linea: 0, posicion: i });
+    const t = p.jugadores[0].lineas[0].cartas[i];
+    expect(p.cartas[t.carta]).toBe("tejadillo");
+    expect(t.colgadas).toEqual([{ prenda: "camiseta-rojo-1", inicio: 0 }, { prenda: "calcetin-azul-1", inicio: 2 }]);
+    expect(p.descartes.cuerdas).toContain(debajo);
+    expect(p.jugadores[0].mano).not.toContain(tejadillo);
+    expect(p.turno.cuerdasJugadas).toBe(1);
+  });
+
+  it("la misma cuerda no se pone encima de sí misma, ni una vieja encima de nada", () => {
+    const p = partida();
+    tender(p, 0, "tejadillo", []);
+    const [t, v] = [copia(p, "tejadillo"), copia(p, "vieja")];
+    p.jugadores[0].mano.push(t, v);
+    expect(motivo(p, { tipo: "mejorarCuerda", jugador: 0, carta: t, linea: 0, posicion: 0 })).toMatch(/Ya es/);
+    expect(motivo(p, { tipo: "mejorarCuerda", jugador: 0, carta: v, linea: 0, posicion: 0 })).toMatch(/no sirve para mejorar/);
+  });
+
+  it("se juegan hasta 2 cartas de cuerda por turno (colocar o mejorar)", () => {
+    let p = partida();
+    tender(p, 0, "basica", []);
+    const [a, b, c] = [copia(p, "basica"), copia(p, "tejadillo"), copia(p, "basica")];
+    p.jugadores[0].mano.push(a, b, c);
+    expect(p.ajustes.jugablesPorTurno.cuerdas).toBe(2);
+    p = jugar(p, { tipo: "colocarCuerda", jugador: 0, carta: a, linea: 1 });
+    p = jugar(p, { tipo: "mejorarCuerda", jugador: 0, carta: b, linea: 0, posicion: 0 });
+    expect(motivo(p, { tipo: "colocarCuerda", jugador: 0, carta: c, linea: 1 })).toMatch(/Ya has jugado 2 cuerdas/);
   });
 });
 
@@ -397,7 +434,7 @@ describe("acciones", () => {
     tender(p, 0, "basica", [["toalla-azul-1", 0]]);
     const carta = darAccion(p, 0, "secar-prenda");
     p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta, objetivo: { jugador: 0, linea: 0, posicion: 0, prenda: "toalla-azul-1" } });
-    expect(p.jugadores[0].puntos).toBe(6);
+    expect(p.jugadores[0].puntos).toBe(3);
   });
 
   it("Proteger cuerda bloquea el fastidio hasta el siguiente turno de su dueño", () => {
@@ -558,7 +595,7 @@ describe("mazo del día", () => {
     proximaCarta(p, "ola-de-calor");
     p = ronda(p);
     expect(p.jugadores[1].seca).toEqual(["toalla-rojo-1"]);
-    expect(p.jugadores[1].puntos).toBe(6);
+    expect(p.jugadores[1].puntos).toBe(3);
   });
 
   it("Viento traicionero tira la prenda más grande de cada uno", () => {
@@ -717,7 +754,7 @@ describe("final de partida", () => {
 
   it("si alguien llega al umbral en el secado de la ronda, se cuentan los objetivos", () => {
     let p = partida();
-    p.jugadores[0].puntos = 29;
+    p.jugadores[0].puntos = p.ajustes.umbralFinal - 1;
     tender(p, 0, "basica", [["calcetin-azul-1", 0]]);
     p = terminar(p);
     expect(p.terminada).toBe(false);
@@ -729,7 +766,7 @@ describe("final de partida", () => {
 
   it("si llega a mitad de ronda, se termina la ronda antes de contar", () => {
     let p = partida();
-    p.jugadores[0].puntos = 25;
+    p.jugadores[0].puntos = p.ajustes.umbralFinal - 3;
     tender(p, 0, "basica", [["toalla-azul-1", 0]]);
     p = jugar(p, { tipo: "jugarAccion", jugador: 0, carta: darAccion(p, 0, "secar-prenda"), objetivo: { jugador: 0, linea: 0, posicion: 0, prenda: "toalla-azul-1" } });
     expect(p.ultimaRonda).toBe(true);
@@ -744,15 +781,15 @@ describe("final de partida", () => {
     let p = partida("abc", (a) => (a.objetivos.secretosRepartidos = 0));
     p.objetivosComunes = ["toallero"];
     p.catalogo.objetivos.toallero ??= datos.objetivos.find((o) => o.id === "toallero")!;
-    p.jugadores[0].puntos = 29;
-    p.jugadores[1].puntos = 25;
+    p.jugadores[0].puntos = p.ajustes.umbralFinal - 1;
+    p.jugadores[1].puntos = p.ajustes.umbralFinal - 5;
     p.jugadores[1].seca = ["toalla-rojo-1", "toalla-rojo-2", "toalla-rojo-3", "toalla-rojo-4", "toalla-rojo-5", "toalla-rojo-6"];
     tender(p, 0, "basica", [["calcetin-azul-1", 0]]);
     p = terminar(terminar(p));
     expect(p.primeroEnLlegar).toBe(0);
     expect(p.final![0].jugador).toBe(1);
     const toallero = p.catalogo.objetivos.toallero;
-    expect(p.final![0].total).toBe(25 + Math.floor(6 / toallero.cada) * toallero.puntos);
+    expect(p.final![0].total).toBe(p.ajustes.umbralFinal - 5 + Math.floor(6 / toallero.cada) * toallero.puntos);
   });
 
   it("los objetivos no tienen límite: dan sus puntos por cada tantos", () => {
@@ -892,10 +929,9 @@ describe("motivos estructurados", () => {
   });
 });
 describe("tope de humedad", () => {
-  it("la humedad máxima viene de los ajustes por defecto (4), también en la partida larga", () => {
+  it("la humedad máxima viene de los ajustes por defecto (4)", () => {
     expect(ajustesIniciales(datos).humedadMaxima).toBe(4);
     expect(partida().ajustes.humedadMaxima).toBe(4);
-    expect(partida("prueba", (a) => void (a.modo = "larga")).ajustes.humedadMaxima).toBe(4);
     // La humedad inicial de cada prenda cabe en la escala de su carta.
     for (const t of datos.tipos) expect(t.humedad).toBeLessThanOrEqual(4);
   });

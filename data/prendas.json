@@ -7,7 +7,7 @@
   ],
   "tipos": [
     { "id": "calcetin", "nombre": "Calcetín", "porColor": 10, "espacios": 1, "humedad": 1, "puntos": 1 },
-    { "id": "camiseta", "nombre": "Camiseta", "porColor": 9, "espacios": 2, "humedad": 2, "puntos": 3 },
-    { "id": "toalla", "nombre": "Toalla", "porColor": 6, "espacios": 3, "humedad": 3, "puntos": 6 }
+    { "id": "camiseta", "nombre": "Camiseta", "porColor": 9, "espacios": 2, "humedad": 2, "puntos": 2 },
+    { "id": "toalla", "nombre": "Toalla", "porColor": 6, "espacios": 3, "humedad": 3, "puntos": 3 }
   ]
 }

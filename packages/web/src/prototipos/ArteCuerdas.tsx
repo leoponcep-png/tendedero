@@ -239,65 +239,65 @@ export function IconoCuerdaCozy({ clave, color }: { clave: string; color?: strin
  * hasta y + 4). Va por encima de la cuerda y por debajo de las pinzas.
  */
 export function TejadoCozy({ x0, x1, y, id }: { x0: number; x1: number; y: number; id: string }) {
-  // Banda fina de tejas pintadas: caballete arriba y dos hileras de tejas curvas; `y` es el borde de abajo de las tejas
-  const paso = 7.2;
-  const r = paso / 2;
-  const filas = [y - 9.4, y - r];
-  const hilera = (fy: number, desfase: number) => {
-    const inicio = x1 + paso + desfase;
-    const n = Math.ceil((inicio - x0 + paso) / paso);
-    return `M${inicio} ${fy - 6} V${fy} ` + Array.from({ length: n }, () => `a${r} ${r} 0 0 1 ${-paso} 0`).join(" ") + ` V${fy - 6} Z`;
-  };
+  // Tejadito pintado: dos filas de tejas curvas (de canal) sobre una viga de alero. `y` es el canto de abajo de la viga.
+  const ancho = 9;
+  const n = Math.ceil((x1 - x0) / ancho) + 2;
+  // Una teja: un medio tubo con la punta redondeada hacia abajo
+  const teja = (x: number, arriba: number, abajo: number) =>
+    `M${x} ${arriba} H${x + ancho} V${abajo - ancho * 0.42} Q${x + ancho} ${abajo} ${x + ancho / 2} ${abajo} Q${x} ${abajo} ${x} ${abajo - ancho * 0.42} Z`;
+  const viga = { arriba: y - 3.2, abajo: y };
+  const filas = [
+    { arriba: y - 15.5, abajo: y - 6.6, desfase: ancho / 2 },
+    { arriba: y - 11.5, abajo: y - 2.4, desfase: 0 },
+  ];
   return (
     <g className="deco" strokeLinejoin="round">
       <defs>
-        <linearGradient id={`${id}-teja`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#e47a5f" />
-          <stop offset=".55" stopColor="#cf5a43" />
-          <stop offset="1" stopColor="#a8402f" />
+        <linearGradient id={`${id}-teja`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#f39a7c" />
+          <stop offset=".3" stopColor="#e2694f" />
+          <stop offset=".75" stopColor="#c44a36" />
+          <stop offset="1" stopColor="#97321f" />
+        </linearGradient>
+        <linearGradient id={`${id}-viga`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#c08a55" />
+          <stop offset="1" stopColor="#8b5a30" />
         </linearGradient>
         <linearGradient id={`${id}-sombra`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor={T} stopOpacity=".26" />
+          <stop offset="0" stopColor={T} stopOpacity=".3" />
           <stop offset="1" stopColor={T} stopOpacity="0" />
         </linearGradient>
         <clipPath id={id}>
-          <rect x={x0} y={y - 20} width={x1 - x0} height="22" />
+          <rect x={x0} y={y - 22} width={x1 - x0} height="30" />
         </clipPath>
       </defs>
-      {/* Sombra suave del tejado sobre el aire que queda encima de la cuerda */}
-      <rect x={x0} y={y - 1} width={x1 - x0} height="9" fill={`url(#${id}-sombra)`} />
+      {/* Sombra del tejado sobre el aire que queda encima de la cuerda */}
+      <rect x={x0} y={y} width={x1 - x0} height="6.5" fill={`url(#${id}-sombra)`} />
       <g clipPath={`url(#${id})`}>
-        <rect x={x0} y={y - 14.5} width={x1 - x0} height="6" fill="#a8402f" />
-        {filas.map((fy, f) => ({ fy, f })).map(({ fy, f }) => (
-          <g key={fy}>
-            <path d={hilera(fy, f % 2 ? r : 0)} fill={`url(#${id}-teja)`} stroke={T} strokeWidth=".9" />
-            {/* Raya entre teja y teja, y su brillo */}
-            <path
-              d={Array.from({ length: Math.ceil((x1 - x0) / paso) + 2 }, (_, i) => {
-                const x = x0 - paso + i * paso + (f % 2 ? r : 0);
-                return `M${x} ${fy - 5.6} V${fy - 0.6}`;
-              }).join(" ")}
-              stroke={T}
-              strokeOpacity=".35"
-              strokeWidth=".55"
-            />
-            <path
-              d={Array.from({ length: Math.ceil((x1 - x0) / paso) + 2 }, (_, i) => {
-                const x = x0 - paso + i * paso + (f % 2 ? r : 0) + 1.8;
-                return `M${x} ${fy - 4.6} q.3 2 1.4 2.8`;
-              }).join(" ")}
-              stroke="#fff"
-              strokeOpacity=".45"
-              strokeWidth=".75"
-              fill="none"
-              strokeLinecap="round"
-            />
+        {/* Fondo oscuro entre tejas (el hueco de debajo) */}
+        <rect x={x0} y={filas[0].arriba} width={x1 - x0} height={viga.arriba - filas[0].arriba} fill="#7e2c1f" />
+        {filas.map((fila, i) => (
+          <g key={i}>
+            {Array.from({ length: n }, (_, j) => {
+              const x = x0 - ancho + j * ancho + fila.desfase;
+              return (
+                <g key={j}>
+                  <path d={teja(x, fila.arriba, fila.abajo)} fill={`url(#${id}-teja)`} stroke={T} strokeWidth=".75" />
+                  {/* Luz a lo largo de la teja y brillo en la punta */}
+                  <path d={`M${x + 2.2} ${fila.arriba + 1.2} V${fila.abajo - 3.4}`} stroke="#ffd3c0" strokeOpacity=".7" strokeWidth=".8" strokeLinecap="round" />
+                  <path d={`M${x + 2} ${fila.abajo - 2.4} q1.2 1.4 2.8 1.6`} stroke="#fff" strokeOpacity=".45" strokeWidth=".55" fill="none" strokeLinecap="round" />
+                </g>
+              );
+            })}
           </g>
         ))}
+        {/* Viga del alero con su veta, por debajo de la última fila */}
+        <rect x={x0} y={viga.arriba} width={x1 - x0} height={viga.abajo - viga.arriba} fill={`url(#${id}-viga)`} />
+        <path d={`M${x0} ${viga.arriba + 1.4} H${x1}`} stroke="#6d4322" strokeOpacity=".45" strokeWidth=".35" strokeDasharray="6 3 10 2" />
+        <path d={`M${x0} ${viga.arriba} H${x1} M${x0} ${viga.abajo} H${x1}`} stroke={T} strokeWidth=".9" />
       </g>
-      {/* Caballete del tejado */}
-      <path d={`M${x0} ${y - 14.5} H${x1}`} stroke={T} strokeWidth="2" strokeLinecap="round" />
-      <path d={`M${x0 + 1.5} ${y - 15.1} H${x1 - 1.5}`} stroke="#f0a088" strokeWidth=".8" strokeLinecap="round" />
+      {/* Caballete: la línea de arriba del tejado */}
+      <path d={`M${x0} ${filas[0].arriba} H${x1}`} stroke={T} strokeWidth="1.3" strokeLinecap="round" />
     </g>
   );
 }

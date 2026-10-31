@@ -2,40 +2,14 @@
   "jugadores": 2,
   "manoInicial": { "cuerdas": 2, "acciones": 2 },
   "roboPorTurno": { "cartas": 3, "maxCuerdas": 2 },
-  "jugablesPorTurno": { "cuerdas": 1, "acciones": 2 },
+  "jugablesPorTurno": { "cuerdas": 2, "acciones": 2 },
   "limiteMano": 6,
-  "umbralFinal": 30,
+  "umbralFinal": 40,
   "humedadMaxima": 4,
   "cestas": {
     "porJugadores": { "2": 4, "3": 4, "4": 4 },
     "prendasPorCesta": 4
   },
   "tendedero": { "lineas": 2, "cartasPorLinea": 4 },
-  "objetivos": { "comunes": 2, "secretosRepartidos": 2 },
-  "modos": {
-    "larga": {
-      "umbralFinal": 70,
-      "humedadMaxima": 4,
-      "jugablesPorTurno": { "cuerdas": 2, "acciones": 2 },
-      "prendas": { "calcetin": { "puntos": 1 }, "camiseta": { "puntos": 2 }, "toalla": { "puntos": 3 } },
-      "objetivos": {
-        "calcetinero": { "cada": 3, "puntos": 2 },
-        "toallero": { "cada": 2, "puntos": 2 },
-        "camisetero": { "cada": 3, "puntos": 2 },
-        "coleccion-color": { "cada": 1, "puntos": 1 },
-        "arcoiris": { "cada": 1, "puntos": 2 },
-        "monton-de-ropa": { "cada": 6, "puntos": 2 },
-        "tendedero-completo": { "cada": 1, "puntos": 3 },
-        "variedad-de-cuerdas": { "cada": 1, "puntos": 2 },
-        "todo-blanco": { "cada": 2, "puntos": 3 },
-        "todo-azul": { "cada": 2, "puntos": 3 },
-        "todo-rojo": { "cada": 2, "puntos": 3 },
-        "todo-amarillo": { "cada": 2, "puntos": 3 },
-        "parejas": { "cada": 1, "puntos": 1 },
-        "bajo-techo": { "cada": 2, "puntos": 3 },
-        "a-toda-prisa": { "cada": 2, "puntos": 3 },
-        "conjunto-completo": { "cada": 1, "puntos": 2 }
-      }
-    }
-  }
+  "objetivos": { "comunes": 2, "secretosRepartidos": 2 }
 }

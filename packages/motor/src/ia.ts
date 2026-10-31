@@ -280,7 +280,10 @@ export function mejorJugada(p: Partida, i: number, opciones: OpcionesIA = {}): {
   if (c.dificultad === "dificil") return mejorJugadaDificil(p, i, c.azar);
   const ahora = valoracion(p, i, c);
   let mejor: { jugada: Jugada; partida: Partida; v: number } | null = null;
+  // La fácil juega como mucho 1 carta de cuerda por turno (no aprovecha la segunda).
+  const sinCuerdas = c.dificultad === "facil" && p.turno.cuerdasJugadas >= 1;
   for (const jugada of candidatas(p, i)) {
+    if (sinCuerdas && (jugada.tipo === "colocarCuerda" || jugada.tipo === "mejorarCuerda")) continue;
     if (!esValida(p, jugada)) continue;
     const q = aplicada(p, jugada);
     if (!q) continue;
@@ -351,8 +354,9 @@ export function cuerdasARobar(p: Partida, i: number, opciones: OpcionesIA = {}):
 }
 
 /**
- * Lo que hace la IA normal: tantas como le caben en el tendedero. Con el tendedero lleno (pasa en la partida
- * larga), las que podría usar para mejorar sus cuerdas básicas, descontando las de habilidad que ya tiene en la mano.
+ * Lo que hace la IA normal: tantas como le caben en el tendedero. Con el tendedero lleno, las que podría usar para
+ * mejorar sus cuerdas básicas y 1 más (para cambiar una habilidad por otra), descontando las de habilidad que ya
+ * tiene en la mano.
  */
 export function cuerdasARobarBase(p: Partida, i: number): number {
   const mano = p.jugadores[i].mano.filter((x) => defCarta(p, x).mazo === "cuerdas");
@@ -360,7 +364,7 @@ export function cuerdasARobarBase(p: Partida, i: number): number {
   if (huecos > 0) return Math.max(0, Math.min(maxCuerdasRobadas(p), huecos - mano.length));
   const basicas = p.jugadores[i].lineas.reduce((s, l) => s + l.cartas.filter((t) => defCarta(p, t.carta).efecto === null).length, 0);
   const paraMejorar = mano.filter((x) => defCarta(p, x).efecto !== null && !efectoDeCuerda(p, x)?.efecto.seRompeTras).length;
-  return Math.max(0, Math.min(maxCuerdasRobadas(p), basicas - paraMejorar));
+  return Math.max(0, Math.min(maxCuerdasRobadas(p), basicas + 1 - paraMejorar));
 }
 
 /** Si el atacado anula el fastidio: solo cuando le perjudica (lo que pierde pesa más que gastar la carta). */

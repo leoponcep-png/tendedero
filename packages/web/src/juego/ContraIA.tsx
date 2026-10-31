@@ -1,7 +1,7 @@
 // Partida contra la IA: tú juegas en el asiento 0 y los demás asientos los juega el motor (src/ia.ts) paso a
 // paso, con una pausa entre jugada y jugada y esperando a que la mesa acabe de animar la anterior.
 
-import { ajustesIniciales, aplicar, cestasPorDefecto, crearPartida, siguienteJugadaIA, vistaPara, type Datos, type Dificultad, type Jugada, type ModoJuego, type Partida } from "@tendedero/motor";
+import { ajustesIniciales, aplicar, cestasPorDefecto, crearPartida, siguienteJugadaIA, vistaPara, type Datos, type Dificultad, type Jugada, type Partida, partidaAlDia } from "@tendedero/motor";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { t } from "../i18n";
 import { ritmo } from "../prototipos/efectos";
@@ -13,11 +13,10 @@ interface Estado {
   ultima: { jugada: Jugada; n: number } | null;
 }
 
-/** `modo`: modo de juego (normal o partida larga); la partida lleva sus puntos y su umbral. */
-function nuevaPartida(datos: Datos, perfiles: Perfil[], modo: ModoJuego = "normal"): Estado {
+function nuevaPartida(datos: Datos, perfiles: Perfil[]): Estado {
   const base = ajustesIniciales(datos);
   const n = perfiles.length;
-  const partida = crearPartida(datos, { ...base, jugadores: n, cestas: { ...base.cestas, numero: cestasPorDefecto(datos, n) }, modo });
+  const partida = crearPartida(datos, { ...base, jugadores: n, cestas: { ...base.cestas, numero: cestasPorDefecto(datos, n) } });
   perfiles.forEach((pf, i) => (partida.jugadores[i].nombre = pf.nombre));
   return { partida, ultima: null };
 }
@@ -77,12 +76,12 @@ function pausa(p: Partida): number {
   return 700 * k;
 }
 
-/** `dificultad`: nivel de la IA de los rivales (sin ella, «normal»). `modo`: modo de juego (sin él, «normal»). */
-export function PartidaContraIA({ datos, perfiles, dificultad, modo = "normal", onSalir }: { datos: Datos; perfiles: Perfil[]; dificultad?: Dificultad; modo?: ModoJuego; onSalir: () => void }) {
+/** `dificultad`: nivel de la IA de los rivales (sin ella, «normal»). */
+export function PartidaContraIA({ datos, perfiles, dificultad, onSalir }: { datos: Datos; perfiles: Perfil[]; dificultad?: Dificultad; onSalir: () => void }) {
   const [estado, setEstado] = useState<Estado>(() => {
     const g = partidaGuardada();
-    const mismoModo = (g?.partida.ajustes.modo ?? "normal") === modo;
-    return g && g.partida.jugadores.length === perfiles.length && mismoModo ? { partida: g.partida, ultima: null } : nuevaPartida(datos, perfiles, modo);
+    // Una partida guardada con una versión anterior (p. ej. en el antiguo modo «Partida larga») se pone al día.
+    return g && g.partida.jugadores.length === perfiles.length ? { partida: partidaAlDia(g.partida, datos), ultima: null } : nuevaPartida(datos, perfiles);
   });
   const actual = useRef(estado);
   actual.current = estado;
@@ -142,7 +141,7 @@ export function PartidaContraIA({ datos, perfiles, dificultad, modo = "normal", 
         }
       }}
       onNueva={() => {
-        const nuevo = nuevaPartida(datos, perfiles, modo);
+        const nuevo = nuevaPartida(datos, perfiles);
         actual.current = nuevo;
         setEstado(nuevo);
         setOcupada(false);
