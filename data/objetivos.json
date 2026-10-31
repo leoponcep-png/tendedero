@@ -18,6 +18,6 @@
     { "id": "a-toda-prisa", "nombre": "A toda prisa", "estado": "definida", "efecto": "secadas-en", "parametros": { "efecto": "secado-rapido" }, "texto": "Prendas secadas en una cuerda de secado rápido.", "cada": 2, "puntos": 3 },
     { "id": "cuerdas-llenas", "nombre": "Cuerdas llenas", "estado": "definida", "efecto": "cuerdas-llenas", "parametros": { "mismoColor": 1 }, "texto": "Al final de la partida, cartas de cuerda con todos sus huecos ocupados por prendas de un mismo color.", "cada": 1, "puntos": 5 },
     { "id": "regalo-envenenado", "nombre": "Regalo envenenado", "estado": "definida", "efecto": "viejas-colocadas", "texto": "Al final de la partida, cuerdas viejas tuyas en tendederos rivales, más las que se les rompieron (tus trofeos).", "cada": 1, "puntos": 6 },
-    { "id": "conjunto-completo", "nombre": "Conjunto completo", "estado": "definida", "efecto": "conjuntos", "texto": "Un calcetín, una camiseta y una toalla secos del mismo color.", "cada": 1, "puntos": 2 }
+    { "id": "conjunto-completo", "nombre": "Conjunto completo", "estado": "definida", "efecto": "conjuntos", "texto": "Un calcetín, una camiseta y una toalla secos del mismo color.", "cada": 1, "puntos": 3 }
   ]
 }
