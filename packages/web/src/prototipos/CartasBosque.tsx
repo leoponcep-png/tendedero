@@ -237,40 +237,14 @@ export function CartaCuerdaBosque({
             )}
           </g>
           {clave === "tejadillo" && <TejadoCozy x0={1.9} x1={W - 1.9} y={94.2} id={`${uid}-tejado`} />}
-          {/* Pinzas impresas en el borde: muerden la cuerda y las prendas que asoman por debajo. La pinza pintada
-              (100 × 218 px) va derecha, con la cuerda pasando por la boca (la V de arriba, a 40 px de su borde de
-              arriba): la soga se ve entre las dos patas y las puntas asoman por encima. Abajo la corta el borde de la
-              carta, como si siguiera mordiendo la prenda. Sombra suave sobre la cuerda y el fondo. */}
-          {pinzaPng && (
-            <filter id={`${uid}-sombra-pinza`} x="-60%" y="-30%" width="220%" height="160%" colorInterpolationFilters="sRGB">
-              <feGaussianBlur in="SourceAlpha" stdDeviation=".75" />
-              <feOffset dx="1" dy="1.4" />
-              <feComponentTransfer>
-                <feFuncA type="linear" slope=".5" />
-              </feComponentTransfer>
-              <feColorMatrix type="matrix" values="0 0 0 0 .2  0 0 0 0 .12  0 0 0 0 .06  0 0 0 1 0" />
-              <feMerge>
-                <feMergeNode />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          )}
-          {[30, 90, 150].map((x) => {
-            // Ancho de la pinza en la carta; el eje de la pinza está en el píxel 45,5 del PNG (no en el centro)
-            const ancho = 15;
-            const alto = (ancho * 218) / 100;
-            return (
-              <g key={x} clipPath={`url(#${uid}-corte)`}>
-                {pinzaPng ? (
-                  <image href={pinzaPng} x={x - (45.5 / 100) * ancho} y={ySoga - (40 / 218) * alto} width={ancho} height={alto} preserveAspectRatio="xMidYMid meet" filter={`url(#${uid}-sombra-pinza)`} />
-                ) : (
-                  <g transform={`translate(0 ${yCuerda - 4})`}>
-                    <PinzaCozy x={x} color={color} />
-                  </g>
-                )}
+          {/* Pinzas impresas en el borde: muerden las prendas que asoman por debajo */}
+          {[30, 90, 150].map((x) => (
+            <g key={x} clipPath={`url(#${uid}-corte)`}>
+              <g transform={`translate(0 ${yCuerda - 4})`}>
+                {pinzaPng ? <image href={pinzaPng} x={x - 6} y="-5" width="12" height={(12 * 218) / 100} preserveAspectRatio="xMidYMid meet" /> : <PinzaCozy x={x} color={color} />}
               </g>
-            );
-          })}
+            </g>
+          ))}
           {/* Cabecera: cinta de pergamino ondulada con el nombre y medallón redondo con el icono */}
           <g className="ccb-cinta">
             <path d="M163 22 C170 22.6 173 27.6 170.6 31.4 C168.4 28.6 165.4 28 162 28.4 Z" fill="#cdb58a" stroke={T_CARTA} strokeWidth="1.2" strokeLinejoin="round" />
