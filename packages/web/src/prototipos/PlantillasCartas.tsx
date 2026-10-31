@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { DefsBosque } from "./ArteBosque";
-import { CaraAccionBosque, CartaCuerdaBosque, CartaDiaBosque, CartaObjetivoBosque, DorsoBosque } from "./CartasBosque";
+import { CaraAccionBosque, CartaCuerdaBosque, CartaDiaBosque, CartaObjetivoBosque, DorsoBosque, medallonDorso } from "./CartasBosque";
 import { CartaPrendaHumeda } from "./HumedadTaller";
 import { MM } from "./medidas";
 import { COLORES } from "./Prototipos";
@@ -55,14 +55,8 @@ function Caja({ medida, children }: { medida: keyof typeof MM; children: ReactNo
 }
 
 function dorso(clase: "acciones" | "objetivos" | "cuerdas" | "dias" | "prendas", medida: keyof typeof MM): Pick<Tipo, "ilustracion" | "carta" | "emblemas"> {
-  const W = MM[medida].ancho;
-  const H = MM[medida].alto;
-  const horizontal = medida === "cuerda";
-  const mini = medida === "prenda";
-  const k = mini ? 0.78 : 1;
-  const cx = W / 2;
-  const cy = horizontal ? H / 2 - 4 : mini ? H / 2 - 5 : H / 2 - 6;
-  const r = 12.4 * k;
+  // El medallón del dorso (CartasBosque): ahí va el emblema del mazo
+  const { cx, cy, r } = medallonDorso(clase);
   return {
     ilustracion: { x: cx - r, y: cy - r, w: 2 * r, h: 2 * r },
     carta: (
@@ -74,13 +68,12 @@ function dorso(clase: "acciones" | "objetivos" | "cuerdas" | "dias" | "prendas",
 }
 
 function tipos(): Tipo[] {
-  const crema = "var(--crema)";
   return [
     {
       id: "fastidio",
       nombre: "Acción · Fastidio",
       medida: "accion",
-      sangrado: crema,
+      sangrado: "#e2675a",
       ilustracion: { x: 5.5, y: 17.6, w: 52, h: 29 },
       forma: "M8.5 17.6 H54.5 L57.5 20.6 V43.6 L54.5 46.6 H8.5 L5.5 43.6 V20.6 Z",
       emblemas: [{ cx: 31.5, cy: 46.6, r: 4.7 }],
@@ -94,7 +87,7 @@ function tipos(): Tipo[] {
       id: "tactica",
       nombre: "Acción · Táctica",
       medida: "accion",
-      sangrado: crema,
+      sangrado: "#4fa27a",
       ilustracion: { x: 5.5, y: 17.6, w: 52, h: 29 },
       forma: "M5.5 46.6 V29 C5.5 22.5 17 17.6 31.5 17.6 C46 17.6 57.5 22.5 57.5 29 V46.6 Z",
       emblemas: [{ cx: 31.5, cy: 46.6, r: 4.7 }],
@@ -108,7 +101,7 @@ function tipos(): Tipo[] {
       id: "objetivo",
       nombre: "Objetivo",
       medida: "objetivo",
-      sangrado: crema,
+      sangrado: "#f0a53a",
       ilustracion: { x: 17.9, y: 17.9, w: 27.2, h: 27.2 },
       forma: "M17.9 31.5 A13.6 13.6 0 1 1 45.1 31.5 A13.6 13.6 0 1 1 17.9 31.5 Z",
       emblemas: [{ cx: 31.5, cy: 45.6, r: 4.3 }],
@@ -118,7 +111,7 @@ function tipos(): Tipo[] {
       id: "dia-tiempo",
       nombre: "Día · Tiempo",
       medida: "dia",
-      sangrado: crema,
+      sangrado: "#4f98d8",
       ilustracion: { x: 5, y: 15.2, w: 31, h: 36 },
       emblemas: [{ cx: 20.5, cy: 51.2, r: 4.2 }],
       carta: <CartaDiaBosque id="soleado" style={{ width: MM.dia.ancho * K, rotate: "0deg" }} />,
@@ -127,7 +120,7 @@ function tipos(): Tipo[] {
       id: "dia-suceso",
       nombre: "Día · Suceso",
       medida: "dia",
-      sangrado: crema,
+      sangrado: "#a07ad0",
       ilustracion: { x: 5, y: 15.2, w: 31, h: 36 },
       emblemas: [{ cx: 20.5, cy: 51.2, r: 4.2 }],
       carta: <CartaDiaBosque id="tormenta-repentina" style={{ width: MM.dia.ancho * K, rotate: "0deg" }} />,
@@ -136,10 +129,10 @@ function tipos(): Tipo[] {
       id: "cuerda",
       nombre: "Cuerda",
       medida: "cuerda",
-      sangrado: "var(--tinta)",
+      sangrado: "#ecd8ad",
       // Franja entre la caja de texto y la cuerda (donde el tejadillo pinta su tejado)
       ilustracion: rectCuerda(12, 81, 168, 103),
-      emblemas: [{ ...cuerdaMm(19, 16), r: (10.2 * 88) / 180 }].map((c) => ({ cx: c.x, cy: c.y, r: c.r })),
+      emblemas: [{ ...cuerdaMm(21.5, 18.4), r: (12 * 88) / 180 }].map((c) => ({ cx: c.x, cy: c.y, r: c.r })),
       notas: [{ rect: rectCuerda(12, 33, 168, 80), texto: "texto de la habilidad" }],
       carta: <CartaCuerdaBosque efecto={null} modo="borde" style={{ position: "relative", width: MM.cuerda.ancho * K, height: MM.cuerda.alto * K }} />,
     },
@@ -147,7 +140,7 @@ function tipos(): Tipo[] {
       id: "prenda",
       nombre: "Prenda (mini)",
       medida: "prenda",
-      sangrado: crema,
+      sangrado: "#f8efdc",
       // Se mide en la carta pintada (ver Plantillas): depende del CSS de la carta
       ilustracion: { x: 0, y: 0, w: 0, h: 0 },
       carta: (
@@ -156,11 +149,11 @@ function tipos(): Tipo[] {
         </div>
       ),
     },
-    { id: "dorso-acciones", nombre: "Dorso · Acciones", medida: "accion", sangrado: crema, ...dorso("acciones", "accion") },
-    { id: "dorso-objetivos", nombre: "Dorso · Objetivos", medida: "objetivo", sangrado: crema, ...dorso("objetivos", "objetivo") },
-    { id: "dorso-cuerdas", nombre: "Dorso · Cuerdas", medida: "cuerda", sangrado: crema, ...dorso("cuerdas", "cuerda") },
-    { id: "dorso-dias", nombre: "Dorso · Días", medida: "dia", sangrado: crema, ...dorso("dias", "dia") },
-    { id: "dorso-prendas", nombre: "Dorso · Prendas", medida: "prenda", sangrado: crema, ...dorso("prendas", "prenda") },
+    { id: "dorso-acciones", nombre: "Dorso · Acciones", medida: "accion", sangrado: "#4f9a6c", ...dorso("acciones", "accion") },
+    { id: "dorso-objetivos", nombre: "Dorso · Objetivos", medida: "objetivo", sangrado: "#f0a53a", ...dorso("objetivos", "objetivo") },
+    { id: "dorso-cuerdas", nombre: "Dorso · Cuerdas", medida: "cuerda", sangrado: "#c99c5e", ...dorso("cuerdas", "cuerda") },
+    { id: "dorso-dias", nombre: "Dorso · Días", medida: "dia", sangrado: "#5c9fdc", ...dorso("dias", "dia") },
+    { id: "dorso-prendas", nombre: "Dorso · Prendas", medida: "prenda", sangrado: "#e79aa9", ...dorso("prendas", "prenda") },
   ];
 }
 

@@ -1,9 +1,10 @@
 import { HUMEDAD_MAXIMA_POR_DEFECTO } from "@tendedero/motor";
 import { useId, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
 import { tono } from "../arte/color";
-import { colorEstilo, COLOR, CREMA, GotaBosque, ICONOS_BOSQUE, IconoBosque, MiniPrenda, nombreColor, PinzaBosque, PrendaBosque, Soga, TINTA } from "./ArteBosque";
+import { colorEstilo, COLOR, CREMA, GotaBosque, ICONOS_BOSQUE, IconoBosque, nombreColor, PinzaBosque, PrendaBosque, TINTA } from "./ArteBosque";
 import { EMBLEMAS, IconoDia, IlustraObjetivo } from "./IconosJuego";
 import { DibujoPrenda, GotaCozy, imagenPrenda, TINTA_CARTA } from "./ArtePrendas";
+import { COLORES_CUERDA, EmblemaAcciones, EmblemaCuerdas, EmblemaDias, EmblemaObjetivos, IconoCuerdaCozy, NudoCozy, PinzaCozy, SogaCozy, TejadoCozy } from "./ArteCuerdas";
 import "./carta-prenda.css";
 import { LIENZO, MM } from "./medidas";
 import { cartaTraducida, t, textoCarta, textoObjetivo, tLibre, useIdioma } from "../i18n";
@@ -108,6 +109,7 @@ export function CartaCuerdaBosque({
   const color = clave === "modificador-puntuacion" ? (pinzas ? nombreColor(pinzas) : undefined) ?? "rojo" : undefined;
   const [banda, nombreBase] = BANDA[clave] ?? BANDA.basica;
   useIdioma();
+  const idUnico = useId();
   const idCarta = color ? `pinzas-${PINZAS_PLURAL[color]}` : (ID_CUERDA[clave] ?? "basica");
   const nombre = textoCarta(idCarta, "nombre", color ? `Pinzas ${PINZAS_PLURAL[color]}` : nombreBase);
   const colorBanda = clave === "modificador-puntuacion" && pinzas ? colorEstilo(pinzas) : banda;
@@ -126,6 +128,126 @@ export function CartaCuerdaBosque({
   const colorCuerda = vieja ? "#a48a63" : gruesa ? "#6b553a" : "#8a6c48";
   const bandaF = { style: { fill: colorBanda } };
   const estilo = { "--banda": colorBanda, "--pinza-color": pinzas ? colorEstilo(pinzas) : undefined, ...style } as CSSProperties;
+  if (borde) {
+    // Carta de la partida (mano, mesa, lupa, galería): estilo «cozy» del de la carta de prenda
+    const colores = COLORES_CUERDA[color ?? clave] ?? COLORES_CUERDA.basica;
+    const uid = `cc${idUnico.replace(/[^a-zA-Z0-9_-]/g, "")}`;
+    // Piezas pintadas (src/arte/cuerdas): medallón entero, cuerda y pinzas. Si falta alguna, se dibuja en SVG.
+    const pieza = (nombre: string) => PNG_CUERDAS[`../arte/cuerdas/${nombre}.png`];
+    const medallonPng = pieza(`icono-${idCarta}`);
+    const sogaPng = pieza(gruesa ? "cuerda-gris" : "cuerda-esparto");
+    const viejaPng = vieja ? pieza("cuerda-vieja") : undefined;
+    const pinzaPng = pieza(`pinza-${color ? { blanco: "blanca", azul: "azul", rojo: "roja", amarillo: "amarilla" }[color] : gruesa ? "gris" : "madera"}`);
+    // La cuerda pintada va recta, a la altura del borde de siempre: así empalma con la carta de al lado
+    const ySoga = yCuerda + 1.5;
+    // Escala de las cuerdas pintadas: la soga mide 22 px de grueso en el PNG y aquí unos 6 de los 180 de ancho
+    const k = 0.273;
+    return (
+      <div {...resto} className={`ccb ccb-${clave} ccb-cozy ccb-borde ${className ?? ""}`} style={{ ...estilo, "--fondo-cuerda": colores.fondo, "--oscuro-cuerda": colores.oscuro } as CSSProperties} title={nombre}>
+        <svg viewBox={`0 0 ${W} ${H}`} className="ilu marco-carta" preserveAspectRatio="none" aria-hidden>
+          {/* Marco del color de la cuerda (la acuarela y el grano van por CSS encima) */}
+          <rect x="1" y="1" width={W - 2} height={H - 2} rx="9" fill={colores.fondo} />
+          <rect x="1" y="1" width={W - 2} height={H - 2} rx="9" fill="#fff" opacity=".12" />
+          <defs>
+            <pattern id={`${uid}-lunares`} width="7" height="7" patternUnits="userSpaceOnUse">
+              <circle cx="1.75" cy="1.75" r="1" fill="#fff" opacity=".28" />
+              <circle cx="5.25" cy="5.25" r="1" fill="#fff" opacity=".28" />
+            </pattern>
+            <linearGradient id={`${uid}-pergamino`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#fbf3df" />
+              <stop offset=".6" stopColor="#f3e3c2" />
+              <stop offset="1" stopColor="#e2c99a" />
+            </linearGradient>
+            <linearGradient id={`${uid}-pergamino-x`} x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stopColor="#b08850" stopOpacity=".25" />
+              <stop offset=".12" stopColor="#b08850" stopOpacity="0" />
+              <stop offset=".88" stopColor="#b08850" stopOpacity="0" />
+              <stop offset="1" stopColor="#b08850" stopOpacity=".3" />
+            </linearGradient>
+          </defs>
+          <rect x="1" y="1" width={W - 2} height={H - 2} rx="9" fill={`url(#${uid}-lunares)`} />
+          {/* Recuadro del texto: crema, con filete discontinuo del color de la carta */}
+          <rect x="12" y="33.5" width="156" height="46" rx="7" fill="#fbf4e3" />
+          <rect x="12" y="33.5" width="156" height="46" rx="7" fill="none" stroke={T_CARTA} strokeOpacity=".22" strokeWidth=".9" />
+          <rect x="15.5" y="37" width="149" height="39" rx="4.6" fill="none" stroke={colores.oscuro} strokeWidth="1.3" strokeDasharray="3.6 2.4" strokeLinecap="round" />
+          {/* La cuerda de esparto, de borde a borde, a la misma altura en todas */}
+          {/* Recortada justo en el borde: con la carta de al lado pegada, la cuerda sigue sin corte */}
+          <clipPath id={`${uid}-corte`}>
+            <rect x="0" y="0" width={W} height={H} />
+          </clipPath>
+          <g clipPath={`url(#${uid}-corte)`}>
+            {sogaPng ? (
+              <g className="soga">
+                {/* Dos tramos que se juntan debajo de la 3.ª pinza (ahí no se ven sus puntas redondas); recortados en el borde */}
+                <g style={vieja ? { filter: "saturate(.6) brightness(.97) sepia(.12)" } : undefined}>
+                  <image href={sogaPng} x="-8" y={ySoga - 17 * k} width={590 * k} height={36 * k} preserveAspectRatio="none" />
+                  <image href={sogaPng} x="146" y={ySoga - 17 * k} width={590 * k} height={36 * k} preserveAspectRatio="none" />
+                </g>
+                {vieja && (
+                  // Hebras sueltas de la cuerda gastada
+                  <g stroke="#b59a70" strokeWidth=".7" strokeLinecap="round" fill="none">
+                    {[14, 52, 68, 104, 138, 168].map((x, i) => (
+                      <path key={x} d={i % 2 ? `M${x} ${ySoga + 1.6} q1.2 2.4 3 3` : `M${x} ${ySoga - 1.8} q1.6 -2 3.4 -2.2`} />
+                    ))}
+                  </g>
+                )}
+                {viejaPng && (
+                  // El nudo, recortado del PNG de la cuerda vieja sin estirarlo, entre la 2.ª y la 3.ª pinza
+                  <svg style={{ filter: "saturate(.75) brightness(.97)" }} x={120 - (57 * 0.3) / 2} y={ySoga - (38 - 6) * 0.3} width={57 * 0.3} height={64 * 0.3} viewBox="284 6 57 64" overflow="hidden">
+                    <image href={viejaPng} x="0" y="0" width="594" height="94" />
+                  </svg>
+                )}
+              </g>
+            ) : (
+              <SogaCozy a={[-2, yCuerda]} c={[W / 2, yCuerda + 9]} b={[W + 2, yCuerda]} gruesa={gruesa} vieja={vieja} />
+            )}
+          </g>
+          {vieja && !sogaPng && <NudoCozy x={121} y={yCuerda + 6.6} />}
+          {clave === "tejadillo" && <TejadoCozy x0={1} x1={W - 1} y={95} id={`${uid}-tejado`} />}
+          {/* Pinzas impresas en el borde: muerden las prendas que asoman por debajo */}
+          {[30, 90, 150].map((x) => (
+            <g key={x} transform={`translate(0 ${yCuerda - 4})`}>
+              {pinzaPng ? <image href={pinzaPng} x={x - 6} y="-5" width="12" height={(12 * 218) / 100} preserveAspectRatio="xMidYMid meet" /> : <PinzaCozy x={x} color={color} />}
+            </g>
+          ))}
+          {/* Cabecera: cinta de pergamino ondulada con el nombre y medallón redondo con el icono */}
+          <g className="ccb-cinta">
+            <path d="M163 22 C170 22.6 173 27.6 170.6 31.4 C168.4 28.6 165.4 28 162 28.4 Z" fill="#cdb58a" stroke={T_CARTA} strokeWidth="1.2" strokeLinejoin="round" />
+            <path d="M31 8.6 C62 5.6 110 7.6 150 5.8 C156 5.6 161 6.2 164.6 9.4 C168 12.4 166 16 163.4 17.6 C166.6 20 166.6 25.4 162 27.6 C120 29.8 70 27.6 31 30.2 Z" fill={T_CARTA} transform="translate(.8 1.2)" />
+            <path d="M31 8.6 C62 5.6 110 7.6 150 5.8 C156 5.6 161 6.2 164.6 9.4 C168 12.4 166 16 163.4 17.6 C166.6 20 166.6 25.4 162 27.6 C120 29.8 70 27.6 31 30.2 Z" fill={`url(#${uid}-pergamino)`} stroke={T_CARTA} strokeWidth="1.4" strokeLinejoin="round" />
+            <path d="M31 8.6 C62 5.6 110 7.6 150 5.8 C156 5.6 161 6.2 164.6 9.4 C168 12.4 166 16 163.4 17.6 C166.6 20 166.6 25.4 162 27.6 C120 29.8 70 27.6 31 30.2 Z" fill={`url(#${uid}-pergamino-x)`} />
+            <path d="M36 11 C70 8.6 110 10.4 152 8.6" stroke="#fff" strokeOpacity=".55" strokeWidth="1.3" fill="none" strokeLinecap="round" />
+            <path d="M36 26.6 C72 24.8 118 26.6 158 24.6" stroke="#c9ad7a" strokeOpacity=".6" strokeWidth="1" fill="none" strokeLinecap="round" />
+            <path d="M159.6 9.6 C162.6 11.6 162.6 15.4 160.4 17" stroke="#c9ad7a" strokeWidth=".9" fill="none" />
+          </g>
+          <text x="100" y="22.2" textAnchor="middle" className="ccb-nombre" fontSize="12.8" fontWeight="800" fill={T_CARTA} style={{ fontFamily: '"Baloo 2", "Fredoka", var(--fuente-titulo), sans-serif' }} {...ajustarTexto(nombre, 15.4, 108)}>
+            {nombre}
+          </text>
+          <g className="ccb-medallon">
+            <path d="M8 3.6 l1.6 3.2 M12.6 1.8 l.4 3.4" stroke="#f2b632" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="21.5" cy="18.4" r="14.6" fill={T_CARTA} transform="translate(.8 1.2)" />
+                <circle cx="21.5" cy="18.4" r="14.6" fill="#fbf2dc" stroke={T_CARTA} strokeWidth="2" />
+                <circle cx="21.5" cy="18.4" r="12" fill="none" stroke={colores.oscuro} strokeWidth="1.1" opacity=".75" />
+          </g>
+          <g className="ccb-icono">
+            {medallonPng ? (
+              // El medallón entero pintado (círculo crema, borde e icono)
+              <image href={medallonPng} x="6.4" y="3.3" width="30.2" height="30.2" preserveAspectRatio="xMidYMid meet" />
+            ) : (
+              <g transform="translate(21.5 18.4) scale(.86)">
+                <IconoCuerdaCozy clave={clave} color={color} />
+              </g>
+            )}
+          </g>
+          {/* Borde fino de tinta */}
+          <rect x="1" y="1" width={W - 2} height={H - 2} rx="9" fill="none" stroke={T_CARTA} strokeWidth="1.8" />
+        </svg>
+        <div className="ccb-texto" style={tamTexto(textoCuerda, 81 * 24.7, 6.6, 3.5)}>
+          {textoCuerda}
+        </div>
+      </div>
+    );
+  }
   return (
     <div {...resto} className={`ccb ccb-${clave} ${className ?? ""}`} style={estilo} title={nombre}>
       <svg viewBox={`0 0 ${W} ${H}`} className="ilu marco-carta" preserveAspectRatio="none" aria-hidden>
@@ -269,6 +391,9 @@ export function CartaCuerdaBosque({
   );
 }
 
+/** Medallón pintado (src/arte/cuerdas/icono-<id>.png) de cada fila de la leyenda de la loseta. */
+const ICONO_LEYENDA: Record<string, string> = { "modificador-puntuacion": "pinzas-rojas", fragil: "vieja" };
+
 /** Loseta de cartón al principio del tendedero: hace de poste y lleva la leyenda de las cuerdas. */
 export function LosetaBosque({ lineas }: { lineas: number }) {
   useIdioma();
@@ -278,7 +403,14 @@ export function LosetaBosque({ lineas }: { lineas: number }) {
         <div className="loseta-titulo">{t("loseta.titulo")}</div>
         {LEYENDA.map((l) => (
           <div key={l.id} className="loseta-fila">
-            <IconoBosque id={l.id} className="loseta-icono" />
+            {PNG_CUERDAS[`../arte/cuerdas/icono-${ICONO_LEYENDA[l.id] ?? l.id}.png`] ? (
+              // El mismo medallón pintado que lleva la carta de esa cuerda
+              <img className="loseta-icono" src={PNG_CUERDAS[`../arte/cuerdas/icono-${ICONO_LEYENDA[l.id] ?? l.id}.png`]} alt="" draggable={false} />
+            ) : (
+              <svg className="loseta-icono" viewBox="-13 -13 26 26" aria-hidden>
+                <IconoCuerdaCozy clave={l.id} />
+              </svg>
+            )}
             <div>
               <b>{tLibre(`leyenda.${l.id}.nombre`)}</b>
               <span>{tLibre(`leyenda.${l.id}.texto`)}</span>
@@ -288,7 +420,7 @@ export function LosetaBosque({ lineas }: { lineas: number }) {
         {/* Recordatorio del tope de humedad: las filas de gotas de la carta de prenda */}
         <div className="loseta-fila loseta-humedad">
           <svg className="loseta-icono" viewBox="-8 -10 16 18" aria-hidden>
-            <GotaBosque />
+            <GotaCozy />
           </svg>
           <div>
             <b>{t("loseta.humedad.nombre")}</b>
@@ -369,52 +501,57 @@ const VENTANA: Record<Tono, string> = {
   objetivo: "M17.9 31.5 A13.6 13.6 0 1 1 45.1 31.5 A13.6 13.6 0 1 1 17.9 31.5 Z",
 };
 
-/** Rayos de sol (manga) dentro de la ventana, desde su centro. */
-function rayos(cx: number, cy: number, n = 18, r = 60) {
-  return Array.from({ length: n }, (_, i) => {
-    const a0 = (i * 2 * Math.PI) / n;
-    const a1 = a0 + Math.PI / n;
-    return `M${cx} ${cy} L${(cx + Math.cos(a0) * r).toFixed(2)} ${(cy + Math.sin(a0) * r).toFixed(2)} L${(cx + Math.cos(a1) * r).toFixed(2)} ${(cy + Math.sin(a1) * r).toFixed(2)} Z`;
-  }).join(" ");
+/**
+ * Cinta del nombre: cinta doblada (las puntas se meten por detrás y asoman un poco más abajo), del color de la carta,
+ * con lunares y una luz arriba. Ocupa la misma caja que antes (x 3,6 a 59,4, y 4 a 15,8), así que el nombre cabe igual.
+ * También vale para la carta del día (más ancha) con x0 y x1.
+ */
+function Cinta({ x0 = 3.6, x1 = 59.4, y0 = 4, y1 = 15.8, lunares }: { x0?: number; x1?: number; y0?: number; y1?: number; lunares: string }) {
+  const h = y1 - y0;
+  const banda = `M${x0} ${y0 + 0.5} C${x0 + 12} ${y0 - 0.4} ${x1 - 12} ${y0 + 0.6} ${x1} ${y0 - 0.1} V${y1 - 0.4} C${x1 - 12} ${y1 + 0.3} ${x0 + 12} ${y1 - 0.5} ${x0} ${y1 + 0.2} Z`;
+  const cola = (lado: 1 | -1) => {
+    const x = lado === 1 ? x1 : x0;
+    const fuera = x + lado * 3.2;
+    return `M${x - lado * 0.4} ${y0 + h * 0.3} H${fuera} L${fuera - lado * 1.4} ${y0 + h * 0.3 + (h + 1.6) / 2} L${fuera} ${y1 + 1.8} H${x - lado * 0.4} Z`;
+  };
+  const pliegue = (lado: 1 | -1) => {
+    const x = lado === 1 ? x1 : x0;
+    return `M${x} ${y1 - 0.4} L${x - lado * 1.6} ${y1 + 1.8} H${x} Z`;
+  };
+  return (
+    <g strokeLinejoin="round">
+      {([-1, 1] as const).map((l) => (
+        <g key={l}>
+          <path className="m-cinta-fondo" d={cola(l)} stroke={T_CARTA} strokeWidth=".45" />
+          <path className="m-cinta-pliegue" d={pliegue(l)} stroke={T_CARTA} strokeWidth=".4" />
+        </g>
+      ))}
+      <path d={banda} fill={T_CARTA} transform="translate(.25 .4)" />
+      <path className="m-cinta" d={banda} />
+      <path d={banda} fill={`url(#${lunares})`} />
+      <path d={`M${x0 + 0.6} ${y0 + 1.3} C${x0 + 12} ${y0 + 0.5} ${x1 - 12} ${y0 + 1.4} ${x1 - 0.6} ${y0 + 0.8}`} fill="none" stroke="#fff" strokeOpacity=".45" strokeWidth=".7" strokeLinecap="round" />
+      <path d={banda} fill="none" stroke={T_CARTA} strokeWidth=".5" />
+    </g>
+  );
 }
 
-/** Cinta del nombre: cola de golondrina (fastidio), pergamino enrollado (táctica) o banderola en punta (objetivos). */
-function Cinta({ t }: { t: Tono }) {
-  const cuerpo = <rect className="m-cinta" x="3.6" y="4" width="55.8" height="11.8" rx=".8" />;
-  const brillo = (
-    <>
-      <rect x="3.6" y="4" width="55.8" height="11.8" rx=".8" fill="url(#trama-fina)" />
-      <rect x="3.6" y="4" width="55.8" height="3.4" rx=".8" fill="#ffffff" opacity=".24" />
-      <rect x="3.6" y="4" width="55.8" height="11.8" rx=".8" fill="none" stroke={TINTA} strokeWidth=".55" />
-    </>
-  );
-  if (t === "fastidio")
-    return (
-      <g>
-        <path className="m-cinta-fondo" d="M5 6.4 H0.9 L3.1 10.1 L0.9 13.8 H5 Z M58 6.4 H62.1 L59.9 10.1 L62.1 13.8 H58 Z" stroke={TINTA} strokeWidth=".5" strokeLinejoin="round" />
-        {cuerpo}
-        {brillo}
-      </g>
-    );
-  if (t === "tactica")
-    return (
-      <g>
-        <circle className="m-cinta-fondo" cx="4.4" cy="11.6" r="3.1" stroke={TINTA} strokeWidth=".5" />
-        <circle className="m-cinta-fondo" cx="58.6" cy="11.6" r="3.1" stroke={TINTA} strokeWidth=".5" />
-        {cuerpo}
-        {brillo}
-        <path d="M4.4 8.5 A3.1 3.1 0 1 0 7.2 13 M58.6 8.5 A3.1 3.1 0 1 1 55.8 13" fill="none" stroke={TINTA} strokeWidth=".45" />
-        <circle cx="4.4" cy="11.6" r="1" fill="none" stroke={TINTA} strokeWidth=".4" />
-        <circle cx="58.6" cy="11.6" r="1" fill="none" stroke={TINTA} strokeWidth=".4" />
-      </g>
-    );
+/** Lunares blancos suaves y luz en el centro, para los marcos y las ventanas (defs de cada SVG). */
+function DefsCozy({ id }: { id: string }) {
   return (
-    <g>
-      <path className="m-cinta" d="M1.2 9.9 L4.4 4 H58.6 L61.8 9.9 L58.6 15.8 H4.4 Z" />
-      <path d="M1.2 9.9 L4.4 4 H58.6 L61.8 9.9 L58.6 15.8 H4.4 Z" fill="url(#trama-fina)" />
-      <path d="M2.9 6.8 L4.4 4 H58.6 L60.1 6.8 Z" fill="#ffffff" opacity=".24" />
-      <path d="M1.2 9.9 L4.4 4 H58.6 L61.8 9.9 L58.6 15.8 H4.4 Z" fill="none" stroke={TINTA} strokeWidth=".55" strokeLinejoin="round" />
-    </g>
+    <>
+      <pattern id={`lunares-${id}`} width="2.8" height="2.8" patternUnits="userSpaceOnUse">
+        <circle cx=".7" cy=".7" r=".42" fill="#fff" opacity=".42" />
+        <circle cx="2.1" cy="2.1" r=".42" fill="#fff" opacity=".42" />
+      </pattern>
+      <pattern id={`lunares-suaves-${id}`} width="2.8" height="2.8" patternUnits="userSpaceOnUse">
+        <circle cx=".7" cy=".7" r=".38" fill="#fff" opacity=".6" />
+        <circle cx="2.1" cy="2.1" r=".38" fill="#fff" opacity=".6" />
+      </pattern>
+      <radialGradient id={`luz-${id}`} cx="50%" cy="45%" r="60%">
+        <stop offset="0" stopColor="#fff" stopOpacity=".55" />
+        <stop offset="1" stopColor="#fff" stopOpacity="0" />
+      </radialGradient>
+    </>
   );
 }
 
@@ -426,7 +563,7 @@ function Laurel() {
     const r = (a * Math.PI) / 180;
     const x = (31.5 + Math.cos(r) * 16.2).toFixed(2);
     const y = (31.5 + Math.sin(r) * 16.2).toFixed(2);
-    return <ellipse key={a} className="m-hoja" cx={x} cy={y} rx="1.2" ry="2.5" transform={`rotate(${a} ${x} ${y})`} stroke={TINTA} strokeWidth=".35" />;
+    return <ellipse key={a} className="m-hoja" cx={x} cy={y} rx="1.2" ry="2.5" transform={`rotate(${a} ${x} ${y})`} stroke={T_CARTA} strokeWidth=".32" />;
   };
   return (
     <g>
@@ -440,9 +577,10 @@ function Laurel() {
 function Medallon({ x, y, r, emblema }: { x: number; y: number; r: number; emblema: string }) {
   return (
     <g>
-      <circle className="m-medallon" cx={x} cy={y} r={r} stroke={TINTA} strokeWidth=".55" />
-      <circle className="m-medallon-aro" cx={x} cy={y} r={r - 0.9} fill="none" strokeWidth=".45" />
-      <g transform={`translate(${x - r * 0.68} ${y - r * 0.68}) scale(${(r * 1.36) / 24})`}>{EMBLEMAS[emblema]}</g>
+      <circle cx={x + 0.25} cy={y + 0.35} r={r} fill={T_CARTA} opacity=".85" />
+      <circle className="m-medallon" cx={x} cy={y} r={r} stroke={T_CARTA} strokeWidth=".45" />
+      <circle className="m-medallon-aro" cx={x} cy={y} r={r - 0.85} fill="none" strokeWidth=".5" />
+      <g className="m-emblema" transform={`translate(${x - r * 0.68} ${y - r * 0.68}) scale(${(r * 1.36) / 24})`}>{EMBLEMAS[emblema]}</g>
     </g>
   );
 }
@@ -452,7 +590,7 @@ function RombosPie({ xs, y }: { xs: number[]; y: number }) {
   return (
     <>
       {xs.map((x) => (
-        <path key={x} d={`M${x} ${y - 1.5} L${x + 1.5} ${y} L${x} ${y + 1.5} L${x - 1.5} ${y} Z`} fill={CREMA} stroke={TINTA} strokeWidth=".35" />
+        <path key={x} d={`M${x} ${y - 1.5} L${x + 1.5} ${y} L${x} ${y + 1.5} L${x - 1.5} ${y} Z`} fill="#fbf2dc" stroke={T_CARTA} strokeWidth=".32" />
       ))}
     </>
   );
@@ -464,13 +602,15 @@ function MarcoVertical({ t, emblema, capa }: { t: Tono; emblema: string; capa: C
   const ventana = VENTANA[t];
   const objetivo = t === "objetivo";
   const centro: [number, number] = objetivo ? [31.5, 31.5] : [31.5, 33];
-  const trama = t === "fastidio" ? "trama-rayas" : t === "tactica" ? "trama-cuadros" : "trama-fina";
   if (capa === "frente")
     return (
       <svg className="marco-carta cb-marco cb-marco-frente" viewBox={`0 0 ${V.ancho} ${V.alto}`} preserveAspectRatio="none" aria-hidden>
-        <path d={ventana} fill="none" stroke={TINTA} strokeWidth=".6" strokeLinejoin="round" />
+        <defs>
+          <DefsCozy id={id} />
+        </defs>
+        <path d={ventana} fill="none" stroke={T_CARTA} strokeWidth=".5" strokeLinejoin="round" />
         {objetivo ? <Medallon x={31.5} y={45.6} r={4.3} emblema={emblema} /> : <Medallon x={31.5} y={46.6} r={4.7} emblema={emblema} />}
-        <Cinta t={t} />
+        <Cinta lunares={`lunares-${id}`} />
         <RombosPie xs={[9, 54]} y={84.7} />
       </svg>
     );
@@ -480,35 +620,33 @@ function MarcoVertical({ t, emblema, capa }: { t: Tono; emblema: string; capa: C
         <clipPath id={`ventana-${id}`}>
           <path d={ventana} />
         </clipPath>
+        <DefsCozy id={id} />
       </defs>
-      {/* Marco de color con su trama */}
+      {/* Marco de acuarela del color del mazo, con lunares blancos suaves (la acuarela va por CSS encima) */}
       <rect className="m-marco" width={V.ancho} height={V.alto} rx="3.4" />
-      <rect width={V.ancho} height={V.alto} rx="3.4" fill={`url(#${trama})`} />
-      <rect width={V.ancho} height={V.alto} rx="3.4" fill="url(#trama-fina)" opacity=".7" />
+      <rect width={V.ancho} height={V.alto} rx="3.4" fill={`url(#lunares-${id})`} />
       <rect className="m-filete" x="1.15" y="1.15" width={V.ancho - 2.3} height={V.alto - 2.3} rx="2.6" fill="none" />
       {/* Panel de papel */}
       <rect className="m-panel" x="2.8" y="2.8" width="57.4" height="78.6" rx="2.2" />
-      <rect x="2.8" y="2.8" width="57.4" height="78.6" rx="2.2" fill="url(#trama-fina-tinta)" opacity=".28" />
-      <rect x="2.8" y="2.8" width="57.4" height="78.6" rx="2.2" fill="none" stroke={TINTA} strokeWidth=".55" />
+      <rect x="2.8" y="2.8" width="57.4" height="78.6" rx="2.2" fill="none" stroke={T_CARTA} strokeWidth=".45" />
       {objetivo && <Laurel />}
       {/* Ventana de la ilustración, con rayos de sol y un ribete claro por dentro */}
       <path className="m-ventana" d={ventana} />
       <g clipPath={`url(#ventana-${id})`}>
-        <path className="m-rayos" d={rayos(centro[0], centro[1])} />
-        <rect width={V.ancho} height={V.alto} fill="url(#trama-fina)" />
-        <path d={ventana} fill="none" stroke="#ffffff" strokeWidth="2.2" opacity=".65" />
+        <rect width={V.ancho} height={V.alto} fill={`url(#lunares-suaves-${id})`} />
+        <ellipse cx={centro[0]} cy={centro[1]} rx="22" ry="16" fill={`url(#luz-${id})`} />
       </g>
       {/* Caja de texto cosida (y placa de puntos en los objetivos) */}
       {objetivo ? (
         <>
-          <rect className="m-placa" x="6" y="48.4" width="51" height="10.2" rx="5.1" stroke={TINTA} strokeWidth=".5" />
-          <rect className="m-caja" x="5.5" y="60.6" width="52" height="19" rx="1.8" stroke={TINTA} strokeWidth=".45" />
-          <rect className="m-pespunte" x="6.6" y="61.7" width="49.8" height="16.8" rx="1.2" fill="none" strokeWidth=".35" strokeDasharray="1 .8" />
+          <rect className="m-placa" x="6" y="48.4" width="51" height="10.2" rx="5.1" stroke={T_CARTA} strokeWidth=".42" />
+          <rect className="m-caja" x="5.5" y="60.6" width="52" height="19" rx="1.8" stroke={T_CARTA} strokeWidth=".4" />
+          <rect className="m-pespunte" x="6.6" y="61.7" width="49.8" height="16.8" rx="1.2" fill="none" strokeWidth=".38" strokeDasharray="1.1 .8" strokeLinecap="round" />
         </>
       ) : (
         <>
-          <rect className="m-caja" x="5.5" y="51" width="52" height="28.6" rx="1.8" stroke={TINTA} strokeWidth=".45" />
-          <rect className="m-pespunte" x="6.6" y="52.1" width="49.8" height="26.4" rx="1.2" fill="none" strokeWidth=".35" strokeDasharray="1 .8" />
+          <rect className="m-caja" x="5.5" y="51" width="52" height="28.6" rx="1.8" stroke={T_CARTA} strokeWidth=".4" />
+          <rect className="m-pespunte" x="6.6" y="52.1" width="49.8" height="26.4" rx="1.2" fill="none" strokeWidth=".38" strokeDasharray="1.1 .8" strokeLinecap="round" />
         </>
       )}
     </svg>
@@ -523,6 +661,12 @@ function MarcoVertical({ t, emblema, capa }: { t: Tono; emblema: string; capa: C
  * si existe src/arte/acciones/<id>.png, la carta la usa en vez del icono SVG. Va entre el fondo y el frente del
  * marco, así que la cinta del título y el medallón quedan por encima.
  */
+/** Iconos en PNG para el medallón de las cartas de cuerda (src/arte/cuerdas/<id>.png, ids de data/cuerdas.json). */
+const PNG_CUERDAS = import.meta.glob<string>("../arte/cuerdas/*.png", { eager: true, query: "?url", import: "default" });
+const T_CARTA = TINTA_CARTA;
+
+/** Emblemas pintados de los dorsos (src/arte/dorsos/emblema-<mazo>.png: acciones, cuerdas, dias, objetivos, prendas). */
+const PNG_DORSOS = import.meta.glob<string>("../arte/dorsos/*.png", { eager: true, query: "?url", import: "default" });
 const PNG_ACCIONES = import.meta.glob<string>("../arte/acciones/*.png", { eager: true, query: "?url", import: "default" });
 /** Lo mismo para las cartas del día (src/arte/dias/<id>.png, ventana de 31 × 36 mm) y los objetivos (src/arte/objetivos/<id>.png, ventana redonda de 27,2 mm). */
 const PNG_DIAS = import.meta.glob<string>("../arte/dias/*.png", { eager: true, query: "?url", import: "default" });
@@ -536,7 +680,7 @@ export function CaraAccionBosque({ id }: { id: string }) {
   const texto = textoCarta(id, "texto", def.texto);
   const png = PNG_ACCIONES[`../arte/acciones/${id}.png`];
   return (
-    <div className={`cb cb-${grupo}`} data-accion={id}>
+    <div className={`cb cb-cozy cb-${grupo}`} data-accion={id}>
       <MarcoVertical t={grupo} emblema={grupo} capa="fondo" />
       {png ? (
         <div className="cb-ilustra cb-ilustra-png">
@@ -583,7 +727,7 @@ export function CartaObjetivoBosque({
   const nombre = textoObjetivo(id, "nombre", o.nombre);
   const texto = textoObjetivo(id, "texto", o.texto);
   return (
-    <div {...resto} className={`cb co ${className ?? ""}`} data-objetivo={id} data-secreto={secreto || undefined}>
+    <div {...resto} className={`cb cb-cozy co ${className ?? ""}`} data-objetivo={id} data-secreto={secreto || undefined}>
       <MarcoVertical t="objetivo" emblema="objetivo" capa="fondo" />
       {PNG_OBJETIVOS[`../arte/objetivos/${o.id}.png`] ? (
         <div className="co-ilustra co-ilustra-png">
@@ -608,7 +752,7 @@ export function CartaObjetivoBosque({
         <span className="co-moneda">{o.puntos}</span>
         <span className="co-pts">{t("carta.puntos", { n: o.puntos })}</span>
       </div>
-      <div className="cb-texto co-texto" style={tamTexto(texto, 79 * 28.2, 7)}>
+      <div className="cb-texto co-texto" style={tamTexto(texto, 79 * 26, 6.3)}>
         <span>{texto}</span>
       </div>
       <div className="cb-tipo">{t("carta.objetivo")}</div>
@@ -636,15 +780,16 @@ function MarcoDia({ suceso, capa }: { suceso: boolean; capa: Capa }) {
   if (capa === "frente")
     return (
       <svg className="marco-carta dia-marco dia-marco-frente" viewBox={`0 0 ${D.ancho} ${D.alto}`} preserveAspectRatio="none" aria-hidden>
-        <rect x={v.x} y={v.y} width={v.ancho} height={v.alto} rx="2" fill="none" stroke={TINTA} strokeWidth=".6" />
+        <defs>
+          <DefsCozy id={id} />
+        </defs>
+        <rect x={v.x} y={v.y} width={v.ancho} height={v.alto} rx="2" fill="none" stroke={T_CARTA} strokeWidth=".5" />
         <Medallon x={centroX} y={v.y + v.alto} r={4.2} emblema={suceso ? "suceso" : "tiempo"} />
         {/* Sello de la duración: el número va encima, en HTML */}
-        <circle className="m-medallon" cx={c.x + c.ancho - 4.4} cy={c.y + c.alto} r="4.6" stroke={TINTA} strokeWidth=".55" />
+        <circle cx={c.x + c.ancho - 4.15} cy={c.y + c.alto + 0.35} r="4.6" fill={T_CARTA} opacity=".85" />
+        <circle className="m-medallon" cx={c.x + c.ancho - 4.4} cy={c.y + c.alto} r="4.6" stroke={T_CARTA} strokeWidth=".45" />
         <circle className="m-medallon-aro" cx={c.x + c.ancho - 4.4} cy={c.y + c.alto} r="3.7" fill="none" strokeWidth=".45" strokeDasharray=".9 .6" />
-        <path className="m-cinta" d="M1.2 8.2 L4.2 3.6 H83.8 L86.8 8.2 L83.8 12.8 H4.2 Z" />
-        <path d="M1.2 8.2 L4.2 3.6 H83.8 L86.8 8.2 L83.8 12.8 H4.2 Z" fill="url(#trama-fina)" />
-        <path d="M2.8 5.8 L4.2 3.6 H83.8 L85.2 5.8 Z" fill="#ffffff" opacity=".24" />
-        <path d="M1.2 8.2 L4.2 3.6 H83.8 L86.8 8.2 L83.8 12.8 H4.2 Z" fill="none" stroke={TINTA} strokeWidth=".55" strokeLinejoin="round" />
+        <Cinta x0={4.2} x1={83.8} y0={3.6} y1={12.8} lunares={`lunares-${id}`} />
         <RombosPie xs={[12, 76]} y={60.1} />
       </svg>
     );
@@ -654,24 +799,23 @@ function MarcoDia({ suceso, capa }: { suceso: boolean; capa: Capa }) {
         <clipPath id={`ventana-dia-${id}`}>
           <rect x={v.x} y={v.y} width={v.ancho} height={v.alto} rx="2" />
         </clipPath>
+        <DefsCozy id={id} />
       </defs>
+      {/* Marco de acuarela con lunares (tiempo azul, suceso morado) */}
       <rect className="m-marco" width={D.ancho} height={D.alto} rx="3.4" />
-      <rect width={D.ancho} height={D.alto} rx="3.4" fill={`url(#${suceso ? "trama-rayas" : "trama-cuadros"})`} />
-      <rect width={D.ancho} height={D.alto} rx="3.4" fill="url(#trama-fina)" opacity=".7" />
+      <rect width={D.ancho} height={D.alto} rx="3.4" fill={`url(#lunares-${id})`} />
       <rect className="m-filete" x="1.15" y="1.15" width={D.ancho - 2.3} height={D.alto - 2.3} rx="2.6" fill="none" />
       <rect className="m-panel" x="2.6" y="2.6" width="82.8" height="54.6" rx="2.2" />
-      <rect x="2.6" y="2.6" width="82.8" height="54.6" rx="2.2" fill="url(#trama-fina-tinta)" opacity=".28" />
-      <rect x="2.6" y="2.6" width="82.8" height="54.6" rx="2.2" fill="none" stroke={TINTA} strokeWidth=".55" />
+      <rect x="2.6" y="2.6" width="82.8" height="54.6" rx="2.2" fill="none" stroke={T_CARTA} strokeWidth=".45" />
       {/* Ventana del icono, con rayos de sol y un ribete claro por dentro */}
       <rect className="m-ventana" x={v.x} y={v.y} width={v.ancho} height={v.alto} rx="2" />
       <g clipPath={`url(#ventana-dia-${id})`}>
-        <path className="m-rayos" d={rayos(centroX, v.y + v.alto * 0.45, 18, 40)} />
-        <rect width={D.ancho} height={D.alto} fill="url(#trama-fina)" />
-        <rect x={v.x} y={v.y} width={v.ancho} height={v.alto} rx="2" fill="none" stroke="#ffffff" strokeWidth="2.2" opacity=".65" />
+        <rect width={D.ancho} height={D.alto} fill={`url(#lunares-suaves-${id})`} />
+        <ellipse cx={centroX} cy={v.y + v.alto * 0.45} rx="16" ry="19" fill={`url(#luz-${id})`} />
       </g>
       {/* Caja de texto cosida */}
-      <rect className="m-caja" x={c.x} y={c.y} width={c.ancho} height={c.alto} rx="1.8" stroke={TINTA} strokeWidth=".45" />
-      <rect className="m-pespunte" x={c.x + 1.1} y={c.y + 1.1} width={c.ancho - 2.2} height={c.alto - 2.2} rx="1.2" fill="none" strokeWidth=".35" strokeDasharray="1 .8" />
+      <rect className="m-caja" x={c.x} y={c.y} width={c.ancho} height={c.alto} rx="1.8" stroke={T_CARTA} strokeWidth=".4" />
+      <rect className="m-pespunte" x={c.x + 1.1} y={c.y + 1.1} width={c.ancho - 2.2} height={c.alto - 2.2} rx="1.2" fill="none" strokeWidth=".38" strokeDasharray="1.1 .8" strokeLinecap="round" />
     </svg>
   );
 }
@@ -690,7 +834,7 @@ export function CartaDiaBosque({ id, className, ...resto }: { id?: string } & HT
   const sinDuracion = d.texto.replace(/^\d+ días?:\s*/, "");
   const texto = cartaTraducida(d.id, "texto") ? textoCarta(d.id, "texto", "") : sinDuracion.charAt(0).toUpperCase() + sinDuracion.slice(1);
   return (
-    <div {...resto} className={`dia-bosque dia-carta ${suceso ? "dia-suceso" : "dia-tiempo"} ${className ?? ""}`} data-dia={d.id}>
+    <div {...resto} className={`dia-bosque dia-carta dia-cozy ${suceso ? "dia-suceso" : "dia-tiempo"} ${className ?? ""}`} data-dia={d.id}>
       <MarcoDia suceso={suceso} capa="fondo" />
       {PNG_DIAS[`../arte/dias/${d.id}.png`] ? (
         <div className="dia-icono dia-icono-png">
@@ -718,200 +862,105 @@ export function CartaDiaBosque({ id, className, ...resto }: { id?: string } & HT
 }
 
 // ---------- Dorsos ----------
+// Todos con el acabado «cozy»: marco de acuarela del color del mazo con su trama (cuadros vichy o lunares),
+// filete crema y un medallón grande con el emblema del mazo. Sin textos, así no hay nada que traducir: se
+// distinguen de un vistazo por el color y el emblema.
 
 type ClaseDorso = "acciones" | "cuerdas" | "dias" | "objetivos" | "prendas";
-/** Cada mazo: su tamaño (medidas.ts), su nombre, los emblemas del pie y la trama del fondo. */
-const DORSO: Record<ClaseDorso, { medida: "accion" | "cuerda" | "prenda"; nombre: string; emblemas: string[]; trama: string }> = {
-  acciones: { medida: "accion", nombre: "Acciones", emblemas: ["fastidio", "tactica"], trama: "trama-cuadros" },
-  cuerdas: { medida: "cuerda", nombre: "Cuerdas", emblemas: ["cuerdas", "cuerdas"], trama: "trama-rayas" },
-  dias: { medida: "cuerda", nombre: "Días", emblemas: ["tiempo", "suceso"], trama: "trama-cuadros" },
-  objetivos: { medida: "accion", nombre: "Objetivos", emblemas: ["objetivo", "objetivo"], trama: "trama-cuadros" },
-  // Prendas: carta mini (41 × 63 mm), el mazo del que se reparten las prendas
-  prendas: { medida: "prenda", nombre: "Prendas", emblemas: ["calcetin", "camiseta", "toalla"], trama: "trama-puntos" },
+const DORSO: Record<ClaseDorso, { medida: "accion" | "cuerda" | "prenda"; fondo: string; oscuro: string; trama: "vichy" | "lunares" }> = {
+  acciones: { medida: "accion", fondo: "#4f9a6c", oscuro: "#2f6d48", trama: "vichy" },
+  objetivos: { medida: "accion", fondo: "#f0a53a", oscuro: "#b9741a", trama: "lunares" },
+  cuerdas: { medida: "cuerda", fondo: "#c99c5e", oscuro: "#8a6234", trama: "vichy" },
+  dias: { medida: "cuerda", fondo: "#5c9fdc", oscuro: "#2c69ad", trama: "lunares" },
+  prendas: { medida: "prenda", fondo: "#e79aa9", oscuro: "#b55a6e", trama: "lunares" },
 };
 
-/** Lo que va en el centro del dorso de cada mazo (cabe en un círculo de radio 11). */
-function CentroDorso({ clase }: { clase: ClaseDorso }) {
-  if (clase === "cuerdas") return <g transform="translate(-11.5 -11.5) scale(.36)">{ICONOS_BOSQUE.basica}</g>;
-  if (clase === "dias") return <g transform="translate(-12 -12) scale(.375)">{ICONOS_BOSQUE.soleado}</g>;
-  // Prendas: una camiseta con un calcetín delante
-  if (clase === "prendas")
-    return (
-      <g>
-        <MiniPrenda tipo="camiseta" c={COLOR.azul} x={-10.2} y={-8} s={0.17} />
-        <MiniPrenda tipo="calcetin" c={COLOR.rojo} x={0.5} y={-4.5} s={0.17} giro={12} />
-      </g>
+/** Centro y radio (interior, en mm) del medallón de cada dorso: también lo usan las plantillas vacías. */
+export function medallonDorso(clase: ClaseDorso) {
+  const m = MM[DORSO[clase].medida];
+  const r = clase === "prendas" ? 13.6 : DORSO[clase].medida === "cuerda" ? 16 : 17;
+  return { cx: m.ancho / 2, cy: m.alto / 2, r: r - 2.2 };
+}
+
+/** Emblema de cada mazo, en un lienzo de −12 a 12. */
+function EmblemaDorso({ clase }: { clase: ClaseDorso }) {
+  if (clase === "acciones") return <EmblemaAcciones />;
+  if (clase === "cuerdas") return <EmblemaCuerdas />;
+  if (clase === "dias") return <EmblemaDias />;
+  if (clase === "objetivos") return <EmblemaObjetivos />;
+  // Prendas: la camiseta con el calcetín delante (las ilustraciones de las cartas)
+  const prenda = (tipo: string, color: string, x: number, y: number, w: number) => {
+    const png = imagenPrenda(tipo, color);
+    return png ? (
+      <image href={png} x={x} y={y} width={w} height={w * 0.89} preserveAspectRatio="xMidYMid meet" />
+    ) : (
+      <svg x={x} y={y} width={w} height={(w * 100) / 140} viewBox="0 0 140 100" overflow="visible">
+        <DibujoPrenda tipo={tipo} color={color} />
+      </svg>
     );
-  if (clase === "objetivos")
-    return (
-      <g transform="translate(-11 -11) scale(.92)">
-        <path
-          d="M12 1.8 L14.9 8.3 L22 9 L16.6 13.7 L18.2 20.7 L12 17 L5.8 20.7 L7.4 13.7 L2 9 L9.1 8.3 Z"
-          style={{ fill: COLOR.amarillo }}
-          stroke={TINTA}
-          strokeWidth="1.3"
-          strokeLinejoin="round"
-        />
-        <circle cx="9.6" cy="9.4" r="1.4" fill="#ffffff" opacity=".8" />
-      </g>
-    );
-  // Acciones: una camiseta tendida entre dos pinzas
+  };
   return (
     <g>
-      <Soga d="M-10.5 -5 Q0 -2 10.5 -5" g={1.3} />
-      <g transform="translate(-9 -4.6) scale(.15)">
-        <path d="M44 7 L22 15 L5 33 L19 45 L30 36 V73 H90 V36 L101 45 L115 33 L98 15 L76 7 C73 15 67 19 60 19 C53 19 47 15 44 7 Z" style={{ fill: COLOR.rojo }} stroke={TINTA} strokeWidth="5.5" strokeLinejoin="round" />
-        <path d="M44 7 C47 15 53 19 60 19 C67 19 73 15 76 7" fill="none" stroke={TINTA} strokeWidth="5.5" />
-      </g>
-      <g transform="translate(0 -5.6) scale(.3)">
-        <PinzaBosque x={-17} />
-        <PinzaBosque x={17} />
-      </g>
+      {prenda("camiseta", "#d2513f", -14.5, -13.5, 24)}
+      {prenda("calcetin", "#4a7fd0", -1, -3.5, 16.5)}
     </g>
   );
 }
 
-/**
- * Dorso del mazo de prendas con el mismo acabado que su cara (carta-prenda.css): papel crema con grano, panel
- * pastel con lunares y luz en el centro, filo dorado, un tendedero con las tres prendas y la cinta con el nombre.
- */
-function DorsoPrendas() {
-  const titulo = tLibre("dorso.prendas");
-  const W = MM.prenda.ancho;
-  const H = MM.prenda.alto;
-  const tinta = TINTA_CARTA;
-  const u = `dp${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
-  // Cuerda combada de un lado a otro; las prendas cuelgan de ella con una pinza
-  const cuerdaY = (x: number) => 16.5 + (1 - ((x - W / 2) / (W / 2 - 2.6)) ** 2) * 2.2;
-  const colgadas: { tipo: string; color: string; x: number; w: number }[] = [
-    { tipo: "calcetin", color: "#4a7fd0", x: 9, w: 14 },
-    { tipo: "camiseta", color: "#d2513f", x: 20.5, w: 17.5 },
-    { tipo: "toalla", color: "#e8c23a", x: 32, w: 13.5 },
-  ];
-  return (
-    <div className="db db-prendas db-cozy">
-      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden>
-        <defs>
-          <radialGradient id={`${u}-luz`} cx="50%" cy="45%" r="60%">
-            <stop offset="0" stopColor="#fff" stopOpacity=".75" />
-            <stop offset="1" stopColor="#fff" stopOpacity="0" />
-          </radialGradient>
-          <pattern id={`${u}-lunares`} width="2.6" height="2.6" patternUnits="userSpaceOnUse">
-            <circle cx=".65" cy=".65" r=".42" fill="#fff" opacity=".6" />
-            <circle cx="1.95" cy="1.95" r=".42" fill="#fff" opacity=".6" />
-          </pattern>
-        </defs>
-        <rect width={W} height={H} fill="#f8efdc" />
-        {/* Panel pastel con lunares y luz en el centro */}
-        <rect x="2.4" y="2.4" width={W - 4.8} height={H - 4.8} rx="2.4" fill="#f4cbd0" />
-        <rect x="2.4" y="2.4" width={W - 4.8} height={H - 4.8} rx="2.4" fill={`url(#${u}-lunares)`} />
-        <rect x="2.4" y="2.4" width={W - 4.8} height={H - 4.8} rx="2.4" fill={`url(#${u}-luz)`} />
-        <rect x="3.7" y="3.7" width={W - 7.4} height={H - 7.4} rx="1.6" fill="none" stroke="#c9a46a" strokeWidth=".32" />
-        <rect x="2.4" y="2.4" width={W - 4.8} height={H - 4.8} rx="2.4" fill="none" stroke={tinta} strokeWidth=".45" />
-        {/* Tendedero con las tres prendas */}
-        <path d={`M2.6 ${cuerdaY(2.6)} Q${W / 2} ${16.5 + 4.4} ${W - 2.6} ${cuerdaY(W - 2.6)}`} fill="none" stroke={tinta} strokeWidth=".9" strokeLinecap="round" />
-        <path d={`M2.6 ${cuerdaY(2.6)} Q${W / 2} ${16.5 + 4.4} ${W - 2.6} ${cuerdaY(W - 2.6)}`} fill="none" stroke="#d8b47c" strokeWidth=".45" strokeDasharray=".7 .5" strokeLinecap="round" />
-        {colgadas.map((c) => {
-          const y = cuerdaY(c.x);
-          const h = (c.w * 100) / 140;
-          return (
-            <g key={c.tipo}>
-              {imagenPrenda(c.tipo, c.color) ? (
-                <image href={imagenPrenda(c.tipo, c.color)} x={c.x - c.w / 2} y={y - 2} width={c.w} height={c.w * 0.89} preserveAspectRatio="xMidYMin meet" />
-              ) : (
-                <svg x={c.x - c.w / 2} y={y - 0.9} width={c.w} height={h} viewBox="0 0 140 100" overflow="visible">
-                  <DibujoPrenda tipo={c.tipo} color={c.color} />
-                </svg>
-              )}
-              <rect x={c.x - 0.6} y={y - 1.6} width="1.2" height="3" rx=".35" fill="#e2b678" stroke={tinta} strokeWidth=".25" />
-            </g>
-          );
-        })}
-        {/* Cinta con el nombre del mazo */}
-        <g transform={`translate(${W / 2} 39)`}>
-          <path d="M-17 -3.6 H17 L15 0 L17 3.6 H-17 L-15 0 Z" fill={tinta} transform="translate(.3 .45)" />
-          <path d="M-17 -3.6 H17 L15 0 L17 3.6 H-17 L-15 0 Z" fill="#3f86cf" stroke={tinta} strokeWidth=".45" strokeLinejoin="round" />
-          <path d="M-16.4 -3 H16.4 L16 -2.2 H-16 Z" fill="#fff" opacity=".3" />
-          <text y="1.75" textAnchor="middle" fontSize="5" fontWeight="800" fill="#fffaf0" stroke={tinta} strokeWidth="1" strokeLinejoin="round" paintOrder="stroke" style={{ fontFamily: '"Baloo 2", "Fredoka", var(--fuente-titulo), sans-serif' }} {...ajustarTexto(titulo, 5, 28)}>
-            {titulo}
-          </text>
-        </g>
-        {/* Las cuatro gotas de la escala de humedad */}
-        {[0, 1, 2, 3].map((i) => (
-          <g key={i} transform={`translate(${W / 2 + (i - 1.5) * 5} 50) scale(.34)`}>
-            <GotaCozy />
-          </g>
-        ))}
-      </svg>
-    </div>
-  );
-}
-
 export function DorsoBosque({ clase = "acciones" }: { clase?: ClaseDorso }) {
-  useIdioma();
-  if (clase === "prendas") return <DorsoPrendas />;
   const d = DORSO[clase];
-  const titulo = tLibre(`dorso.${clase}`);
-  const horizontal = d.medida === "cuerda";
-  const mini = d.medida === "prenda";
   const W = MM[d.medida].ancho;
   const H = MM[d.medida].alto;
-  const cx = W / 2;
-  const cy = horizontal ? H / 2 - 4 : mini ? H / 2 - 5 : H / 2 - 6;
-  // En la carta mini el medallón y la cinta son más pequeños para que quepan
-  const k = mini ? 0.78 : 1;
-  const esquinas: [number, number, number][] = [
-    [7.4, 7.4, 135],
-    [W - 7.4, 7.4, -135],
-    [7.4, H - 7.4, 45],
-    [W - 7.4, H - 7.4, -45],
-  ];
+  const u = `do${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
+  const { cx, cy } = medallonDorso(clase);
+  const R = medallonDorso(clase).r + 2.2;
+  // Radio del emblema pintado: casi todo el ancho de la carta (más pequeño en la carta mini y en las apaisadas)
+  const RP = Math.min(W, H) * (clase === "prendas" ? 0.4 : 0.36);
+  const emblemaPng = PNG_DORSOS[`../arte/dorsos/emblema-${clase}.png`];
+  const rx = 3.2;
   return (
-    <div className={`db db-${clase}`}>
-      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="ilu marco-carta" aria-hidden>
-        <rect className="d-fondo" width={W} height={H} rx="3.4" />
-        <rect width={W} height={H} rx="3.4" fill={`url(#${d.trama})`} />
-        <rect width={W} height={H} rx="3.4" fill="url(#trama-fina)" opacity=".6" />
-        {/* Rayos desde el centro, muy suaves */}
-        <path d={rayos(cx, cy, 24, 90)} fill="#ffffff" opacity=".07" />
-        {/* Doble filete y esquinas con pinzas */}
-        <rect x="2.6" y="2.6" width={W - 5.2} height={H - 5.2} rx="2.4" fill="none" stroke={CREMA} strokeWidth=".9" />
-        <rect x="4.4" y="4.4" width={W - 8.8} height={H - 8.8} rx="1.6" fill="none" stroke={CREMA} strokeWidth=".4" strokeDasharray="1.4 1" opacity=".8" />
-        {esquinas.map(([x, y, g]) => (
-          <g key={`${x}-${y}`} transform={`translate(${x} ${y}) rotate(${g}) scale(.3) translate(0 -8)`}>
-            <PinzaBosque x={0} />
+    <div className={`db db-${clase} db-cozy`} style={{ "--db": d.fondo } as CSSProperties}>
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="marco-carta" aria-hidden>
+        <defs>
+          <pattern id={`${u}-vichy`} width="7" height="7" patternUnits="userSpaceOnUse">
+            <rect width="3.5" height="7" fill="#fff" opacity=".16" />
+            <rect width="7" height="3.5" fill="#fff" opacity=".16" />
+            <rect width="3.5" height="3.5" fill={d.oscuro} opacity=".18" />
+          </pattern>
+          <pattern id={`${u}-lunares`} width="3" height="3" patternUnits="userSpaceOnUse">
+            <circle cx=".75" cy=".75" r=".45" fill="#fff" opacity=".5" />
+            <circle cx="2.25" cy="2.25" r=".45" fill="#fff" opacity=".5" />
+          </pattern>
+          <radialGradient id={`${u}-luz`} cx="50%" cy="50%" r="55%">
+            <stop offset="0" stopColor="#fff" stopOpacity=".28" />
+            <stop offset="1" stopColor="#fff" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <rect className="d-fondo" width={W} height={H} rx={rx} fill={d.fondo} />
+        <rect width={W} height={H} rx={rx} fill={`url(#${u}-${d.trama})`} />
+        <rect width={W} height={H} rx={rx} fill={`url(#${u}-luz)`} />
+        {/* Doble filete crema */}
+        <rect x="2.6" y="2.6" width={W - 5.2} height={H - 5.2} rx="2.2" fill="none" stroke="#fbf2dc" strokeWidth=".75" />
+        <rect x="3.7" y="3.7" width={W - 7.4} height={H - 7.4} rx="1.6" fill="none" stroke="#fbf2dc" strokeWidth=".3" opacity=".8" />
+        {emblemaPng ? (
+          // Emblema pintado (src/arte/dorsos/emblema-<mazo>.png): el medallón entero, grande y centrado, con una sombra suave
+          <g>
+            <circle cx={cx + 0.5} cy={cy + 0.8} r={RP * 0.93} fill={T_CARTA} opacity=".35" />
+            <image className="d-emblema" href={emblemaPng} x={cx - RP} y={cy - RP} width={2 * RP} height={2 * RP} preserveAspectRatio="xMidYMid meet" />
           </g>
-        ))}
-        {/* En el de cuerdas, la cuerda cruza de lado a lado, como en la cara */}
-        {clase === "cuerdas" && <Soga d={`M-1 ${cy} Q${cx} ${cy + 6} ${W + 1} ${cy}`} g={2.2} />}
-        {/* Medallón central */}
-        <g transform={`translate(${cx} ${cy}) scale(${k})`}>
-          <circle r="15.5" fill={TINTA} opacity=".3" transform="translate(.8 1.2)" />
-          <circle className="d-medallon" r="15.5" stroke={TINTA} strokeWidth=".7" />
-          <circle r="13.6" fill="none" className="d-aro" strokeWidth=".9" />
-          <circle r="12.4" fill="none" stroke={TINTA} strokeWidth=".3" strokeDasharray="1 .8" opacity=".5" />
-          <CentroDorso clase={clase} />
-        </g>
-        {/* Cinta con el nombre del mazo y sus emblemas debajo */}
-        <g transform={`translate(${cx} ${cy + 17.5 * k}) scale(${k})`}>
-          <path className="d-cinta" d="M-21 -4.4 H21 L18.6 0 L21 4.4 H-21 L-18.6 0 Z" stroke={TINTA} strokeWidth=".55" strokeLinejoin="round" />
-          <path d="M-21 -4.4 H21 L20 -2.6 H-20 Z" fill="#ffffff" opacity=".25" />
-          <text y="2.3" textAnchor="middle" className="d-titulo" fontSize="6.2" fontWeight="800" fill="#ffffff" stroke={TINTA} strokeWidth="1.3" strokeLinejoin="round" paintOrder="stroke" style={{ fontFamily: "var(--fuente-titulo)" }} {...ajustarTexto(titulo, 6.2, 36)}>
-            {titulo}
-          </text>
-        </g>
-        <g transform={`translate(${cx} ${horizontal ? H - 7.4 : mini ? H - 8.4 : H - 9})`}>
-          {d.emblemas.map((e, i) => {
-            // Emblemas de 5,8 mm separados por rombos, centrados en el pie
-            const x = (i - (d.emblemas.length - 1) / 2) * 8.6;
-            return (
-              <g key={i}>
-                {i > 0 && <path d={`M${x - 4.3} -1.4 L${x - 2.9} 0 L${x - 4.3} 1.4 L${x - 5.7} 0 Z`} fill={CREMA} stroke={TINTA} strokeWidth=".3" />}
-                <g transform={`translate(${x - 2.9} -2.9) scale(.24)`}>{EMBLEMAS[e]}</g>
-              </g>
-            );
-          })}
-        </g>
+        ) : (
+          <g>
+            {/* Medallón crema con aro del color del mazo y el emblema */}
+            <circle cx={cx + 0.5} cy={cy + 0.7} r={R} fill={T_CARTA} opacity=".9" />
+            <circle className="d-medallon" cx={cx} cy={cy} r={R} fill="#fbf2dc" stroke={T_CARTA} strokeWidth=".6" />
+            <circle className="d-aro" cx={cx} cy={cy} r={R - 1.5} fill="none" stroke={d.oscuro} strokeWidth=".9" />
+            <circle cx={cx} cy={cy} r={R - 2.6} fill="none" stroke={T_CARTA} strokeWidth=".22" strokeDasharray=".9 .7" opacity=".45" />
+            <g className="d-emblema" transform={`translate(${cx} ${cy}) scale(${(R - 3.4) / 12.4})`}>
+              <EmblemaDorso clase={clase} />
+            </g>
+          </g>
+        )}
+        <rect width={W} height={H} rx={rx} fill="none" stroke={T_CARTA} strokeWidth=".5" />
       </svg>
     </div>
   );

@@ -163,17 +163,180 @@
   pointer-events: none;
 }
 
-/* ---------- Dorso del mazo de prendas, con el mismo acabado ---------- */
-.db.db-cozy.db-prendas {
-  border-radius: 7.3% / 4.8%;
-  background: #f8efdc;
-  box-shadow:
-    0 0 0 1px #6e5136,
-    0 2px 5px #2a170a40;
+/* Texturas comunes del acabado: acuarela (manchas suaves de color) y grano del papel */
+.ccb-cozy,
+.db-cozy,
+.cb-cozy,
+.dia-cozy {
+  --acuarela: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='a' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='4' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .3  0 0 0 0 .15  0 0 0 .9 -.32'/></filter><rect width='100%25' height='100%25' filter='url(%23a)'/></svg>");
+  --grano-papel: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='g' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .42  0 0 0 0 .3  0 0 0 0 .16  0 0 0 .55 -.18'/></filter><rect width='100%25' height='100%25' filter='url(%23g)'/></svg>");
 }
-.db.db-cozy.db-prendas::after {
-  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='g' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .42  0 0 0 0 .3  0 0 0 0 .16  0 0 0 .55 -.18'/></filter><rect width='100%25' height='100%25' filter='url(%23g)'/></svg>") 0 0 / 160px 160px;
-  opacity: 0.38;
-  mix-blend-mode: multiply;
+
+/* ---------- Dorsos de los 5 mazos, con el mismo acabado (acuarela y grano por encima) ---------- */
+.db.db-cozy.db-cozy {
+  border-radius: 5.1% / 3.6%;
+  background: transparent;
+  box-shadow: 0 2px 5px #2a170a40;
+}
+.db.db-cozy.db-cuerdas,
+.db.db-cozy.db-dias {
+  border-radius: 3.6% / 5.1%;
+}
+.db.db-cozy.db-prendas {
+  border-radius: 7.8% / 5.1%;
+}
+.db.db-cozy.db-cozy::after {
+  inset: 0;
   border-radius: inherit;
+  background: var(--acuarela) 0 0 / 320px 320px, var(--grano-papel) 0 0 / 160px 160px;
+  opacity: 0.42;
+  mix-blend-mode: multiply;
+}
+
+/* ---------- Carta de cuerda (modo «borde», la de la partida) con el mismo acabado ---------- */
+/* Marco del color de la cuerda con una acuarela suave y grano de papel encima (capas aparte: no tocan los trazos) */
+.ccb.ccb-cozy.ccb-borde::after {
+  inset: 0;
+  border-radius: 5% / 7%;
+  background: var(--acuarela) 0 0 / 320px 320px, var(--grano-papel) 0 0 / 160px 160px;
+  opacity: 0.4;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+.ccb.ccb-cozy.ccb-borde > svg {
+  filter: drop-shadow(0 1px 0 #3b25162e) drop-shadow(0 3px 4px #2a170a4d);
+}
+.ccb.ccb-cozy.ccb-borde .ccb-texto {
+  color: #3b2516;
+  font-weight: 700;
+}
+
+/* ---------- Cartas de acción, objetivo y día con el acabado nuevo ---------- */
+/* Colores de acuarela de cada mazo (más suaves que los de la interfaz) */
+.cb.cb-cozy {
+  --g: #4fa27a;
+  --g-claro: color-mix(in srgb, var(--g), #fff 74%);
+  --g-oscuro: color-mix(in srgb, var(--g), #3b2516 30%);
+  --contorno: #3b2516;
+  --titulo-carta: #fff8ea;
+  border-radius: 5.4% / 3.9%;
+  box-shadow: 0 0 0 1px #5a3b22, 0 0.6cqw 1.6cqw #2a170a55;
+}
+.cb.cb-cozy.cb-fastidio {
+  --g: #e2675a;
+}
+.cb.cb-cozy.co {
+  --g: #f0a53a;
+}
+.dia-carta.dia-cozy {
+  --d: #4f98d8;
+  --g: var(--d);
+  --g-claro: color-mix(in srgb, var(--d), #fff 74%);
+  --g-oscuro: color-mix(in srgb, var(--d), #3b2516 30%);
+  --contorno: #3b2516;
+  --titulo-carta: #fff8ea;
+  box-shadow: 0 0 0 1px #5a3b22, 0 0.6cqw 1.6cqw #2a170a55;
+}
+.dia-carta.dia-cozy.dia-suceso {
+  --d: #a07ad0;
+}
+/* Papel crema, recuadros crema y medallones crema con aro del color */
+.cb-cozy .marco-carta .m-panel,
+.dia-cozy .marco-carta .m-panel {
+  fill: #fbf3e1;
+}
+.cb-cozy .marco-carta .m-caja,
+.dia-cozy .marco-carta .m-caja,
+.cb-cozy .marco-carta .m-placa {
+  fill: #fffaf0;
+}
+.cb-cozy .marco-carta .m-medallon,
+.dia-cozy .marco-carta .m-medallon {
+  fill: #fbf2dc;
+}
+.cb-cozy .marco-carta .m-pespunte,
+.dia-cozy .marco-carta .m-pespunte {
+  stroke: var(--g);
+  opacity: 0.9;
+}
+.cb-cozy .marco-carta .m-filete,
+.dia-cozy .marco-carta .m-filete {
+  stroke: #fff6e4;
+  stroke-width: 0.35;
+  opacity: 0.75;
+}
+.cb-cozy .marco-carta .m-cinta-pliegue,
+.dia-cozy .marco-carta .m-cinta-pliegue {
+  fill: color-mix(in srgb, var(--g), #3b2516 45%);
+}
+.cb-cozy .marco-carta .m-hoja {
+  fill: #5fae6a;
+}
+/* Acuarela y grano del papel: por encima del marco y por debajo del dibujo y de las letras */
+.cb.cb-cozy::before,
+.dia-carta.dia-cozy::before {
+  background: var(--acuarela) 0 0 / 320px 320px, var(--grano-papel) 0 0 / 160px 160px;
+  opacity: 0.45;
+  mix-blend-mode: multiply;
+}
+/* Sin el brillo de plástico ni la trama de lino de la mesa: papel mate */
+.me .cb.cb-cozy::after,
+.me .dia-carta.dia-cozy::after {
+  background: none;
+}
+.me .cb.cb-cozy,
+.me .dia-carta.dia-cozy {
+  box-shadow: 0 0 0 1px #5a3b22, var(--canto-carta);
+}
+/* Títulos en crema con contorno marrón más fino */
+.cb-cozy .cb-nombre,
+.dia-cozy .dia-bosque-nombre {
+  text-shadow:
+    0.05em 0 0 var(--contorno),
+    -0.05em 0 0 var(--contorno),
+    0 0.05em 0 var(--contorno),
+    0 -0.05em 0 var(--contorno),
+    0.035em 0.035em 0 var(--contorno),
+    -0.035em 0.035em 0 var(--contorno),
+    0.035em -0.035em 0 var(--contorno),
+    -0.035em -0.035em 0 var(--contorno),
+    0.04em 0.09em 0 var(--contorno);
+}
+/* El texto de la cuerda usa todo el ancho del recuadro discontinuo (cabe mejor el texto largo de la vieja) */
+.ccb.ccb-cozy.ccb-borde .ccb-texto {
+  left: 9.5%;
+  right: 9.5%;
+  top: 28.4%;
+  height: 32%;
+}
+/* Leyenda de la loseta con los medallones pintados de las cartas de cuerda: ya traen su círculo y su borde */
+img.loseta-icono {
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  object-fit: contain;
+}
+.cb-cozy .marco-carta .m-cinta-fondo,
+.dia-cozy .marco-carta .m-cinta-fondo {
+  fill: color-mix(in srgb, var(--g), #3b2516 22%);
+}
+/* Un poco de aire entre el texto y el filete discontinuo del recuadro */
+.cb-cozy .cb-texto {
+  box-sizing: border-box;
+  padding: 0 1.8cqw;
+}
+.dia-carta.dia-cozy .dia-bosque-texto {
+  box-sizing: border-box;
+  padding: 0 1.4cqw;
+}
+/* El filete fino de dentro del marco, crema (el estilo fusión lo ponía dorado) */
+.cb.cb-cozy .marco-carta .m-filete,
+.dia-carta.dia-cozy .marco-carta .m-filete {
+  stroke: #fff6e4;
+  stroke-width: 0.35;
+  opacity: 0.75;
+}
+/* Táctica: la ilustración en PNG se recorta al arco de su ventana */
+.cb-tactica .cb-ilustra.cb-ilustra-png {
+  clip-path: inset(0 round 50% 50% 0 0 / 39% 39% 0 0);
 }

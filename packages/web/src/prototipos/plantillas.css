@@ -59,12 +59,14 @@
 .plantillas .dia-bosque-texto,
 .plantillas .dia-pie,
 /* Emblema dentro de los medallones (el medallón se queda) */
-.plantillas .marco-carta .m-medallon-aro + g,
+.plantillas .marco-carta .m-emblema,
 /* Cuerda: icono del medallón, nombre, texto y adornos del tipo */
 .plantillas .ccb svg g > circle + circle + g,
 .plantillas .ccb-nombre,
 .plantillas .ccb-texto,
 .plantillas .ccb .deco,
+.plantillas .ccb .ccb-icono,
+.plantillas .db .d-emblema,
 /* Dorsos: dibujo del centro, nombre del mazo, emblemas del pie, pinzas de las esquinas y la soga */
 .plantillas .db .d-aro ~ g,
 .plantillas .db .d-titulo,
